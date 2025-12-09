@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { Atom, BrainCircuit, Code2, Database, ShieldCheck, Wind, Server, Container, Cloud, GitBranch, Figma, Terminal, Cpu } from 'lucide-react';
 
@@ -21,8 +21,16 @@ const PhysicsZone = () => {
   const requestRef = useRef<number>(0);
   const mouseRef = useRef({ x: -1000, y: -1000 });
   const bodiesRef = useRef<PhysicsBody[]>([]);
+  const [shouldAnimate, setShouldAnimate] = useState(true);
 
   useEffect(() => {
+    // Check for reduced motion preference
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    if (mediaQuery.matches) {
+      setShouldAnimate(false);
+      return;
+    }
+
     const container = containerRef.current;
     if (!container) return;
 
@@ -103,6 +111,8 @@ const PhysicsZone = () => {
 
     // Animation Loop
     const animate = () => {
+      if (!shouldAnimate) return;
+
       const width = window.innerWidth;
       const height = window.innerHeight;
       const { x: mouseX, y: mouseY } = mouseRef.current;
@@ -175,6 +185,16 @@ const PhysicsZone = () => {
       requestRef.current = requestAnimationFrame(animate);
     };
 
+    // Visibility Change Handler
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        cancelAnimationFrame(requestRef.current);
+      } else {
+        requestRef.current = requestAnimationFrame(animate);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
     requestRef.current = requestAnimationFrame(animate);
 
     return () => {
@@ -182,9 +202,11 @@ const PhysicsZone = () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('mouseup', handleMouseUp);
-      // Cleanup event listeners on elements if needed, though they will be removed from DOM
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, []);
+  }, [shouldAnimate]);
+
+  if (!shouldAnimate) return null;
 
   return (
     <div ref={containerRef} id="gravity-zone" className="fixed inset-0 w-full h-full overflow-hidden pointer-events-auto z-0">

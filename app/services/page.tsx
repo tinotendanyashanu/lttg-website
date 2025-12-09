@@ -20,8 +20,8 @@ export default function Services() {
       ],
       outcome: "You get systems that think, learn, and save you time.",
       cta: "Book an AI Consultation",
-      icon: <BrainCircuit className="w-10 h-10 text-[#A26BFA]" />,
-      gradient: "from-[#A26BFA]/10 to-[#A26BFA]/5"
+      icon: <BrainCircuit className="w-10 h-10 text-[#10B981]" />,
+      gradient: "from-[#10B981]/10 to-[#10B981]/5"
     },
     {
       title: "Software & Full-Stack Development",
@@ -37,8 +37,8 @@ export default function Services() {
       ],
       outcome: "Technology that actually works, and works beautifully.",
       cta: "Start Building",
-      icon: <Code2 className="w-10 h-10 text-[#4C8BFF]" />,
-      gradient: "from-[#4C8BFF]/10 to-[#4C8BFF]/5"
+      icon: <Code2 className="w-10 h-10 text-[#0071e3]" />,
+      gradient: "from-[#0071e3]/10 to-[#0071e3]/5"
     },
     {
       title: "Cybersecurity & Secure Engineering",
@@ -83,10 +83,10 @@ export default function Services() {
       {/* Header */}
       <section className="pt-32 pb-16 px-6 lg:px-8 max-w-7xl mx-auto">
         <div className="max-w-3xl">
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-slate-900 mb-6">
+          <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight text-slate-900 mb-6">
             What I Do
           </h1>
-          <p className="text-lg text-slate-600 leading-relaxed">
+          <p className="text-lg text-slate-600 leading-relaxed font-normal">
             I don’t do hype or empty promises. I build useful, clean, real technology. Whether you need software, AI, security, or guidance, here’s what I can help you with.
           </p>
         </div>

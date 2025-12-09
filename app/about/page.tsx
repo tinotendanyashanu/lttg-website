@@ -1,28 +1,30 @@
 import React from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import PhysicsZone from '@/components/PhysicsZone';
 import { User, Heart, Briefcase, Users, Zap } from 'lucide-react';
 import Link from 'next/link';
 
 export default function About() {
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-white relative">
+      <PhysicsZone />
       <Navbar />
       
       {/* Header */}
-      <section className="pt-32 pb-16 px-6 lg:px-8 max-w-7xl mx-auto">
+      <section className="pt-32 pb-16 px-6 lg:px-8 max-w-7xl mx-auto relative z-10">
         <div className="max-w-3xl">
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-slate-900 mb-6">
+          <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight text-slate-900 mb-6">
             Who I Am
           </h1>
-          <p className="text-lg text-slate-600 leading-relaxed">
+          <p className="text-lg text-slate-600 leading-relaxed font-normal">
             Hey, I’m Leo The Tech Guy, a normal guy who’s obsessed with technology.
           </p>
         </div>
       </section>
 
       {/* Main Content */}
-      <section className="pb-24 px-6 lg:px-8 max-w-7xl mx-auto">
+      <section className="pb-24 px-6 lg:px-8 max-w-7xl mx-auto relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-16">
           
           {/* Left Column: Story */}
@@ -31,25 +33,25 @@ export default function About() {
             {/* My Story */}
             <div className="prose prose-lg prose-slate max-w-none">
               <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-blue-50 rounded-lg">
-                  <User className="w-6 h-6 text-[#4C8BFF]" />
+                <div className="p-2 bg-blue-50 rounded-full">
+                  <User className="w-6 h-6 text-[#0071e3]" />
                 </div>
-                <h2 className="text-2xl font-bold text-slate-900 m-0">My Story</h2>
+                <h2 className="text-2xl font-semibold text-slate-900 m-0">My Story</h2>
               </div>
-              <p className="text-slate-600 leading-relaxed">
+              <p className="text-slate-600 leading-relaxed font-normal">
                 I’m a tech geek at heart. I build software, explore AI, dive into cybersecurity, experiment with gadgets, and break things on purpose just to fix them again.
               </p>
-              <p className="text-slate-600 leading-relaxed mt-6">
+              <p className="text-slate-600 leading-relaxed mt-6 font-normal">
                 I’m not trying to be perfect or pretend to be something I’m not. I learn, create, fail, fix, build, and share. It’s always been that way.
               </p>
-              <p className="text-slate-600 leading-relaxed mt-6">
+              <p className="text-slate-600 leading-relaxed mt-6 font-normal">
                 I build startups, solve problems I believe technology can fix, and try to make things that help people.
               </p>
             </div>
 
             {/* Timeline */}
             <div className="border-t border-slate-100 pt-12">
-                <h3 className="text-2xl font-bold text-slate-900 mb-8">My Journey</h3>
+                <h3 className="text-2xl font-semibold text-slate-900 mb-8">My Journey</h3>
                 <div className="space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px before:h-full before:w-0.5 before:bg-slate-200">
                     {[
                     { year: "2018", title: "Started Coding", desc: "Built my first web apps and fell in love with solving problems through code." },
@@ -58,16 +60,16 @@ export default function About() {
                     { year: "Present", title: "Leo The Tech Guy", desc: "Helping businesses and founders build world-class technology." }
                     ].map((item, i) => (
                     <div key={i} className="relative flex items-start group">
-                        <div className="absolute left-0 top-1 flex items-center justify-center w-10 h-10 rounded-full border border-white bg-slate-100 group-hover:bg-[#4C8BFF] group-hover:text-white transition-colors shadow-sm z-10">
+                        <div className="absolute left-0 top-1 flex items-center justify-center w-10 h-10 rounded-full border border-white bg-slate-100 group-hover:bg-[#0071e3] group-hover:text-white transition-colors shadow-sm z-10">
                             <div className="w-3 h-3 bg-current rounded-full"></div>
                         </div>
                         <div className="ml-16">
                             <div className="flex items-center space-x-2 mb-1">
-                                <span className="font-bold text-slate-900">{item.title}</span>
+                                <span className="font-semibold text-slate-900">{item.title}</span>
                                 <span className="text-sm text-slate-400">•</span>
-                                <span className="text-sm font-medium text-[#4C8BFF]">{item.year}</span>
+                                <span className="text-sm font-medium text-[#0071e3]">{item.year}</span>
                             </div>
-                            <p className="text-slate-600 text-sm leading-relaxed">{item.desc}</p>
+                            <p className="text-slate-600 text-sm leading-relaxed font-normal">{item.desc}</p>
                         </div>
                     </div>
                     ))}
@@ -77,10 +79,10 @@ export default function About() {
             {/* What I Believe */}
             <div>
               <div className="flex items-center gap-3 mb-8">
-                <div className="p-2 bg-purple-50 rounded-lg">
-                  <Heart className="w-6 h-6 text-[#A26BFA]" />
+                <div className="p-2 bg-emerald-50 rounded-full">
+                  <Heart className="w-6 h-6 text-[#10B981]" />
                 </div>
-                <h2 className="text-2xl font-bold text-slate-900">What I Believe</h2>
+                <h2 className="text-2xl font-semibold text-slate-900">What I Believe</h2>
               </div>
               <div className="grid gap-4">
                 {[
@@ -90,8 +92,8 @@ export default function About() {
                   "Learning never stops.",
                   "If something can be improved, I want to improve it."
                 ].map((item, i) => (
-                  <div key={i} className="flex items-center p-4 bg-slate-50 rounded-xl border border-slate-100">
-                    <div className="w-2 h-2 rounded-full bg-[#A26BFA] mr-4"></div>
+                  <div key={i} className="flex items-center p-4 bg-slate-50/80 backdrop-blur-sm rounded-2xl border border-slate-100 hover:border-slate-200 transition-colors">
+                    <div className="w-2 h-2 rounded-full bg-[#10B981] mr-4"></div>
                     <span className="text-slate-700 font-medium">{item}</span>
                   </div>
                 ))}

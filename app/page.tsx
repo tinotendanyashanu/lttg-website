@@ -1,45 +1,127 @@
-import React from 'react';
+"use client";
+
+import React, { useState, useEffect, useRef } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import PhysicsZone from '@/components/PhysicsZone';
-import { ArrowRight, Code2, BrainCircuit, ShieldCheck, Lightbulb } from 'lucide-react';
+import { ArrowRight, Code2, BrainCircuit, ShieldCheck, Lightbulb, Volume2, VolumeX } from 'lucide-react';
 import Link from 'next/link';
 
+const HERO_VIDEOS = [
+  '/videos/hero-video1.mp4',
+  '/videos/hero-video2.mp4',
+  '/videos/hero-video3.mp4'
+];
+
 export default function Home() {
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+  const [isMuted, setIsMuted] = useState(true);
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+
+  useEffect(() => {
+    if (audioRef.current) {
+      if (isMuted) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play().catch(e => console.log("Audio play failed:", e));
+      }
+    }
+  }, [isMuted]);
+
+  useEffect(() => {
+    // Play the current video and reset it
+    const currentVideo = videoRefs.current[currentVideoIndex];
+    if (currentVideo) {
+      currentVideo.currentTime = 0;
+      currentVideo.play().catch(e => console.log("Video play failed:", e));
+    }
+
+    // Pause other videos to prevent them from triggering onEnded or using resources
+    videoRefs.current.forEach((video, index) => {
+      if (index !== currentVideoIndex && video) {
+        // Optional: Pause after a delay to allow crossfade? 
+        // For now, let's just pause them to ensure logic correctness. 
+        // If we want smooth crossfade, we might need to let them play for a bit.
+        // But if they are hidden (opacity 0), pausing them is fine.
+        // The CSS transition takes 2000ms. 
+        // If we pause immediately, the outgoing video freezes.
+        // Let's try NOT pausing them immediately, but ensuring onEnded is scoped.
+        // Actually, if we don't pause them, they might finish and trigger onEnded?
+        // We will guard onEnded.
+      }
+    });
+  }, [currentVideoIndex]);
+
+  const handleVideoEnded = (index: number) => {
+    if (index === currentVideoIndex) {
+      setCurrentVideoIndex((prev) => (prev + 1) % HERO_VIDEOS.length);
+    }
+  };
+
   return (
     <main className="min-h-screen relative">
-      <PhysicsZone />
       <Navbar />
       
+      {/* Audio Player */}
+      <audio ref={audioRef} src="/audio/LeoVoice.mp3" loop />
+
       {/* Hero Section */}
-      <section className="relative z-10 pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden pointer-events-none">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 pointer-events-auto">
+      <section className="relative h-screen min-h-[600px] flex items-end pb-20 overflow-hidden group">
+        {/* Background Videos */}
+        <div className="absolute inset-0 w-full h-full z-0 bg-slate-900">
+          {HERO_VIDEOS.map((src, index) => (
+            <video 
+              key={src}
+              ref={(el) => { videoRefs.current[index] = el }}
+              muted 
+              playsInline
+              onEnded={() => handleVideoEnded(index)}
+              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-[2000ms] ease-in-out ${
+                index === currentVideoIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'
+              }`}
+            >
+              <source src={src} type="video/mp4" />
+            </video>
+          ))}
+          {/* Overlay */}
+          <div className="absolute inset-0 bg-slate-900/60 z-20" />
+        </div>
+
+        {/* Mute Toggle */}
+        <button 
+          onClick={() => setIsMuted(!isMuted)}
+          className="absolute top-32 right-8 z-50 p-3 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20 transition-all duration-300"
+        >
+          {isMuted ? <VolumeX className="w-6 h-6" /> : <Volume2 className="w-6 h-6" />}
+        </button>
+
+        <div className="relative z-30 max-w-7xl mx-auto px-6 lg:px-8 w-full">
           <div className="max-w-3xl">
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-slate-900 mb-8 leading-[1.1]">
-              Hey, I’m <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4C8BFF] to-[#A26BFA]">Leo The Tech Guy.</span>
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-semibold tracking-tight text-white mb-6 leading-[1.05]">
+              Hey, I’m <span className="text-[#10B981]">Leo The Tech Guy.</span>
             </h1>
-            <p className="text-xl lg:text-2xl text-slate-600 leading-relaxed mb-10 font-light">
-              I’m just a normal guy obsessed with technology. I build software, explore AI, test gadgets, break things, fix them, and share the journey with you. I create real products, solve real problems, and help people turn ideas into powerful tech.
+            <p className="text-xl lg:text-2xl text-slate-100 leading-relaxed mb-10 font-normal max-w-2xl">
+              I’m just a normal guy obsessed with technology. I build software, explore AI, test gadgets, break things, fix them, and share the journey with you.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 mb-12">
-              <Link href="/contact" className="inline-flex justify-center items-center px-8 py-4 text-base font-medium text-white bg-[#4C8BFF] rounded-lg shadow-lg shadow-blue-500/30 hover:bg-blue-600 hover:shadow-blue-500/40 transition-all duration-200">
+              <Link href="/contact" className="inline-flex justify-center items-center px-8 py-4 text-base font-medium text-white bg-[#0071e3] rounded-full hover:bg-[#0077ED] transition-all duration-300 shadow-lg shadow-blue-500/20">
                 Start Your Project
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Link>
-              <Link href="/portfolio" className="inline-flex justify-center items-center px-8 py-4 text-base font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:text-slate-900 transition-all duration-200">
+              <Link href="/portfolio" className="inline-flex justify-center items-center px-8 py-4 text-base font-medium text-white bg-white/10 border border-white/20 rounded-full hover:bg-white/20 backdrop-blur-md transition-all duration-300">
                 See My Work
               </Link>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4 mt-12">
               <div className="flex -space-x-2">
-                <div className="w-8 h-8 rounded-full bg-slate-100 border-2 border-white flex items-center justify-center text-xs font-bold text-slate-400">AI</div>
-                <div className="w-8 h-8 rounded-full bg-slate-100 border-2 border-white flex items-center justify-center text-xs font-bold text-slate-400">Dev</div>
-                <div className="w-8 h-8 rounded-full bg-slate-100 border-2 border-white flex items-center justify-center text-xs font-bold text-slate-400">Sec</div>
+                <div className="w-10 h-10 rounded-full bg-slate-800/80 backdrop-blur-sm border border-slate-600 flex items-center justify-center text-xs font-medium text-slate-300">AI</div>
+                <div className="w-10 h-10 rounded-full bg-slate-800/80 backdrop-blur-sm border border-slate-600 flex items-center justify-center text-xs font-medium text-slate-300">Dev</div>
+                <div className="w-10 h-10 rounded-full bg-slate-800/80 backdrop-blur-sm border border-slate-600 flex items-center justify-center text-xs font-medium text-slate-300">Sec</div>
               </div>
-              <p className="text-sm text-slate-500 font-medium">
-                Real tech, real builds, real results.
+              <p className="text-sm text-slate-300 font-medium tracking-wide">
+                Real tech. Real builds. Real results.
               </p>
             </div>
           </div>
@@ -65,7 +147,7 @@ export default function Home() {
       <section className="relative z-10 py-20 bg-slate-50/90 backdrop-blur-sm">
         <div className="max-w-4xl mx-auto px-6 lg:px-8 text-center">
           <p className="text-2xl lg:text-3xl text-slate-800 leading-relaxed font-light">
-            I’m a tech geek at heart. I dive into <span className="font-semibold text-[#A26BFA]">AI</span>, <span className="font-semibold text-[#4C8BFF]">software engineering</span>, <span className="font-semibold text-emerald-500">cybersecurity</span>, automation, and anything that sparks curiosity. I also build startups and tackle problems I believe technology can solve. If you’re into building, learning, and creating cool things, welcome.
+            I’m a tech geek at heart. I dive into <span className="font-semibold text-[#10B981]">AI</span>, <span className="font-semibold text-[#4C8BFF]">software engineering</span>, <span className="font-semibold text-emerald-500">cybersecurity</span>, automation, and anything that sparks curiosity. I also build startups and tackle problems I believe technology can solve. If you’re into building, learning, and creating cool things, welcome.
           </p>
         </div>
       </section>
@@ -77,7 +159,7 @@ export default function Home() {
             {
               title: "AI & Automation",
               desc: "I build smart systems that automate work, save time, and power businesses.",
-              icon: <BrainCircuit className="w-8 h-8 text-[#A26BFA]" />
+              icon: <BrainCircuit className="w-8 h-8 text-[#10B981]" />
             },
             {
               title: "Software Development",
@@ -159,7 +241,7 @@ export default function Home() {
 
       {/* Lead Magnet */}
       <section className="relative z-10 py-24 px-6 lg:px-8 max-w-7xl mx-auto">
-        <div className="bg-gradient-to-br from-[#4C8BFF]/10 to-[#A26BFA]/10 rounded-3xl p-8 lg:p-16 flex flex-col lg:flex-row items-center gap-12 border border-blue-100">
+        <div className="bg-gradient-to-br from-[#4C8BFF]/10 to-[#10B981]/10 rounded-3xl p-8 lg:p-16 flex flex-col lg:flex-row items-center gap-12 border border-blue-100">
           <div className="w-full lg:w-1/2">
             <h2 className="text-3xl font-bold text-slate-900 mb-4">Validate your AI idea before building.</h2>
             <p className="text-lg text-slate-600 mb-8">
