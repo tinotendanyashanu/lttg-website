@@ -13,6 +13,7 @@
   },
   "packageManager": "npm@10.9.0",
   "dependencies": {
+    "@calcom/embed-react": "^1.5.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.25",

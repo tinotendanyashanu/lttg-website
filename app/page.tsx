@@ -216,7 +216,7 @@ export default function Home() {
             ))}
           </div>
           <div className="mt-16 text-center">
-            <Link href="/contact" className="inline-flex justify-center items-center px-8 py-4 text-base font-medium text-slate-700 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 transition-all duration-200">
+            <Link href="/book" className="inline-flex justify-center items-center px-8 py-4 text-base font-medium text-slate-700 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 transition-all duration-200">
               Book a 15-minute call
             </Link>
           </div>
