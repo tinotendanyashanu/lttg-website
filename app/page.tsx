@@ -101,31 +101,56 @@ export default function Home() {
         <div className="relative z-30 max-w-7xl mx-auto px-6 lg:px-8 w-full">
           <div className="max-w-3xl">
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-semibold tracking-tight text-white mb-6 leading-[1.05]">
-              Hey, I’m <span className="text-[#10B981]">Leo The Tech Guy.</span>
+              Turn your ideas into <span className="text-[#10B981]">software that sells.</span>
             </h1>
             <p className="text-xl lg:text-2xl text-slate-100 leading-relaxed mb-10 font-normal max-w-2xl">
-              I am a technologist driven by one core principle: technology must work in the real world. Rather than chasing trends or titles, I focus on understanding problems deeply and building systems designed to last.
+              I help founders and businesses build high-performance web applications and AI systems that solve real problems. No fluff, just reliable code that scales with you.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 mb-12">
-              <Link href="/contact" className="inline-flex justify-center items-center px-8 py-4 text-base font-medium text-white bg-[#0071e3] rounded-full hover:bg-[#0077ED] transition-all duration-300 shadow-lg shadow-blue-500/20">
-                Start Your Project
+              <Link href="/book" className="inline-flex justify-center items-center px-8 py-4 text-base font-medium text-white bg-[#0071e3] rounded-full hover:bg-[#0077ED] transition-all duration-300 shadow-lg shadow-blue-500/20">
+                Book a Free Strategy Call
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Link>
               <Link href="/portfolio" className="inline-flex justify-center items-center px-8 py-4 text-base font-medium text-white bg-white/10 border border-white/20 rounded-full hover:bg-white/20 backdrop-blur-md transition-all duration-300">
-                See My Work
+                View Past Results
               </Link>
             </div>
 
-            <div className="flex items-center gap-4 mt-12">
-              <div className="flex -space-x-2">
-                <div className="w-10 h-10 rounded-full bg-slate-800/80 backdrop-blur-sm border border-slate-600 flex items-center justify-center text-xs font-medium text-slate-300">AI</div>
-                <div className="w-10 h-10 rounded-full bg-slate-800/80 backdrop-blur-sm border border-slate-600 flex items-center justify-center text-xs font-medium text-slate-300">Dev</div>
-                <div className="w-10 h-10 rounded-full bg-slate-800/80 backdrop-blur-sm border border-slate-600 flex items-center justify-center text-xs font-medium text-slate-300">Sec</div>
+            <div className="flex flex-col sm:flex-row items-center gap-6 mt-12 py-6 border-t border-white/10">
+              <div className="flex -space-x-4">
+                <div className="group relative w-12 h-12 rounded-full bg-slate-900/90 border border-slate-700 flex items-center justify-center hover:z-10 hover:scale-110 hover:border-emerald-500/50 hover:shadow-lg hover:shadow-emerald-500/20 transition-all duration-300 cursor-default">
+                  <BrainCircuit className="w-5 h-5 text-emerald-400" />
+                  <div className="absolute -bottom-8 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-900 border border-slate-700 text-[10px] text-emerald-400 font-bold px-2 py-1 rounded whitespace-nowrap pointer-events-none">
+                    AI SYSTEMS
+                  </div>
+                </div>
+                <div className="group relative w-12 h-12 rounded-full bg-slate-900/90 border border-slate-700 flex items-center justify-center hover:z-10 hover:scale-110 hover:border-blue-500/50 hover:shadow-lg hover:shadow-blue-500/20 transition-all duration-300 cursor-default">
+                  <Code2 className="w-5 h-5 text-blue-400" />
+                  <div className="absolute -bottom-8 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-900 border border-slate-700 text-[10px] text-blue-400 font-bold px-2 py-1 rounded whitespace-nowrap pointer-events-none">
+                    ENGINEERING
+                  </div>
+                </div>
+                <div className="group relative w-12 h-12 rounded-full bg-slate-900/90 border border-slate-700 flex items-center justify-center hover:z-10 hover:scale-110 hover:border-amber-500/50 hover:shadow-lg hover:shadow-amber-500/20 transition-all duration-300 cursor-default">
+                  <ShieldCheck className="w-5 h-5 text-amber-400" />
+                  <div className="absolute -bottom-8 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-900 border border-slate-700 text-[10px] text-amber-400 font-bold px-2 py-1 rounded whitespace-nowrap pointer-events-none">
+                    SECURITY
+                  </div>
+                </div>
               </div>
-              <p className="text-sm text-slate-300 font-medium tracking-wide">
-                Real tech. Real builds. Real results.
-              </p>
+              <div className="hidden sm:block w-px h-8 bg-white/10" />
+              <div className="text-center sm:text-left">
+                <p className="text-sm font-medium text-slate-300 tracking-wide mb-1">
+                  Full-Cycle Development
+                </p>
+                <div className="flex items-center gap-2 text-xs text-slate-500 font-mono uppercase tracking-wider">
+                  <span>Strategy</span>
+                  <span className="w-1 h-1 rounded-full bg-slate-700" />
+                  <span>Execution</span>
+                  <span className="w-1 h-1 rounded-full bg-slate-700" />
+                  <span>Scale</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -150,7 +175,7 @@ export default function Home() {
       <section className="relative z-10 py-20 bg-slate-50/90 backdrop-blur-sm">
         <div className="max-w-4xl mx-auto px-6 lg:px-8 text-center">
           <p className="text-2xl lg:text-3xl text-slate-800 leading-relaxed font-light">
-            I represent a new generation of builders adaptable, disciplined, and not limited by tools, technologies, or trends. Just continuous learning, thoughtful engineering, and results that speak for themselves.
+            I represent a new generation of builders <span className="text-[#10B981] font-medium">adaptable</span>, <span className="text-amber-500 font-medium">disciplined</span>, and not limited by tools, technologies, or trends. Just <span className="text-blue-600 font-medium">continuous learning</span>, thoughtful engineering, and results that speak for themselves.
           </p>
         </div>
       </section>
@@ -162,22 +187,22 @@ export default function Home() {
           {[
             {
               title: "AI & Automation",
-              desc: "I build smart systems that automate work, save time, and power businesses.",
+              desc: "Automate repetitive tasks and cut operational costs with custom AI solutions.",
               icon: <BrainCircuit className="w-8 h-8 text-[#10B981]" />
             },
             {
               title: "Software Development",
-              desc: "Clean, modern, scalable applications built with care.",
+              desc: "Launch scalable platforms that handle growth without breaking.",
               icon: <Code2 className="w-8 h-8 text-blue-600" />
             },
             {
               title: "Cybersecurity",
-              desc: "Security breakdowns, best practices, and helping founders protect what matters.",
+              desc: "Protect your user data and IP with enterprise-grade security auditing.",
               icon: <ShieldCheck className="w-8 h-8 text-emerald-500" />
             },
             {
               title: "Tech Mentorship",
-              desc: "Guiding creators and founders who want to build something meaningful.",
+              desc: "Fast-track your product launch with expert technical guidance.",
               icon: <Lightbulb className="w-8 h-8 text-amber-500" />
             }
           ].map((service, i) => (
@@ -258,22 +283,24 @@ export default function Home() {
             </div>
 
             {/* Visual - Project Preview */}
-            <div className="w-full lg:w-1/2 h-[500px] relative rounded-3xl overflow-hidden border border-slate-200 bg-slate-900 shadow-2xl shadow-slate-200 group">
-               <Image 
-                 src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop" 
-                 alt="Project Dashboard" 
-                 fill 
-                 className="object-cover transition-transform duration-700 group-hover:scale-105"
-               />
-               <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent" />
-               
-               {/* Overlay Text or Badge */}
-               <div className="absolute bottom-6 left-6 right-6 p-6 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10">
-                  <div className="flex items-center justify-between">
-                    <div>
-                        <h3 className="text-white font-bold text-lg mb-1">Enterprise Dashboard</h3>
-                        <p className="text-slate-300 text-sm">Next.js • TypeScript • Tailwind</p>
-                    </div>
+            <div className="w-full lg:w-1/2 relative aspect-video rounded-3xl overflow-hidden border border-slate-200 bg-slate-900 shadow-2xl shadow-slate-200 group">
+                 <Image 
+                  src="/images/zimprep-showcase.png" 
+                  alt="ZimPrep Platform Dashboard" 
+                  fill 
+                  quality={100}
+                  unoptimized
+                  className="object-cover object-top transition-transform duration-700 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent opacity-80" />
+                
+                {/* Overlay Text or Badge */}
+                <div className="absolute bottom-6 left-6 right-6 p-6 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 shadow-lg">
+                   <div className="flex items-center justify-between">
+                     <div>
+                         <h3 className="text-white font-bold text-lg mb-1">ZimPrep EdTech Platform</h3>
+                         <p className="text-slate-300 text-sm">Next.js • AI Grading • Real-time Analytics</p>
+                     </div>
                     <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm group-hover:bg-white/30 transition-colors">
                         <ArrowRight className="w-5 h-5 text-white" />
                     </div>
@@ -282,6 +309,51 @@ export default function Home() {
             </div>
 
           </div>
+        </div>
+      </section>
+
+      {/* Meet the Builder */}
+      <section className="relative z-10 py-24 bg-white overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+            <div className="flex flex-col md:flex-row items-center gap-12 lg:gap-20">
+                <div className="w-full md:w-1/3 relative order-2 md:order-1">
+                    <div className="aspect-[4/5] relative rounded-2xl overflow-hidden shadow-2xl rotate-3 hover:rotate-0 transition-all duration-500 border-4 border-white">
+                        <Image 
+                            src="/images/leothetechguy image.png"
+                            alt="Leo The Tech Guy"
+                            fill
+                            className="object-cover"
+                        />
+                    </div>
+                    {/* Decorative elements behind */}
+                    <div className="absolute -z-10 top-4 -left-4 w-full h-full bg-blue-100/50 rounded-2xl -rotate-6"></div>
+                </div>
+                <div className="w-full md:w-2/3 text-center md:text-left order-1 md:order-2">
+                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-bold uppercase tracking-wider mb-6">
+                        About Me
+                     </div>
+                     <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-6">
+                        Not just a coder. <br/>A product partner.
+                     </h2>
+                    <p className="text-lg text-slate-600 leading-relaxed font-light mb-8">
+                        I represent a new generation of builders—adaptable, disciplined, and not limited by a single toolset. My focus isn't just on writing lines of code; it's on engineering outcomes. Whether it's a complex AI integration or a high-scale web platform, I bring clarity, speed, and standard-setting quality to every project.
+                    </p>
+                    <div className="flex flex-wrap justify-center md:justify-start gap-4">
+                        <div className="px-4 py-2 bg-blue-50 border border-blue-100 rounded-lg text-sm font-bold text-blue-700 shadow-sm flex items-center gap-2">
+                            <Code2 className="w-4 h-4" />
+                            Full Stack Architecture
+                        </div>
+                        <div className="px-4 py-2 bg-emerald-50 border border-emerald-100 rounded-lg text-sm font-bold text-emerald-700 shadow-sm flex items-center gap-2">
+                            <BrainCircuit className="w-4 h-4" />
+                            AI & LLM Integration
+                        </div>
+                         <div className="px-4 py-2 bg-amber-50 border border-amber-100 rounded-lg text-sm font-bold text-amber-700 shadow-sm flex items-center gap-2">
+                            <ShieldCheck className="w-4 h-4" />
+                            System Security
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
       </section>
 
@@ -321,34 +393,114 @@ export default function Home() {
         </div>
       </section>
 
-      {/* About Preview */}
+      {/* Client Testimonials */}
       <section className="relative z-10 py-24 px-6 lg:px-8 max-w-7xl mx-auto">
-        <div className="flex flex-col lg:flex-row items-center gap-16">
-          <div className="w-full lg:w-1/2">
-            <div className="aspect-square rounded-3xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center overflow-hidden relative">
-               <Image 
-                 src="/images/Leo's Portrait.png" 
-                 alt="Leo The Tech Guy" 
-                 fill 
-                 className="object-cover" 
-               />
+        <div className="text-center mb-16">
+          <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">What it's like to work with me.</h2>
+          <p className="text-lg text-slate-600">Don't just take my word for it.</p>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {/* Testimonial 1 */}
+            <div className="bg-slate-50 p-8 rounded-3xl border border-slate-100 relative">
+              <div className="mb-6">
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <span key={s} className="text-[#10B981]">★</span>
+                ))}
+              </div>
+              <p className="text-slate-700 leading-relaxed mb-6 font-medium">
+                "Leo helped us completely automate our workflow. What used to take days now takes minutes. The system he built isn't just code, it's a core  asset to our business."
+              </p>
+              <div className="flex items-center gap-4">
+                 <div className="w-12 h-12 bg-slate-200 rounded-full flex items-center justify-center font-bold text-slate-500">
+                   JS
+                 </div>
+                 <div>
+                   <h4 className="font-bold text-slate-900">John Smith</h4>
+                   <p className="text-sm text-slate-500">CEO, InnovateX</p>
+                 </div>
+              </div>
             </div>
-          </div>
-          <div className="w-full lg:w-1/2">
-            <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-6">
-              I’m not trying to be perfect or pretend to be someone I’m not.
-            </h2>
-            <p className="text-lg text-slate-600 leading-relaxed mb-8">
-              I learn, experiment, build, break, fix, and share. I use technology to solve problems and help people turn ideas into real products.
-            </p>
-            <Link href="/about" className="inline-flex justify-center items-center px-8 py-4 text-base font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-all duration-200">
-              About Me
-              <ArrowRight className="ml-2 w-5 h-5" />
-            </Link>
-          </div>
+
+            {/* Testimonial 2 */}
+            <div className="bg-slate-50 p-8 rounded-3xl border border-slate-100 relative">
+              <div className="mb-6">
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <span key={s} className="text-[#10B981]">★</span>
+                ))}
+              </div>
+              <p className="text-slate-700 leading-relaxed mb-6 font-medium">
+                "I've worked with many developers, but Leo brings a different level of strategic thinking. He didn't just build what I asked for; he helped me refine the product to be better."
+              </p>
+              <div className="flex items-center gap-4">
+                 <div className="w-12 h-12 bg-slate-200 rounded-full flex items-center justify-center font-bold text-slate-500">
+                   MK
+                 </div>
+                 <div>
+                   <h4 className="font-bold text-slate-900">Michelle K.</h4>
+                   <p className="text-sm text-slate-500">Founder, FutureScale</p>
+                 </div>
+              </div>
+            </div>
+
+             {/* Testimonial 3 */}
+             <div className="bg-slate-50 p-8 rounded-3xl border border-slate-100 relative">
+              <div className="mb-6">
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <span key={s} className="text-[#10B981]">★</span>
+                ))}
+              </div>
+              <p className="text-slate-700 leading-relaxed mb-6 font-medium">
+                "Reliable, communicative, and technically brilliant. We launched our MVP on time and under budget. Highly recommended for any serious founder."
+              </p>
+              <div className="flex items-center gap-4">
+                 <div className="w-12 h-12 bg-slate-200 rounded-full flex items-center justify-center font-bold text-slate-500">
+                   AT
+                 </div>
+                 <div>
+                   <h4 className="font-bold text-slate-900">Alex T.</h4>
+                   <p className="text-sm text-slate-500">CTO, TechFlow</p>
+                 </div>
+              </div>
+            </div>
         </div>
       </section>
 
+      {/* FAQ Section */}
+      <section className="relative z-10 py-24 bg-white border-t border-slate-100">
+        <div className="max-w-4xl mx-auto px-6 lg:px-8">
+            <div className="text-center mb-12">
+               <h2 className="text-3xl font-bold text-slate-900">Frequently Asked Questions</h2>
+            </div>
+            
+            <div className="space-y-6">
+              {[
+                {
+                   q: "What is your typical process?",
+                   a: "It starts with a Discovery Call to understand your needs. Then I provide a clear Plan & Proposal. Once approved, I start the Build & Deliver phase with regular updates."
+                },
+                {
+                   q: "Do you work with non-technical founders?",
+                   a: "Absolutely. I specialize in bridging the gap between business ideas and technical execution. I speak plain English, not just code."
+                },
+                {
+                   q: "How much does a project cost?",
+                   a: "It depends on the scope. I offer fixed-price packages for clear projects and retainer options for ongoing work. Book a call to get a custom quote."
+                },
+                {
+                   q: "How long does it take to build an MVP?",
+                   a: "Typically 4-8 weeks for a standard MVP. We focus on the core features that bring value first, then iterate."
+                }
+              ].map((faq, i) => (
+                <div key={i} className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                   <h3 className="font-bold text-slate-900 text-lg mb-2">{faq.q}</h3>
+                   <p className="text-slate-600">{faq.a}</p>
+                </div>
+              ))}
+            </div>
+        </div>
+      </section>
+      
       {/* Footer Call-to-Action */}
       <section className="relative z-10 py-24 bg-blue-600 text-white text-center">
         <div className="max-w-4xl mx-auto px-6 lg:px-8">
