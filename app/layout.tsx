@@ -35,7 +35,11 @@ export const metadata: Metadata = {
     creator: "@LeoTheTechGuy",
   },
   icons: {
-    icon: "/3.png",
+    icon: [
+      { url: "/3.png", type: "image/png" },
+    ],
+    apple: "/3.png",
+    shortcut: "/3.png",
   },
 };
 
