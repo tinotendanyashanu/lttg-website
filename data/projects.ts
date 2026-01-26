@@ -12,7 +12,7 @@ export interface Project {
   size: 'large' | 'medium' | 'small';
   gradient: string;
   icon: any;
-  status: 'Live' | 'Prototype' | 'Demo' | 'Coming Soon';
+  status: 'Live' | 'Prototype' | 'Demo' | 'Coming Soon' | 'Pilot';
 }
 
 export const projects: Project[] = [
