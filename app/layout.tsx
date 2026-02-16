@@ -5,16 +5,16 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "LeoTheTechGuy | AI, Cybersecurity & Software Engineering",
-  description: "LeoTheTechGuy is a technologist driven by one core principle: technology must work in the real world. Focused on understanding problems deeply and building systems designed to last.",
-  keywords: ["LeoTheTechGuy", "Tinotenda Nyashanu", "AI Developer", "Cybersecurity Expert", "Software Engineer", "Tech Consultant", "Artificial Intelligence", "Next.js Developer", "Zimbabwe Tech", "Harare", "Full Stack Developer", "Creative Technologist"],
+  title: "Leo The Tech Guy | AI & Digital Infrastructure Architect",
+  description: "Leo The Tech Guy designs AI-powered business systems, builds scalable SaaS platforms, and deploys enterprise-grade infrastructure. The strategic partner for SMEs, Startups, and Enterprises.",
+  keywords: ["AI Architect", "Digital Infrastructure", "SaaS Development", "Enterprise AI", "Cloud Architecture", "System Automation", "Leo The Tech Guy", "Tinotenda Nyashanu"],
   metadataBase: new URL("https://leothetechguy.com"),
   alternates: {
     canonical: "/",
   },
   openGraph: {
-    title: "Leo The Tech Guy | AI, Software, Cybersecurity",
-    description: "LeoTheTechGuy is a technologist driven by one core principle: technology must work in the real world. Focused on understanding problems deeply and building systems designed to last.",
+    title: "Leo The Tech Guy | AI & Digital Infrastructure Architect",
+    description: "Building scalable AI systems and digital infrastructure for forward-thinking businesses. From MVP to Enterprise.",
     url: "https://leothetechguy.com",
     siteName: "Leo The Tech Guy",
     type: "website",
@@ -23,14 +23,14 @@ export const metadata: Metadata = {
         url: "/images/linkimage.png",
         width: 1200,
         height: 630,
-        alt: "Leo The Tech Guy",
+        alt: "Leo The Tech Guy - AI & Digital Infrastructure Architect",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Leo The Tech Guy | AI, Software, Cybersecurity",
-    description: "LeoTheTechGuy is a technologist driven by one core principle: technology must work in the real world. Focused on understanding problems deeply and building systems designed to last.",
+    title: "Leo The Tech Guy | AI & Digital Infrastructure Architect",
+    description: "Building scalable AI systems and digital infrastructure for forward-thinking businesses.",
     images: ["/images/linkimage.png"],
     creator: "@LeoTheTechGuy",
   },

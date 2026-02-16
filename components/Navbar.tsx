@@ -41,13 +41,14 @@ const Navbar = () => {
           </div>
 
           {/* Desktop Menu */}
-          <div className="hidden md:flex items-center space-x-8">
-            <Link href="/" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Home</Link>
-            <Link href="/services" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Services</Link>
-            <Link href="/portfolio" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Portfolio</Link>
-            <Link href="/about" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">About</Link>
+          <div className="hidden md:flex items-center space-x-6">
+            <Link href="/services" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
+              Services
+            </Link>
+            <Link href="/media" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Media</Link>
+            <Link href="/partner" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Partner</Link>
+            <Link href="/tech-stack" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Tech Stack</Link>
             <Link href="/contact" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Contact</Link>
-            <Link href="/book" className="text-sm font-medium text-[#0071e3] hover:text-blue-700 transition-colors">Book Meeting</Link>
           </div>
 
           {/* Desktop CTA */}
@@ -75,11 +76,23 @@ const Navbar = () => {
         <div className="md:hidden glass border-t border-slate-100 absolute w-full bg-white/95">
           <div className="px-6 pt-4 pb-6 space-y-2">
             <Link href="/" className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50/50">Home</Link>
-            <Link href="/services" className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50/50">Services</Link>
-            <Link href="/portfolio" className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50/50">Portfolio</Link>
-            <Link href="/about" className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50/50">About</Link>
+            
+            {/* Mobile Services Submenu */}
+            <div className="px-3 py-2">
+              <div className="font-medium text-slate-900 mb-2">Services</div>
+              <div className="pl-4 space-y-2 border-l-2 border-slate-100">
+                 <Link href="/services/sme" className="block text-sm text-slate-600 hover:text-slate-900">SMEs</Link>
+                 <Link href="/services/startups" className="block text-sm text-slate-600 hover:text-slate-900">Startups</Link>
+                 <Link href="/services/enterprise" className="block text-sm text-slate-600 hover:text-slate-900">Enterprise</Link>
+                 <Link href="/services/individuals" className="block text-sm text-slate-600 hover:text-slate-900">Individuals</Link>
+                 <Link href="/services" className="block text-sm font-medium text-blue-600 mt-2">View Overview</Link>
+              </div>
+            </div>
+
+            <Link href="/media" className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50/50">Media</Link>
+            <Link href="/partner" className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50/50">Partner</Link>
+            <Link href="/tech-stack" className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50/50">Tech Stack</Link>
             <Link href="/contact" className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50/50">Contact</Link>
-            <Link href="/book" className="block px-3 py-2 rounded-md text-base font-medium text-[#0071e3] hover:text-blue-700 hover:bg-blue-50/50">Book Meeting</Link>
             <div className="pt-4">
               <Link href="/contact" className="block w-full text-center px-5 py-3 text-base font-medium text-[#4C8BFF] border border-[#4C8BFF] rounded-lg bg-white shadow-sm">
                 Work With Me

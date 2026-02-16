@@ -360,15 +360,15 @@ export const services: Service[] = [
     faqs: [
       {
         question: "I'm non-technical. Can you still help me?",
-        answer: "Absolutely! A big part of what I do is translating complex technical concepts into plain language. I'll help you understand your options and make informed decisions without needing to become a developer yourself."
+        answer: "Absolutely! I bridge the gap between business strategy and technical execution. I translate complex architectural concepts into clear business value."
       },
       {
         question: "What's CTO-as-a-Service?",
-        answer: "It's fractional technical leadership for startups that need expert guidance but aren't ready for a full-time CTO. I help with architecture decisions, team building, technical strategy, and vendor management."
+        answer: "It's fractional technical leadership for startups and SMEs. I provide the strategic oversight of a CTO without the full-time cost—guiding architecture, hiring, and roadmap decisions."
       },
       {
         question: "How often would we meet?",
-        answer: "It depends on your needs. Some clients benefit from weekly sessions, others prefer bi-weekly or monthly check-ins. We'll find a rhythm that works for you and your budget."
+        answer: "It depends on your needs. Whether it's a one-off strategy session or a monthly retainer for ongoing advisory, we structure the engagement to drive maximum impact."
       }
     ]
   }
