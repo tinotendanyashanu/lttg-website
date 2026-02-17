@@ -26,7 +26,7 @@ export async function sendEmail({
       to,
       subject,
       html,
-      reply_to: replyTo,
+      replyTo,
     });
     console.log(`Email sent to ${to}:`, data);
     return { success: true, data };
@@ -35,6 +35,8 @@ export async function sendEmail({
     return { success: false, error };
   }
 }
+
+// ... (previous code)
 
 export async function sendAdminNotification({
   subject,
@@ -51,13 +53,24 @@ export async function sendAdminNotification({
           to: ADMIN_EMAIL,
           subject: `[ADMIN] ${subject}`,
           html: `<p>${text}</p>`,
-          reply_to: replyTo,
+          replyTo,
       });
       console.log(`Admin notification sent:`, data);
   } catch (error) {
       console.error('Failed to send admin notification', error);
   }
 }
+
+// --- TEMPLATES ---
+
+const EMAIL_STYLES = `
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.6;
+  color: #334155;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+`;
 
 function BaseTemplate(content: string) {
   return `
