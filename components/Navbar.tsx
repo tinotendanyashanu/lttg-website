@@ -45,7 +45,7 @@ const Navbar = () => {
             <Link href="/services" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
               Services
             </Link>
-            <Link href="/media" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Media</Link>
+            {/* <Link href="/media" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Media</Link> */}
             <Link href="/partner" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Partner</Link>
             <Link href="/tech-stack" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Tech Stack</Link>
             <Link href="/contact" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Contact</Link>
@@ -89,7 +89,7 @@ const Navbar = () => {
               </div>
             </div>
 
-            <Link href="/media" className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50/50">Media</Link>
+            {/* <Link href="/media" className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50/50">Media</Link> */}
             <Link href="/partner" className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50/50">Partner</Link>
             <Link href="/tech-stack" className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50/50">Tech Stack</Link>
             <Link href="/contact" className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50/50">Contact</Link>

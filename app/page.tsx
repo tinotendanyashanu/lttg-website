@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { ArrowRight, Code2, BrainCircuit, ShieldCheck, Lightbulb, Volume2, VolumeX, Youtube, Twitter, Play } from 'lucide-react';
+import { ArrowRight, Code2, BrainCircuit, ShieldCheck, Lightbulb, Volume2, VolumeX, Youtube, Twitter, Play, Terminal, Layout, Database } from 'lucide-react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 
@@ -244,12 +244,35 @@ export default function Home() {
         </div>
       </section>
       {/* Featured Projects Teaser */}
-      <section className="relative z-10 py-32 bg-slate-50 overflow-hidden">
-        
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
-          <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
+      {/* Tech Stack Preview */}
+      <section className="relative z-10 py-24 bg-slate-50 border-y border-slate-200">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+            <div className="text-center mb-16">
+                <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">The Stack.</h2>
+                <p className="text-lg text-slate-600">Built on the bleeding edge for speed and scale.</p>
+            </div>
             
-          </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+                {[
+                    { name: "Next.js", icon: <Terminal className="w-6 h-6 text-slate-900" /> },
+                    { name: "TypeScript", icon: <Code2 className="w-6 h-6 text-blue-600" /> },
+                    { name: "Tailwind CSS", icon: <Layout className="w-6 h-6 text-cyan-500" /> },
+                    { name: "Supabase", icon: <Database className="w-6 h-6 text-emerald-500" /> }
+                ].map((tech, i) => (
+                    <div key={i} className="flex flex-col items-center justify-center p-8 bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 group">
+                        <div className="mb-4 p-4 bg-slate-50 rounded-full group-hover:scale-110 transition-transform duration-300">
+                            {tech.icon}
+                        </div>
+                        <span className="font-bold text-slate-900">{tech.name}</span>
+                    </div>
+                ))}
+            </div>
+            
+            <div className="mt-12 text-center">
+                 <Link href="/tech-stack" className="inline-flex items-center font-medium text-blue-600 hover:text-blue-700 transition-colors">
+                    View Full Tech Stack <ArrowRight className="ml-2 w-4 h-4" />
+                 </Link>
+            </div>
         </div>
       </section>
 
@@ -265,34 +288,34 @@ export default function Home() {
                 {/* Project 1 */}
                 <div className="group grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center">
                     <div className="order-2 lg:order-1">
-                        <span className="text-emerald-500 font-bold uppercase tracking-widest text-xs mb-4 block">Enterprise System</span>
-                        <h3 className="text-4xl lg:text-5xl font-semibold mb-6 tracking-tight group-hover:text-emerald-400 transition-colors">ZimPrep</h3>
+                        <span className="text-emerald-500 font-bold uppercase tracking-widest text-xs mb-4 block">AI & Agriculture</span>
+                        <h3 className="text-4xl lg:text-5xl font-semibold mb-6 tracking-tight group-hover:text-emerald-400 transition-colors">PreciAgro</h3>
                         <p className="text-xl text-neutral-400 mb-8 leading-relaxed">
-                            A real-time educational analytics platform processing 50k+ daily events. Built with Next.js and specialized AI grading models to reduce teacher workload by 90%.
+                            An intelligent agricultural system that Diagnoses crops, predicts yields, and provides actionable farming insights using advanced AI models.
                         </p>
                         <ul className="grid grid-cols-2 gap-y-4 gap-x-8 mb-10 text-neutral-300">
                              <li className="flex items-center gap-3 border-l text-sm pl-4 border-neutral-800">
-                                <span className="block font-bold text-white">99.9%</span> Uptime
+                                <span className="block font-bold text-white">AI</span> Powered
                              </li>
                              <li className="flex items-center gap-3 border-l text-sm pl-4 border-neutral-800">
-                                <span className="block font-bold text-white">500ms</span> Response
+                                <span className="block font-bold text-white">IoT</span> Integrated
                              </li>
                              <li className="flex items-center gap-3 border-l text-sm pl-4 border-neutral-800">
-                                <span className="block font-bold text-white">SOC2</span> Ready
+                                <span className="block font-bold text-white">Real-time</span> Diagnosis
                              </li>
                              <li className="flex items-center gap-3 border-l text-sm pl-4 border-neutral-800">
-                                <span className="block font-bold text-white">Zero</span> Downtime
+                                <span className="block font-bold text-white">Scalable</span> Cloud Arch
                              </li>
                         </ul>
-                        <Link href="/portfolio" className="inline-flex items-center text-white font-semibold hover:opacity-70 transition-opacity">
-                            View Case Study <ArrowRight className="ml-2 w-4 h-4" />
+                        <Link href="https://www.preciagro.com/" className="inline-flex items-center text-white font-semibold hover:opacity-70 transition-opacity">
+                            View Live Project <ArrowRight className="ml-2 w-4 h-4" />
                         </Link>
                     </div>
                     <div className="order-1 lg:order-2">
                         <div className="relative aspect-[16/10] bg-neutral-900 rounded-3xl overflow-hidden border border-white/10 shadow-2xl group-hover:scale-[1.02] transition-transform duration-700">
                              <Image 
-                                src="/images/dashboard-analytics.png" 
-                                alt="ZimPrep Dashboard"
+                                src="/Preciagrethumb.png" 
+                                alt="PreciAgro Dashboard"
                                 fill
                                 className="object-cover opacity-90 group-hover:opacity-100 transition-opacity"
                              />
@@ -305,35 +328,35 @@ export default function Home() {
                      <div className="order-1">
                         <div className="relative aspect-[16/10] bg-neutral-900 rounded-3xl overflow-hidden border border-white/10 shadow-2xl group-hover:scale-[1.02] transition-transform duration-700">
                              <Image 
-                                src="/images/dashboard-ai.png" 
-                                alt="AI Interface"
+                                src="/zimprep.png" 
+                                alt="ZimPrep Interface"
                                 fill
                                 className="object-cover opacity-90 group-hover:opacity-100 transition-opacity"
                              />
                         </div>
                     </div>
                     <div className="order-2">
-                        <span className="text-blue-500 font-bold uppercase tracking-widest text-xs mb-4 block">SaaS Platform</span>
-                        <h3 className="text-4xl lg:text-5xl font-semibold mb-6 tracking-tight group-hover:text-blue-400 transition-colors">Nexus AI Agent</h3>
+                        <span className="text-yellow-500 font-bold uppercase tracking-widest text-xs mb-4 block">AI EdTech SaaS</span>
+                        <h3 className="text-4xl lg:text-5xl font-semibold mb-6 tracking-tight group-hover:text-yellow-400 transition-colors">ZimPrep</h3>
                         <p className="text-xl text-neutral-400 mb-8 leading-relaxed">
-                            Autonomous customer support agent capable of handling complex refund logic. Integrated deeply with Stripe and CRM systems to replace Tier 1 support.
+                            A SaaS platform for high school student revision powered by AI. Intelligent tutoring that adapts to every student's learning pace.
                         </p>
                          <ul className="grid grid-cols-2 gap-y-4 gap-x-8 mb-10 text-neutral-300">
                              <li className="flex items-center gap-3 border-l text-sm pl-4 border-neutral-800">
-                                <span className="block font-bold text-white">$12k</span> Monthly Savings
+                                <span className="block font-bold text-white">AI</span> Powered
                              </li>
                              <li className="flex items-center gap-3 border-l text-sm pl-4 border-neutral-800">
-                                <span className="block font-bold text-white">24/7</span> Availability
+                                <span className="block font-bold text-white">Exam</span> Focused
                              </li>
                              <li className="flex items-center gap-3 border-l text-sm pl-4 border-neutral-800">
-                                <span className="block font-bold text-white">4s</span> Avg Resolution
+                                <span className="block font-bold text-white">Real-time</span> Progress
                              </li>
                               <li className="flex items-center gap-3 border-l text-sm pl-4 border-neutral-800">
-                                <span className="block font-bold text-white">100%</span> Automated
+                                <span className="block font-bold text-white">Mobile</span> First
                              </li>
                         </ul>
-                        <Link href="/portfolio" className="inline-flex items-center text-white font-semibold hover:opacity-70 transition-opacity">
-                            View Case Study <ArrowRight className="ml-2 w-4 h-4" />
+                        <Link href="https://zimprep.vercel.app/" className="inline-flex items-center text-white font-semibold hover:opacity-70 transition-opacity">
+                            View Live Platform <ArrowRight className="ml-2 w-4 h-4" />
                         </Link>
                     </div>
                 </div>
@@ -417,6 +440,7 @@ export default function Home() {
       </section>
 
       {/* Latest Insights - Clean Card Style */}
+      {false && (
       <section className="py-32 max-w-[1400px] mx-auto px-6 lg:px-8">
            <div className="flex items-end justify-between mb-16">
                <div>
@@ -448,6 +472,7 @@ export default function Home() {
                ))}
            </div>
       </section>
+      )}
 
       {/* FAQ - Minimalist Accordion */}
       <section className="py-24 border-t border-slate-100">

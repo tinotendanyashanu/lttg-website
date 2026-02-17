@@ -6,7 +6,12 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
 import { ArrowRight, ChevronDown } from 'lucide-react';
-import Prism from '@/components/Prism';
+import dynamic from 'next/dynamic';
+
+const Prism = dynamic(() => import('@/components/Prism'), {
+  ssr: false,
+  loading: () => <div className="absolute inset-0 bg-transparent" />
+});
 
 export default function ServicesPage() {
   return (
@@ -24,24 +29,18 @@ export default function ServicesPage() {
         {/* Content */}
         <div className="relative z-10 text-center px-6 max-w-4xl mx-auto flex flex-col items-center animate-fade-in-up">
           <h2 className="text-5xl md:text-7xl font-bold text-white tracking-tight mb-6 drop-shadow-2xl">
-            SME Systems
+            SME Solutions
           </h2>
           <p className="text-xl md:text-2xl text-slate-200 mb-10 font-light tracking-wide max-w-2xl drop-shadow-md">
-            Scale your revenue engines. Automate workflows.
+            AI-powered systems that streamline operations and increase revenue.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
             <Link 
               href="/services/sme" 
-              className="px-10 py-3.5 bg-white text-black rounded-full font-medium sm:min-w-[200px] hover:bg-slate-200 transition-colors"
+              className="px-10 py-3.5 bg-white text-black rounded-full font-medium sm:min-w-[200px] hover:bg-slate-200 transition-colors flex items-center justify-center group"
             >
-              Deep Dive
-            </Link>
-             <Link 
-              href="/contact" 
-              className="px-10 py-3.5 bg-white/10 backdrop-blur-md text-white border border-white/20 rounded-full font-medium sm:min-w-[200px] hover:bg-white/20 transition-colors"
-            >
-              Contact
+              Explore SME Solutions <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
         </div>
@@ -61,23 +60,17 @@ export default function ServicesPage() {
         
         <div className="relative z-10 text-center px-6 max-w-4xl mx-auto flex flex-col items-center">
           <h2 className="text-5xl md:text-7xl font-bold text-white tracking-tight mb-6 drop-shadow-2xl">
-            Startups
+            Startup Solutions
           </h2>
           <p className="text-xl md:text-2xl text-slate-200 mb-10 font-light tracking-wide max-w-2xl drop-shadow-md">
-             From MVP to IPO. Infrastructure that scales with you.
+             Scalable product architecture, MVP builds, and SaaS systems.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
             <Link 
               href="/services/startups" 
-              className="px-10 py-3.5 bg-white text-black rounded-full font-medium sm:min-w-[200px] hover:bg-slate-200 transition-colors"
+              className="px-10 py-3.5 bg-white text-black rounded-full font-medium sm:min-w-[200px] hover:bg-slate-200 transition-colors flex items-center justify-center group"
             >
-              Deep Dive
-            </Link>
-             <Link 
-              href="/contact" 
-              className="px-10 py-3.5 bg-white/10 backdrop-blur-md text-white border border-white/20 rounded-full font-medium sm:min-w-[200px] hover:bg-white/20 transition-colors"
-            >
-              Contact
+              Explore Startup Solutions <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
         </div>
@@ -92,23 +85,17 @@ export default function ServicesPage() {
 
         <div className="relative z-10 text-center px-6 max-w-4xl mx-auto flex flex-col items-center">
           <h2 className="text-5xl md:text-7xl font-bold text-white tracking-tight mb-6 drop-shadow-2xl">
-            Enterprise
+            Enterprise Solutions
           </h2>
           <p className="text-xl md:text-2xl text-slate-200 mb-10 font-light tracking-wide max-w-2xl drop-shadow-md">
-             Secure AI & Cloud Architecture. Modernize your legacy.
+             Secure AI infrastructure and digital transformation systems.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
             <Link 
               href="/services/enterprise" 
-              className="px-10 py-3.5 bg-white text-black rounded-full font-medium sm:min-w-[200px] hover:bg-slate-200 transition-colors"
+              className="px-10 py-3.5 bg-white text-black rounded-full font-medium sm:min-w-[200px] hover:bg-slate-200 transition-colors flex items-center justify-center group"
             >
-              Deep Dive
-            </Link>
-             <Link 
-              href="/contact" 
-              className="px-10 py-3.5 bg-white/10 backdrop-blur-md text-white border border-white/20 rounded-full font-medium sm:min-w-[200px] hover:bg-white/20 transition-colors"
-            >
-              Contact
+              Explore Enterprise Solutions <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
         </div>
@@ -123,23 +110,17 @@ export default function ServicesPage() {
 
         <div className="relative z-10 text-center px-6 max-w-4xl mx-auto flex flex-col items-center">
           <h2 className="text-5xl md:text-7xl font-bold text-white tracking-tight mb-6 drop-shadow-2xl">
-            Individuals
+            Individual Solutions
           </h2>
           <p className="text-xl md:text-2xl text-slate-200 mb-10 font-light tracking-wide max-w-2xl drop-shadow-md">
-             High-performance personal branding & digital products.
+             High-performance websites and digital platforms built properly.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
             <Link 
               href="/services/individuals" 
-              className="px-10 py-3.5 bg-white text-black rounded-full font-medium sm:min-w-[200px] hover:bg-slate-200 transition-colors"
+              className="px-10 py-3.5 bg-white text-black rounded-full font-medium sm:min-w-[200px] hover:bg-slate-200 transition-colors flex items-center justify-center group"
             >
-              Deep Dive
-            </Link>
-             <Link 
-              href="/contact" 
-              className="px-10 py-3.5 bg-white/10 backdrop-blur-md text-white border border-white/20 rounded-full font-medium sm:min-w-[200px] hover:bg-white/20 transition-colors"
-            >
-              Contact
+              Explore Individual Solutions <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
         </div>

@@ -3,181 +3,280 @@ import React from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
-import { Monitor, Smartphone, ShoppingBag, Calendar, Zap, ArrowRight, User, CheckCircle2 } from 'lucide-react';
+import Image from 'next/image';
+import { Palette, PenTool, ShoppingCart, Calendar, ArrowRight, CheckCircle2, Globe, Layout, Smartphone } from 'lucide-react';
 import ServiceHero from '@/components/ServiceHero';
 
 export const metadata = {
-  title: "Personal Brand & Website Development | Leo The Tech Guy",
-  description: "High-performance websites, personal brand platforms, and e-commerce systems for individuals and creators.",
+  title: "Services for Individuals | Leo the Tech Guy",
+  description: "Personal brand platforms, portfolios, and e-commerce systems.",
 };
 
 export default function IndividualsPage() {
   return (
-    <main className="min-h-screen bg-slate-50 selection:bg-emerald-100 font-sans text-slate-900">
+    <main className="min-h-screen bg-white selection:bg-emerald-100 font-sans text-slate-900">
       <Navbar />
       
       <ServiceHero 
-        title="Build Your Digital Presence."
-        description="Don't settle for a generic template. I build structured, high-performance platforms that position you as a leader and convert visitors into clients."
+        title="Your Digital Authority."
+        description="We build personal platforms that position you as an industry leader. Clean, fast, and optimized for conversion."
         ctaText="Start My Project"
         ctaLink="/contact"
         themeColor="emerald"
+        videoSrc="/videos/hero-video1.mp4"
       />
+      
+      {/* The Methodology */}
+      <section className="py-24 px-6 lg:px-8 bg-slate-50 border-b border-slate-100">
+        <div className="max-w-7xl mx-auto">
+            <div className="flex flex-col lg:flex-row gap-16 items-start">
+                <div className="lg:w-1/3 sticky top-32">
+                     <span className="text-emerald-600 font-bold tracking-wider uppercase text-sm mb-4 block">The Methodology</span>
+                     <h2 className="text-4xl font-bold text-slate-900 mb-6 leading-tight">The "Authority" Stack.</h2>
+                     <p className="text-lg text-slate-600 leading-relaxed">
+                         A website isn't enough. You need a platform that captures attention, builds trust, and converts visitors into clients or followers automatically.
+                     </p>
+                </div>
+                <div className="lg:w-2/3 grid gap-12">
+                    {/* Step 1 */}
+                    <div className="group">
+                        <div className="flex items-center gap-4 mb-4">
+                            <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-lg">01</div>
+                            <h3 className="text-2xl font-bold text-slate-900">Brand Identity</h3>
+                        </div>
+                        <p className="text-slate-600 text-lg leading-relaxed pl-14 border-l-2 border-slate-200 group-hover:border-emerald-500 transition-colors duration-300">
+                            We distill your unique value proposition into a visual identity. Minimalist, premium, and distinct. No templates.
+                        </p>
+                    </div>
 
-      {/* The Challenge */}
-      <section className="py-20 px-6 lg:px-8 bg-white">
-        <div className="max-w-4xl mx-auto">
-            <span className="text-emerald-600 font-bold tracking-wider uppercase text-sm mb-4 block">The Challenge</span>
-            <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-8 leading-tight">
-                Visibility vs. Authenticity.
-            </h2>
-            <div className="grid md:grid-cols-2 gap-12">
-                <p className="text-lg text-slate-600 leading-relaxed">
-                    Most personal brand websites are just "digital business cards"—static, boring, and disconnected from your actual revenue streams (newsletter, products, booking).
-                </p>
-                <p className="text-lg text-slate-600 leading-relaxed">
-                    To stand out, you need a platform. A central hub that aggregates your content, captures leads automatically, and sells your expertise while you sleep.
-                </p>
+                    {/* Step 2 */}
+                    <div className="group">
+                         <div className="flex items-center gap-4 mb-4">
+                            <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-lg">02</div>
+                            <h3 className="text-2xl font-bold text-slate-900">High-Performance Build</h3>
+                        </div>
+                        <p className="text-slate-600 text-lg leading-relaxed pl-14 border-l-2 border-slate-200 group-hover:border-emerald-500 transition-colors duration-300">
+                            We code custom platforms using Next.js. This ensures instant load times, perfect SEO, and a user experience that feels like a native app.
+                        </p>
+                    </div>
+
+                    {/* Step 3 */}
+                    <div className="group">
+                         <div className="flex items-center gap-4 mb-4">
+                            <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-lg">03</div>
+                            <h3 className="text-2xl font-bold text-slate-900">Automation Loops</h3>
+                        </div>
+                        <p className="text-slate-600 text-lg leading-relaxed pl-14 border-l-2 border-slate-200 group-hover:border-emerald-500 transition-colors duration-300">
+                            We integrate booking systems, newsletters, and payment gateways directly. Your platform works for you while you sleep.
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
       </section>
 
-       {/* Our Approach */}
-       <section className="py-20 px-6 lg:px-8 bg-slate-50 border-y border-slate-200">
-         <div className="max-w-7xl mx-auto">
-            <div className="mb-16 max-w-3xl">
-                <span className="text-emerald-600 font-bold tracking-wider uppercase text-sm mb-4 block">Our Approach</span>
-                <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-6">Performance-Driven Design.</h2>
-                <p className="text-xl text-slate-600">We don't use drag-and-drop builders. We write custom code for maximum speed and SEO.</p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                 <div className="bg-white p-8 rounded-xl shadow-sm border border-slate-200 hover:border-emerald-200 transition-colors">
-                    <div className="text-emerald-600 font-bold text-xl mb-4">01. Architect</div>
-                    <p className="text-slate-600">We map your user journey. How does a visitor become a newsletter subscriber, then a client?</p>
-                 </div>
-                 <div className="bg-white p-8 rounded-xl shadow-sm border border-slate-200 hover:border-emerald-200 transition-colors">
-                    <div className="text-emerald-600 font-bold text-xl mb-4">02. Design</div>
-                    <p className="text-slate-600">We create a visual identity that reflects your premium standing in the market. No templates.</p>
-                 </div>
-                 <div className="bg-white p-8 rounded-xl shadow-sm border border-slate-200 hover:border-emerald-200 transition-colors">
-                    <div className="text-emerald-600 font-bold text-xl mb-4">03. Optimize</div>
-                    <p className="text-slate-600">We perfect the technical SEO and load speeds (Core Web Vitals) so Google loves you.</p>
-                 </div>
-            </div>
-         </div>
-      </section>
-
-      {/* Core Services */}
+      {/* Featured Services */}
       <section className="py-24 px-6 lg:px-8 bg-white">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-12">
-             <h2 className="text-3xl font-bold text-slate-900">Core Capabilities</h2>
-          </div>
+             <div className="mb-20 text-center max-w-3xl mx-auto">
+                 <span className="text-emerald-600 font-bold tracking-wider uppercase text-sm mb-4 block">Capabilities</span>
+                 <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6 tracking-tight">Personal Infrastructure.</h2>
+                 <p className="text-xl text-slate-600">
+                     Tools for creators, consultants, and thought leaders.
+                 </p>
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="space-y-24">
             
-            {/* Custom Website - Large */}
-            <div className="lg:col-span-2 bg-slate-50 rounded-3xl p-8 md:p-12 border border-slate-200 relative overflow-hidden group hover:border-emerald-200 transition-all">
-              <div className="relative z-10">
-                <div className="w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center mb-8 text-emerald-600">
-                  <Monitor className="w-8 h-8" />
+                {/* Service Block 1: Portfolios */}
+                <div className="flex flex-col lg:flex-row gap-12 lg:gap-24 items-center">
+                    <div className="lg:w-1/2 order-2 lg:order-1">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-sm font-medium mb-6">
+                            <PenTool className="w-4 h-4" /> Personal Brand
+                        </div>
+                        <h3 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">Portfolio Platforms</h3>
+                        <p className="text-lg text-slate-600 mb-8 leading-relaxed">
+                             A static squarespace site won't cut it. We build dynamic portfolio systems that showcase your work, host your content, and capture leads with premium interactions.
+                        </p>
+                        
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                            <div className="flex items-start">
+                                <CheckCircle2 className="w-5 h-5 text-emerald-600 mr-3 mt-0.5 shrink-0" />
+                                <span className="text-slate-700 font-medium">Case Study Systems</span>
+                            </div>
+                            <div className="flex items-start">
+                                <CheckCircle2 className="w-5 h-5 text-emerald-600 mr-3 mt-0.5 shrink-0" />
+                                <span className="text-slate-700 font-medium">Blog & CMS</span>
+                            </div>
+                            <div className="flex items-start">
+                                <CheckCircle2 className="w-5 h-5 text-emerald-600 mr-3 mt-0.5 shrink-0" />
+                                <span className="text-slate-700 font-medium">Newsletter Integration</span>
+                            </div>
+                            <div className="flex items-start">
+                                <CheckCircle2 className="w-5 h-5 text-emerald-600 mr-3 mt-0.5 shrink-0" />
+                                <span className="text-slate-700 font-medium">Analytics Dashboard</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="lg:w-1/2 order-1 lg:order-2">
+                        <div className="bg-slate-50 rounded-2xl overflow-hidden aspect-square md:aspect-[4/3] relative group shadow-lg">
+                           <Image 
+                                src="/images/individuals/Portfolio Platforms.png"
+                                alt="Personal Portfolio Design"
+                                fill
+                                className="object-cover group-hover:scale-105 transition-transform duration-700"
+                            />
+                             <div className="absolute inset-0 bg-emerald-900/10 group-hover:bg-emerald-900/0 transition-colors" />
+                        </div>
+                    </div>
                 </div>
-                <h3 className="text-2xl font-bold mb-4 text-slate-900">Custom Website Development</h3>
-                <p className="text-slate-600 leading-relaxed mb-8 max-w-xl">
-                  Pixel-perfect, responsive websites built with modern code (Next.js), not drag-and-drop builders. Fast, SEO-optimized, and fully yours.
-                </p>
-                <ul className="grid sm:grid-cols-2 gap-4 mb-8">
-                    <li className="flex items-center text-sm font-medium text-slate-700"><CheckCircle2 className="w-4 h-4 text-emerald-600 mr-3" /> Next.js / React Architecture</li>
-                    <li className="flex items-center text-sm font-medium text-slate-700"><CheckCircle2 className="w-4 h-4 text-emerald-600 mr-3" /> Perfect Google Lighthouse Score</li>
-                    <li className="flex items-center text-sm font-medium text-slate-700"><CheckCircle2 className="w-4 h-4 text-emerald-600 mr-3" /> Advanced Animations</li>
-                    <li className="flex items-center text-sm font-medium text-slate-700"><CheckCircle2 className="w-4 h-4 text-emerald-600 mr-3" /> Content Management System (CMS)</li>
-                </ul>
-              </div>
+
+                {/* Service Block 2: E-commerce */}
+                <div className="flex flex-col lg:flex-row gap-12 lg:gap-24 items-center">
+                    <div className="lg:w-1/2">
+                         <div className="bg-slate-900 rounded-2xl overflow-hidden aspect-square md:aspect-[4/3] relative group shadow-lg">
+                           <Image 
+                                src="/images/individuals/E-commerce Systems.png"
+                                alt="E-commerce Store"
+                                fill
+                                className="object-cover opacity-80 group-hover:scale-105 transition-transform duration-700"
+                            />
+                             <div className="absolute inset-0 bg-emerald-900/40" />
+                        </div>
+                    </div>
+                    <div className="lg:w-1/2">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-sm font-medium mb-6">
+                            <ShoppingCart className="w-4 h-4" /> Commerce
+                        </div>
+                        <h3 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">E-commerce Systems</h3>
+                        <p className="text-lg text-slate-600 mb-8 leading-relaxed">
+                            Selling digital products or services? We build high-conversion storefronts integrated with Stripe/LemonSqueezy, handling tax, delivery, and access automatically.
+                        </p>
+                        
+                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                            <div className="flex items-start">
+                                <CheckCircle2 className="w-5 h-5 text-emerald-600 mr-3 mt-0.5 shrink-0" />
+                                <span className="text-slate-700 font-medium">Digital Product Delivery</span>
+                            </div>
+                            <div className="flex items-start">
+                                <CheckCircle2 className="w-5 h-5 text-emerald-600 mr-3 mt-0.5 shrink-0" />
+                                <span className="text-slate-700 font-medium">Subscription Mgmt</span>
+                            </div>
+                            <div className="flex items-start">
+                                <CheckCircle2 className="w-5 h-5 text-emerald-600 mr-3 mt-0.5 shrink-0" />
+                                <span className="text-slate-700 font-medium">Custom Checkout</span>
+                            </div>
+                            <div className="flex items-start">
+                                <CheckCircle2 className="w-5 h-5 text-emerald-600 mr-3 mt-0.5 shrink-0" />
+                                <span className="text-slate-700 font-medium">Cart Recovery</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Service Block 3: Booking/Auto */}
+                <div className="flex flex-col lg:flex-row gap-12 lg:gap-24 items-center">
+                    <div className="lg:w-1/2 order-2 lg:order-1">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-sm font-medium mb-6">
+                            <Calendar className="w-4 h-4" /> Systems
+                        </div>
+                        <h3 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">Booking & Automation</h3>
+                        <p className="text-lg text-slate-600 mb-8 leading-relaxed">
+                            Stop emailing back and forth. We implement smart booking flows that qualify leads before they ever get on your calendar.
+                        </p>
+                        
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                            <div className="flex items-start">
+                                <CheckCircle2 className="w-5 h-5 text-emerald-600 mr-3 mt-0.5 shrink-0" />
+                                <span className="text-slate-700 font-medium">Smart Scheduling</span>
+                            </div>
+                            <div className="flex items-start">
+                                <CheckCircle2 className="w-5 h-5 text-emerald-600 mr-3 mt-0.5 shrink-0" />
+                                <span className="text-slate-700 font-medium">Intake Forms</span>
+                            </div>
+                            <div className="flex items-start">
+                                <CheckCircle2 className="w-5 h-5 text-emerald-600 mr-3 mt-0.5 shrink-0" />
+                                <span className="text-slate-700 font-medium">Payment Pre-auth</span>
+                            </div>
+                             <div className="flex items-start">
+                                <CheckCircle2 className="w-5 h-5 text-emerald-600 mr-3 mt-0.5 shrink-0" />
+                                <span className="text-slate-700 font-medium">Reminders</span>
+                            </div>
+                        </div>
+                    </div>
+                     <div className="lg:w-1/2 order-1 lg:order-2">
+                         <div className="bg-slate-50 rounded-2xl overflow-hidden aspect-square md:aspect-[4/3] relative group shadow-lg">
+                           <Image 
+                                src="/images/individuals/Booking & Automation.png"
+                                alt="Booking Systems"
+                                fill
+                                className="object-cover group-hover:scale-105 transition-transform duration-700"
+                            />
+                        </div>
+                    </div>
+                </div>
+
             </div>
-            
-            {/* Personal Brand - Dark Card */}
-             <div className="bg-slate-900 text-white rounded-3xl p-8 md:p-10 border border-slate-800 flex flex-col justify-between group">
-               <div>
-                   <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mb-6 text-emerald-400">
-                    <User className="w-6 h-6" />
+        </div>
+      </section>
+      
+      {/* Infrastructure - The "Safety Net" */}
+      <section className="py-24 bg-black text-white relative overflow-hidden">
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+          <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
+              <div className="grid lg:grid-cols-2 gap-16 items-center">
+                  <div>
+                      <h2 className="text-3xl md:text-5xl font-bold mb-6">Build Your Legacy.</h2>
+                      <p className="text-xl text-slate-400 leading-relaxed mb-8">
+                          Don't rely on rented land (social media). Own your platform, your data, and your audience with infrastructure that lasts.
+                      </p>
+                      <Link href="/contact" className="inline-flex items-center px-8 py-4 bg-emerald-600 text-white rounded-full font-bold hover:bg-emerald-700 transition-colors">
+                          Start My Project <ArrowRight className="ml-2 w-5 h-5" />
+                      </Link>
                   </div>
-                  <h3 className="text-2xl font-bold mb-4">Personal Brand Platforms</h3>
-                  <p className="text-slate-300 leading-relaxed mb-6">
-                     A centralized hub for your content, newsletter, and products. Establish authority.
-                  </p>
-               </div>
-            </div>
-
-            {/* E-commerce */}
-             <div className="bg-slate-50 rounded-3xl p-8 md:p-10 border border-slate-200 flex flex-col group hover:border-emerald-200 transition-all">
-              <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center mb-6 text-emerald-700">
-                <ShoppingBag className="w-6 h-6" />
+                  <div className="grid grid-cols-2 gap-6">
+                      <div className="bg-white/5 border border-white/10 p-6 rounded-xl backdrop-blur-sm">
+                          <h4 className="font-bold text-lg mb-2 text-emerald-400">SEO Optimized</h4>
+                          <p className="text-sm text-slate-400">Rank for your name.</p>
+                      </div>
+                      <div className="bg-white/5 border border-white/10 p-6 rounded-xl backdrop-blur-sm">
+                          <h4 className="font-bold text-lg mb-2 text-emerald-400">Mobile Perfect</h4>
+                          <p className="text-sm text-slate-400">Looks great on any device.</p>
+                      </div>
+                       <div className="bg-white/5 border border-white/10 p-6 rounded-xl backdrop-blur-sm">
+                          <h4 className="font-bold text-lg mb-2 text-emerald-400">Fast Loading</h4>
+                          <p className="text-sm text-slate-400">95+ Performance Score.</p>
+                      </div>
+                       <div className="bg-white/5 border border-white/10 p-6 rounded-xl backdrop-blur-sm">
+                          <h4 className="font-bold text-lg mb-2 text-emerald-400">Secure</h4>
+                          <p className="text-sm text-slate-400">SSL and DDoS protection.</p>
+                      </div>
+                  </div>
               </div>
-              <h3 className="text-2xl font-bold mb-4 text-slate-900">E-commerce Systems</h3>
-              <p className="text-slate-600 leading-relaxed mb-6">
-                Sell digital or physical products with a custom storefront. Secure payments, inventory management.
-              </p>
-            </div>
-
-            {/* Booking */}
-             <div className="bg-slate-50 rounded-3xl p-8 md:p-10 border border-slate-200 flex flex-col group hover:border-emerald-200 transition-all">
-              <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center mb-6 text-emerald-700">
-                <Calendar className="w-6 h-6" />
-              </div>
-              <h3 className="text-2xl font-bold mb-4 text-slate-900">Booking & Automation</h3>
-              <p className="text-slate-600 leading-relaxed mb-6">
-                Automate your calendar. Clients book slots, pay deposits, and receive reminders automatically.
-              </p>
-            </div>
-
-            {/* Optimization/Redesign */}
-             <div className="bg-slate-50 rounded-3xl p-8 md:p-10 border border-slate-200 flex flex-col group hover:border-emerald-200 transition-all">
-              <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center mb-6 text-emerald-700">
-                <Zap className="w-6 h-6" />
-              </div>
-              <h3 className="text-2xl font-bold mb-4 text-slate-900">Redesign & Optimize</h3>
-              <p className="text-slate-600 leading-relaxed mb-6">
-                Audit existing sites, fix speed issues, improve responsiveness, and refresh the design.
-              </p>
-            </div>
-
           </div>
-        </div>
       </section>
 
-      {/* Impact / Metrics */}
-      <section className="py-24 bg-black text-white border-y border-white/10">
+      {/* Final Stats / Impact */}
+      <section className="py-24 bg-white border-t border-slate-200">
           <div className="max-w-7xl mx-auto px-6 lg:px-8">
-               <div className="grid md:grid-cols-3 gap-12 text-center divider-y md:divide-y-0 md:divide-x divide-white/10">
+               <div className="text-center mb-16">
+                   <h2 className="text-3xl font-bold text-slate-900">Quantifiable Impact</h2>
+               </div>
+               <div className="grid md:grid-cols-3 gap-12 text-center divider-y md:divide-y-0 md:divide-x divide-slate-200">
                     <div className="p-4">
-                        <div className="text-5xl font-bold mb-2">100</div>
-                        <div className="text-emerald-400 font-medium">PageSpeed Score</div>
+                        <div className="text-5xl font-bold mb-2 text-slate-900">2x</div>
+                        <div className="text-emerald-600 font-medium">Conversion Rate</div>
                     </div>
                     <div className="p-4">
-                        <div className="text-5xl font-bold mb-2">&lt;24h</div>
-                        <div className="text-emerald-400 font-medium">Delivery Speed</div>
+                        <div className="text-5xl font-bold mb-2 text-slate-900">95+</div>
+                        <div className="text-emerald-600 font-medium">Google PageSpeed</div>
                     </div>
                     <div className="p-4">
-                        <div className="text-5xl font-bold mb-2">SEO</div>
-                        <div className="text-emerald-400 font-medium">Optimized Architecture</div>
+                        <div className="text-5xl font-bold mb-2 text-slate-900">100%</div>
+                        <div className="text-emerald-600 font-medium">Ownership</div>
                     </div>
                </div>
           </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-24 bg-white text-center">
-        <div className="max-w-3xl mx-auto px-6">
-            <h2 className="text-4xl font-bold text-slate-900 mb-6">Stand out from the noise.</h2>
-            <p className="text-xl text-slate-600 mb-10">
-                Stop using generic templates. Build a platform that's worthy of your brand.
-            </p>
-            <Link href="/contact" className="inline-flex items-center px-10 py-5 bg-emerald-600 text-white rounded-full font-bold hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-500/20">
-                Start My Project
-                <ArrowRight className="ml-2 w-6 h-6" />
-            </Link>
-        </div>
       </section>
 
       <Footer />

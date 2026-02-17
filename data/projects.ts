@@ -85,13 +85,13 @@ export const projects: Project[] = [
     id: "zimprep",
     title: "ZimPrep SaaS",
     category: "EdTech",
-    description: "Educational platform offering exam preparation resources. Developed the landing page and upcoming system architecture.",
+    description: "A SaaS platform for high school student revision powered by AI.",
     link: "https://zimprep.vercel.app/",
-    tags: ["SaaS", "Education", "Next.js"],
+    tags: ["SaaS", "Education", "AI"],
     size: 'small',
     gradient: "from-yellow-400/20 to-orange-400/20",
     icon: Layout,
-    status: 'Coming Soon'
+    status: 'Live'
   },
   {
     id: "sanganai",

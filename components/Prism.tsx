@@ -451,6 +451,10 @@ const Prism: React.FC<PrismProps> = ({
         delete (container as PrismContainer).__prismIO;
       }
       if (gl.canvas.parentElement === container) container.removeChild(gl.canvas);
+      
+      // Explicitly lose context to free memory
+      const extension = gl.getExtension('WEBGL_lose_context');
+      if (extension) extension.loseContext();
     };
   }, [
     height,

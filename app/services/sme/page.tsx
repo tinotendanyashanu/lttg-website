@@ -3,181 +3,281 @@ import React from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
-import { Bot, BarChart3, Users, Zap, ArrowRight, LineChart, CheckCircle2 } from 'lucide-react';
+import Image from 'next/image';
+import { Bot, BarChart3, Users, Zap, CheckCircle2, ArrowRight, Layers, Workflow, LineChart } from 'lucide-react';
 import ServiceHero from '@/components/ServiceHero';
 
 export const metadata = {
-  title: "SME Systems & Automation | Leo The Tech Guy",
-  description: "Scalable revenue engines and operational automation for growing small to medium enterprises.",
+  title: "SME Solutions | Leo the Tech Guy",
+  description: "AI-powered systems that streamline operations and increase revenue.",
 };
 
 export default function SMEPage() {
   return (
-    <main className="min-h-screen bg-slate-50 selection:bg-emerald-100 font-sans text-slate-900">
+    <main className="min-h-screen bg-white selection:bg-emerald-100 font-sans text-slate-900">
       <Navbar />
       
       <ServiceHero 
-        title="Automate Operations. Scale Revenue."
-        description="Stop trading time for money. We build intelligent infrastructure that allows your business to run autonomously."
+        title="Operational Intelligence."
+        description="We don't just patch problems. We deploy autonomous infrastructure that scales your business without scaling your headcount."
         ctaText="Upgrade My Business Systems"
         ctaLink="/contact"
         themeColor="emerald"
+        videoSrc="/videos/hero-video1.mp4"
       />
+      
+      {/* The Methodology / Process Section - Premium Text Heavy */}
+      <section className="py-24 px-6 lg:px-8 bg-slate-50 border-b border-slate-100">
+        <div className="max-w-7xl mx-auto">
+            <div className="flex flex-col lg:flex-row gap-16 items-start">
+                <div className="lg:w-1/3 sticky top-32">
+                     <span className="text-emerald-600 font-bold tracking-wider uppercase text-sm mb-4 block">The Methodology</span>
+                     <h2 className="text-4xl font-bold text-slate-900 mb-6 leading-tight">The 3-Step Optimization Protocol.</h2>
+                     <p className="text-lg text-slate-600 leading-relaxed">
+                         Most "digital transformation" fails because it's additive. We focus on subtraction: removing friction, removing manual data entry, and removing bottlenecks.
+                     </p>
+                </div>
+                <div className="lg:w-2/3 grid gap-12">
+                    {/* Step 1 */}
+                    <div className="group">
+                        <div className="flex items-center gap-4 mb-4">
+                            <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-lg">01</div>
+                            <h3 className="text-2xl font-bold text-slate-900">Audit & Map</h3>
+                        </div>
+                        <p className="text-slate-600 text-lg leading-relaxed pl-14 border-l-2 border-slate-200 group-hover:border-emerald-500 transition-colors duration-300">
+                            We map every manual process in your business. From lead intake to invoice generation, we identify where human hours are being wasted on robot work.
+                        </p>
+                    </div>
 
-      {/* The Challenge */}
-      <section className="py-20 px-6 lg:px-8 bg-white">
-        <div className="max-w-4xl mx-auto">
-            <span className="text-emerald-600 font-bold tracking-wider uppercase text-sm mb-4 block">The Challenge</span>
-            <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-8 leading-tight">
-                The "Growth Plateau" is a systems problem.
-            </h2>
-            <div className="grid md:grid-cols-2 gap-12">
-                <p className="text-lg text-slate-600 leading-relaxed">
-                    Most SMEs hit a ceiling where more revenue equals more chaos. You're hiring more people to do manual tasks, margins are shrinking, and you, the founder, are still the bottleneck for critical decisions.
-                </p>
-                <p className="text-lg text-slate-600 leading-relaxed">
-                    This isn't a personnel issue; it's an infrastructure failure. Without automated workflows and data-driven visibility, you cannot scale past a certain point without breaking the machine.
-                </p>
+                    {/* Step 2 */}
+                    <div className="group">
+                         <div className="flex items-center gap-4 mb-4">
+                            <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-lg">02</div>
+                            <h3 className="text-2xl font-bold text-slate-900">Architect & Automate</h3>
+                        </div>
+                        <p className="text-slate-600 text-lg leading-relaxed pl-14 border-l-2 border-slate-200 group-hover:border-emerald-500 transition-colors duration-300">
+                            We design standard operating procedures (SOPs) and translate them into code. Using n8n, Make, and custom scripts, we build the "nervous system" of your business.
+                        </p>
+                    </div>
+
+                    {/* Step 3 */}
+                    <div className="group">
+                         <div className="flex items-center gap-4 mb-4">
+                            <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-lg">03</div>
+                            <h3 className="text-2xl font-bold text-slate-900">Deploy & Optimize</h3>
+                        </div>
+                        <p className="text-slate-600 text-lg leading-relaxed pl-14 border-l-2 border-slate-200 group-hover:border-emerald-500 transition-colors duration-300">
+                            We launch your new infrastructure in parallel with existing systems to ensure zero downtime. Once validated, we switch over and monitor for efficiency gains.
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
       </section>
 
-      {/* Our Approach */}
-      <section className="py-20 px-6 lg:px-8 bg-slate-50 border-y border-slate-200">
-         <div className="max-w-7xl mx-auto">
-            <div className="mb-16 max-w-3xl">
-                <span className="text-emerald-600 font-bold tracking-wider uppercase text-sm mb-4 block">Our Approach</span>
-                <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-6">Systems-First Scaling.</h2>
-                <p className="text-xl text-slate-600">We don't just "fix" things. We re-architect your operational core.</p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                 <div className="bg-white p-8 rounded-xl shadow-sm border border-slate-200 hover:border-emerald-200 transition-colors">
-                    <div className="text-emerald-600 font-bold text-xl mb-4">01. Audit</div>
-                    <p className="text-slate-600">We map every manual process in your business to identify bottlenecks and redundancies.</p>
-                 </div>
-                 <div className="bg-white p-8 rounded-xl shadow-sm border border-slate-200 hover:border-emerald-200 transition-colors">
-                    <div className="text-emerald-600 font-bold text-xl mb-4">02. Automate</div>
-                    <p className="text-slate-600">We deploy code-based automations (not just Zapier) to handle reliable, complex workflows.</p>
-                 </div>
-                 <div className="bg-white p-8 rounded-xl shadow-sm border border-slate-200 hover:border-emerald-200 transition-colors">
-                    <div className="text-emerald-600 font-bold text-xl mb-4">03. Scale</div>
-                    <p className="text-slate-600">We implement dashboards effectively giving you a "cockpit" to manage the business.</p>
-                 </div>
-            </div>
-         </div>
-      </section>
-
-      {/* Core Capabilities */}
+      {/* Featured Services - Alternating or Large Cards */}
       <section className="py-24 px-6 lg:px-8 bg-white">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-12">
-            <h2 className="text-3xl font-bold text-slate-900">Core Capabilities</h2>
-          </div>
+             <div className="mb-20 text-center max-w-3xl mx-auto">
+                 <span className="text-emerald-600 font-bold tracking-wider uppercase text-sm mb-4 block">Capabilities</span>
+                 <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6 tracking-tight">Core Infrastructure Modules.</h2>
+                 <p className="text-xl text-slate-600">
+                     Select the components your business needs to scale.
+                 </p>
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="space-y-24">
             
-            {/* Automation - Large */}
-            <div className="lg:col-span-2 bg-slate-50 rounded-3xl p-8 md:p-12 border border-slate-200 relative overflow-hidden group hover:border-emerald-200 transition-all">
-              <div className="relative z-10">
-                <div className="w-14 h-14 bg-emerald-100 rounded-xl flex items-center justify-center mb-8 text-emerald-700">
-                  <Bot className="w-7 h-7" />
+                {/* Service Block 1: Workflow Automation */}
+                <div className="flex flex-col lg:flex-row gap-12 lg:gap-24 items-center">
+                    <div className="lg:w-1/2 order-2 lg:order-1">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-sm font-medium mb-6">
+                            <Workflow className="w-4 h-4" /> Operations
+                        </div>
+                        <h3 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">AI Workflow Automation</h3>
+                        <p className="text-lg text-slate-600 mb-8 leading-relaxed">
+                            Manual repetition is the enemy of scale. We replace hours of admin work with intelligent agents. Imagine an employee that works 24/7, never makes a typo, and costs a fraction of a salary.
+                        </p>
+                        
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                            <div className="flex items-start">
+                                <CheckCircle2 className="w-5 h-5 text-emerald-600 mr-3 mt-0.5 shrink-0" />
+                                <span className="text-slate-700 font-medium">Auto-Invoicing</span>
+                            </div>
+                            <div className="flex items-start">
+                                <CheckCircle2 className="w-5 h-5 text-emerald-600 mr-3 mt-0.5 shrink-0" />
+                                <span className="text-slate-700 font-medium">Employee Onboarding</span>
+                            </div>
+                            <div className="flex items-start">
+                                <CheckCircle2 className="w-5 h-5 text-emerald-600 mr-3 mt-0.5 shrink-0" />
+                                <span className="text-slate-700 font-medium">Data Synchronization</span>
+                            </div>
+                            <div className="flex items-start">
+                                <CheckCircle2 className="w-5 h-5 text-emerald-600 mr-3 mt-0.5 shrink-0" />
+                                <span className="text-slate-700 font-medium">Contract Generation</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="lg:w-1/2 order-1 lg:order-2">
+                        <div className="bg-slate-50 rounded-2xl overflow-hidden aspect-square md:aspect-[4/3] relative group shadow-lg">
+                            <Image 
+                                src="/images/sme/Operations AI Workflow Automation.png"
+                                alt="AI Workflow Automation"
+                                fill
+                                className="object-cover group-hover:scale-105 transition-transform duration-700"
+                            />
+                            <div className="absolute inset-0 bg-emerald-900/10 group-hover:bg-emerald-900/0 transition-colors" />
+                        </div>
+                    </div>
                 </div>
-                <h3 className="text-2xl font-bold mb-4 text-slate-900">AI Workflow Automation</h3>
-                <p className="text-slate-600 leading-relaxed mb-8 max-w-xl">
-                  Replace manual data entry, customer onboarding, and invoicing with intelligent agents. We build custom Python scripts and API integrations that run 24/7 without error.
-                </p>
-                <ul className="grid sm:grid-cols-2 gap-4 mb-8">
-                    <li className="flex items-center text-sm font-medium text-slate-700"><CheckCircle2 className="w-4 h-4 text-emerald-600 mr-3" /> Automated Invoicing</li>
-                    <li className="flex items-center text-sm font-medium text-slate-700"><CheckCircle2 className="w-4 h-4 text-emerald-600 mr-3" /> Lead Qualification</li>
-                    <li className="flex items-center text-sm font-medium text-slate-700"><CheckCircle2 className="w-4 h-4 text-emerald-600 mr-3" /> Client Onboarding</li>
-                    <li className="flex items-center text-sm font-medium text-slate-700"><CheckCircle2 className="w-4 h-4 text-emerald-600 mr-3" /> Support Triage</li>
-                </ul>
-              </div>
+
+                {/* Service Block 2: Revenue Systems */}
+                <div className="flex flex-col lg:flex-row gap-12 lg:gap-24 items-center">
+                    <div className="lg:w-1/2">
+                         <div className="bg-slate-900 rounded-2xl overflow-hidden aspect-square md:aspect-[4/3] relative group shadow-lg">
+                             {/* Dark card for contrast */}
+                            <Image 
+                                src="/images/sme/AI Sales & Lead Systems.png"
+                                alt="AI Sales & Lead Systems"
+                                fill
+                                className="object-cover opacity-80 group-hover:scale-105 transition-transform duration-700"
+                            />
+                             <div className="absolute inset-0 bg-emerald-900/40" />
+                        </div>
+                    </div>
+                    <div className="lg:w-1/2">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-sm font-medium mb-6">
+                            <Zap className="w-4 h-4" /> Revenue
+                        </div>
+                        <h3 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">AI Sales & Lead Systems</h3>
+                        <p className="text-lg text-slate-600 mb-8 leading-relaxed">
+                            Stop losing leads to fast decay. We build automated pipelines that engage, qualify, and book meetings with prospects instantly. Your sales team should only talk to qualified buyers.
+                        </p>
+                        
+                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                            <div className="flex items-start">
+                                <CheckCircle2 className="w-5 h-5 text-blue-600 mr-3 mt-0.5 shrink-0" />
+                                <span className="text-slate-700 font-medium">Instant Lead Response</span>
+                            </div>
+                            <div className="flex items-start">
+                                <CheckCircle2 className="w-5 h-5 text-blue-600 mr-3 mt-0.5 shrink-0" />
+                                <span className="text-slate-700 font-medium">Automated Follow-ups</span>
+                            </div>
+                            <div className="flex items-start">
+                                <CheckCircle2 className="w-5 h-5 text-blue-600 mr-3 mt-0.5 shrink-0" />
+                                <span className="text-slate-700 font-medium">CRM Enrichment</span>
+                            </div>
+                            <div className="flex items-start">
+                                <CheckCircle2 className="w-5 h-5 text-blue-600 mr-3 mt-0.5 shrink-0" />
+                                <span className="text-slate-700 font-medium">Calendar Booking</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Service Block 3: Dashboard & BI */}
+                <div className="flex flex-col lg:flex-row gap-12 lg:gap-24 items-center">
+                    <div className="lg:w-1/2 order-2 lg:order-1">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-sm font-medium mb-6">
+                            <LineChart className="w-4 h-4" /> Intelligence
+                        </div>
+                        <h3 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">Business Intelligence Dashboards</h3>
+                        <p className="text-lg text-slate-600 mb-8 leading-relaxed">
+                             Gut feeling isn't a strategy. We centralize your scattered data (Stripe, Ads, CRM, Support) into live, actionable dashboards. Know your net profit, LTV, and churn in real-time.
+                        </p>
+                        
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                            <div className="flex items-start">
+                                <CheckCircle2 className="w-5 h-5 text-amber-600 mr-3 mt-0.5 shrink-0" />
+                                <span className="text-slate-700 font-medium">Unified Data Warehouse</span>
+                            </div>
+                            <div className="flex items-start">
+                                <CheckCircle2 className="w-5 h-5 text-amber-600 mr-3 mt-0.5 shrink-0" />
+                                <span className="text-slate-700 font-medium">Real-time P&L</span>
+                            </div>
+                            <div className="flex items-start">
+                                <CheckCircle2 className="w-5 h-5 text-amber-600 mr-3 mt-0.5 shrink-0" />
+                                <span className="text-slate-700 font-medium">Marketing Attribution</span>
+                            </div>
+                            <div className="flex items-start">
+                                <CheckCircle2 className="w-5 h-5 text-amber-600 mr-3 mt-0.5 shrink-0" />
+                                <span className="text-slate-700 font-medium">Custom Reporting</span>
+                            </div>
+                        </div>
+                    </div>
+                     <div className="lg:w-1/2 order-1 lg:order-2">
+                         <div className="bg-slate-50 rounded-2xl overflow-hidden aspect-square md:aspect-[4/3] relative group shadow-lg">
+                            <Image 
+                                src="/images/sme/Business Intelligence Dashboards.png"
+                                alt="Business Intelligence Dashboards"
+                                fill
+                                className="object-cover group-hover:scale-105 transition-transform duration-700"
+                            />
+                        </div>
+                    </div>
+                </div>
+
             </div>
-            
-            {/* Dashboards - Dark Accent Card (Keep contrast) */}
-             <div className="bg-slate-900 text-white rounded-3xl p-8 md:p-10 border border-slate-800 flex flex-col justify-between group">
-               <div>
-                  <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mb-6 text-emerald-400">
-                    <BarChart3 className="w-6 h-6" />
+        </div>
+      </section>
+      
+      {/* Support & Optimization - The "Safety Net" */}
+      <section className="py-24 bg-black text-white relative overflow-hidden">
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+          <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
+              <div className="grid lg:grid-cols-2 gap-16 items-center">
+                  <div>
+                      <h2 className="text-3xl md:text-5xl font-bold mb-6">Ongoing Support & Optimization.</h2>
+                      <p className="text-xl text-slate-400 leading-relaxed mb-8">
+                          Infrastructure is a living thing. We provide ongoing monitoring, updates, and optimization to ensure your systems never age out.
+                      </p>
+                      <Link href="/contact" className="inline-flex items-center px-8 py-4 bg-emerald-600 text-white rounded-full font-bold hover:bg-emerald-700 transition-colors">
+                          Upgrade My Systems <ArrowRight className="ml-2 w-5 h-5" />
+                      </Link>
                   </div>
-                  <h3 className="text-2xl font-bold mb-4">Business Intelligence</h3>
-                  <p className="text-slate-300 leading-relaxed mb-6">
-                     Custom dashboards (Looker/PowerBI) that give you real-time visibility into cash flow, churn, and LTV.
-                  </p>
-               </div>
-            </div>
-
-            {/* CRM */}
-             <div className="bg-slate-50 rounded-3xl p-8 md:p-10 border border-slate-200 flex flex-col group hover:border-emerald-200 transition-all">
-              <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center mb-6 text-emerald-700">
-                <Users className="w-6 h-6" />
+                  <div className="grid grid-cols-2 gap-6">
+                      <div className="bg-white/5 border border-white/10 p-6 rounded-xl backdrop-blur-sm">
+                          <h4 className="font-bold text-lg mb-2 text-emerald-400">99.9% Uptime</h4>
+                          <p className="text-sm text-slate-400">We monitor your systems 24/7 so you don't have to.</p>
+                      </div>
+                      <div className="bg-white/5 border border-white/10 p-6 rounded-xl backdrop-blur-sm">
+                          <h4 className="font-bold text-lg mb-2 text-emerald-400">Rapid Response</h4>
+                          <p className="text-sm text-slate-400">Direct access to engineering for critical issues.</p>
+                      </div>
+                       <div className="bg-white/5 border border-white/10 p-6 rounded-xl backdrop-blur-sm">
+                          <h4 className="font-bold text-lg mb-2 text-emerald-400">Monthly Audits</h4>
+                          <p className="text-sm text-slate-400">Proactive checks to identify new efficiency wins.</p>
+                      </div>
+                       <div className="bg-white/5 border border-white/10 p-6 rounded-xl backdrop-blur-sm">
+                          <h4 className="font-bold text-lg mb-2 text-emerald-400">Scale Ready</h4>
+                          <p className="text-sm text-slate-400">Architecture that grows with your revenue.</p>
+                      </div>
+                  </div>
               </div>
-              <h3 className="text-2xl font-bold mb-4 text-slate-900">CRM Architecture</h3>
-              <p className="text-slate-600 leading-relaxed mb-6">
-                HubSpot/Salesforce implementation that actually tracks attribution. Know exactly where your money comes from.
-              </p>
-            </div>
-
-            {/* Sales Engines */}
-            <div className="bg-slate-50 rounded-3xl p-8 md:p-10 border border-slate-200 flex flex-col group hover:border-emerald-200 transition-all">
-              <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center mb-6 text-emerald-700">
-                <LineChart className="w-6 h-6" />
-              </div>
-              <h3 className="text-2xl font-bold mb-4 text-slate-900">Sales Engineering</h3>
-              <p className="text-slate-600 leading-relaxed mb-6">
-                Outbound infrastructure setup. Cold email systems, warm-up protocols, and automated follow-up sequences.
-              </p>
-            </div>
-
-             {/* Speed */}
-            <div className="bg-slate-50 rounded-3xl p-8 md:p-10 border border-slate-200 flex flex-col group hover:border-emerald-200 transition-all">
-              <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center mb-6 text-emerald-700">
-                <Zap className="w-6 h-6" />
-              </div>
-              <h3 className="text-2xl font-bold mb-4 text-slate-900">Process Optimization</h3>
-              <p className="text-slate-600 leading-relaxed mb-6">
-                We remove friction. Reducing click-counts for employees and speeding up delivery times for customers.
-              </p>
-            </div>
-
           </div>
-        </div>
       </section>
 
-      {/* Impact / Metrics */}
-      <section className="py-24 bg-black text-white border-y border-white/10">
+      {/* Final Stats / Impact */}
+      <section className="py-24 bg-white border-t border-slate-200">
           <div className="max-w-7xl mx-auto px-6 lg:px-8">
-               <div className="grid md:grid-cols-3 gap-12 text-center divider-y md:divide-y-0 md:divide-x divide-white/10">
+               <div className="text-center mb-16">
+                   <h2 className="text-3xl font-bold text-slate-900">Quantifiable Impact</h2>
+               </div>
+               <div className="grid md:grid-cols-3 gap-12 text-center divider-y md:divide-y-0 md:divide-x divide-slate-200">
                     <div className="p-4">
-                        <div className="text-5xl font-bold mb-2">30%</div>
-                        <div className="text-emerald-400 font-medium">Reduction in OpEx</div>
+                        <div className="text-5xl font-bold mb-2 text-slate-900">30%</div>
+                        <div className="text-emerald-600 font-medium">Reduction in OpEx</div>
                     </div>
                     <div className="p-4">
-                        <div className="text-5xl font-bold mb-2">100+</div>
-                        <div className="text-emerald-400 font-medium">Hours Saved Monthly</div>
+                        <div className="text-5xl font-bold mb-2 text-slate-900">100+</div>
+                        <div className="text-emerald-600 font-medium">Hours Saved Monthly</div>
                     </div>
                     <div className="p-4">
-                        <div className="text-5xl font-bold mb-2">2x</div>
-                        <div className="text-emerald-400 font-medium">Revenue Capacity</div>
+                        <div className="text-5xl font-bold mb-2 text-slate-900">2x</div>
+                        <div className="text-emerald-600 font-medium">Revenue Capacity</div>
                     </div>
                </div>
           </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-24 bg-white text-center">
-        <div className="max-w-3xl mx-auto px-6">
-            <h2 className="text-4xl font-bold text-slate-900 mb-6">Ready to remove the bottlenecks?</h2>
-            <p className="text-xl text-slate-600 mb-10">
-                Schedule a discovery call to audit your current infrastructure.
-            </p>
-            <Link href="/contact" className="inline-flex items-center px-10 py-5 bg-emerald-600 text-white rounded-full font-medium hover:bg-emerald-700 transition-colors shadow-xl shadow-emerald-600/20">
-                Book Scale Consulatation
-                <ArrowRight className="ml-2 w-6 h-6" />
-            </Link>
-        </div>
       </section>
 
       <Footer />

@@ -7,12 +7,14 @@ import { ArrowRight } from 'lucide-react';
 import Prism from './Prism';
 import { motion } from 'framer-motion';
 
+
 interface ServiceHeroProps {
   title: string;
   description: string;
   ctaText: string;
   ctaLink: string;
   themeColor: 'emerald' | 'blue' | 'indigo' | 'amber' | 'rose' | 'cyan' | 'purple';
+  videoSrc?: string;
 }
 
 const colorMap = {
@@ -35,21 +37,35 @@ const prismColorMap = {
     purple: 0.8
 }
 
-export default function ServiceHero({ title, description, ctaText, ctaLink, themeColor }: ServiceHeroProps) {
+export default function ServiceHero({ title, description, ctaText, ctaLink, themeColor, videoSrc }: ServiceHeroProps) {
   return (
     <section className="relative pt-32 pb-32 overflow-hidden bg-slate-950">
-      {/* Background Prism */}
-      <div className="absolute inset-0 z-0 opacity-40">
-        <Prism 
-            animationType="hover"
-            hueShift={prismColorMap[themeColor]}
-            hoverStrength={1.5}
-            scale={4.5}
-        />
+      {/* Background: Video or Prism */}
+      <div className="absolute inset-0 z-0">
+        {videoSrc ? (
+            <video 
+                autoPlay 
+                loop 
+                muted 
+                playsInline 
+                className="w-full h-full object-cover opacity-60"
+            >
+                <source src={videoSrc} type="video/mp4" />
+            </video>
+        ) : (
+            <div className="opacity-40 w-full h-full">
+                <Prism 
+                    animationType="hover"
+                    hueShift={prismColorMap[themeColor]}
+                    hoverStrength={1.5}
+                    scale={4.5}
+                />
+            </div>
+        )}
       </div>
       
-      {/* Overlay Gradient */}
-      <div className="absolute inset-0 z-10 bg-gradient-to-b from-slate-950/0 via-slate-950/50 to-slate-950" />
+      {/* Overlay Gradient for readability */}
+      <div className="absolute inset-0 z-10 bg-gradient-to-b from-slate-950/20 via-slate-950/60 to-slate-950" />
 
       <div className="relative z-20 max-w-7xl mx-auto px-6 lg:px-8 text-center md:text-left">
         <div className="max-w-4xl">
