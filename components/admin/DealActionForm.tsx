@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { updateDealStatus, recordCommissionPayment } from '@/lib/actions/admin';
 import { useRouter } from 'next/navigation';
+import { AlertCircle, CheckCircle, XCircle } from 'lucide-react';
 
 export default function DealActionForm({ deal, partnerName }: { deal: any, partnerName: string }) {
   const router = useRouter();
@@ -11,6 +12,10 @@ export default function DealActionForm({ deal, partnerName }: { deal: any, partn
   const [commissionRate, setCommissionRate] = useState(deal.commissionRate || 0.10);
   const [status, setStatus] = useState(deal.dealStatus);
   
+  // Feedback state
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
   // Payment recording state
   const [paymentAmount, setPaymentAmount] = useState(deal.commissionAmount || (deal.finalValue || deal.estimatedValue) * deal.commissionRate);
   const [paymentMethod, setPaymentMethod] = useState('bank_transfer');
@@ -19,12 +24,15 @@ export default function DealActionForm({ deal, partnerName }: { deal: any, partn
   const handleStatusUpdate = async (e: React.FormEvent) => {
       e.preventDefault();
       setLoading(true);
+      setError(null);
+      setSuccess(null);
       try {
           await updateDealStatus(deal._id, status, Number(finalValue), Number(commissionRate));
+          setSuccess('Deal status updated successfully');
           router.refresh();
-      } catch (err) {
+      } catch (err: any) {
           console.error(err);
-          alert('Failed to update status');
+          setError(err.message || 'Failed to update status');
       } finally {
           setLoading(false);
       }
@@ -33,12 +41,15 @@ export default function DealActionForm({ deal, partnerName }: { deal: any, partn
   const handleCommissionPayment = async (e: React.FormEvent) => {
       e.preventDefault();
       setLoading(true);
+      setError(null);
+      setSuccess(null);
       try {
           await recordCommissionPayment(deal._id, Number(paymentAmount), paymentMethod, paymentRef);
+          setSuccess('Commission payment recorded successfully');
           router.refresh();
-      } catch (err) {
+      } catch (err: any) {
           console.error(err);
-          alert('Failed to record payment');
+          setError(err.message || 'Failed to record payment');
       } finally {
           setLoading(false);
       }
@@ -46,6 +57,26 @@ export default function DealActionForm({ deal, partnerName }: { deal: any, partn
 
   return (
     <div className="space-y-8">
+      {/* Feedback Alerts */}
+      {error && (
+        <div className="p-4 bg-red-50 border border-red-200 rounded-xl flex items-start text-red-700">
+            <XCircle className="h-5 w-5 mr-2 mt-0.5" />
+            <div>
+                <h4 className="font-bold text-sm">Action Failed</h4>
+                <p className="text-sm">{error}</p>
+            </div>
+        </div>
+      )}
+      {success && (
+        <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-start text-emerald-700">
+            <CheckCircle className="h-5 w-5 mr-2 mt-0.5" />
+            <div>
+                <h4 className="font-bold text-sm">Success</h4>
+                <p className="text-sm">{success}</p>
+            </div>
+        </div>
+      )}
+
       {/* Status Update Card */}
       <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
         <h3 className="text-lg font-bold text-slate-900 mb-4">Update Deal Status</h3>

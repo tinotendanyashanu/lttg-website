@@ -19,51 +19,50 @@ const navigation = [
   { name: 'Deals', href: '/admin/deals', icon: Briefcase },
   { name: 'Payouts', href: '/admin/payouts', icon: CreditCard },
   { name: 'Audit Logs', href: '/admin/audit', icon: ShieldAlert },
-//   { name: 'Settings', href: '/admin/settings', icon: Settings },
 ];
 
-export default function AdminSidebar({ user }: { user: any }) {
+export default function AdminSidebar() {
   const pathname = usePathname();
 
   return (
-    <div className="flex flex-col w-64 bg-slate-900 border-r border-slate-800 h-screen fixed left-0 top-0">
+    <div className="flex flex-col w-64 h-[calc(100vh-2rem)] fixed left-4 top-4 bg-slate-900 rounded-2xl shadow-xl overflow-hidden z-30">
       <div className="p-6">
-        <div className="flex items-center space-x-2 mb-8">
-            <div className="h-8 w-8 bg-purple-500 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">A</span>
+        <div className="flex items-center space-x-3 mb-2">
+            <div className="h-8 w-8 bg-gradient-to-tr from-purple-500 to-indigo-500 rounded-lg flex items-center justify-center shadow-lg">
+                <span className="text-white font-bold text-lg">L</span>
             </div>
-            <span className="text-white font-semibold text-lg">Admin Panel</span>
+            <span className="text-white font-bold text-lg tracking-tight">Leo Admin</span>
         </div>
+        <p className="text-xs text-slate-400 ml-1">Control Center 2.0</p>
       </div>
 
-      <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
+      <nav className="flex-1 px-3 space-y-1 overflow-y-auto">
         {navigation.map((item) => {
           const isActive = pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href));
           return (
             <Link
               key={item.name}
               href={item.href}
-              className={`flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
+              className={`flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 group ${
                 isActive
-                  ? 'bg-purple-600 text-white'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                  ? 'bg-white/10 text-white shadow-sm backdrop-blur-sm'
+                  : 'text-slate-400 hover:text-white hover:bg-white/5'
               }`}
             >
-              <item.icon className="mr-3 h-5 w-5" aria-hidden="true" />
+              <item.icon className={`mr-3 h-5 w-5 transition-colors ${isActive ? 'text-purple-400' : 'text-slate-500 group-hover:text-slate-300'}`} aria-hidden="true" />
               {item.name}
+              {isActive && (
+                  <div className="ml-auto w-1.5 h-1.5 rounded-full bg-purple-400 shadow-[0_0_8px_rgba(168,85,247,0.5)]" />
+              )}
             </Link>
           );
         })}
       </nav>
 
-      <div className="p-4 border-t border-slate-800">
-        <div className="px-4 py-3 mb-4">
-             <p className="text-xs text-slate-500 uppercase">Logged in as</p>
-             <p className="text-sm font-medium text-slate-300">{user?.name}</p>
-        </div>
+      <div className="p-4 border-t border-white/10">
         <form action={handleSignOut}>
             <button 
-                className="flex items-center w-full px-4 py-3 text-sm font-medium text-slate-400 rounded-lg hover:text-white hover:bg-slate-800 transition-colors"
+                className="flex items-center w-full px-4 py-3 text-sm font-medium text-slate-400 rounded-xl hover:text-red-400 hover:bg-white/5 transition-colors"
                 type="submit"
             >
                 <LogOut className="mr-3 h-5 w-5" />

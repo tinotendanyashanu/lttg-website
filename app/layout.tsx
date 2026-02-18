@@ -67,6 +67,9 @@ const jsonLd = {
   "description": "LeoTheTechGuy is a technologist driven by one core principle: technology must work in the real world. Rather than chasing trends or titles, he focuses on understanding problems deeply and building systems designed to last."
 };
 
+import AnalyticsTracker from "@/components/AnalyticsTracker";
+import CookieConsent from "@/components/CookieConsent";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -75,6 +78,8 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth" suppressHydrationWarning>
       <body className={`${inter.className} bg-zinc-50 text-slate-800 relative overflow-x-hidden selection:bg-indigo-100 selection:text-indigo-900`} suppressHydrationWarning>
+        <AnalyticsTracker />
+        <CookieConsent />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

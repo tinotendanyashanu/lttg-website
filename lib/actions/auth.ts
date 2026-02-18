@@ -9,12 +9,24 @@ import { SignupSchema } from '@/lib/schemas';
 import { z } from 'zod';
 import { sendEmail, EmailTemplates } from '@/lib/email';
 
+
 export async function authenticate(
   prevState: string | undefined,
   formData: FormData,
 ) {
   try {
-    await signIn('credentials', { ...Object.fromEntries(formData), redirectTo: '/partner/dashboard' });
+    const email = formData.get('email') as string;
+    await dbConnect();
+    const user = await Partner.findOne({ email });
+    
+    // Default redirect
+    let redirectTo = '/partner/dashboard';
+    
+    if (user && user.role === 'admin') {
+        redirectTo = '/admin';
+    }
+
+    await signIn('credentials', { ...Object.fromEntries(formData), redirectTo });
   } catch (error) {
     if (error instanceof AuthError) {
       switch (error.type) {
