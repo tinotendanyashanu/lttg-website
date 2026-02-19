@@ -9,7 +9,8 @@ import {
   CreditCard, 
   ShieldAlert,
   LogOut,
-  MessageSquare
+  MessageSquare,
+  BookOpen
 } from 'lucide-react';
 import { handleSignOut } from '@/lib/actions/auth';
 
@@ -19,6 +20,7 @@ const navigation = [
   { name: 'Deals', href: '/admin/deals', icon: Briefcase },
   { name: 'Payouts', href: '/admin/payouts', icon: CreditCard },
   { name: 'Audit Logs', href: '/admin/audit', icon: ShieldAlert },
+  { name: 'Commercial Playbook', href: '/admin/commercial-playbook', icon: BookOpen },
   { name: 'Messages', href: '/admin/contacts', icon: MessageSquare },
 ];
 
@@ -29,7 +31,7 @@ export default function AdminSidebar() {
     <div className="flex flex-col w-64 h-[calc(100vh-2rem)] fixed left-4 top-4 bg-slate-900 rounded-2xl shadow-xl overflow-hidden z-30">
       <div className="p-6">
         <div className="flex items-center space-x-3 mb-2">
-            <div className="h-8 w-8 bg-gradient-to-tr from-purple-500 to-indigo-500 rounded-lg flex items-center justify-center shadow-lg">
+            <div className="h-8 w-8 bg-linear-to-tr from-purple-500 to-indigo-500 rounded-lg flex items-center justify-center shadow-lg">
                 <span className="text-white font-bold text-lg">L</span>
             </div>
             <span className="text-white font-bold text-lg tracking-tight">Leo Admin</span>

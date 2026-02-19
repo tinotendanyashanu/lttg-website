@@ -18,7 +18,9 @@ export default async function DashboardLayout({
   }
 
   await dbConnect();
-  const partner = await PartnerModel.findOne({ email: session.user.email }).lean() as unknown as Partner;
+  await dbConnect();
+  const partnerDoc = await PartnerModel.findOne({ email: session.user.email }).lean();
+  const partner = JSON.parse(JSON.stringify(partnerDoc)) as unknown as Partner;
 
   if (!partner) {
     // Handle case where user is authenticated but not in partner DB
@@ -28,7 +30,7 @@ export default async function DashboardLayout({
   return (
     <div className="min-h-screen bg-[#f8f9fa]">
       <OnboardingTour userHasCompleted={partner.hasCompletedOnboarding || false} partnerType={partner.partnerType || 'standard'} />
-      <Sidebar user={session.user} partnerType={partner.partnerType || 'standard'} />
+      <Sidebar user={partner} partnerType={partner.partnerType || 'standard'} />
       <div className="pl-64 transition-all duration-300">
         {/* Header content... */}
         <header className="bg-white/50 backdrop-blur-sm sticky top-0 z-30 h-20 flex items-center px-10 justify-between">

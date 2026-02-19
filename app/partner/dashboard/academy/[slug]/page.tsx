@@ -1,8 +1,8 @@
 import { auth } from '@/auth';
 import dbConnect from '@/lib/mongodb';
 import CourseModel from '@/models/Course';
-import { getCourseProgress } from '@/lib/actions/academy';
-import AcademyCourseClient from '@/components/academy/AcademyCourseClient';
+
+import { getPartnerProgress } from '@/lib/actions/academy';
 import { redirect, notFound } from 'next/navigation';
 import { Course } from '@/types';
 import Link from 'next/link';
@@ -44,7 +44,7 @@ export default async function CourseDetailPage(props: { params: Promise<{ slug: 
                 fill
                 className="object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent flex items-end">
+              <div className="absolute inset-0 bg-linear-to-t from-slate-900/80 to-transparent flex items-end">
                   <div className="p-8 text-white">
                       <span className="inline-block px-2 py-1 rounded bg-purple-600 text-xs font-bold uppercase tracking-wide mb-2">{course.category}</span>
                       <h1 className="text-3xl font-bold mb-2">{course.title}</h1>

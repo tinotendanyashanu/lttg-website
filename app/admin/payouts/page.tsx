@@ -4,11 +4,23 @@ import Payout, { IPayout } from '@/models/Payout';
 import { IPartner } from '@/models/Partner';
 import { Search, DollarSign } from 'lucide-react';
 
-type PopulatedPayout = Omit<IPayout, 'partnerId'> & { partnerId: IPartner };
+// Define a simpler type for the populated partner that doesn't strictly extend Document
+interface SimplePartner {
+  _id: string;
+  name: string;
+  email: string;
+}
 
-async function getPayouts() {
+// Override partnerId to be SimplePartner or null (in case of populated failure)
+type PopulatedPayout = Omit<IPayout, 'partnerId'> & { 
+  partnerId: SimplePartner | null; 
+  _id: string | object; // handle ObjectId or string
+};
+
+async function getPayouts(): Promise<PopulatedPayout[]> {
   await dbConnect();
-  return Payout.find().populate('partnerId', 'name email').sort({ createdAt: -1 }).lean();
+  // Cast the result to unknown first to avoid Mongoose type complexity
+  return Payout.find().populate('partnerId', 'name email').sort({ createdAt: -1 }).lean() as unknown as PopulatedPayout[];
 }
 
 export default async function AdminPayoutsPage() {

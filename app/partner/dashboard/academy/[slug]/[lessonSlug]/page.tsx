@@ -5,7 +5,7 @@ import { getPartnerProgress, completeLesson } from '@/lib/actions/academy';
 import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, CheckCircle, PlayCircle } from 'lucide-react';
-import LessonContent from '@/components/academy/LessonContent';
+
 import { Course, Lesson, PartnerProgress } from '@/types';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -36,7 +36,7 @@ export default async function LessonPage(props: { params: Promise<{ slug: string
 
   const progressList = await getPartnerProgress(session.user.email);
   const progress = progressList.find((p) => p.courseId === course._id.toString());
-  const isCompleted = progress?.completedLessons?.includes(lesson.slug);
+  const isCompleted = progress?.completedLessons?.includes(lesson.slug) || false;
 
   return (
     <div className="max-w-4xl mx-auto">

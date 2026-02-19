@@ -1,3 +1,12 @@
+export interface PartnerProgress {
+  courseId: string;
+  completedLessons: string[];
+  progressPercentage: number;
+  isCompleted: boolean;
+  examScore?: number;
+  examAttempts?: number;
+}
+
 export interface Partner {
   _id: string;
   name: string;
@@ -26,14 +35,7 @@ export interface Partner {
   };
   hasReceivedAcademyBonus: boolean;
   hasCompletedOnboarding: boolean;
-  partnerProgress: {
-    courseId: string;
-    completedLessons: string[];
-    progressPercentage: number;
-    isCompleted: boolean;
-    examScore?: number;
-    examAttempts?: number;
-  }[];
+  partnerProgress: PartnerProgress[];
   createdAt: string;
   updatedAt: string;
 }
@@ -56,6 +58,15 @@ export interface Deal {
   updatedAt: string;
 }
 
+export interface Lesson {
+  title: string;
+  slug: string;
+  content: string;
+  duration: string;
+  videoUrl?: string;
+  imageUrls?: string[];
+}
+
 export interface Course {
   _id: string;
   title: string;
@@ -65,14 +76,7 @@ export interface Course {
   level: 'beginner' | 'intermediate' | 'advanced';
   category: 'sales' | 'marketing' | 'product' | 'technical';
   targetAudience: ('standard' | 'creator' | 'all')[];
-  lessons: {
-    title: string;
-    slug: string;
-    content: string;
-    duration: string;
-    videoUrl?: string;
-    imageUrls?: string[];
-  }[];
+  lessons: Lesson[];
   exam?: {
     questions: {
       question: string;

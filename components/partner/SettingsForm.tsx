@@ -43,7 +43,7 @@ interface BankDetails {
   iban?: string;
 }
 
-export default function SettingsForm({ bankDetails }: { bankDetails: BankDetails }) {
+export default function SettingsForm({ bankDetails }: { bankDetails?: BankDetails }) {
   const [state, dispatch] = useActionState(updateBankDetails, initialState);
 
   return (

@@ -1,13 +1,13 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface ILead extends Document {
-  partnerId: mongoose.Schema.Types.ObjectId;
+  partnerId: mongoose.Types.ObjectId;
   name: string;
   email: string;
   source: string;
   bookedCall: boolean;
   converted: boolean;
-  dealId?: mongoose.Schema.Types.ObjectId;
+  dealId?: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }

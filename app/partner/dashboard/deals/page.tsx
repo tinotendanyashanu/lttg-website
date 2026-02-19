@@ -6,12 +6,25 @@ import Link from 'next/link';
 import { Plus, Search } from 'lucide-react'; // Kept Search, changed Plus to PlusCircle in the edit, but Plus is used in the JSX. I will keep Plus as it's used.
 import { Deal, Partner } from '@/types';
 
-async function getDeals(email: string) {
+async function getDeals(userId: string, query: string, status: string) {
   await dbConnect();
-  const partner = await PartnerModel.findOne({ email }).lean() as unknown as Partner;
-  if (!partner) return null;
+  // Using findById since we are passing session.user.id
+  const partner = await PartnerModel.findById(userId).lean() as unknown as Partner;
+  if (!partner) return [];
 
-  const deals = await DealModel.find({ partnerId: partner._id })
+  // Build filter
+  const filter: any = { partnerId: partner._id };
+  
+  if (status !== 'all') {
+    filter.dealStatus = status;
+  }
+
+  if (query) {
+    // Basic search on client name
+    filter.clientName = { $regex: query, $options: 'i' };
+  }
+
+  const deals = await DealModel.find(filter)
     .sort({ createdAt: -1 })
     .lean() as unknown as Deal[];
     
@@ -47,7 +60,7 @@ export default async function DealsPage(props: {
       </div>
 
        {/* Filters */}
-       <div className="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4 bg-white p-4 rounded-[1.5rem] border border-slate-100 shadow-sm">
+       <div className="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4 bg-white p-4 rounded-3xl border border-slate-100 shadow-sm">
           <div className="relative flex-1">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <form>
@@ -77,7 +90,7 @@ export default async function DealsPage(props: {
           </div>
       </div>
 
-      <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-4xl border border-slate-100 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
             <table className="w-full text-left text-sm text-slate-600">
                 <thead className="bg-white text-slate-500 font-bold uppercase text-xs tracking-wider">

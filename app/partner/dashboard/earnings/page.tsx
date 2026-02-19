@@ -95,8 +95,10 @@ export default async function EarningsPage() {
                                   <td className="px-8 py-5 font-bold text-slate-900">
                                       {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(payout.amount)}
                                   </td>
-                                  <td className="px-8 py-5 capitalize font-medium">{payout.method.replace('_', ' ')}</td>
-                                  <td className="px-8 py-5 text-slate-400 font-medium">{new Date(payout.processedAt).toLocaleDateString()}</td>
+                  <td className="px-8 py-5 capitalize font-medium">{payout.method.replace('_', ' ')}</td>
+                                  <td className="px-8 py-5 text-slate-400 font-medium">
+                                      {payout.processedAt ? new Date(payout.processedAt).toLocaleDateString() : '-'}
+                                  </td>
                                   <td className="px-8 py-5">
                                       <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 capitalize">
                                           {payout.status}
