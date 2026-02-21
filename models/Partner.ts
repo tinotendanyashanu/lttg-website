@@ -23,10 +23,10 @@ export interface IPartner extends Document {
     pendingCommission: number;
     approvedBalance: number;
     paidCommission: number;
-    paidDealsSinceLastPayout: number;
     referralClicks: number;
     referralLeads: number;
   };
+  debtBalance: number;
   countryOfResidence?: string;
   payoutMethod?: 'Wise' | 'Bank Transfer' | 'USDT (TRC20)' | 'PayPal' | 'Local Remittance';
   localRemittanceDetails?: {
@@ -37,6 +37,7 @@ export interface IPartner extends Document {
   };
   hasReceivedAcademyBonus: boolean;
   hasCompletedOnboarding: boolean;
+  academyBonusIssuedAt?: Date;
   partnerProgress: {
     courseId: string;
     completedLessons: string[];
@@ -45,6 +46,17 @@ export interface IPartner extends Document {
     examScore?: number;
     examAttempts?: number;
   }[];
+  // Tier Governance
+  tierOverride: boolean;
+  tierLocked: boolean;
+  tierOverrideReason?: string;
+  tierLastChangedAt?: Date;
+  tierLastChangedBy?: string;
+  // Legal & Compliance
+  termsAccepted: boolean;
+  termsAcceptedAt?: Date;
+  termsAcceptedIp?: string;
+  termsVersion?: string;
   createdAt: Date;
   updatedAt: Date;
   verificationToken?: string;
@@ -92,10 +104,10 @@ const PartnerSchema: Schema = new Schema({
     pendingCommission: { type: Number, default: 0 },
     approvedBalance: { type: Number, default: 0 },
     paidCommission: { type: Number, default: 0 },
-    paidDealsSinceLastPayout: { type: Number, default: 0 },
     referralClicks: { type: Number, default: 0 },
     referralLeads: { type: Number, default: 0 },
   },
+  debtBalance: { type: Number, default: 0 },
   countryOfResidence: { type: String },
   payoutMethod: {
     type: String,
@@ -107,7 +119,19 @@ const PartnerSchema: Schema = new Schema({
     city: String,
     preferredMethod: String
   },
+  // Tier Governance
+  tierOverride: { type: Boolean, default: false },
+  tierLocked: { type: Boolean, default: false },
+  tierOverrideReason: { type: String },
+  tierLastChangedAt: { type: Date },
+  tierLastChangedBy: { type: String },
+  // Legal & Compliance
+  termsAccepted: { type: Boolean, default: false },
+  termsAcceptedAt: { type: Date },
+  termsAcceptedIp: { type: String },
+  termsVersion: { type: String },
   hasReceivedAcademyBonus: { type: Boolean, default: false },
+  academyBonusIssuedAt: Date,
   verificationToken: String,
   verificationTokenExpiry: Date,
   resetPasswordToken: String,

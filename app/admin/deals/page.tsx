@@ -7,7 +7,7 @@ type PopulatedDeal = Omit<IDeal, 'partnerId'> & { partnerId: IPartner };
 
 async function getDeals() {
   await dbConnect();
-  return Deal.find({}).populate('partnerId', 'name email').sort({ createdAt: -1 }).lean();
+  return Deal.find({ commissionSource: { $ne: 'ACADEMY_BONUS' } }).populate('partnerId', 'name email').sort({ createdAt: -1 }).lean();
 }
 
 export default async function AdminDealsPage() {

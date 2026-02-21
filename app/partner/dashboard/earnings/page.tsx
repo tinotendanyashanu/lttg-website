@@ -3,6 +3,7 @@ import dbConnect from '@/lib/mongodb';
 import PartnerModel from '@/models/Partner';
 import PayoutModel from '@/models/Payout';
 import { DollarSign, CreditCard, Clock } from 'lucide-react';
+import { getPartnerBalances } from '@/lib/services/ledger';
 import { Partner, Payout } from '@/types';
 
 async function getEarningsData(email: string) {
@@ -10,6 +11,12 @@ async function getEarningsData(email: string) {
   const partner = await PartnerModel.findOne({ email }).lean() as unknown as Partner;
   
   if (!partner) return null;
+
+  const ledgerBalances = await getPartnerBalances(partner._id.toString());
+  partner.stats = {
+    ...partner.stats,
+    ...ledgerBalances
+  };
 
   const payouts = await PayoutModel.find({ partnerId: partner._id })
     .sort({ createdAt: -1 })
@@ -72,11 +79,42 @@ export default async function EarningsPage() {
       </div>
 
       <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
-          <div className="p-8 border-b border-slate-50">
+          <div className="p-4 sm:p-8 border-b border-slate-50">
               <h3 className="text-lg font-bold text-slate-900">Payout History</h3>
               <p className="text-sm text-slate-500">Record of all processed payments.</p>
           </div>
-          <div className="overflow-x-auto">
+
+          {/* Mobile card list */}
+          <div className="sm:hidden divide-y divide-slate-50">
+            {payouts.length > 0 ? (
+              payouts.map((payout) => (
+                <div key={payout._id} className="p-4 space-y-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="font-bold text-slate-900 text-sm">
+                      {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(payout.amount)}
+                    </p>
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 capitalize">
+                      {payout.status}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-slate-500">
+                    <span className="capitalize font-medium">{payout.method.replace('_', ' ')}</span>
+                    <span>{payout.processedAt ? new Date(payout.processedAt).toLocaleDateString() : '-'}</span>
+                  </div>
+                  {payout.reference && (
+                    <p className="text-xs font-mono text-slate-400">Ref: {payout.reference}</p>
+                  )}
+                </div>
+              ))
+            ) : (
+              <div className="px-4 py-12 text-center text-slate-400 font-medium text-sm">
+                No payouts received yet.
+              </div>
+            )}
+          </div>
+
+          {/* Desktop table */}
+          <div className="hidden sm:block overflow-x-auto">
               <table className="w-full text-left text-sm text-slate-600">
                   <thead className="bg-white text-slate-500 font-bold uppercase text-xs tracking-wider">
                       <tr>
@@ -95,7 +133,7 @@ export default async function EarningsPage() {
                                   <td className="px-8 py-5 font-bold text-slate-900">
                                       {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(payout.amount)}
                                   </td>
-                  <td className="px-8 py-5 capitalize font-medium">{payout.method.replace('_', ' ')}</td>
+                                  <td className="px-8 py-5 capitalize font-medium">{payout.method.replace('_', ' ')}</td>
                                   <td className="px-8 py-5 text-slate-400 font-medium">
                                       {payout.processedAt ? new Date(payout.processedAt).toLocaleDateString() : '-'}
                                   </td>

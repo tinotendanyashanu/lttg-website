@@ -1,5 +1,8 @@
 'use server';
 
+// All payout eligibility decisions must go through evaluatePartnerPayoutEligibility().
+// Do not implement payout rules anywhere else.
+
 import { auth } from '@/auth';
 import dbConnect from '@/lib/mongodb';
 import Deal from '@/models/Deal';
@@ -7,6 +10,10 @@ import Partner from '@/models/Partner';
 import PayoutBatch from '@/models/PayoutBatch';
 import AuditLog from '@/models/AuditLog';
 import { revalidatePath } from 'next/cache';
+import { updateDealState } from '@/lib/actions/dealState';
+import { recordLedgerEntry } from '@/lib/services/ledger';
+import bcrypt from 'bcryptjs';
+import { headers } from 'next/headers';
 
 // Middleware check helper
 async function checkAdmin() {
@@ -17,36 +24,114 @@ async function checkAdmin() {
   return session.user;
 }
 
+export async function getBatchSummary(batchId: string) {
+  await checkAdmin();
+  await dbConnect();
+  
+  const batch = await PayoutBatch.findById(batchId);
+  if (!batch) throw new Error('Batch not found');
+  
+  const deals = await Deal.find({ payoutBatchId: batchId, commissionStatus: 'Approved' });
+  const partnerIds = [...new Set(deals.map(d => d.partnerId.toString()))];
+  
+  const partners = await Partner.find({ _id: { $in: partnerIds } });
+  
+  const methodCounts: Record<string, number> = {};
+  partners.forEach(p => {
+    const m = p.payoutMethod || 'Unknown';
+    methodCounts[m] = (methodCounts[m] || 0) + 1;
+  });
+  
+  return {
+    batchId: batch._id.toString(),
+    payoutMonth: batch.payoutMonth,
+    createdAt: batch.createdAt,
+    totalAmount: batch.totalAmount,
+    totalPartners: partnerIds.length,
+    totalEntries: deals.length,
+    methods: methodCounts,
+    status: batch.status
+  };
+}
+
+export async function evaluatePartnerPayoutEligibility(partnerId: string) {
+  await dbConnect();
+  const partner = await Partner.findById(partnerId);
+  if (!partner) throw new Error("Partner not found");
+
+  const reasons: string[] = [];
+  const approvedBalance = partner.stats?.approvedBalance || 0;
+
+  if (approvedBalance < 50) {
+    reasons.push("Approved balance is below $50 minimum threshold.");
+  }
+  if (partner.status !== 'active') {
+    reasons.push("Partner account is not active.");
+  }
+  // The prompt explicitly requires checking partner.isSuspended !== true
+  if (partner.get('isSuspended') === true) {
+    reasons.push("Partner account is suspended.");
+  }
+
+  return {
+    isEligible: reasons.length === 0,
+    reasons,
+    approvedBalance
+  };
+}
+
 export async function processCommissionApprovals() {
-  const admin = await checkAdmin();
+  await checkAdmin();
   await dbConnect();
 
-  // Find all deals that are Pending and saleDate is > 14 days ago
-  const fourteenDaysAgo = new Date();
-  fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+  // Find all deals that are Pending and payment has been received for at least 14 days
+  // HOLD_PERIOD_DAYS = 14
+  const holdExpirationDate = new Date();
+  holdExpirationDate.setDate(holdExpirationDate.getDate() - 14);
 
   const dealsToApprove = await Deal.find({
     commissionStatus: 'Pending',
     dealStatus: 'closed',
-    saleDate: { $lte: fourteenDaysAgo }
+    paymentStatus: 'received',
+    paymentReceivedAt: { $lte: holdExpirationDate }
   });
 
   let approvedCount = 0;
 
   for (const deal of dealsToApprove) {
+    // ---- STRICT DEFENSIVE GUARDS ----
+    if (deal.paymentStatus !== 'received') {
+      console.warn(`[COMMISSION GUARD] Deal ${deal._id} is missing 'received' status. Bypassing.`);
+      continue;
+    }
+
+    if (!deal.paymentReceivedAt) {
+      console.warn(`[COMMISSION GUARD] Deal ${deal._id} is missing paymentReceivedAt. Bypassing.`);
+      continue;
+    }
+
+    const approvalDate = new Date(deal.paymentReceivedAt);
+    approvalDate.setDate(approvalDate.getDate() + 14);
+
+    if (approvalDate > new Date()) {
+      console.warn(`[COMMISSION GUARD] Deal ${deal._id} hold period has not expired. Bypassing.`);
+      continue;
+    }
+    // ---------------------------------
+    
     const amount = deal.commissionAmount || 0;
 
-    await Deal.findByIdAndUpdate(deal._id, {
+    await updateDealState(deal._id.toString(), {
       commissionStatus: 'Approved',
       approvalDate: new Date()
     });
 
-    // Move pending -> approved balance
-    await Partner.findByIdAndUpdate(deal.partnerId, {
-      $inc: {
-        'stats.pendingCommission': -amount,
-        'stats.approvedBalance': amount
-      }
+    // Record ledger entry
+    await recordLedgerEntry({
+      partnerId: deal.partnerId.toString(),
+      type: 'commission_approved',
+      amount: amount,
+      relatedDealId: deal._id.toString()
     });
 
     approvedCount++;
@@ -68,15 +153,16 @@ export async function generateMonthlyPayoutBatch() {
   const admin = await checkAdmin();
   await dbConnect();
 
-  // Rules:
-  // - Approved Commissions
-  // - Affiliate approvedBalance >= 50
-  // Note: deductions for past post-payout refunds would be reflected in the approvedBalance if we handle refunds correctly.
+  // Find all partners to evaluate
+  const allPartners = await Partner.find({});
   
-  const eligiblePartners = await Partner.find({
-    'stats.approvedBalance': { $gte: 50 },
-    status: 'active'
-  });
+  const eligiblePartners = [];
+  for (const partner of allPartners) {
+    const eligibility = await evaluatePartnerPayoutEligibility(partner._id.toString());
+    if (eligibility.isEligible) {
+      eligiblePartners.push(partner);
+    }
+  }
 
   if (eligiblePartners.length === 0) {
     return { success: false, message: 'No eligible partners found for payout.' };
@@ -112,7 +198,7 @@ export async function generateMonthlyPayoutBatch() {
     totalAmount += amount;
 
     for (const deal of approvedDeals) {
-      await Deal.findByIdAndUpdate(deal._id, {
+      await updateDealState(deal._id.toString(), {
         payoutBatchId: batch._id,
         // Wait, they shouldn't be marked 'Paid' until the batch is complete?
         // Let's mark them as processing or keep them Approved but linked to the batch.
@@ -138,56 +224,104 @@ export async function generateMonthlyPayoutBatch() {
   return { success: true, batchId: batch._id.toString(), totalAmount, dealsCount };
 }
 
-export async function completePayoutBatch(batchId: string, referenceNumber?: string, adjustments?: { partnerId: string, feeDeducted: number }[]) {
+export async function completePayoutBatch(
+  batchId: string, 
+  payload: {
+    transactionReference: string;
+    password?: string;
+    referenceNumber?: string;
+    adjustments?: { partnerId: string, feeDeducted: number }[];
+  }
+) {
    const admin = await checkAdmin();
    await dbConnect();
+
+   if (!payload.transactionReference || payload.transactionReference.trim() === '') {
+     throw new Error('Transaction reference is required');
+   }
+
+   if (payload.password) {
+     const adminUser = await Partner.findById(admin.id);
+     if (!adminUser || !adminUser.password) {
+       throw new Error('Admin authentication failed');
+     }
+     const passwordsMatch = await bcrypt.compare(payload.password, adminUser.password);
+     if (!passwordsMatch) {
+       throw new Error('Invalid password');
+     }
+   }
 
    const batch = await PayoutBatch.findById(batchId);
    if (!batch || batch.status === 'Completed') {
      throw new Error('Batch not found or already completed');
    }
-
-   // Optional: apply fee adjustments to partner balances or payouts.
-   // For now, if a fee is applied, we subtract it from the payout amount but not from their tracked stats, 
-   // or we subtract from both. The prompt says "Remittance fees deducted from affiliate payout".
+   if (batch.status !== 'Processing') {
+     throw new Error('Batch is not in Processing state');
+   }
    
    // Find all deals linked to this batch
    const deals = await Deal.find({ payoutBatchId: batchId, commissionStatus: 'Approved' });
+   if (deals.length === 0) {
+     throw new Error('Batch has no valid payout entries');
+   }
 
    // Deduct from partner's approved balance and add to paid
    const partnerTotals = new Map<string, number>();
    
    for (const deal of deals) {
-     await Deal.findByIdAndUpdate(deal._id, { commissionStatus: 'Paid' });
+     await updateDealState(deal._id.toString(), { commissionStatus: 'Paid' });
      const pid = deal.partnerId.toString();
+     
+     await recordLedgerEntry({
+       partnerId: pid,
+       type: 'commission_paid',
+       amount: deal.commissionAmount || 0,
+       relatedDealId: deal._id.toString(),
+       batchId: batchId
+     });
+
      partnerTotals.set(pid, (partnerTotals.get(pid) || 0) + (deal.commissionAmount || 0));
    }
 
    for (const [pid, amount] of partnerTotals.entries()) {
      // Apply any manual fee adjustments
-     const adjustment = adjustments?.find(a => a.partnerId === pid)?.feeDeducted || 0;
-     const finalPaid = amount - adjustment;
-
-     await Partner.findByIdAndUpdate(pid, {
-       $inc: {
-         'stats.approvedBalance': -amount,
-         'stats.paidCommission': finalPaid,
-         'stats.totalCommissionEarned': -adjustment // Reduce total earned by the fee? Or just paid? Usually total earned stays the same, paid reflects fee
-       }
-     });
+     const adjustment = payload.adjustments?.find(a => a.partnerId === pid)?.feeDeducted || 0;
+     if (adjustment > 0) {
+       await recordLedgerEntry({
+         partnerId: pid,
+         type: 'adjustment',
+         amount: -adjustment,
+         batchId: batchId
+       });
+     }
    }
 
    await PayoutBatch.findByIdAndUpdate(batchId, { 
       status: 'Completed',
-      referenceNumber: referenceNumber || undefined
+      referenceNumber: payload.referenceNumber || undefined,
+      transactionReference: payload.transactionReference
    });
+
+   let ipAddress = 'unknown';
+   try {
+     const headersList = await headers();
+     ipAddress = headersList.get('x-forwarded-for') || headersList.get('x-real-ip') || 'unknown';
+   } catch (e) {
+     // Ignore header errors during background tasks
+   }
 
    await AuditLog.create({
       entityType: 'payout_batch',
       entityId: batch._id,
       action: 'payout_batch_completed',
       performedBy: admin.id,
-      metadata: { batchId, referenceNumber }
+      metadata: { 
+        batchId, 
+        referenceNumber: payload.referenceNumber,
+        transactionReference: payload.transactionReference,
+        totalAmount: batch.totalAmount,
+        ipAddress 
+      }
    });
 
    revalidatePath('/admin/payouts');
@@ -203,27 +337,20 @@ export async function processRefund(dealId: string) {
 
   const amount = deal.commissionAmount || 0;
 
-  if (deal.commissionStatus === 'Pending') {
-    // Reverse pending
-    await Partner.findByIdAndUpdate(deal.partnerId, {
-      $inc: { 'stats.pendingCommission': -amount }
-    });
-  } else if (deal.commissionStatus === 'Approved') {
-    // Reverse approved
-    await Partner.findByIdAndUpdate(deal.partnerId, {
-      $inc: { 'stats.approvedBalance': -amount }
-    });
-  } else if (deal.commissionStatus === 'Paid') {
-    // Deduct from next cycle: negative approved balance or pending?
-    // We can deduct from approvedBalance, effectively lowering their next payout.
-    await Partner.findByIdAndUpdate(deal.partnerId, {
-      $inc: { 'stats.approvedBalance': -amount }
-    });
-  }
+  await recordLedgerEntry({
+    partnerId: deal.partnerId.toString(),
+    type: 'refund',
+    amount: amount,
+    relatedDealId: dealId
+  });
 
-  await Deal.findByIdAndUpdate(dealId, {
-    dealStatus: 'rejected', // Or 'refunded', but 'rejected' exists in schema
-    commissionStatus: 'Reversed'
+  // Next commission status based on previous
+  const nextCommissionStatus = deal.commissionStatus === 'Paid' ? 'Refunded' : 'Reversed';
+
+  await updateDealState(dealId, {
+    dealStatus: 'rejected', 
+    paymentStatus: 'pending',
+    commissionStatus: nextCommissionStatus
   });
 
   await AuditLog.create({

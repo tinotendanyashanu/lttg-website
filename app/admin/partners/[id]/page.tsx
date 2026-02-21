@@ -2,8 +2,12 @@ import dbConnect from '@/lib/mongodb';
 import Partner from '@/models/Partner';
 import Deal from '@/models/Deal';
 import Payout from '@/models/Payout';
+import AffiliateRiskFlag from '@/models/AffiliateRiskFlag';
 import { updatePartnerStatus, deletePartner } from '@/lib/actions/admin';
+import { getPartnerBalances, getPartnerLedger } from '@/lib/services/ledger';
 import Link from 'next/link';
+import RiskFlagsPanel from '@/components/admin/RiskFlagsPanel';
+import TierControlPanel from '@/components/admin/TierControlPanel';
 import { 
     ArrowLeft, 
     Mail, 
@@ -16,21 +20,33 @@ import {
     Trash2,
     Briefcase,
     DollarSign,
-    Lock
+    Lock,
+    Activity,
+    ShieldAlert
 } from 'lucide-react';
 import AdminPasswordResetButton from '@/components/admin/AdminPasswordResetButton';
 import { IDeal } from '@/models/Deal';
 import { IPayout } from '@/models/Payout';
+import { CURRENT_TERMS_VERSION } from '@/lib/constants';
+
 
 async function getPartnerData(id: string) {
     await dbConnect();
     const partner = await Partner.findById(id).lean();
     if (!partner) return null;
 
+    const ledgerBalances = await getPartnerBalances(partner._id.toString());
+    partner.stats = {
+        ...partner.stats,
+        ...ledgerBalances
+    };
+
     const deals = await Deal.find({ partnerId: id }).sort({ createdAt: -1 }).lean();
     const payouts = await Payout.find({ partnerId: id }).sort({ createdAt: -1 }).lean();
+    const ledger = await getPartnerLedger(id);
+    const riskFlags = await AffiliateRiskFlag.find({ partnerId: id }).sort({ createdAt: -1 }).lean();
 
-    return { partner, deals, payouts };
+    return { partner, deals, payouts, ledger, riskFlags };
 }
 
 export default async function AdminPartnerDetailsPage(props: { params: Promise<{ id: string }> }) {
@@ -48,7 +64,21 @@ export default async function AdminPartnerDetailsPage(props: { params: Promise<{
         );
     }
 
-    const { partner, deals, payouts } = data;
+    const { partner, deals, payouts, ledger, riskFlags } = data;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const serializedFlags = JSON.parse(JSON.stringify(riskFlags)).map((f: any) => ({
+        _id: f._id.toString(),
+        type: f.type,
+        severity: f.severity,
+        message: f.message,
+        resolved: f.resolved,
+        resolvedAt: f.resolvedAt,
+        resolutionNotes: f.resolutionNotes,
+        createdAt: f.createdAt,
+    }));
+
+    const unresolvedHighFlags = serializedFlags.filter((f: { severity: string; resolved: boolean }) => !f.resolved && f.severity === 'high');
 
     // Prepare table data for deals (reusing DataTable logic pattern if expanding, but keeping simple tables for now or upgrading?)
     // Let's keep simple tables for "Recent" sections but styled better.
@@ -151,6 +181,62 @@ export default async function AdminPartnerDetailsPage(props: { params: Promise<{
                         </p>
                         <AdminPasswordResetButton partnerId={partner._id.toString()} />
                     </div>
+
+                    {/* Legal Compliance Card */}
+                    <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+                        <h3 className="font-bold text-slate-900 mb-4 flex items-center">
+                            <Shield className="h-5 w-5 mr-2 text-indigo-600" />
+                            Legal Compliance
+                        </h3>
+                        {partner.termsAccepted ? (
+                            <div className="space-y-3">
+                                <div className="p-3 bg-slate-50 rounded-lg">
+                                    <p className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Terms Version</p>
+                                    <div className="flex items-center gap-2 mt-1">
+                                        <p className="font-medium text-slate-900">{partner.termsVersion || 'N/A'}</p>
+                                        {partner.termsVersion === CURRENT_TERMS_VERSION ? (
+                                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
+                                                ✅ Current
+                                            </span>
+                                        ) : (
+                                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
+                                                ⚠️ Outdated
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className="p-3 bg-slate-50 rounded-lg">
+                                    <p className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Accepted At</p>
+                                    <p className="font-medium text-slate-900 mt-1">
+                                        {partner.termsAcceptedAt
+                                            ? new Date(partner.termsAcceptedAt).toLocaleString()
+                                            : 'N/A'}
+                                    </p>
+                                </div>
+                                <div className="p-3 bg-slate-50 rounded-lg">
+                                    <p className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Acceptance IP</p>
+                                    <p className="font-mono text-sm text-slate-900 mt-1">{partner.termsAcceptedIp || 'N/A'}</p>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="text-center py-6 bg-red-50 rounded-xl border-2 border-dashed border-red-200">
+                                <Shield className="h-8 w-8 mx-auto text-red-300 mb-2" />
+                                <p className="text-sm text-red-600 font-medium">Terms not yet accepted</p>
+                                <p className="text-xs text-red-400 mt-1">Partner cannot operate until agreement is accepted.</p>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Tier Governance */}
+                    <TierControlPanel
+                        partnerId={partner._id.toString()}
+                        currentTier={partner.tier as 'referral' | 'agency' | 'enterprise' | 'creator'}
+                        tierOverride={partner.tierOverride ?? false}
+                        tierLocked={partner.tierLocked ?? false}
+                        tierOverrideReason={partner.tierOverrideReason}
+                        tierLastChangedAt={partner.tierLastChangedAt ? new Date(partner.tierLastChangedAt).toISOString() : undefined}
+                        tierLastChangedBy={partner.tierLastChangedBy}
+                    />
 
                     {/* Financial Stats */}
                     <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
@@ -327,6 +413,81 @@ export default async function AdminPartnerDetailsPage(props: { params: Promise<{
                             </table>
                         </div>
                     </div>
+
+                    {/* Ledger Activity Section */}
+                    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden mt-8">
+                         <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                             <h3 className="font-bold text-slate-900 flex items-center">
+                                <Activity className="h-5 w-5 mr-3 text-indigo-600" />
+                                Ledger Activity
+                            </h3>
+                        </div>
+                        <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
+                            <table className="w-full text-left text-sm text-slate-600">
+                                <thead className="bg-slate-50 text-slate-500 font-medium uppercase text-xs sticky top-0 z-10 shadow-sm">
+                                    <tr>
+                                        <th className="px-6 py-4">Type</th>
+                                        <th className="px-6 py-4">Amount</th>
+                                        <th className="px-6 py-4 flex-1">Context</th>
+                                        <th className="px-6 py-4 text-right">Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100">
+                                    {ledger.length > 0 ? (
+                                        ledger.map((entry: any) => {
+                                            const isAddition = ['commission_earned', 'commission_approved', 'academy_bonus', 'adjustment'].includes(entry.type);
+                                            const isSubtraction = ['commission_paid', 'refund'].includes(entry.type);
+                                            return (
+                                                <tr key={entry._id.toString()} className="hover:bg-slate-50 transition-colors">
+                                                    <td className="py-4 font-mono text-xs uppercase text-slate-700 bg-slate-50 rounded px-3 w-fit">
+                                                        {entry.type.replace('_', ' ')}
+                                                    </td>
+                                                    <td className={`px-6 py-4 font-bold ${isAddition ? 'text-emerald-700' : isSubtraction ? 'text-amber-700' : 'text-slate-700'}`}>
+                                                        {isSubtraction ? '-' : '+'}{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(entry.amount)}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-slate-500 truncate max-w-xs">
+                                                        {entry.relatedDealId ? (
+                                                            <span>Deal: {entry.relatedDealId.clientName || entry.relatedDealId._id?.toString() || 'Unknown'}</span>
+                                                        ) : entry.batchId ? (
+                                                            <span>Batch: {entry.batchId.payoutMonth || entry.batchId._id?.toString()}</span>
+                                                        ) : (
+                                                            <span>N/A</span>
+                                                        )}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-right text-slate-400">
+                                                        {new Date(entry.createdAt).toLocaleString()}
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })
+                                    ) : (
+                                        <tr>
+                                             <td colSpan={4} className="px-6 py-12 text-center text-slate-400">
+                                                <Activity className="h-8 w-8 mx-auto text-slate-200 mb-2" />
+                                                No ledger activity yet.
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                
+                    {/* Risk Flags Section */}
+                    {serializedFlags.length > 0 && (
+                        <div className="mt-8">
+                            <div className="flex items-center gap-2 mb-3">
+                                <ShieldAlert className="h-5 w-5 text-amber-500" />
+                                <h3 className="font-bold text-slate-900">Risk Flags</h3>
+                                {unresolvedHighFlags.length > 0 && (
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700">
+                                        {unresolvedHighFlags.length} unresolved high
+                                    </span>
+                                )}
+                            </div>
+                            <RiskFlagsPanel flags={serializedFlags} title="Partner Risk Flags" />
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

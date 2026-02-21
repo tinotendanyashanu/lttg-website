@@ -8,6 +8,7 @@ export interface PartnerProgress {
 }
 
 export interface Partner {
+  [key: string]: unknown;
   _id: string;
   name: string;
   email: string;
@@ -30,7 +31,6 @@ export interface Partner {
     pendingCommission: number;
     approvedBalance: number;
     paidCommission: number;
-    paidDealsSinceLastPayout: number;
     referralClicks: number;
     referralLeads: number;
   };
@@ -42,9 +42,14 @@ export interface Partner {
     city: string;
     preferredMethod: string;
   };
-  hasReceivedAcademyBonus: boolean;
   hasCompletedOnboarding: boolean;
+  academyBonusIssuedAt?: string;
   partnerProgress: PartnerProgress[];
+  // Legal & Compliance
+  termsAccepted: boolean;
+  termsAcceptedAt?: string;
+  termsAcceptedIp?: string;
+  termsVersion?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -58,13 +63,15 @@ export interface Deal {
   commissionRate: number;
   commissionAmount?: number;
   commissionStatus?: 'Pending' | 'Approved' | 'Reversed' | 'Paid';
-  payoutBatchId?: unknown;
+  payoutBatchId?: any;
   dealStatus: 'registered' | 'under_review' | 'approved' | 'closed' | 'rejected';
   paymentStatus: 'pending' | 'received' | 'commission_paid';
   paymentMethod?: 'cash' | 'bank_transfer' | 'stripe' | 'other';
-  serviceType: 'SME' | 'Startup' | 'Enterprise' | 'Individual';
+  serviceType: 'SME' | 'Startup' | 'Enterprise' | 'Individual' | 'Internal';
   notes?: string;
   closedAt?: string;
+  paymentReceivedAt?: string;
+  commissionSource: 'DEAL' | 'ACADEMY_BONUS';
   createdAt: string;
   updatedAt: string;
 }

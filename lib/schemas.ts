@@ -11,4 +11,7 @@ export const SignupSchema = z.object({
   password: z.string().min(6, { message: "Password must be at least 6 characters" }),
   companyName: z.string().optional(),
   partnerType: z.enum(['standard', 'creator']).default('standard'),
+  termsAccepted: z.literal('true', {
+    message: "You must accept the Affiliate Agreement",
+  }),
 });

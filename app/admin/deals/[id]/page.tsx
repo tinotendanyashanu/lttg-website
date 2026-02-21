@@ -1,7 +1,9 @@
 import dbConnect from '@/lib/mongodb';
 import Deal from '@/models/Deal';
+import AffiliateRiskFlag from '@/models/AffiliateRiskFlag';
 import { IPartner } from '@/models/Partner';
 import DealActionForm from '@/components/admin/DealActionForm';
+import RiskFlagsPanel from '@/components/admin/RiskFlagsPanel';
 import Link from 'next/link';
 import { ArrowLeft, User, Calendar } from 'lucide-react';
 
@@ -10,13 +12,32 @@ async function getDeal(id: string) {
   return Deal.findById(id).populate('partnerId', 'name email tier').lean();
 }
 
+async function getDealRiskFlags(dealId: string) {
+  return AffiliateRiskFlag.find({ dealId }).sort({ createdAt: -1 }).lean();
+}
+
 export default async function AdminDealDetailsPage(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
-  const deal = await getDeal(params.id);
+  const [deal, riskFlags] = await Promise.all([
+    getDeal(params.id),
+    getDealRiskFlags(params.id),
+  ]);
   
   if (!deal) return <div>Deal not found</div>;
   
   const partner = deal.partnerId as unknown as IPartner;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const serializedFlags = JSON.parse(JSON.stringify(riskFlags)).map((f: any) => ({
+    _id: f._id.toString(),
+    type: f.type,
+    severity: f.severity,
+    message: f.message,
+    resolved: f.resolved,
+    resolvedAt: f.resolvedAt,
+    resolutionNotes: f.resolutionNotes,
+    createdAt: f.createdAt,
+  }));
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -36,6 +57,11 @@ export default async function AdminDealDetailsPage(props: { params: Promise<{ id
                               <Calendar className="h-4 w-4" />
                               <span>Registered on {new Date(deal.createdAt).toLocaleDateString()}</span>
                           </div>
+                          {(deal as { clientEmail?: string }).clientEmail && (
+                            <div className="mt-1 text-sm text-slate-400">
+                              📧 {(deal as { clientEmail?: string }).clientEmail}
+                            </div>
+                          )}
                       </div>
                       <span className={`px-4 py-1.5 rounded-full text-sm font-bold uppercase tracking-wide 
                         ${deal.dealStatus === 'approved' ? 'bg-emerald-100 text-emerald-800' : 
@@ -77,6 +103,11 @@ export default async function AdminDealDetailsPage(props: { params: Promise<{ id
                   </div>
                   <Link href={`/admin/partners?q=${partner.email}`} className="text-sm text-purple-600 hover:underline">View Profile</Link>
               </div>
+
+              {/* Risk Flags */}
+              {serializedFlags.length > 0 && (
+                <RiskFlagsPanel flags={serializedFlags} title="Risk Flags for this Deal" />
+              )}
           </div>
 
           {/* Sidebar Actions */}

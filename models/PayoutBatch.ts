@@ -6,6 +6,7 @@ export interface IPayoutBatch extends Document {
   totalAmount: number;
   status: 'Processing' | 'Completed';
   referenceNumber?: string;
+  transactionReference?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -20,6 +21,7 @@ const PayoutBatchSchema: Schema = new Schema({
     default: 'Processing' 
   },
   referenceNumber: { type: String },
+  transactionReference: { type: String },
 }, { timestamps: true });
 
 const PayoutBatch: Model<IPayoutBatch> = mongoose.models.PayoutBatch || mongoose.model<IPayoutBatch>('PayoutBatch', PayoutBatchSchema);

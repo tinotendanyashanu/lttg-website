@@ -1,12 +1,16 @@
 'use server';
 
-import { signIn, signOut } from '@/auth';
+import { signIn, signOut, auth } from '@/auth';
 import { AuthError } from 'next-auth';
 import dbConnect from '@/lib/mongodb';
 import Partner from '@/models/Partner';
 import bcrypt from 'bcryptjs';
 import { SignupSchema } from '@/lib/schemas';
 import { sendEmail, EmailTemplates } from '@/lib/email';
+import { headers } from 'next/headers';
+import { CURRENT_TERMS_VERSION } from '@/lib/constants';
+import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
 
 
 export async function authenticate(
@@ -53,6 +57,7 @@ export async function registerPartner(prevState: unknown, formData: FormData) {
     password: formData.get('password'),
     companyName: formData.get('companyName'),
     partnerType: formData.get('partnerType'),
+    termsAccepted: formData.get('termsAccepted'),
   });
 
   if (!validatedFields.success) {
@@ -90,6 +95,12 @@ export async function registerPartner(prevState: unknown, formData: FormData) {
     const verificationToken = crypto.randomBytes(32).toString('hex');
     const verificationTokenExpiry = new Date(Date.now() + 3600 * 1000); // 1 hour
 
+    // Extract IP for legal compliance
+    const headersList = await headers();
+    const clientIp = headersList.get('x-forwarded-for')?.split(',')[0]?.trim() 
+      || headersList.get('x-real-ip') 
+      || 'unknown';
+
     await Partner.create({
       name,
       email,
@@ -102,6 +113,11 @@ export async function registerPartner(prevState: unknown, formData: FormData) {
       status: 'pending', 
       verificationToken,
       verificationTokenExpiry,
+      // Legal & Compliance — immutable after creation
+      termsAccepted: true,
+      termsAcceptedAt: new Date(),
+      termsAcceptedIp: clientIp,
+      termsVersion: CURRENT_TERMS_VERSION,
     });
     
     // Send verification email
@@ -214,4 +230,35 @@ export async function resetPassword(prevState: unknown, formData: FormData) {
 
 export async function handleSignOut() {
     await signOut();
+}
+
+// --- Legal & Compliance: Terms Re-Acceptance ---
+
+export async function acceptTerms(prevState: unknown, formData: FormData) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { message: 'Unauthorized' };
+  }
+
+  const accepted = formData.get('termsAccepted');
+  if (accepted !== 'true') {
+    return { message: 'You must accept the Affiliate Agreement.' };
+  }
+
+  await dbConnect();
+
+  const headersList = await headers();
+  const clientIp = headersList.get('x-forwarded-for')?.split(',')[0]?.trim() 
+    || headersList.get('x-real-ip') 
+    || 'unknown';
+
+  await Partner.findByIdAndUpdate(session.user.id, {
+    termsAccepted: true,
+    termsAcceptedAt: new Date(),
+    termsAcceptedIp: clientIp,
+    termsVersion: CURRENT_TERMS_VERSION,
+  });
+
+  revalidatePath('/partner/dashboard');
+  redirect('/partner/dashboard');
 }

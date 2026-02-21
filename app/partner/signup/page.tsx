@@ -98,6 +98,31 @@ export default function SignupPage() {
                 </div>
             )}
 
+            {/* Terms & Conditions Checkbox */}
+            <div className="pt-2">
+              <label className="flex items-start gap-3 cursor-pointer group">
+                <input
+                  type="checkbox"
+                  name="termsAccepted"
+                  value="true"
+                  required
+                  className="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                />
+                <span className="text-sm text-slate-600 leading-snug">
+                  I have read and agree to the{' '}
+                  <a
+                    href="/legal/affiliate-agreement"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-emerald-600 hover:text-emerald-700 font-medium underline underline-offset-2"
+                  >
+                    Affiliate Agreement (v1.0)
+                  </a>
+                </span>
+              </label>
+              {state?.errors?.termsAccepted && <p className="text-red-500 text-xs mt-1">{state.errors.termsAccepted}</p>}
+            </div>
+
             <SignupButton />
             
             <p className="text-center text-sm text-slate-500 mt-6">

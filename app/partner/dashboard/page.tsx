@@ -5,6 +5,7 @@ import dbConnect from '@/lib/mongodb';
 import PartnerModel from '@/models/Partner';
 import DealModel from '@/models/Deal';
 import CourseModel from '@/models/Course';
+import { getPartnerBalances } from '@/lib/services/ledger';
 import { Partner, Deal, Course } from '@/types';
 import { 
   DollarSign, 
@@ -29,6 +30,12 @@ async function getDashboardData(email: string) {
   const partner = await PartnerModel.findOne({ email }).lean() as unknown as Partner;
   
   if (!partner) return null;
+
+  const ledgerBalances = await getPartnerBalances(partner._id.toString());
+  partner.stats = {
+    ...partner.stats,
+    ...ledgerBalances
+  };
 
   const deals = await DealModel.find({ partnerId: partner._id })
     .populate('payoutBatchId', 'referenceNumber status payoutMonth')
@@ -160,8 +167,8 @@ export default async function DashboardPage() {
       </div>
 
       {/* Payout Settings & Status */}
-      <div className="bg-white rounded-4xl shadow-sm border border-slate-100 overflow-hidden p-8">
-         <div className="flex items-center justify-between mb-6">
+      <div className="bg-white rounded-4xl shadow-sm border border-slate-100 overflow-hidden p-4 sm:p-8">
+         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
             <div>
                <h3 className="text-lg font-bold text-slate-900 flex items-center">
                  <DollarSign className="h-5 w-5 mr-2 text-emerald-500" />
@@ -169,38 +176,38 @@ export default async function DashboardPage() {
                </h3>
                <p className="text-sm text-slate-500 mt-1">Next Payout Date: <span className="font-bold text-slate-800">5th of Next Month</span></p>
             </div>
-            <Link href="/partner/dashboard/settings" className="px-4 py-2 bg-slate-50 text-slate-700 rounded-xl text-sm font-medium hover:bg-slate-100 transition-colors">
+            <Link href="/partner/dashboard/settings" className="self-start sm:self-auto px-4 py-2 bg-slate-50 text-slate-700 rounded-xl text-sm font-medium hover:bg-slate-100 transition-colors">
               Update Payout Method
             </Link>
          </div>
          
-         <div className="grid md:grid-cols-3 gap-6 mb-6">
-            <div className="p-5 rounded-2xl border border-slate-100 bg-slate-50">
+         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+            <div className="p-4 sm:p-5 rounded-2xl border border-slate-100 bg-slate-50">
                <p className="text-sm font-semibold text-slate-500 mb-1">Approved Balance</p>
-               <p className="text-2xl font-bold text-emerald-600">
+               <p className="text-xl sm:text-2xl font-bold text-emerald-600">
                   {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(partner.stats.approvedBalance || 0)}
                </p>
             </div>
-            <div className="p-5 rounded-2xl border border-slate-100 bg-slate-50">
+            <div className="p-4 sm:p-5 rounded-2xl border border-slate-100 bg-slate-50">
                <p className="text-sm font-semibold text-slate-500 mb-1">Pending Earnings</p>
-               <p className="text-2xl font-bold text-amber-600">
+               <p className="text-xl sm:text-2xl font-bold text-amber-600">
                   {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(partner.stats.pendingCommission || 0)}
                </p>
             </div>
-            <div className="p-5 rounded-2xl border border-slate-100 bg-slate-50">
+            <div className="p-4 sm:p-5 rounded-2xl border border-slate-100 bg-slate-50">
                <p className="text-sm font-semibold text-slate-500 mb-1">Minimum Threshold</p>
-               <p className="text-2xl font-bold text-slate-900">$50.00</p>
+               <p className="text-xl sm:text-2xl font-bold text-slate-900">$50.00</p>
             </div>
          </div>
 
          {(partner.stats.approvedBalance || 0) < 50 ? (
-            <div className="flex items-center p-4 rounded-xl text-sm font-medium bg-amber-50 text-amber-800 border border-amber-200">
-               <Shield className="h-5 w-5 mr-3 shrink-0 text-amber-600" />
+            <div className="flex items-start sm:items-center p-4 rounded-xl text-sm font-medium bg-amber-50 text-amber-800 border border-amber-200">
+               <Shield className="h-5 w-5 mr-3 shrink-0 text-amber-600 mt-0.5 sm:mt-0" />
                <p><strong>Below Threshold:</strong> Your approved balance is below the $50 minimum. Payouts will roll over to the next month once the threshold is reached.</p>
             </div>
          ) : (
-            <div className="flex items-center p-4 rounded-xl text-sm font-medium bg-emerald-50 text-emerald-800 border border-emerald-200">
-               <CheckCircle className="h-5 w-5 mr-3 shrink-0 text-emerald-600" />
+            <div className="flex items-start sm:items-center p-4 rounded-xl text-sm font-medium bg-emerald-50 text-emerald-800 border border-emerald-200">
+               <CheckCircle className="h-5 w-5 mr-3 shrink-0 text-emerald-600 mt-0.5 sm:mt-0" />
                <p><strong>Eligible for Payout:</strong> Your approved balance meets the $50 minimum threshold. Your payout will be generated securely on the 5th.</p>
             </div>
          )}
@@ -209,7 +216,7 @@ export default async function DashboardPage() {
       {/* Quick Actions & Announcements */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Quick Actions */}
-        <div className="lg:col-span-1 bg-white rounded-4xl shadow-sm border border-slate-100 p-8">
+        <div className="lg:col-span-1 bg-white rounded-4xl shadow-sm border border-slate-100 p-4 sm:p-8">
           <h3 className="text-lg font-bold text-slate-900 mb-4">Quick Actions</h3>
           <div className="space-y-3">
             <Link
@@ -256,7 +263,7 @@ export default async function DashboardPage() {
         </div>
 
         {/* Announcements */}
-        <div className="lg:col-span-2 bg-white rounded-4xl shadow-sm border border-slate-100 p-8">
+        <div className="lg:col-span-2 bg-white rounded-4xl shadow-sm border border-slate-100 p-4 sm:p-8">
           <div className="flex items-center mb-4">
             <Megaphone className="h-5 w-5 text-amber-500 mr-2" />
             <h3 className="text-lg font-bold text-slate-900">Program Announcements</h3>
@@ -298,14 +305,52 @@ export default async function DashboardPage() {
 
       {/* Recent Activity / Deals */}
       <div className="bg-white rounded-4xl shadow-sm border border-slate-100 overflow-hidden">
-        <div className="p-8 border-b border-slate-50 flex justify-between items-center">
+        <div className="p-4 sm:p-8 border-b border-slate-50 flex justify-between items-center">
             <div>
                 <h3 className="text-lg font-bold text-slate-900">Recent Deals</h3>
-                <p className="text-sm text-slate-500 mb-4">You haven&apos;t registered any deals yet.</p>
+                <p className="text-sm text-slate-500">Your latest registered opportunities.</p>
             </div>
-            <Link href="/partner/dashboard/deals" className="text-sm text-emerald-600 hover:text-emerald-700 font-bold px-4 py-2 bg-emerald-50 rounded-full transition-colors">View All &rarr;</Link>
+            <Link href="/partner/dashboard/deals" className="text-sm text-emerald-600 hover:text-emerald-700 font-bold px-4 py-2 bg-emerald-50 rounded-full transition-colors shrink-0">View All &rarr;</Link>
         </div>
-        <div className="overflow-x-auto">
+
+        {/* Mobile card list */}
+        <div className="sm:hidden divide-y divide-slate-50">
+          {deals.length > 0 ? (
+            deals.map((deal) => (
+              <div key={deal._id} className="p-4 space-y-2">
+                <div className="flex items-start justify-between gap-2">
+                  <p className="font-bold text-slate-900 text-sm">{deal.clientName}</p>
+                  <span className={`shrink-0 inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold capitalize 
+                    ${deal.dealStatus === 'approved' ? 'bg-emerald-100 text-emerald-700' : 
+                      deal.dealStatus === 'closed' ? 'bg-blue-100 text-blue-700' :
+                      deal.dealStatus === 'rejected' ? 'bg-red-100 text-red-700' :
+                      'bg-amber-100 text-amber-700'}`}>
+                    {deal.dealStatus.replace('_', ' ')}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium text-slate-600">
+                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(deal.finalValue || deal.estimatedValue)}
+                  </p>
+                  <p className="text-xs text-slate-400">{new Date(deal.createdAt).toLocaleDateString()}</p>
+                </div>
+                {deal.commissionStatus === 'Paid' && deal.payoutBatchId?.referenceNumber && (
+                  <p className="text-xs text-slate-500 font-mono flex items-center">
+                    <CheckCircle className="h-3 w-3 text-emerald-500 mr-1 shrink-0" />
+                    Ref: {deal.payoutBatchId.referenceNumber}
+                  </p>
+                )}
+              </div>
+            ))
+          ) : (
+            <div className="px-4 py-12 text-center text-slate-400 font-medium text-sm">
+              No deals yet. <Link href="/partner/dashboard/deals" className="text-emerald-600 hover:underline">Register your first deal</Link>.
+            </div>
+          )}
+        </div>
+
+        {/* Desktop table */}
+        <div className="hidden sm:block overflow-x-auto">
             <table className="w-full text-left text-sm text-slate-600">
                 <thead className="bg-white text-slate-500 font-bold uppercase text-xs tracking-wider">
                     <tr>

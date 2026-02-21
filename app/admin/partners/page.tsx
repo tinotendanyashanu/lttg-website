@@ -6,7 +6,9 @@ async function getPartners() {
   await dbConnect();
   // Fetch all partners for client-side sorting/filtering for now (assuming < 1000)
   // For larger datasets, we'd move this logic to the server with params.
-  return Partner.find({ role: 'partner' }).sort({ createdAt: -1 }).lean() as unknown as IPartner[];
+  const raw = await Partner.find({ role: 'partner' }).sort({ createdAt: -1 }).lean();
+  // Serialize to strip all Mongoose-specific objects (ObjectIds, Buffers, etc.)
+  return JSON.parse(JSON.stringify(raw)) as IPartner[];
 }
 
 export default async function AdminPartnersPage() {
@@ -19,7 +21,6 @@ export default async function AdminPartnersPage() {
       _id: partner._id.toString(),
       createdAtString: new Date(partner.createdAt).toLocaleDateString(),
       revenueFormatted: new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(partner.stats.totalReferredRevenue),
-      // Ensure complex objects are not passed unless serializable
   }));
 
   return (
