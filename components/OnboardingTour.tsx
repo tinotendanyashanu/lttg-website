@@ -115,49 +115,71 @@ export default function OnboardingTour({ userHasCompleted, partnerType = 'standa
 
   return (
     <AnimatePresence>
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm"
-      >
+      {isVisible && (
         <motion.div 
-           initial={{ scale: 0.9, opacity: 0 }}
-           animate={{ scale: 1, opacity: 1 }}
-           className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden"
+          initial={{ y: 50, opacity: 0, scale: 0.95 }}
+          animate={{ y: 0, opacity: 1, scale: 1 }}
+          exit={{ y: 50, opacity: 0, scale: 0.95 }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          className="fixed bottom-6 right-6 z-100 w-full max-w-[360px] md:max-w-sm"
         >
-             <div className="relative h-32 bg-purple-600 flex items-center justify-center">
-                 <div className="absolute top-4 right-4 text-purple-200 hover:text-white cursor-pointer" onClick={handleDismiss}>
-                     <X className="h-6 w-6" />
-                 </div>
-                 <div className="text-white text-center px-6">
-                    <h3 className="text-2xl font-bold">{steps[currentStep].title}</h3>
-                 </div>
-             </div>
-             
-             <div className="p-8">
-                 <p className="text-slate-600 text-lg leading-relaxed mb-8 text-center">{steps[currentStep].description}</p>
-                 
-                 <div className="flex items-center justify-between">
-                     <div className="flex space-x-2">
-                         {steps.map((_, idx) => (
-                             <div 
-                                key={idx} 
-                                className={`h-2 w-2 rounded-full transition-colors ${idx === currentStep ? 'bg-purple-600 scale-125' : 'bg-slate-200'}`} 
-                             />
-                         ))}
-                     </div>
-                     <button 
-                        onClick={handleNext}
-                        className="bg-slate-900 text-white px-6 py-2 rounded-full font-bold hover:bg-slate-800 transition-colors flex items-center"
-                     >
-                         {currentStep === steps.length - 1 ? 'Get Started' : 'Next'}
-                         {currentStep === steps.length - 1 ? <Check className="ml-2 h-4 w-4" /> : <ArrowRight className="ml-2 h-4 w-4" />}
-                     </button>
-                 </div>
-             </div>
+          <div className="bg-white rounded-3xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] border border-slate-100 overflow-hidden relative">
+            {/* Elegant top accent line */}
+            <div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-purple-500 to-indigo-500" />
+            
+            <div className="p-6">
+              <button 
+                onClick={handleDismiss}
+                className="absolute top-5 right-5 text-slate-400 hover:text-slate-600 transition-colors bg-slate-50 hover:bg-slate-100 rounded-full p-1"
+                aria-label="Dismiss tour"
+              >
+                <X className="h-4 w-4" />
+              </button>
+              
+              <div className="mb-3">
+                <span className="text-xs font-bold tracking-widest text-purple-600 uppercase bg-purple-50 px-2 py-1 rounded-md">
+                  Step {currentStep + 1} of {steps.length}
+                </span>
+              </div>
+              
+              <h3 className="text-lg font-bold text-slate-900 mb-2 pr-6">
+                {steps[currentStep].title}
+              </h3>
+              
+              <p className="text-slate-500 text-sm leading-relaxed mb-6">
+                {steps[currentStep].description}
+              </p>
+              
+              <div className="flex items-center justify-between pt-2">
+                <div className="flex space-x-1.5">
+                  {steps.map((_, idx) => (
+                    <div 
+                      key={idx} 
+                      className={`h-1.5 rounded-full transition-all duration-300 ${
+                        idx === currentStep 
+                          ? 'w-5 bg-purple-600' 
+                          : 'w-1.5 bg-slate-200'
+                      }`} 
+                    />
+                  ))}
+                </div>
+                
+                <button 
+                  onClick={handleNext}
+                  className="bg-slate-900 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-slate-800 transition-all flex items-center shadow-lg shadow-slate-900/20 hover:shadow-slate-900/30 active:scale-95 group"
+                >
+                  {currentStep === steps.length - 1 ? 'Finish' : 'Next'}
+                  {currentStep === steps.length - 1 ? (
+                    <Check className="ml-2 h-4 w-4" />
+                  ) : (
+                    <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
         </motion.div>
-      </motion.div>
+      )}
     </AnimatePresence>
   );
 }

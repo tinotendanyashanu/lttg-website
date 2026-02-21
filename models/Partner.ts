@@ -21,10 +21,19 @@ export interface IPartner extends Document {
     totalReferredRevenue: number;
     totalCommissionEarned: number;
     pendingCommission: number;
+    approvedBalance: number;
     paidCommission: number;
     paidDealsSinceLastPayout: number;
     referralClicks: number;
     referralLeads: number;
+  };
+  countryOfResidence?: string;
+  payoutMethod?: 'Wise' | 'Bank Transfer' | 'USDT (TRC20)' | 'PayPal' | 'Local Remittance';
+  localRemittanceDetails?: {
+    fullName: string;
+    mobileNumber: string;
+    city: string;
+    preferredMethod: string;
   };
   hasReceivedAcademyBonus: boolean;
   hasCompletedOnboarding: boolean;
@@ -81,10 +90,22 @@ const PartnerSchema: Schema = new Schema({
     totalReferredRevenue: { type: Number, default: 0 },
     totalCommissionEarned: { type: Number, default: 0 },
     pendingCommission: { type: Number, default: 0 },
+    approvedBalance: { type: Number, default: 0 },
     paidCommission: { type: Number, default: 0 },
     paidDealsSinceLastPayout: { type: Number, default: 0 },
     referralClicks: { type: Number, default: 0 },
     referralLeads: { type: Number, default: 0 },
+  },
+  countryOfResidence: { type: String },
+  payoutMethod: {
+    type: String,
+    enum: ['Wise', 'Bank Transfer', 'USDT (TRC20)', 'PayPal', 'Local Remittance']
+  },
+  localRemittanceDetails: {
+    fullName: String,
+    mobileNumber: String,
+    city: String,
+    preferredMethod: String
   },
   hasReceivedAcademyBonus: { type: Boolean, default: false },
   verificationToken: String,

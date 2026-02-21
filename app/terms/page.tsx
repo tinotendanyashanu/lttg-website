@@ -153,11 +153,14 @@ export default function TermsOfService() {
               Fraudulent accounts will be terminated immediately. Pending commissions may be forfeited.
             </p>
 
-            <h3 className="text-lg font-bold text-slate-800 mb-2">8.4 Payouts</h3>
+            <h3 className="text-lg font-bold text-slate-800 mb-2">8.4 Payouts & Commission Approval</h3>
             <ul className="list-disc pl-6 text-slate-600 space-y-1">
-              <li>Payouts are processed after client payment is fully received.</li>
-              <li>Net-30 processing may apply.</li>
-              <li>Minimum payout thresholds may apply.</li>
+              <li><strong>14-Day Hold:</strong> Commissions are held for a 14-day approval period following the collection of client payment to protect against refunds or chargebacks.</li>
+              <li><strong>Minimum Threshold:</strong> An accumulated approved balance of at least $50.00 USD is required to be eligible for a payout. Balances below this threshold will roll over to the next month.</li>
+              <li><strong>Monthly Schedule:</strong> Payout batches are generated and processed on the 5th of every month for all eligible approved balances.</li>
+              <li><strong>Method Lockout:</strong> To ensure secure payout processing, changes to your payout method are disabled between the 2nd and 5th of each month.</li>
+              <li><strong>Reversals:</strong> If a client is refunded or files a chargeback, the associated commission will be reversed. If the commission has already been paid out, it will be deducted from future earnings.</li>
+              <li><strong>Fees:</strong> Partners are responsible for any remittance, currency conversion, or processing fees associated with their chosen payout method. These fees may be automatically deducted from the final payout amount.</li>
             </ul>
           </section>
 

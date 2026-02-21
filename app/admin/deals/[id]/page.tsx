@@ -1,10 +1,9 @@
-import { auth } from '@/auth';
 import dbConnect from '@/lib/mongodb';
 import Deal from '@/models/Deal';
 import { IPartner } from '@/models/Partner';
 import DealActionForm from '@/components/admin/DealActionForm';
 import Link from 'next/link';
-import { ArrowLeft, User, DollarSign, Calendar } from 'lucide-react';
+import { ArrowLeft, User, Calendar } from 'lucide-react';
 
 async function getDeal(id: string) {
   await dbConnect();

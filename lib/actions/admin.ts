@@ -110,6 +110,8 @@ export async function updateDealStatus(dealId: string, status: string, finalValu
   
   if (status === 'closed') {
       updates.closedAt = new Date();
+      updates.saleDate = new Date();
+      updates.commissionStatus = 'Pending';
       // When closed, add to Partner's Pending Commission and Total Revenue
       // But only if it wasn't already closed. 
       if (deal.dealStatus !== 'closed') {

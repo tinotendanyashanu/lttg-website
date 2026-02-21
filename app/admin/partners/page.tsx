@@ -1,7 +1,5 @@
-import { auth } from '@/auth';
 import dbConnect from '@/lib/mongodb';
 import Partner, { IPartner } from '@/models/Partner';
-import Link from 'next/link';
 import PartnersClient from '@/components/admin/PartnersClient';
 
 async function getPartners() {

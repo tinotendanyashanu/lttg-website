@@ -1,4 +1,3 @@
-import { auth } from '@/auth';
 import dbConnect from '@/lib/mongodb';
 import AuditLog, { IAuditLog } from '@/models/AuditLog';
 import { IPartner } from '@/models/Partner';

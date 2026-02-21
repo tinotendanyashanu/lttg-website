@@ -19,7 +19,8 @@ import {
   Sparkles,
   CalendarCheck,
   Star,
-  MousePointer2
+  MousePointer2,
+  CheckCircle
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -30,6 +31,7 @@ async function getDashboardData(email: string) {
   if (!partner) return null;
 
   const deals = await DealModel.find({ partnerId: partner._id })
+    .populate('payoutBatchId', 'referenceNumber status payoutMonth')
     .sort({ createdAt: -1 })
     .limit(5)
     .lean() as unknown as Deal[];
@@ -140,7 +142,7 @@ export default async function DashboardPage() {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat) => (
-          <Link key={stat.name} href={stat.href} className="group block bg-white p-6 rounded-[2rem] shadow-sm hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300 border border-transparent hover:border-slate-100">
+          <Link key={stat.name} href={stat.href} className="group block bg-white p-6 rounded-4xl shadow-sm hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300 border border-transparent hover:border-slate-100">
             <div className="flex items-start justify-between mb-6">
                <div className={`p-4 rounded-2xl ${stat.color} bg-opacity-10 group-hover:scale-110 transition-transform duration-300`}>
                   <stat.icon className={`h-6 w-6 ${stat.color.replace('bg-', 'text-')}`} />
@@ -157,10 +159,57 @@ export default async function DashboardPage() {
         ))}
       </div>
 
+      {/* Payout Settings & Status */}
+      <div className="bg-white rounded-4xl shadow-sm border border-slate-100 overflow-hidden p-8">
+         <div className="flex items-center justify-between mb-6">
+            <div>
+               <h3 className="text-lg font-bold text-slate-900 flex items-center">
+                 <DollarSign className="h-5 w-5 mr-2 text-emerald-500" />
+                 Payout Status
+               </h3>
+               <p className="text-sm text-slate-500 mt-1">Next Payout Date: <span className="font-bold text-slate-800">5th of Next Month</span></p>
+            </div>
+            <Link href="/partner/dashboard/settings" className="px-4 py-2 bg-slate-50 text-slate-700 rounded-xl text-sm font-medium hover:bg-slate-100 transition-colors">
+              Update Payout Method
+            </Link>
+         </div>
+         
+         <div className="grid md:grid-cols-3 gap-6 mb-6">
+            <div className="p-5 rounded-2xl border border-slate-100 bg-slate-50">
+               <p className="text-sm font-semibold text-slate-500 mb-1">Approved Balance</p>
+               <p className="text-2xl font-bold text-emerald-600">
+                  {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(partner.stats.approvedBalance || 0)}
+               </p>
+            </div>
+            <div className="p-5 rounded-2xl border border-slate-100 bg-slate-50">
+               <p className="text-sm font-semibold text-slate-500 mb-1">Pending Earnings</p>
+               <p className="text-2xl font-bold text-amber-600">
+                  {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(partner.stats.pendingCommission || 0)}
+               </p>
+            </div>
+            <div className="p-5 rounded-2xl border border-slate-100 bg-slate-50">
+               <p className="text-sm font-semibold text-slate-500 mb-1">Minimum Threshold</p>
+               <p className="text-2xl font-bold text-slate-900">$50.00</p>
+            </div>
+         </div>
+
+         {(partner.stats.approvedBalance || 0) < 50 ? (
+            <div className="flex items-center p-4 rounded-xl text-sm font-medium bg-amber-50 text-amber-800 border border-amber-200">
+               <Shield className="h-5 w-5 mr-3 shrink-0 text-amber-600" />
+               <p><strong>Below Threshold:</strong> Your approved balance is below the $50 minimum. Payouts will roll over to the next month once the threshold is reached.</p>
+            </div>
+         ) : (
+            <div className="flex items-center p-4 rounded-xl text-sm font-medium bg-emerald-50 text-emerald-800 border border-emerald-200">
+               <CheckCircle className="h-5 w-5 mr-3 shrink-0 text-emerald-600" />
+               <p><strong>Eligible for Payout:</strong> Your approved balance meets the $50 minimum threshold. Your payout will be generated securely on the 5th.</p>
+            </div>
+         )}
+      </div>
+
       {/* Quick Actions & Announcements */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Quick Actions */}
-        <div className="lg:col-span-1 bg-white rounded-[2rem] shadow-sm border border-slate-100 p-8">
+        <div className="lg:col-span-1 bg-white rounded-4xl shadow-sm border border-slate-100 p-8">
           <h3 className="text-lg font-bold text-slate-900 mb-4">Quick Actions</h3>
           <div className="space-y-3">
             <Link
@@ -207,7 +256,7 @@ export default async function DashboardPage() {
         </div>
 
         {/* Announcements */}
-        <div className="lg:col-span-2 bg-white rounded-[2rem] shadow-sm border border-slate-100 p-8">
+        <div className="lg:col-span-2 bg-white rounded-4xl shadow-sm border border-slate-100 p-8">
           <div className="flex items-center mb-4">
             <Megaphone className="h-5 w-5 text-amber-500 mr-2" />
             <h3 className="text-lg font-bold text-slate-900">Program Announcements</h3>
@@ -248,7 +297,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Recent Activity / Deals */}
-      <div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden">
+      <div className="bg-white rounded-4xl shadow-sm border border-slate-100 overflow-hidden">
         <div className="p-8 border-b border-slate-50 flex justify-between items-center">
             <div>
                 <h3 className="text-lg font-bold text-slate-900">Recent Deals</h3>
@@ -282,6 +331,12 @@ export default async function DashboardPage() {
                                           'bg-amber-100 text-amber-700'}`}>
                                         {deal.dealStatus.replace('_', ' ')}
                                     </span>
+                                    {deal.commissionStatus === 'Paid' && deal.payoutBatchId?.referenceNumber && (
+                                       <div className="mt-1.5 text-xs text-slate-500 font-mono flex items-center">
+                                          <CheckCircle className="h-3 w-3 text-emerald-500 mr-1 shrink-0" />
+                                          Ref: {deal.payoutBatchId.referenceNumber}
+                                       </div>
+                                    )}
                                 </td>
                                 <td className="px-8 py-5 text-slate-400 font-medium">{new Date(deal.createdAt).toLocaleDateString()}</td>
                             </tr>

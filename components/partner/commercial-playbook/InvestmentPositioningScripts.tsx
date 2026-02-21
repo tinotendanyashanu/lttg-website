@@ -31,7 +31,7 @@ export default function InvestmentPositioningScripts({ data }: InvestmentPositio
           </div>
           
           <div className="bg-slate-50 p-4 rounded-lg font-mono text-sm text-slate-600 mb-4 grow italic border border-slate-100">
-            "{script.content}"
+            &quot;{script.content}&quot;
           </div>
 
           <button

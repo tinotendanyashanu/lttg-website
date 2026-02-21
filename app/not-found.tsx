@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Home, Search, AlertTriangle, ArrowRight, Terminal } from 'lucide-react';
+import { Home, AlertTriangle, ArrowRight, Terminal } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 

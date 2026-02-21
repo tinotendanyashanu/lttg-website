@@ -7,6 +7,10 @@ export interface IDeal extends Document {
   finalValue?: number;
   commissionRate: number; // e.g., 0.10 for 10%
   commissionAmount?: number;
+  commissionStatus: 'Pending' | 'Approved' | 'Reversed' | 'Paid';
+  saleDate?: Date;
+  approvalDate?: Date;
+  payoutBatchId?: mongoose.Types.ObjectId;
   dealStatus: 'registered' | 'under_review' | 'approved' | 'closed' | 'rejected';
   paymentStatus: 'pending' | 'received' | 'commission_paid';
   paymentMethod?: 'cash' | 'bank_transfer' | 'stripe' | 'other';
@@ -24,6 +28,14 @@ const DealSchema: Schema = new Schema({
   finalValue: { type: Number },
   commissionRate: { type: Number, default: 0.10 }, // Default 10% commissioned
   commissionAmount: { type: Number },
+  commissionStatus: {
+    type: String,
+    enum: ['Pending', 'Approved', 'Reversed', 'Paid'],
+    default: 'Pending'
+  },
+  saleDate: { type: Date },
+  approvalDate: { type: Date },
+  payoutBatchId: { type: Schema.Types.ObjectId, ref: 'PayoutBatch' },
   dealStatus: { 
     type: String, 
     enum: ['registered', 'under_review', 'approved', 'closed', 'rejected'],

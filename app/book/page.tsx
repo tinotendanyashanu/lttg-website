@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Cal, { getCalApi } from "@calcom/embed-react";
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { Calendar, Clock, Video, CheckCircle, MessageSquare, Loader2, AlertCircle } from 'lucide-react';
+import { Clock, Video, CheckCircle, Loader2, AlertCircle } from 'lucide-react';
 
 export default function BookMeeting() {
   // Initialize Cal.com API

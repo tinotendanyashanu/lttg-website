@@ -28,10 +28,19 @@ export interface Partner {
     totalReferredRevenue: number;
     totalCommissionEarned: number;
     pendingCommission: number;
+    approvedBalance: number;
     paidCommission: number;
     paidDealsSinceLastPayout: number;
     referralClicks: number;
     referralLeads: number;
+  };
+  countryOfResidence?: string;
+  payoutMethod?: 'Wise' | 'Bank Transfer' | 'USDT (TRC20)' | 'PayPal' | 'Local Remittance';
+  localRemittanceDetails?: {
+    fullName: string;
+    mobileNumber: string;
+    city: string;
+    preferredMethod: string;
   };
   hasReceivedAcademyBonus: boolean;
   hasCompletedOnboarding: boolean;
@@ -48,6 +57,8 @@ export interface Deal {
   finalValue?: number;
   commissionRate: number;
   commissionAmount?: number;
+  commissionStatus?: 'Pending' | 'Approved' | 'Reversed' | 'Paid';
+  payoutBatchId?: unknown;
   dealStatus: 'registered' | 'under_review' | 'approved' | 'closed' | 'rejected';
   paymentStatus: 'pending' | 'received' | 'commission_paid';
   paymentMethod?: 'cash' | 'bank_transfer' | 'stripe' | 'other';

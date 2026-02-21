@@ -1,4 +1,3 @@
-import { auth } from '@/auth';
 import dbConnect from '@/lib/mongodb';
 import Partner, { IPartner } from '@/models/Partner';
 import Deal from '@/models/Deal';

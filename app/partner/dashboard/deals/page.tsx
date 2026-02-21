@@ -13,7 +13,7 @@ async function getDeals(userId: string, query: string, status: string) {
   if (!partner) return [];
 
   // Build filter
-  const filter: any = { partnerId: partner._id };
+  const filter: Record<string, unknown> = { partnerId: partner._id };
   
   if (status !== 'all') {
     filter.dealStatus = status;

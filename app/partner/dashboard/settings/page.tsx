@@ -1,7 +1,7 @@
 import { auth } from '@/auth';
 import dbConnect from '@/lib/mongodb';
 import PartnerModel from '@/models/Partner';
-import SettingsForm from '@/components/partner/SettingsForm';
+import PayoutSettingsForm from '@/components/partner/PayoutSettingsForm';
 import { User, CreditCard, Mail, Award, CheckCircle } from 'lucide-react';
 import { Partner } from '@/types';
 
@@ -72,11 +72,11 @@ export default async function SettingsPage() {
       <div>
         <div className="flex items-center space-x-2 mb-4 px-1">
              <CreditCard className="h-5 w-5 text-slate-400" />
-             <h3 className="text-lg font-bold text-slate-900">Payout / Bank Details</h3>
+             <h3 className="text-lg font-bold text-slate-900">Payout Settings</h3>
         </div>
-        <p className="text-sm text-slate-500 mb-4 px-1">Enter your bank details to receive commission payouts. Keep these up to date.</p>
+        <p className="text-sm text-slate-500 mb-4 px-1">Select your preferred payout method and ensure your details are complete. (Note: Changes are locked between the 2nd and 5th of each month prior to payouts)</p>
         
-        <SettingsForm bankDetails={partner.bankDetails} />
+        <PayoutSettingsForm partner={partner} />
       </div>
 
       {/* Danger Zone */}

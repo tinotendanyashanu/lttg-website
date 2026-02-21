@@ -1,6 +1,4 @@
-import { auth } from '@/auth';
 import dbConnect from '@/lib/mongodb';
-import Link from 'next/link';
 import Deal, { IDeal } from '@/models/Deal';
 import { IPartner } from '@/models/Partner';
 import DealsClient from '@/components/admin/DealsClient';

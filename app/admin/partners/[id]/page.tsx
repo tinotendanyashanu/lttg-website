@@ -1,4 +1,3 @@
-import { auth } from '@/auth';
 import dbConnect from '@/lib/mongodb';
 import Partner from '@/models/Partner';
 import Deal from '@/models/Deal';
@@ -22,7 +21,6 @@ import {
 import AdminPasswordResetButton from '@/components/admin/AdminPasswordResetButton';
 import { IDeal } from '@/models/Deal';
 import { IPayout } from '@/models/Payout';
-import DataTable from '@/components/admin/DataTable';
 
 async function getPartnerData(id: string) {
     await dbConnect();
