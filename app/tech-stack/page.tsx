@@ -24,7 +24,8 @@ import {
     SiLogitech, 
     SiRaycast, 
     SiLinear,
-    SiArc
+    SiArc,
+    SiGoogle
 } from 'react-icons/si'; 
 
 // --- Data ---
@@ -212,6 +213,15 @@ const TOOLS: Tool[] = [
         why: "A fresh take on how a browser should work.",
         link: "https://arc.net",
         icon: <SiArc className="w-5 h-5 text-rose-500" />
+    },
+    {
+        name: "Google One",
+        category: "Apps",
+        tags: ["Productivity", "Storage", "Cloud"],
+        description: "Expand your cloud storage and get extra features.",
+        why: "Essential for backing up high-quality photos and large project files.",
+        link: "https://g.co/g1referral/ECTRK1HA",
+        icon: <SiGoogle className="w-5 h-5 text-blue-500" />
     },
 ];
 
