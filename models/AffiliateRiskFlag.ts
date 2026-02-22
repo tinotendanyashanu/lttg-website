@@ -4,7 +4,8 @@ export type RiskFlagType =
   | 'duplicate_client'
   | 'cross_affiliate_email'
   | 'self_referral'
-  | 'deal_value_spike';
+  | 'deal_value_spike'
+  | 'multiple_accounts_ip';
 
 export type RiskFlagSeverity = 'low' | 'medium' | 'high';
 
@@ -27,7 +28,7 @@ const AffiliateRiskFlagSchema: Schema = new Schema(
     dealId: { type: Schema.Types.ObjectId, ref: 'Deal', default: null },
     type: {
       type: String,
-      enum: ['duplicate_client', 'cross_affiliate_email', 'self_referral', 'deal_value_spike'],
+      enum: ['duplicate_client', 'cross_affiliate_email', 'self_referral', 'deal_value_spike', 'multiple_accounts_ip'],
       required: true,
     },
     severity: {

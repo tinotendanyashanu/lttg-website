@@ -9,10 +9,17 @@ async function getTierData(userId: string) {
 }
 
 const TIERS = {
+    creator: {
+        name: 'Creator Partner',
+        commission: 8,
+        minRevenue: 0,
+        benefits: ['8% Commission', 'Referral Link', 'Academy Access'],
+        nextTier: 'referral'
+    },
     referral: {
         name: 'Referral Partner',
         commission: 10,
-        minRevenue: 0,
+        minRevenue: 10000,
         benefits: ['10% Commission', 'Basic Resources', 'No Minimums'],
         nextTier: 'agency'
     },

@@ -3,7 +3,7 @@ import Partner from '@/models/Partner';
 import Deal from '@/models/Deal';
 import Payout from '@/models/Payout';
 import AffiliateRiskFlag from '@/models/AffiliateRiskFlag';
-import { updatePartnerStatus, deletePartner } from '@/lib/actions/admin';
+import { updatePartnerStatus, deletePartner, forceVerifyPartnerEmail } from '@/lib/actions/admin';
 import { getPartnerBalances, getPartnerLedger } from '@/lib/services/ledger';
 import Link from 'next/link';
 import RiskFlagsPanel from '@/components/admin/RiskFlagsPanel';
@@ -112,6 +112,11 @@ export default async function AdminPartnerDetailsPage(props: { params: Promise<{
                                 <span className="flex items-center">
                                     <Mail className="h-4 w-4 mr-2" />
                                     {partner.email}
+                                    {!partner.emailVerified && (
+                                        <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 uppercase tracking-wide">
+                                            Unverified
+                                        </span>
+                                    )}
                                 </span>
                                 {partner.companyName && (
                                     <span className="flex items-center">
@@ -179,7 +184,18 @@ export default async function AdminPartnerDetailsPage(props: { params: Promise<{
                         <p className="text-sm text-slate-500 mb-3">
                             Manage access credentials for this partner.
                         </p>
-                        <AdminPasswordResetButton partnerId={partner._id.toString()} />
+                        <div className="space-y-3">
+                            <AdminPasswordResetButton partnerId={partner._id.toString()} />
+                            
+                            {!partner.emailVerified && (
+                                <form action={forceVerifyPartnerEmail.bind(null, partner._id.toString())}>
+                                    <button className="w-full flex items-center justify-center px-4 py-2 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition-colors text-sm font-medium">
+                                        <CheckCircle className="h-4 w-4 mr-2" />
+                                        Force Verify Email
+                                    </button>
+                                </form>
+                            )}
+                        </div>
                     </div>
 
                     {/* Legal Compliance Card */}

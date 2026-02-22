@@ -115,6 +115,11 @@ export default async function DealsPage(props: {
                 <p className="text-xs text-slate-500">
                   Value: {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(deal.finalValue || deal.estimatedValue)}
                 </p>
+                <div className="pt-2">
+                  <Link href={`/partner/dashboard/deals/${deal._id}`} className="text-xs font-bold text-emerald-600 hover:text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-lg inline-block">
+                    View Details &rarr;
+                  </Link>
+                </div>
               </div>
             ))
           ) : (
@@ -135,6 +140,7 @@ export default async function DealsPage(props: {
                         <th className="px-8 py-6 border-b border-slate-50">Potential Earnings</th>
                         <th className="px-8 py-6 border-b border-slate-50">Status</th>
                         <th className="px-8 py-6 border-b border-slate-50">Date</th>
+                        <th className="px-8 py-6 border-b border-slate-50 text-right">Actions</th>
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
@@ -160,11 +166,16 @@ export default async function DealsPage(props: {
                                     </span>
                                 </td>
                                 <td className="px-8 py-5 text-slate-400 font-medium">{new Date(deal.createdAt).toLocaleDateString()}</td>
+                                <td className="px-8 py-5 text-right">
+                                    <Link href={`/partner/dashboard/deals/${deal._id}`} className="text-xs font-bold text-emerald-600 hover:text-emerald-700 opacity-0 group-hover:opacity-100 transition-opacity bg-emerald-50 px-3 py-1.5 rounded-lg inline-block">
+                                        View
+                                    </Link>
+                                </td>
                             </tr>
                         ))
                     ) : (
                         <tr>
-                            <td colSpan={6} className="px-8 py-16 text-center text-slate-400 font-medium">
+                            <td colSpan={7} className="px-8 py-16 text-center text-slate-400 font-medium">
                                 No deals found. <Link href="/partner/dashboard/deals/register" className="text-emerald-600 hover:underline">Register your first deal</Link> to start earning.
                             </td>
                         </tr>

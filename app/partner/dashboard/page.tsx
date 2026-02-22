@@ -5,7 +5,9 @@ import dbConnect from '@/lib/mongodb';
 import PartnerModel from '@/models/Partner';
 import DealModel from '@/models/Deal';
 import CourseModel from '@/models/Course';
+import AffiliateRiskFlagModel from '@/models/AffiliateRiskFlag';
 import { getPartnerBalances } from '@/lib/services/ledger';
+import { evaluatePartnerPayoutEligibility } from '@/lib/actions/payouts';
 import { Partner, Deal, Course } from '@/types';
 import { 
   DollarSign, 
@@ -21,9 +23,17 @@ import {
   CalendarCheck,
   Star,
   MousePointer2,
-  CheckCircle
+  CheckCircle,
+  AlertTriangle,
+  Info,
+  TrendingUp as TrendingUpIcon,
+  ChevronsUp
 } from 'lucide-react';
 import Link from 'next/link';
+import OnboardingChecklist from '@/components/partner/OnboardingChecklist';
+import ReferralLinkGenerator from '@/components/partner/ReferralLinkGenerator';
+import PerformanceAnalyticsPanel from '@/components/partner/PerformanceAnalyticsPanel';
+import CommissionForecastPanel from '@/components/partner/CommissionForecastPanel';
 
 async function getDashboardData(email: string) {
   await dbConnect();
@@ -49,7 +59,24 @@ async function getDashboardData(email: string) {
   const totalCourses = courses.length;
   const completedCourses = progressList.filter((p) => p.isCompleted).length;
     
-  return { partner, deals, totalCourses, completedCourses };
+  // Fetch eligibility & risk flags
+  const eligibility = await evaluatePartnerPayoutEligibility(partner._id.toString());
+  const riskFlags = await AffiliateRiskFlagModel.find({ 
+    partnerId: partner._id, 
+    resolved: false, 
+    severity: 'high' 
+  }).lean();
+
+  const hasDeals = await DealModel.exists({ partnerId: partner._id });
+
+  return { partner, deals, totalCourses, completedCourses, eligibility, hasRiskFlags: riskFlags.length > 0, hasDeals: !!hasDeals };
+}
+
+// Tier helper
+function getTierProgress(tier: string, revenue: number) {
+  if (tier === 'referral') return { next: 'Agency', threshold: 10000, current: revenue, pct: Math.min((revenue / 10000) * 100, 100) };
+  if (tier === 'agency') return { next: 'Enterprise', threshold: 50000, current: revenue, pct: Math.min((revenue / 50000) * 100, 100) };
+  return null; // enterprise or creator
 }
 
 export default async function DashboardPage() {
@@ -59,8 +86,9 @@ export default async function DashboardPage() {
   const data = await getDashboardData(session.user.email);
   if (!data) return <div>Partner not found</div>;
 
-  const { partner, deals, totalCourses, completedCourses } = data;
-  const isCreator = partner.partnerType === 'creator';
+  const { partner, deals, totalCourses, completedCourses, eligibility, hasRiskFlags, hasDeals } = data;
+  const isCreator = partner.tier === 'creator';
+  const tierProgress = getTierProgress(partner.tier || 'referral', partner.stats.totalReferredRevenue || 0);
 
   const stats = isCreator ? [
     {
@@ -146,6 +174,63 @@ export default async function DashboardPage() {
         )}
       </div>
 
+      <OnboardingChecklist 
+        profileComplete={!!partner.bankDetails?.accountName || !!partner.payoutMethod || !!partner.localRemittanceDetails?.fullName}
+        payoutMethodSet={!!partner.payoutMethod}
+        academyFinished={partner.hasCompletedOnboarding || false}
+        dealRegistered={hasDeals}
+        standardsReviewed={partner.termsAccepted || false}
+      />
+
+      {isCreator ? (
+         <ReferralLinkGenerator 
+           referralCode={partner.referralCode || ''}
+           clicks={partner.stats.referralClicks || 0}
+           conversions={partner.stats.referralLeads || 0}
+         />
+      ) : (
+        <div className="bg-linear-to-r from-emerald-600 to-emerald-500 rounded-4xl shadow-lg shadow-emerald-200 border border-emerald-400/20 overflow-hidden mb-8 p-8 text-white relative group transition-all hover:scale-[1.01]">
+          <div className="relative z-10 max-w-2xl">
+            <div className="inline-flex items-center px-3 py-1 rounded-full bg-white/20 text-white text-xs font-bold uppercase tracking-wider mb-4 backdrop-blur-md">
+              <Sparkles className="h-3 w-3 mr-1.5" />
+              New Feature
+            </div>
+            <h3 className="text-2xl font-bold mb-3">Get your unique Referral Link</h3>
+            <p className="text-emerald-50 mb-6 font-medium">
+              Want to earn commissions without manual deal registration? Switch to the <strong className="text-white">Creator Tier</strong> to get a trackable link you can share anywhere.
+            </p>
+            <Link 
+              href="/partner/dashboard/settings" 
+              className="inline-flex items-center px-6 py-3 bg-white text-emerald-600 rounded-xl font-bold text-sm transition-all hover:bg-emerald-50 shadow-md"
+            >
+              Get Started &rarr;
+            </Link>
+          </div>
+          
+          {/* Background Decor */}
+          <div className="absolute top-1/2 -right-8 -translate-y-1/2 opacity-20 pointer-events-none transition-transform group-hover:rotate-12 duration-700">
+            <MousePointer2 className="h-64 w-64" />
+          </div>
+        </div>
+      )}
+
+      {/* Warning Banners */}
+      <div className="space-y-3">
+        {hasRiskFlags && (
+          <div className="flex items-start p-4 rounded-xl text-sm font-medium bg-slate-50 text-slate-800 border border-slate-200">
+            <Info className="h-5 w-5 mr-3 shrink-0 text-slate-500 mt-0.5" />
+            <p>Your account has activity under review. This does not block your earnings but may require manual verification.</p>
+          </div>
+        )}
+        
+        {(partner as any).debtBalance > 0 && (
+          <div className="flex items-start p-4 rounded-xl text-sm font-medium bg-red-50 text-red-800 border border-red-200">
+            <AlertTriangle className="h-5 w-5 mr-3 shrink-0 text-red-600 mt-0.5" />
+            <p>A previous client refund resulted in a balance adjustment. Future commissions will first offset this amount. Current debt: <strong>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format((partner as any).debtBalance)}</strong></p>
+          </div>
+        )}
+      </div>
+
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat) => (
@@ -166,52 +251,50 @@ export default async function DashboardPage() {
         ))}
       </div>
 
-      {/* Payout Settings & Status */}
-      <div className="bg-white rounded-4xl shadow-sm border border-slate-100 overflow-hidden p-4 sm:p-8">
-         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
-            <div>
-               <h3 className="text-lg font-bold text-slate-900 flex items-center">
-                 <DollarSign className="h-5 w-5 mr-2 text-emerald-500" />
-                 Payout Status
-               </h3>
-               <p className="text-sm text-slate-500 mt-1">Next Payout Date: <span className="font-bold text-slate-800">5th of Next Month</span></p>
-            </div>
-            <Link href="/partner/dashboard/settings" className="self-start sm:self-auto px-4 py-2 bg-slate-50 text-slate-700 rounded-xl text-sm font-medium hover:bg-slate-100 transition-colors">
-              Update Payout Method
-            </Link>
-         </div>
-         
-         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-            <div className="p-4 sm:p-5 rounded-2xl border border-slate-100 bg-slate-50">
-               <p className="text-sm font-semibold text-slate-500 mb-1">Approved Balance</p>
-               <p className="text-xl sm:text-2xl font-bold text-emerald-600">
-                  {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(partner.stats.approvedBalance || 0)}
-               </p>
-            </div>
-            <div className="p-4 sm:p-5 rounded-2xl border border-slate-100 bg-slate-50">
-               <p className="text-sm font-semibold text-slate-500 mb-1">Pending Earnings</p>
-               <p className="text-xl sm:text-2xl font-bold text-amber-600">
-                  {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(partner.stats.pendingCommission || 0)}
-               </p>
-            </div>
-            <div className="p-4 sm:p-5 rounded-2xl border border-slate-100 bg-slate-50">
-               <p className="text-sm font-semibold text-slate-500 mb-1">Minimum Threshold</p>
-               <p className="text-xl sm:text-2xl font-bold text-slate-900">$50.00</p>
-            </div>
-         </div>
+      <CommissionForecastPanel 
+        isEligible={eligibility.isEligible}
+        reasons={eligibility.reasons}
+        approvedBalance={partner.stats.approvedBalance || 0}
+        pendingCommission={partner.stats.pendingCommission || 0}
+      />
 
-         {(partner.stats.approvedBalance || 0) < 50 ? (
-            <div className="flex items-start sm:items-center p-4 rounded-xl text-sm font-medium bg-amber-50 text-amber-800 border border-amber-200">
-               <Shield className="h-5 w-5 mr-3 shrink-0 text-amber-600 mt-0.5 sm:mt-0" />
-               <p><strong>Below Threshold:</strong> Your approved balance is below the $50 minimum. Payouts will roll over to the next month once the threshold is reached.</p>
+      <PerformanceAnalyticsPanel partnerId={partner._id.toString()} stats={partner.stats} />
+
+      {/* Tier Progression */}
+      {tierProgress && (
+        <div className="bg-white rounded-4xl shadow-sm border border-slate-100 overflow-hidden p-4 sm:p-8">
+          <div className="flex items-center mb-6">
+            <ChevronsUp className="h-6 w-6 text-emerald-500 mr-2" />
+            <h3 className="text-lg font-bold text-slate-900">Tier Progression</h3>
+          </div>
+          
+          <div className="mb-2 flex justify-between items-end">
+            <div>
+              <p className="text-sm text-slate-500 font-medium">Current Tier</p>
+              <p className="text-xl font-bold text-slate-900 capitalize">{partner.tier || 'Referral'}</p>
             </div>
-         ) : (
-            <div className="flex items-start sm:items-center p-4 rounded-xl text-sm font-medium bg-emerald-50 text-emerald-800 border border-emerald-200">
-               <CheckCircle className="h-5 w-5 mr-3 shrink-0 text-emerald-600 mt-0.5 sm:mt-0" />
-               <p><strong>Eligible for Payout:</strong> Your approved balance meets the $50 minimum threshold. Your payout will be generated securely on the 5th.</p>
+            <div className="text-right">
+              <p className="text-sm text-slate-500 font-medium">Next Tier: <span className="text-slate-900 font-bold">{tierProgress.next}</span></p>
+              <p className="text-sm font-bold text-emerald-600">
+                {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(tierProgress.current)} / {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(tierProgress.threshold)}
+              </p>
             </div>
-         )}
-      </div>
+          </div>
+          
+          {/* Progress Bar */}
+          <div className="w-full bg-slate-100 rounded-full h-4 mb-4 overflow-hidden relative">
+            <div 
+              className="bg-emerald-500 h-4 rounded-full transition-all duration-1000 ease-out" 
+              style={{ width: `${tierProgress.pct}%` }}
+            />
+          </div>
+          
+          <p className="text-sm text-slate-600">
+            You are <strong className="text-slate-900">{tierProgress.pct.toFixed(1)}%</strong> toward the <strong className="text-slate-900">{tierProgress.next} Tier</strong>. 
+            Keep referring to unlock higher commissions and exclusive benefits!
+          </p>
+        </div>
+      )}
 
       {/* Quick Actions & Announcements */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -269,8 +352,8 @@ export default async function DashboardPage() {
             <h3 className="text-lg font-bold text-slate-900">Program Announcements</h3>
           </div>
           <div className="space-y-4">
-            <div className="flex items-start p-4 rounded-xl bg-gradient-to-r from-emerald-50 to-emerald-50/50 border border-emerald-100">
-              <div className="p-2 bg-emerald-500 rounded-lg mr-4 mt-0.5 flex-shrink-0">
+            <div className="flex items-start p-4 rounded-xl bg-linear-to-r from-emerald-50 to-emerald-50/50 border border-emerald-100">
+              <div className="p-2 bg-emerald-500 rounded-lg mr-4 mt-0.5 shrink-0">
                 <Sparkles className="h-4 w-4 text-white" />
               </div>
               <div>
@@ -279,8 +362,8 @@ export default async function DashboardPage() {
                 <p className="text-xs text-slate-400 mt-2 font-medium">Feb 2026</p>
               </div>
             </div>
-            <div className="flex items-start p-4 rounded-xl bg-gradient-to-r from-blue-50 to-blue-50/50 border border-blue-100">
-              <div className="p-2 bg-blue-500 rounded-lg mr-4 mt-0.5 flex-shrink-0">
+            <div className="flex items-start p-4 rounded-xl bg-linear-to-r from-blue-50 to-blue-50/50 border border-blue-100">
+              <div className="p-2 bg-blue-500 rounded-lg mr-4 mt-0.5 shrink-0">
                 <Star className="h-4 w-4 text-white" />
               </div>
               <div>
@@ -289,8 +372,8 @@ export default async function DashboardPage() {
                 <p className="text-xs text-slate-400 mt-2 font-medium">Feb 2026</p>
               </div>
             </div>
-            <div className="flex items-start p-4 rounded-xl bg-gradient-to-r from-amber-50 to-amber-50/50 border border-amber-100">
-              <div className="p-2 bg-amber-500 rounded-lg mr-4 mt-0.5 flex-shrink-0">
+            <div className="flex items-start p-4 rounded-xl bg-linear-to-r from-amber-50 to-amber-50/50 border border-amber-100">
+              <div className="p-2 bg-amber-500 rounded-lg mr-4 mt-0.5 shrink-0">
                 <CalendarCheck className="h-4 w-4 text-white" />
               </div>
               <div>

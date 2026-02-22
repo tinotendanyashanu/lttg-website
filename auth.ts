@@ -39,7 +39,8 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
 
 
         if (parsedCredentials.success) {
-          const { email, password } = parsedCredentials.data;
+          let { email, password } = parsedCredentials.data;
+          email = email.toLowerCase();
           console.log(`[Auth] Attempting login for: ${email}`);
           
           await dbConnect();

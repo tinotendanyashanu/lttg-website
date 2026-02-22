@@ -14,8 +14,9 @@ export interface Partner {
   email: string;
   companyName?: string;
   role: 'partner' | 'admin';
-  partnerType: 'standard' | 'creator';
+  partnerType: 'partner' | 'influencer';
   tier: 'referral' | 'agency' | 'enterprise' | 'creator';
+  tierLocked?: boolean;
   referralCode?: string;
   status: 'active' | 'suspended' | 'pending';
   bankDetails?: {
@@ -58,17 +59,19 @@ export interface Deal {
   _id: string;
   partnerId: string;
   clientName: string;
+  clientEmail?: string;
   estimatedValue: number;
   finalValue?: number;
   commissionRate: number;
   commissionAmount?: number;
-  commissionStatus?: 'Pending' | 'Approved' | 'Reversed' | 'Paid';
+  commissionStatus?: 'Pending' | 'Approved' | 'Reversed' | 'Refunded' | 'Paid';
   payoutBatchId?: any;
   dealStatus: 'registered' | 'under_review' | 'approved' | 'closed' | 'rejected';
   paymentStatus: 'pending' | 'received' | 'commission_paid';
   paymentMethod?: 'cash' | 'bank_transfer' | 'stripe' | 'other';
   serviceType: 'SME' | 'Startup' | 'Enterprise' | 'Individual' | 'Internal';
   notes?: string;
+  approvalDate?: string;
   closedAt?: string;
   paymentReceivedAt?: string;
   commissionSource: 'DEAL' | 'ACADEMY_BONUS';

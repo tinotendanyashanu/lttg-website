@@ -10,6 +10,7 @@ import Deal from '@/models/Deal';
 import Payout from '@/models/Payout';
 import AuditLog from '@/models/AuditLog';
 import AffiliateRiskFlag from '@/models/AffiliateRiskFlag';
+import PartnerNotification from '@/models/PartnerNotification';
 import { revalidatePath } from 'next/cache';
 import { sendEmail, EmailTemplates } from '@/lib/email';
 import { evaluatePartnerPayoutEligibility } from '@/lib/actions/payouts';
@@ -66,6 +67,7 @@ async function checkAndUpgradeTier(partnerId: string) {
             entityId: partnerId,
             action: 'tier_auto_upgraded',
             performedBy: 'system',
+            details: { newTier, oldTier },
             metadata: {
                 oldTier,
                 newTier,
@@ -79,6 +81,12 @@ async function checkAndUpgradeTier(partnerId: string) {
             to: partner.email,
             subject: 'Congratulations! You\'ve been upgraded!',
             html: EmailTemplates.tierUpgrade(partner.name, newTier),
+        });
+
+        await PartnerNotification.create({
+            partnerId,
+            type: 'tier_upgraded',
+            message: `Congratulations! Your tier has been upgraded to ${newTier.charAt(0).toUpperCase() + newTier.slice(1)}.`,
         });
     }
 }
@@ -125,6 +133,7 @@ export async function updatePartnerTier(
         entityId: partnerId,
         action: 'tier_manual_change',
         performedBy: admin.id,
+        details: { newTier, oldTier, tierOverride, tierLocked },
         metadata: {
             oldTier,
             newTier,
@@ -162,10 +171,36 @@ export async function updatePartnerStatus(partnerId: string, status: 'active' | 
     entityId: partnerId,
     action: `partner_status_update_${status}`,
     performedBy: admin.id,
+    details: { status, tier },
     metadata: { status, tier },
   });
 
   revalidatePath('/admin/partners');
+}
+
+export async function forceVerifyPartnerEmail(partnerId: string) {
+    const admin = await checkAdmin();
+    await dbConnect();
+    
+    const partner = await Partner.findById(partnerId);
+    if (!partner) throw new Error('Partner not found');
+
+    await Partner.findByIdAndUpdate(partnerId, {
+        emailVerified: true,
+        $unset: { verificationToken: "", verificationTokenExpiry: "" }
+    });
+
+    await AuditLog.create({
+        entityType: 'partner',
+        entityId: partnerId,
+        action: 'admin_force_verified_email',
+        performedBy: admin.id,
+        details: { partnerEmail: partner.email },
+        metadata: { partnerEmail: partner.email },
+    });
+
+    revalidatePath('/admin/partners');
+    revalidatePath(`/admin/partners/${partnerId}`);
 }
 
 export async function updateDealStatus(
@@ -188,6 +223,12 @@ export async function updateDealStatus(
       updates.paymentStatus = paymentStatus;
       if (paymentStatus === 'received' && deal.paymentStatus !== 'received') {
           updates.paymentReceivedAt = new Date();
+          
+          await PartnerNotification.create({
+              partnerId: deal.partnerId,
+              type: 'payment_received',
+              message: `Client payment received for your deal: ${deal.clientName}.`,
+          });
       }
   }
 
@@ -239,6 +280,7 @@ export async function updateDealStatus(
     entityId: dealId,
     action: `deal_status_update_${status}`,
     performedBy: admin.id,
+    details: { status, finalValue, commissionRate },
     metadata: { status, finalValue, commissionRate },
   });
   
@@ -312,6 +354,7 @@ export async function recordCommissionPayment(dealId: string, amount: number, me
         entityId: payout._id,
         action: 'commission_paid_manual',
         performedBy: admin.id,
+        details: { dealId, amount, method, reference },
         metadata: { dealId, amount, method, reference },
     });
     
@@ -322,6 +365,12 @@ export async function recordCommissionPayment(dealId: string, amount: number, me
             to: partnerToNotify.email,
             subject: 'Commission Paid',
             html: EmailTemplates.commissionPaid(partnerToNotify.name, deal.clientName, amount),
+        });
+        
+        await PartnerNotification.create({
+            partnerId: deal.partnerId,
+            type: 'commission_paid',
+            message: `Your commission of $${amount} for ${deal.clientName} has been paid via ${method}.`,
         });
     }
 
@@ -360,6 +409,7 @@ export async function resolveRiskFlag(flagId: string, resolutionNotes: string) {
     entityId: flagId,
     action: 'risk_flag_resolved',
     performedBy: admin.id,
+    details: { type: flag.type, action: 'resolved' },
     metadata: { flagId, type: flag.type, resolutionNotes },
   });
 

@@ -23,7 +23,7 @@ export default async function DashboardLayout({
   const partner = JSON.parse(JSON.stringify(partnerDoc)) as unknown as Partner;
 
   if (!partner) {
-    redirect('/contact');
+    redirect('/partner/signup');
   }
 
   // Legal & Compliance: Block dashboard if terms not accepted or outdated
@@ -31,13 +31,18 @@ export default async function DashboardLayout({
     redirect('/partner/accept-terms');
   }
 
+  // Email Verification check
+  if (!partner.emailVerified) {
+    redirect('/partner/verify-email');
+  }
+
   return (
     <>
       <OnboardingTour
         userHasCompleted={partner.hasCompletedOnboarding || false}
-        partnerType={partner.partnerType || 'standard'}
+        partnerType={partner.partnerType || 'partner'}
       />
-      <DashboardShell user={partner} partnerType={partner.partnerType || 'standard'}>
+      <DashboardShell user={partner} partnerType={partner.partnerType || 'partner'}>
         {children}
       </DashboardShell>
     </>

@@ -9,6 +9,10 @@ import { redirect } from 'next/navigation';
 import { sendEmail } from '@/lib/email';
 import { z } from 'zod';
 import { runAllFraudChecks } from '@/lib/services/fraudDetection';
+import PartnerNotification from '@/models/PartnerNotification';
+import AuditLog from '@/models/AuditLog';
+import crypto from 'crypto';
+import mongoose from 'mongoose';
 
 const DealSchema = z.object({
   clientName: z.string().min(2, "Client name is required"),
@@ -59,6 +63,13 @@ export async function registerDeal(prevState: unknown, formData: FormData) {
 
     dealId = deal._id.toString();
 
+    // Notify Partner silently
+    await PartnerNotification.create({
+      partnerId: session.user.id,
+      type: 'deal_registered',
+      message: `Your deal for ${clientName} has been registered successfully.`,
+    });
+
     // Notify Admin
     await sendEmail({
       to: 'contact@leothetechguy.com',
@@ -99,5 +110,124 @@ export async function completeOnboarding() {
   await dbConnect();
   await Partner.findByIdAndUpdate(session.user.id, { hasCompletedOnboarding: true });
   revalidatePath('/partner/dashboard');
+}
+
+export async function switchTier(targetTier: 'referral' | 'creator') {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false, message: 'Unauthorized' };
+  }
+
+  try {
+    await dbConnect();
+    const partner = await Partner.findById(session.user.id);
+    
+    if (!partner) {
+      return { success: false, message: 'Partner not found' };
+    }
+
+    if (partner.tierLocked) {
+      return { success: false, message: 'Your tier is locked by an administrator. Please contact support.' };
+    }
+
+    if (partner.tier === targetTier) {
+      return { success: true, message: `You are already in the ${targetTier} tier.` };
+    }
+
+    const previousTier = partner.tier;
+    const updates: any = {
+      tier: targetTier,
+      partnerType: targetTier === 'creator' ? 'influencer' : 'partner'
+    };
+
+    // Generate referral code if switching to creator and missing
+    if (targetTier === 'creator' && !partner.referralCode) {
+      const slugBase = partner.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+      const randomSuffix = crypto.randomBytes(3).toString('hex');
+      updates.referralCode = `leo-${slugBase}-${randomSuffix}`;
+    }
+
+    await Partner.findByIdAndUpdate(session.user.id, updates);
+
+    // Audit Log
+    await AuditLog.create({
+      entityType: 'partner',
+      entityId: partner._id as mongoose.Types.ObjectId,
+      action: 'tier_switch',
+      performedBy: partner._id as mongoose.Types.ObjectId,
+      details: { from: previousTier, to: targetTier },
+    });
+
+    // Notification
+    await PartnerNotification.create({
+      partnerId: partner._id,
+      type: 'tier_updated',
+      message: `You have successfully switched to the ${targetTier === 'creator' ? 'Creator' : 'Referral'} tier.`,
+    });
+
+    revalidatePath('/partner/dashboard');
+    revalidatePath('/partner/dashboard/settings');
+    revalidatePath('/partner/dashboard/tier');
+
+    return { 
+      success: true, 
+      message: `Successfully switched to ${targetTier === 'creator' ? 'Creator' : 'Referral'} tier.`,
+      referralCode: updates.referralCode || partner.referralCode
+    };
+
+  } catch (error) {
+    console.error('Tier switch error:', error);
+    return { success: false, message: 'Failed to switch tier. Please try again.' };
+  }
+}
+
+export async function generateReferralCode() {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false, message: 'Unauthorized' };
+  }
+
+  try {
+    await dbConnect();
+    const partner = await Partner.findById(session.user.id);
+    
+    if (!partner) {
+      return { success: false, message: 'Partner not found' };
+    }
+
+    if (partner.tier !== 'creator') {
+      return { success: false, message: 'Only Creator partners can have referral links.' };
+    }
+
+    if (partner.referralCode) {
+      return { success: true, message: 'Referral code already exists.', referralCode: partner.referralCode };
+    }
+
+    const slugBase = partner.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    const randomSuffix = crypto.randomBytes(3).toString('hex');
+    const referralCode = `leo-${slugBase}-${randomSuffix}`;
+
+    await Partner.findByIdAndUpdate(session.user.id, { referralCode });
+
+    // Notification
+    await PartnerNotification.create({
+      partnerId: partner._id,
+      type: 'tier_updated',
+      message: `Your unique referral code has been generated: ${referralCode}`,
+    });
+
+    revalidatePath('/partner/dashboard');
+    revalidatePath('/partner/dashboard/settings');
+
+    return { 
+      success: true, 
+      message: 'Referral code generated successfully!',
+      referralCode
+    };
+
+  } catch (error) {
+    console.error('Code generation error:', error);
+    return { success: false, message: 'Failed to generate referral code. Please try again.' };
+  }
 }
 

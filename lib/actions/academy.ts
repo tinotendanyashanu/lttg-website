@@ -110,6 +110,7 @@ export async function submitExam(courseId: string, answers: number[]) {
               entityId: partner._id,
               action: 'academy_bonus_issued',
               performedBy: 'system',
+              details: { dealId: bonusDeal._id, amount: 10 },
               metadata: { dealId: bonusDeal._id, amount: 10 }
             }], { session: mSession });
 

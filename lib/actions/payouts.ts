@@ -12,6 +12,7 @@ import AuditLog from '@/models/AuditLog';
 import { revalidatePath } from 'next/cache';
 import { updateDealState } from '@/lib/actions/dealState';
 import { recordLedgerEntry } from '@/lib/services/ledger';
+import PartnerNotification from '@/models/PartnerNotification';
 import bcrypt from 'bcryptjs';
 import { headers } from 'next/headers';
 
@@ -133,6 +134,12 @@ export async function processCommissionApprovals() {
       amount: amount,
       relatedDealId: deal._id.toString()
     });
+    
+    await PartnerNotification.create({
+      partnerId: deal.partnerId,
+      type: 'commission_approved',
+      message: `Commission of $${amount} for ${deal.clientName} has been approved.`,
+    });
 
     approvedCount++;
 
@@ -141,6 +148,7 @@ export async function processCommissionApprovals() {
       entityId: deal._id,
       action: 'commission_approved',
       performedBy: 'system',
+      details: { dealId: deal._id, amount },
       metadata: { dealId: deal._id, amount }
     });
   }
@@ -217,6 +225,7 @@ export async function generateMonthlyPayoutBatch() {
     entityId: batch._id,
     action: 'payout_batch_generated',
     performedBy: admin.id,
+    details: { totalAmount, payoutMonth, dealsCount },
     metadata: { totalAmount, payoutMonth, dealsCount }
   });
 
@@ -271,16 +280,21 @@ export async function completePayoutBatch(
    for (const deal of deals) {
      await updateDealState(deal._id.toString(), { commissionStatus: 'Paid' });
      const pid = deal.partnerId.toString();
-     
-     await recordLedgerEntry({
-       partnerId: pid,
-       type: 'commission_paid',
-       amount: deal.commissionAmount || 0,
-       relatedDealId: deal._id.toString(),
-       batchId: batchId
-     });
+          await recordLedgerEntry({
+        partnerId: pid,
+        type: 'commission_paid',
+        amount: deal.commissionAmount || 0,
+        relatedDealId: deal._id.toString(),
+        batchId: batchId
+      });
+      
+      await PartnerNotification.create({
+        partnerId: pid,
+        type: 'commission_paid',
+        message: `Your commission of $${deal.commissionAmount || 0} has been paid via batch.`,
+      });
 
-     partnerTotals.set(pid, (partnerTotals.get(pid) || 0) + (deal.commissionAmount || 0));
+      partnerTotals.set(pid, (partnerTotals.get(pid) || 0) + (deal.commissionAmount || 0));
    }
 
    for (const [pid, amount] of partnerTotals.entries()) {
@@ -315,6 +329,13 @@ export async function completePayoutBatch(
       entityId: batch._id,
       action: 'payout_batch_completed',
       performedBy: admin.id,
+      details: {
+        batchId,
+        referenceNumber: payload.referenceNumber,
+        transactionReference: payload.transactionReference,
+        totalAmount: batch.totalAmount,
+        ipAddress
+      },
       metadata: { 
         batchId, 
         referenceNumber: payload.referenceNumber,
@@ -358,6 +379,7 @@ export async function processRefund(dealId: string) {
     entityId: dealId,
     action: 'commission_reversed',
     performedBy: admin.id,
+    details: { dealId, amount, previousStatus: deal.commissionStatus },
     metadata: { dealId, amount, previousStatus: deal.commissionStatus }
   });
 

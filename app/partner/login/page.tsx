@@ -49,7 +49,7 @@ export default function LoginPage() {
             
             <p className="mt-2 text-sm text-slate-600">
               Don&apos;t have an account?{' '}
-              <Link href="/contact" className="font-medium text-emerald-600 hover:text-emerald-500">
+              <Link href="/partner/signup" className="font-medium text-emerald-600 hover:text-emerald-500">
                 Apply to become a partner
               </Link>
             </p>

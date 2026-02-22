@@ -3,6 +3,7 @@ import Deal from '@/models/Deal';
 import Partner from '@/models/Partner';
 import AffiliateRiskFlag, { RiskFlagType } from '@/models/AffiliateRiskFlag';
 import AffiliateProgramConfig from '@/models/AffiliateProgramConfig';
+import PartnerNotification from '@/models/PartnerNotification';
 import mongoose from 'mongoose';
 
 /**
@@ -68,6 +69,12 @@ async function createFlag({
     type,
     severity,
     message,
+  });
+
+  await PartnerNotification.create({
+    partnerId: new mongoose.Types.ObjectId(partnerId),
+    type: 'risk_flag_review',
+    message: `A recent activity on your account check has been flagged for standard review.`,
   });
 }
 

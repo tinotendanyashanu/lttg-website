@@ -6,10 +6,16 @@ export interface IPartner extends Document {
   companyName?: string;
   password?: string; // Optional because initial signups might be OAuth or awaiting password set
   role: 'partner' | 'admin';
-  partnerType: 'standard' | 'creator';
+  partnerType: 'partner' | 'influencer';
+  primaryPlatform?: 'youtube' | 'instagram' | 'tiktok' | 'twitter' | 'linkedin' | 'blog' | 'other';
+  profileUrl?: string;
+  audienceSize?: 'under_1k' | '1k_10k' | '10k_50k' | '50k_100k' | 'over_100k';
   tier: 'referral' | 'agency' | 'enterprise' | 'creator';
   referralCode?: string;
   status: 'active' | 'suspended' | 'pending';
+  emailVerified: boolean;
+  kycStatus: 'not_started' | 'pending' | 'approved' | 'rejected';
+  riskLevel: 'low' | 'medium' | 'high';
   bankDetails?: {
     accountName: string;
     accountNumber: string;
@@ -77,8 +83,17 @@ const PartnerSchema: Schema = new Schema({
   },
   partnerType: {
     type: String,
-    enum: ['standard', 'creator'],
-    default: 'standard'
+    enum: ['partner', 'influencer'],
+    default: 'partner'
+  },
+  primaryPlatform: {
+    type: String,
+    enum: ['youtube', 'instagram', 'tiktok', 'twitter', 'linkedin', 'blog', 'other']
+  },
+  profileUrl: { type: String },
+  audienceSize: {
+    type: String,
+    enum: ['under_1k', '1k_10k', '10k_50k', '50k_100k', 'over_100k']
   },
   tier: { 
     type: String, 
@@ -89,7 +104,18 @@ const PartnerSchema: Schema = new Schema({
   status: { 
     type: String, 
     enum: ['active', 'suspended', 'pending'],
-    default: 'pending' 
+    default: 'active' 
+  },
+  emailVerified: { type: Boolean, default: false },
+  kycStatus: {
+    type: String,
+    enum: ['not_started', 'pending', 'approved', 'rejected'],
+    default: 'not_started'
+  },
+  riskLevel: {
+    type: String,
+    enum: ['low', 'medium', 'high'],
+    default: 'low'
   },
   bankDetails: {
     accountName: String,

@@ -20,13 +20,13 @@ import Image from 'next/image';
 import { Partner } from '@/types';
 
 const navigation = [
-  { name: 'Overview', href: '/partner/dashboard', icon: LayoutDashboard, roles: ['standard', 'creator'] },
-  { name: 'Leads', href: '/partner/dashboard/leads', icon: MousePointer2, roles: ['creator'] },
-  { name: 'Deals', href: '/partner/dashboard/deals', icon: Briefcase, roles: ['standard', 'creator'] },
-  { name: 'Earnings', href: '/partner/dashboard/earnings', icon: DollarSign, roles: ['standard', 'creator'] },
-  { name: 'Academy', href: '/partner/dashboard/academy', icon: GraduationCap, roles: ['standard', 'creator'] },
-  { name: 'Commercial Playbook', href: '/partner/dashboard/commercial-playbook', icon: BookOpen, roles: ['standard', 'creator'] },
-  { name: 'Tier Progress', href: '/partner/dashboard/tier', icon: Award, roles: ['standard'] },
+  { name: 'Overview', href: '/partner/dashboard', icon: LayoutDashboard, roles: ['partner', 'influencer'] },
+  { name: 'Leads', href: '/partner/dashboard/leads', icon: MousePointer2, roles: ['influencer'] },
+  { name: 'Deals', href: '/partner/dashboard/deals', icon: Briefcase, roles: ['partner', 'influencer'] },
+  { name: 'Earnings', href: '/partner/dashboard/earnings', icon: DollarSign, roles: ['partner', 'influencer'] },
+  { name: 'Academy', href: '/partner/dashboard/academy', icon: GraduationCap, roles: ['partner', 'influencer'] },
+  { name: 'Commercial Playbook', href: '/partner/dashboard/commercial-playbook', icon: BookOpen, roles: ['partner', 'influencer'] },
+  { name: 'Tier Progress', href: '/partner/dashboard/tier', icon: Award, roles: ['partner'] },
 ];
 
 const secondaryNavigation = [
@@ -36,7 +36,7 @@ const secondaryNavigation = [
 
 export default function Sidebar({
   user,
-  partnerType = 'standard',
+  partnerType = 'partner',
   isOpen = false,
   onClose,
 }: {

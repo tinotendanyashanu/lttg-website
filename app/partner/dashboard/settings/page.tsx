@@ -2,13 +2,15 @@ import { auth } from '@/auth';
 import dbConnect from '@/lib/mongodb';
 import PartnerModel from '@/models/Partner';
 import PayoutSettingsForm from '@/components/partner/PayoutSettingsForm';
-import { User, CreditCard, Mail, Award, CheckCircle } from 'lucide-react';
+import TierSwitcher from '@/components/partner/TierSwitcher';
+import { User, CreditCard, Mail, Award, CheckCircle, ShieldCheck } from 'lucide-react';
 import { Partner } from '@/types';
+import Link from 'next/link';
 
 async function getPartnerSettings(email: string) {
   await dbConnect();
-  const partner = await PartnerModel.findOne({ email }).lean() as unknown as Partner;
-  return partner;
+  const partnerDoc = await PartnerModel.findOne({ email }).lean();
+  return JSON.parse(JSON.stringify(partnerDoc)) as unknown as Partner;
 }
 
 export default async function SettingsPage() {
@@ -68,6 +70,12 @@ export default async function SettingsPage() {
         </div>
       </div>
 
+      {/* Tier Switching */}
+      <TierSwitcher 
+        currentTier={partner.tier || 'referral'} 
+        isLocked={partner.tierLocked || false} 
+      />
+
       {/* Bank Details Form */}
       <div>
         <div className="flex items-center space-x-2 mb-4 px-1">
@@ -77,6 +85,43 @@ export default async function SettingsPage() {
         <p className="text-sm text-slate-500 mb-4 px-1">Select your preferred payout method and ensure your details are complete. (Note: Changes are locked between the 2nd and 5th of each month prior to payouts)</p>
         
         <PayoutSettingsForm partner={partner} />
+      </div>
+
+      {/* Legal & Compliance */}
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+        <div className="p-8 border-b border-slate-50 flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-bold text-slate-900 flex items-center">
+              <ShieldCheck className="h-5 w-5 mr-2 text-emerald-500" />
+              Legal & Compliance
+            </h3>
+            <p className="text-sm text-slate-500 mt-1">Your accepted agreements and compliance status.</p>
+          </div>
+          <Link href="/legal/affiliate-agreement" className="text-sm text-emerald-600 font-bold hover:underline" target="_blank">
+            View Agreement &rarr;
+          </Link>
+        </div>
+        <div className="p-8">
+          <div className="grid md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Terms Accepted</label>
+              <div className="flex items-center px-4 py-3 bg-slate-50 rounded-xl border border-slate-100">
+                <CheckCircle className="h-4 w-4 text-emerald-500 mr-3" />
+                <span className="text-slate-900 font-medium">Agreement Version {partner.termsVersion || '1.0'}</span>
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Date Accepted</label>
+              <div className="flex items-center px-4 py-3 bg-slate-50 rounded-xl border border-slate-100">
+                <span className="text-slate-900 font-medium">
+                  {partner.termsAcceptedAt 
+                    ? new Date(partner.termsAcceptedAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) 
+                    : 'Unknown'}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Danger Zone */}

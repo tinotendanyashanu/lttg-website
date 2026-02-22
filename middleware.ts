@@ -19,6 +19,18 @@ export default auth((req) => {
       sameSite: 'lax',
     });
     console.log(`[Middleware] Set ref cookie: ${refCode}`);
+
+    // Fire and forget tracking API call
+    fetch(`${nextUrl.origin}/api/tracking/click`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        refCode, 
+        userAgent: req.headers.get('user-agent') || '', 
+        ip: req.headers.get('x-forwarded-for') || '' 
+      })
+    }).catch((err) => console.error('[Middleware] Failed to track referral click:', err));
+
     return response;
   }
 
