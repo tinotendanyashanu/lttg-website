@@ -21,6 +21,7 @@ export async function POST(request: Request) {
     // Save click
     await ReferralClick.create({
       partnerId: partner._id,
+      refCode,
       ip,
       userAgent
     });

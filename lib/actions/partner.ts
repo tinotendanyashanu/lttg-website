@@ -11,12 +11,21 @@ import { z } from 'zod';
 import { runAllFraudChecks } from '@/lib/services/fraudDetection';
 import PartnerNotification from '@/models/PartnerNotification';
 import AuditLog from '@/models/AuditLog';
+import Lead from '@/models/Lead';
 import crypto from 'crypto';
 import mongoose from 'mongoose';
+
+const phoneRegex = /^\+?[1-9]\d{1,14}$/;
 
 const DealSchema = z.object({
   clientName: z.string().min(2, "Client name is required"),
   clientEmail: z.string().email("A valid client email is required"),
+  clientPhone: z.string()
+    .min(1, "Client phone number is required")
+    .transform((val) => val.replace(/[\s\-().]/g, ''))
+    .refine((val) => phoneRegex.test(val), {
+      message: "Please enter a valid phone number (e.g. +1234567890)"
+    }),
   estimatedValue: z.coerce.number().min(1, "Estimated value must be greater than 0"),
   serviceType: z.enum(['SME', 'Startup', 'Enterprise', 'Individual']),
   notes: z.string().optional(),
@@ -31,6 +40,7 @@ export async function registerDeal(prevState: unknown, formData: FormData) {
   const validatedFields = DealSchema.safeParse({
     clientName: formData.get('clientName'),
     clientEmail: formData.get('clientEmail'),
+    clientPhone: formData.get('clientPhone'),
     estimatedValue: formData.get('estimatedValue'),
     serviceType: formData.get('serviceType'),
     notes: formData.get('notes'),
@@ -43,7 +53,7 @@ export async function registerDeal(prevState: unknown, formData: FormData) {
     };
   }
 
-  const { clientName, clientEmail, estimatedValue, serviceType, notes } = validatedFields.data;
+  const { clientName, clientEmail, clientPhone, estimatedValue, serviceType, notes } = validatedFields.data;
 
   let dealId: string | null = null;
 
@@ -54,6 +64,7 @@ export async function registerDeal(prevState: unknown, formData: FormData) {
       partnerId: session.user.id,
       clientName,
       clientEmail: clientEmail.toLowerCase().trim(),
+      clientPhone,
       estimatedValue,
       serviceType,
       notes,
@@ -62,6 +73,23 @@ export async function registerDeal(prevState: unknown, formData: FormData) {
     });
 
     dealId = deal._id.toString();
+
+    // Optionally create a corresponding lead record for manual deal registration
+    try {
+      await Lead.create({
+        partnerId: session.user.id,
+        clientName,
+        clientEmail: clientEmail.toLowerCase().trim(),
+        clientPhone,
+        source: 'manual',
+        status: 'qualified',
+        relatedDealId: deal._id,
+        converted: true,
+      });
+    } catch (leadErr) {
+      // Lead creation failure should never block deal registration
+      console.error('[LEAD] Auto-creation failed silently:', leadErr);
+    }
 
     // Notify Partner silently
     await PartnerNotification.create({
