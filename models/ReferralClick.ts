@@ -2,6 +2,7 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface IReferralClick extends Document {
   partnerId: mongoose.Types.ObjectId;
+  refCode?: string;
   ip?: string;
   userAgent?: string;
   createdAt: Date;
@@ -10,6 +11,7 @@ export interface IReferralClick extends Document {
 
 const ReferralClickSchema: Schema = new Schema({
   partnerId: { type: Schema.Types.ObjectId, ref: 'Partner', required: true },
+  refCode: { type: String },
   ip: { type: String },
   userAgent: { type: String },
 }, { timestamps: true });

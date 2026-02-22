@@ -4,6 +4,7 @@ export interface IDeal extends Document {
   partnerId: mongoose.Types.ObjectId;
   clientName: string;
   clientEmail?: string;
+  clientPhone?: string;
   estimatedValue: number;
   finalValue?: number;
   commissionRate: number; // e.g., 0.10 for 10%
@@ -28,6 +29,7 @@ const DealSchema: Schema = new Schema({
   partnerId: { type: Schema.Types.ObjectId, ref: 'Partner', required: true },
   clientName: { type: String, required: true },
   clientEmail: { type: String },
+  clientPhone: { type: String },
   estimatedValue: { type: Number, required: true },
   finalValue: { type: Number },
   commissionRate: { type: Number, default: 0.10 }, // Default 10% commissioned

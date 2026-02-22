@@ -63,6 +63,7 @@ export interface Deal {
   partnerId: string;
   clientName: string;
   clientEmail?: string;
+  clientPhone?: string;
   estimatedValue: number;
   finalValue?: number;
   commissionRate: number;
@@ -124,6 +125,24 @@ export interface Payout {
   processedAt?: string;
   dealIds: string[];
   notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type LeadStatus = 'new' | 'contacted' | 'qualified' | 'converted' | 'rejected';
+export type LeadSource = 'manual' | 'referral_link' | 'contact_form' | 'consultation_form' | 'project_inquiry';
+
+export interface Lead {
+  _id: string;
+  partnerId: string;
+  clientName: string;
+  clientEmail: string;
+  clientPhone?: string;
+  source: LeadSource;
+  status: LeadStatus;
+  relatedDealId?: string;
+  bookedCall: boolean;
+  converted: boolean;
   createdAt: string;
   updatedAt: string;
 }

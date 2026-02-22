@@ -188,6 +188,12 @@ export default async function DealDetailPage(props: { params: Promise<{ id: stri
                    <p className="text-slate-900 font-medium">{deal.clientEmail}</p>
                 </div>
               )}
+              {deal.clientPhone && (
+                <div>
+                   <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Client Phone</p>
+                   <p className="text-slate-900 font-medium">{deal.clientPhone}</p>
+                </div>
+              )}
               {deal.notes && (
                 <div className="md:col-span-2">
                    <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Original Notes</p>
