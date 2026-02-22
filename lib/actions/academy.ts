@@ -183,7 +183,7 @@ export async function getCourses() {
     await seedCourses();
   }
   
-  return await Course.find({ published: true }).sort({ createdAt: 1 }).lean();
+  return await Course.find({ published: true }).sort({ sortOrder: 1, createdAt: 1 }).lean();
 }
 
 export async function getCourse(slug: string) {

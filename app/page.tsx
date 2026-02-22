@@ -153,7 +153,7 @@ export default function Home() {
              <div className="text-xl font-bold text-slate-400">PreciAgro</div>
              <div className="text-xl font-bold text-slate-400">UpperhandZim</div>
              <div className="text-xl font-bold text-slate-400">ZimPrep</div>
-             <div className="text-xl font-bold text-slate-400">FutureScale</div>
+             <div className="text-xl font-bold text-slate-400">ZimCelebsOfficial</div>
              <div className="text-xl font-bold text-slate-400">DigitalGeeks</div>
           </div>
         </div>

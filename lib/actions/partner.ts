@@ -195,9 +195,6 @@ export async function generateReferralCode() {
       return { success: false, message: 'Partner not found' };
     }
 
-    if (partner.tier !== 'creator') {
-      return { success: false, message: 'Only Creator partners can have referral links.' };
-    }
 
     if (partner.referralCode) {
       return { success: true, message: 'Referral code already exists.', referralCode: partner.referralCode };

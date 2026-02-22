@@ -9,6 +9,7 @@ import {
     Briefcase, // Fallback for Office
     Keyboard,  // Fallback for Keychron
     Headphones, // Fallback for Shure
+    Cpu,
 } from 'lucide-react';
 import { 
     SiNextdotjs, 
@@ -23,7 +24,8 @@ import {
     SiLogitech, 
     SiRaycast, 
     SiLinear,
-    SiArc
+    SiArc,
+    SiGoogle
 } from 'react-icons/si'; 
 
 // --- Data ---
@@ -77,6 +79,15 @@ const TOOLS: Tool[] = [
         why: "Perfect for hosting background workers and cron jobs.",
         link: "https://railway.app",
         icon: <SiRailway className="w-5 h-5 text-purple-500" />
+    },
+    {
+        name: "RunPod",
+        category: "Development",
+        tags: ["Infrastructure", "GPU", "AI"],
+        description: "Cloud computing platform for AI and machine learning.",
+        why: "Best-in-class GPU instances for training and deploying AI models at scale.",
+        link: "https://runpod.io?ref=7kyer76k",
+        icon: <Cpu className="w-5 h-5 text-indigo-600" />
     },
     {
         name: "VS Code",
@@ -203,6 +214,15 @@ const TOOLS: Tool[] = [
         link: "https://arc.net",
         icon: <SiArc className="w-5 h-5 text-rose-500" />
     },
+    {
+        name: "Google One",
+        category: "Apps",
+        tags: ["Productivity", "Storage", "Cloud"],
+        description: "Expand your cloud storage and get extra features.",
+        why: "Essential for backing up high-quality photos and large project files.",
+        link: "https://g.co/g1referral/ECTRK1HA",
+        icon: <SiGoogle className="w-5 h-5 text-blue-500" />
+    },
 ];
 
 const CATEGORIES: Category[] = ['All', 'Development', 'Design', 'Hardware', 'Office', 'Apps'];
@@ -305,7 +325,7 @@ export default function ResourcesPage() {
                                         className="group py-8 border-b border-slate-100 flex flex-col md:flex-row md:items-start md:justify-between gap-6 hover:bg-slate-50/50 transition-colors -mx-4 px-4 rounded-xl"
                                     >
                                         <div className="flex gap-4 md:max-w-2xl">
-                                            <div className="flex-shrink-0 mt-1">
+                                            <div className="shrink-0 mt-1">
                                                 <div className="p-3 bg-white border border-slate-100 rounded-xl text-slate-600 shadow-sm group-hover:border-blue-200 group-hover:text-blue-600 transition-colors">
                                                     {tool.icon}
                                                 </div>
@@ -326,7 +346,7 @@ export default function ResourcesPage() {
                                             </div>
                                         </div>
 
-                                        <div className="flex-shrink-0 pt-1">
+                                        <div className="shrink-0 pt-1">
                                             <a 
                                                 href={tool.link} 
                                                 target="_blank" 

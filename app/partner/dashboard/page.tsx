@@ -22,11 +22,9 @@ import {
   Sparkles,
   CalendarCheck,
   Star,
-  MousePointer2,
   CheckCircle,
   AlertTriangle,
   Info,
-  TrendingUp as TrendingUpIcon,
   ChevronsUp
 } from 'lucide-react';
 import Link from 'next/link';
@@ -87,39 +85,12 @@ export default async function DashboardPage() {
   if (!data) return <div>Partner not found</div>;
 
   const { partner, deals, totalCourses, completedCourses, eligibility, hasRiskFlags, hasDeals } = data;
-  const isCreator = partner.tier === 'creator';
+  // Tier is PURELY economic — it never controls feature or sidebar visibility.
+  // All partners see identical dashboard layout. Tier affects badge + commission % only.
   const tierProgress = getTierProgress(partner.tier || 'referral', partner.stats.totalReferredRevenue || 0);
 
-  const stats = isCreator ? [
-    {
-      name: 'Referral Clicks',
-      value: (partner.stats.referralClicks || 0).toLocaleString(),
-      icon: MousePointer2,
-      color: 'bg-blue-500',
-      href: '#'
-    },
-    {
-      name: 'Leads Generated',
-      value: (partner.stats.referralLeads || 0).toLocaleString(),
-      icon: TrendingUp,
-      color: 'bg-emerald-500',
-      href: '/partner/dashboard/leads'
-    },
-    {
-      name: 'Total Earnings',
-      value: new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(partner.stats.totalCommissionEarned),
-      icon: DollarSign,
-      color: 'bg-amber-500',
-      href: '/partner/dashboard/earnings'
-    },
-    {
-      name: 'Academy Progress',
-      value: `${completedCourses}/${totalCourses} Courses`,
-      icon: GraduationCap,
-      color: 'bg-indigo-500',
-      href: '/partner/dashboard/academy'
-    },
-  ] : [
+  // Unified stats for ALL partner tiers and types
+  const stats = [
     {
       name: 'Total Revenue Referred',
       value: new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(partner.stats.totalReferredRevenue),
@@ -152,26 +123,15 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      {/* Welcome Section */}
+      {/* Welcome Section — all partners see same header */}
       <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4">
         <div>
             <h2 className="text-2xl font-bold text-slate-900">Overview</h2>
             <p className="text-slate-500">Welcome back, {partner.name}. Here&apos;s what&apos;s happening today.</p>
         </div>
-        
-        {isCreator && partner.referralCode ? (
-             <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3 w-full md:w-auto">
-                <div className="text-sm font-medium text-slate-500 whitespace-nowrap">Your Referral Link:</div>
-                <div className="bg-slate-50 px-3 py-1.5 rounded-lg text-sm font-mono text-slate-700 select-all">
-                    leosystems.com?ref={partner.referralCode}
-                </div>
-                {/* Simple Copy Button could go here */}
-             </div>
-        ) : (
-            <Link href="/partner/dashboard/deals/register" className="bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-800 transition-colors">
-                + Register Deal
-            </Link>
-        )}
+        <Link href="/partner/dashboard/deals/register" className="bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-800 transition-colors">
+            + Register Deal
+        </Link>
       </div>
 
       <OnboardingChecklist 
@@ -182,37 +142,12 @@ export default async function DashboardPage() {
         standardsReviewed={partner.termsAccepted || false}
       />
 
-      {isCreator ? (
-         <ReferralLinkGenerator 
-           referralCode={partner.referralCode || ''}
-           clicks={partner.stats.referralClicks || 0}
-           conversions={partner.stats.referralLeads || 0}
-         />
-      ) : (
-        <div className="bg-linear-to-r from-emerald-600 to-emerald-500 rounded-4xl shadow-lg shadow-emerald-200 border border-emerald-400/20 overflow-hidden mb-8 p-8 text-white relative group transition-all hover:scale-[1.01]">
-          <div className="relative z-10 max-w-2xl">
-            <div className="inline-flex items-center px-3 py-1 rounded-full bg-white/20 text-white text-xs font-bold uppercase tracking-wider mb-4 backdrop-blur-md">
-              <Sparkles className="h-3 w-3 mr-1.5" />
-              New Feature
-            </div>
-            <h3 className="text-2xl font-bold mb-3">Get your unique Referral Link</h3>
-            <p className="text-emerald-50 mb-6 font-medium">
-              Want to earn commissions without manual deal registration? Switch to the <strong className="text-white">Creator Tier</strong> to get a trackable link you can share anywhere.
-            </p>
-            <Link 
-              href="/partner/dashboard/settings" 
-              className="inline-flex items-center px-6 py-3 bg-white text-emerald-600 rounded-xl font-bold text-sm transition-all hover:bg-emerald-50 shadow-md"
-            >
-              Get Started &rarr;
-            </Link>
-          </div>
-          
-          {/* Background Decor */}
-          <div className="absolute top-1/2 -right-8 -translate-y-1/2 opacity-20 pointer-events-none transition-transform group-hover:rotate-12 duration-700">
-            <MousePointer2 className="h-64 w-64" />
-          </div>
-        </div>
-      )}
+      {/* Referral Link Generator — available to ALL partner types */}
+      <ReferralLinkGenerator 
+        referralCode={partner.referralCode || ''}
+        clicks={partner.stats.referralClicks || 0}
+        conversions={partner.stats.referralLeads || 0}
+      />
 
       {/* Warning Banners */}
       <div className="space-y-3">
