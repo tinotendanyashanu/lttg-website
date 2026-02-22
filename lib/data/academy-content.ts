@@ -1,5 +1,309 @@
 
 export const courses = [
+  // ── Course 0: Dashboard Walkthrough (FIRST — shown to all new partners) ──
+  {
+    title: "How to Use Your Partner Dashboard",
+    slug: "dashboard-walkthrough",
+    description: "A complete step-by-step walkthrough of the Partner Dashboard. Learn how to register deals, track earnings, generate referral links, and master every feature in your account.",
+    thumbnailUrl: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80",
+    level: "beginner",
+    category: "sales",
+    targetAudience: ["all"],
+    sortOrder: 0,
+    published: true,
+    lessons: [
+      {
+        title: "Lesson 1: Getting Oriented — The Dashboard Overview",
+        slug: "dashboard-overview",
+        duration: "4 mins",
+        content: `## Getting Oriented — The Dashboard Overview
+
+Welcome to the Leo Systems Partner Dashboard. This is your command centre for everything related to your partnership — deals, earnings, referrals, and more.
+
+### What You'll See on the Overview Page
+
+When you first log in, you land on the **Overview** page. Here's what each section does:
+
+#### 📊 The 4 Stats Cards (Top of Page)
+| Card | What It Shows |
+|------|----------------|
+| **Total Revenue Referred** | The combined value of all deals you've brought in |
+| **Lifetime Commission** | Total commission you've ever earned (including paid amounts) |
+| **Pending Commission** | Earnings that are approved but not yet transferred to you |
+| **Academy Progress** | How many courses you've completed out of the total available |
+
+#### ✅ Onboarding Checklist
+Just below the stats, you'll see a quick checklist. It tracks whether you've:
+- Set up your payout method
+- Completed an Academy course
+- Registered your first deal
+- Reviewed the Program Rules
+
+Complete all steps to unlock your full earning potential.
+
+#### 📈 Commission Forecast & Performance
+Further down, you'll find two analytical panels:
+- **Commission Forecast** — tells you whether you're eligible for a payout and why/why not
+- **Performance Analytics** — shows trends in your deals, approvals, and earnings over time
+
+#### 📢 Program Announcements
+The bottom section keeps you up to date on program changes, payout schedule updates, and new features.
+
+> **Tip:** Bookmark your dashboard URL. You'll be visiting it regularly.`,
+      },
+      {
+        title: "Lesson 2: Registering Your First Deal",
+        slug: "register-a-deal",
+        duration: "6 mins",
+        content: `## Registering Your First Deal
+
+Registering a deal is the single most important action you can take as a partner. It **protects your commission rights** on that client.
+
+### Step-by-Step: How to Register a Deal
+
+1. **Click "Register Deal"** in the sidebar (or the "+ Register Deal" button on the Overview page)
+2. **Fill in the Client Name** — use the business's full legal name or the contact's full name
+3. **Enter Client Email** — this is used for duplicate-checking, so accuracy matters
+4. **Enter Estimated Deal Value** — your best guess in USD. Your commission is calculated on the final actual value, not this estimate
+5. **Select Service Type** — choose from SME, Startup, Enterprise, or Individual
+6. **Add Notes** — describe the client's pain point, your relationship with them, and any urgency. More detail = faster admin review
+7. **Click Submit**
+
+### What Happens After Submission?
+
+- ✅ You'll receive an in-dashboard notification confirming registration
+- 📧 An email is sent to the admin team for review
+- 🔒 The deal is **timestamped under your name** within seconds
+
+### Deal Protection Rule
+Once registered, no other partner can claim commission on that same client for **90 days**.
+
+> ⚠️ **Never delay registering a deal.** Even if you're still in early conversations with the prospect, register immediately to protect your claim.`,
+      },
+      {
+        title: "Lesson 3: Tracking Your Deals",
+        slug: "tracking-deals",
+        duration: "5 mins",
+        content: `## Tracking Your Deals
+
+The **Deals** section gives you a full view of every opportunity you've registered.
+
+### How to Access It
+Click **Deals** in the sidebar.
+
+### What You'll See
+Each deal has the following information:
+- **Client Name** — the company or individual you registered
+- **Deal Value** — the estimated or confirmed final value
+- **Status** — the current lifecycle stage of the deal
+- **Date** — when the deal was registered
+
+### Understanding Deal Statuses
+
+| Status | Meaning |
+|--------|---------|
+| 🟡 **registered** | Submitted and awaiting admin review |
+| 🟢 **approved** | Accepted into our pipeline — our sales team is now engaged |
+| 🔵 **closed** | Client has signed the contract |
+| 🔴 **rejected** | Did not meet our criteria (you'll be notified with a reason) |
+
+### Commission Statuses (Separate from Deal Status)
+
+| Commission Status | Meaning |
+|------------------|---------|
+| **Pending** | Commission earned but not yet approved |
+| **Approved** | Verified and queued for payout |
+| **Paid** | Transferred to your bank account |
+
+### Viewing a Deal's Full Details
+Click any deal row to open its detail page. You'll see:
+- Full status history
+- Commission breakdown
+- Payout batch reference (once paid)
+
+> **Tip:** If a deal has been under review for more than 5 business days with no update, open Settings and contact your partner manager.`,
+      },
+      {
+        title: "Lesson 4: Using Your Referral Link",
+        slug: "referral-links",
+        duration: "5 mins",
+        content: `## Using Your Referral Link
+
+The **Referral Links** section allows you to earn commissions passively — without manually registering each deal.
+
+### What Is a Referral Link?
+Your referral link is a unique URL tied to your account. When someone visits it and becomes a client, the commission is automatically attributed to you.
+
+> Format: \`leosystems.com?ref=your-unique-code\`
+
+### How to Generate Your Link
+1. Click **Referral Links** in the sidebar
+2. If you don't have a referral code yet, click **"Generate My Referral Code"**
+3. Your unique link is created instantly and shown on the page
+
+### What Can You Do With It?
+- Share it on social media (LinkedIn, Twitter/X, Instagram)
+- Add it to your email signature
+- Put it in your bio or website
+- Include it in content you create about Leo Systems
+
+### Tracking Your Referral Performance
+The Referral Links page shows:
+- **Total Clicks** — how many people visited using your link
+- **Conversions** — how many became qualified leads
+- **Referral Code** — your unique identifier
+
+### Referral vs. Deal Registration
+| Method | Best For |
+|--------|---------|
+| **Referral Link** | High-volume, passive sharing — social media, public content |
+| **Deal Registration** | Warm introductions — direct one-on-one referrals to specific businesses |
+
+You can use **both methods simultaneously**. They are complementary, not mutually exclusive.`,
+      },
+      {
+        title: "Lesson 5: Analytics & Payouts",
+        slug: "analytics-and-payouts",
+        duration: "6 mins",
+        content: `## Analytics & Payouts
+
+The **Analytics** and **Payouts** sections in the sidebar both take you to your **Earnings page** — your financial command centre.
+
+### What's on the Earnings Page?
+
+#### Your Balance Summary
+- **Approved Balance** — funds ready for payout
+- **Pending Commission** — earned but still in the verification window
+- **Lifetime Earned** — total all-time commission
+
+#### Commission Eligibility
+We evaluate whether you're eligible for a payout based on:
+- ✅ Your email is verified
+- ✅ Your payout method is set up
+- ✅ You have a positive approved balance
+- ✅ Your account is in good standing (not suspended)
+
+If you're not eligible, the system will tell you **exactly why** so you can fix it.
+
+#### Payout Hold Period
+Commissions go through a **14-day hold** after the client pays, before being approved for payout. This protects against refunds and chargebacks.
+
+#### Payout History
+Once paid, each payout shows:
+- Amount transferred
+- Payout batch reference number
+- Date processed
+
+### Setting Up Your Payout Method
+Go to **Settings** → scroll to the **Payout Details** section → fill in your bank details or local remittance information.
+
+> ⚠️ **Important:** Payouts cannot be processed without a valid payout method on file. Set this up on your first day.`,
+      },
+      {
+        title: "Lesson 6: Academy, Settings & Notifications",
+        slug: "academy-settings-notifications",
+        duration: "5 mins",
+        content: `## Academy, Settings & Notifications
+
+### 🎓 The Academy
+Click **Academy** in the sidebar to access your training courses.
+
+Completing Academy courses helps you:
+- Understand Leo Systems' services deeply so you can sell more effectively
+- Earn the **$10 Academy Bonus** upon completing all courses
+- Build real expertise that clients will sense in your conversations
+
+Each course has:
+- **Multiple lessons** — readable, structured content
+- **An exam at the end** — must pass with 80%+ to complete the course
+- **A progress tracker** on the Academy overview page
+
+### 🔔 Notifications
+Your notification bell (top-right of every page) alerts you to:
+- Deal status changes (approved, rejected, closed)
+- Commission approved or paid
+- New platform announcements
+
+Click the bell to view all notifications. They're stored in your account permanently.
+
+### ⚙️ Settings
+The **Settings** page is where you manage your account:
+
+| Section | Purpose |
+|---------|---------|
+| **Profile** | Update your name and contact details |
+| **Payout Details** | Add bank account or local remittance info |
+| **Tier Info** | See your current tier and commission rate |
+| **Security** | Change password, review account status |
+
+### 📋 Tier Progress
+Click **Tier Progress** in the sidebar to see:
+- Your current tier (Referral → Agency → Enterprise)
+- How much referred revenue you've generated
+- How close you are to the next tier upgrade
+
+Tiers affect your **commission percentage only** — not what features you can access.
+
+> **Summary:** You now know every major section of your Partner Dashboard. Start by setting up your payout method, registering your first deal, and completing at least one Academy course!`,
+      },
+    ],
+    exam: {
+      passingScore: 80,
+      questions: [
+        {
+          question: "What is the primary purpose of registering a deal immediately after speaking to a prospect?",
+          options: [
+            "To get a notification",
+            "To protect your commission rights by timestamping the lead under your name",
+            "To trigger an automatic payout",
+            "To assign the deal to an admin",
+          ],
+          correctAnswer: 1,
+        },
+        {
+          question: "Which dashboard stat shows earnings that are approved but not yet transferred to your bank?",
+          options: [
+            "Total Revenue Referred",
+            "Lifetime Commission",
+            "Pending Commission",
+            "Academy Progress",
+          ],
+          correctAnswer: 2,
+        },
+        {
+          question: "What does a deal status of 'Approved' mean?",
+          options: [
+            "The client has paid their invoice",
+            "Your commission has been transferred",
+            "The deal has been accepted into the sales pipeline",
+            "The deal registration was received",
+          ],
+          correctAnswer: 2,
+        },
+        {
+          question: "How long is the commission hold period after client payment before it becomes eligible for payout?",
+          options: [
+            "7 days",
+            "30 days",
+            "14 days",
+            "Immediately",
+          ],
+          correctAnswer: 2,
+        },
+        {
+          question: "What does your partner Tier affect?",
+          options: [
+            "Which sidebar links you can see",
+            "Your commission percentage and tier badge only",
+            "Whether you can register deals",
+            "Your access to the Academy",
+          ],
+          correctAnswer: 1,
+        },
+      ],
+    },
+  },
+
   // ── Course 1: Partner Fundamentals ───────────────────────────────────
   {
     title: "Partner Fundamentals",

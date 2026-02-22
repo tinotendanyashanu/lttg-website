@@ -13,20 +13,26 @@ import {
   GraduationCap,
   MousePointer2,
   BookOpen,
+  Link2,
+  PlusCircle,
   X
 } from 'lucide-react';
 import { handleSignOut } from '@/lib/actions/auth';
 import Image from 'next/image';
 import { Partner } from '@/types';
 
+// All sidebar items are visible to every partner regardless of tier or partnerType.
+// Tier only affects commission rate, badge display, and revenue thresholds — never feature access.
 const navigation = [
-  { name: 'Overview', href: '/partner/dashboard', icon: LayoutDashboard, roles: ['partner', 'influencer'] },
-  { name: 'Leads', href: '/partner/dashboard/leads', icon: MousePointer2, roles: ['influencer'] },
-  { name: 'Deals', href: '/partner/dashboard/deals', icon: Briefcase, roles: ['partner', 'influencer'] },
-  { name: 'Earnings', href: '/partner/dashboard/earnings', icon: DollarSign, roles: ['partner', 'influencer'] },
-  { name: 'Academy', href: '/partner/dashboard/academy', icon: GraduationCap, roles: ['partner', 'influencer'] },
-  { name: 'Commercial Playbook', href: '/partner/dashboard/commercial-playbook', icon: BookOpen, roles: ['partner', 'influencer'] },
-  { name: 'Tier Progress', href: '/partner/dashboard/tier', icon: Award, roles: ['partner'] },
+  { name: 'Overview', href: '/partner/dashboard', icon: LayoutDashboard },
+  { name: 'Register Deal', href: '/partner/dashboard/deals/register', icon: PlusCircle },
+  { name: 'Deals', href: '/partner/dashboard/deals', icon: Briefcase },
+  { name: 'Referral Links', href: '/partner/dashboard/leads', icon: Link2 },
+  { name: 'Analytics', href: '/partner/dashboard/earnings', icon: MousePointer2 },
+  { name: 'Payouts', href: '/partner/dashboard/earnings', icon: DollarSign },
+  { name: 'Academy', href: '/partner/dashboard/academy', icon: GraduationCap },
+  { name: 'Commercial Playbook', href: '/partner/dashboard/commercial-playbook', icon: BookOpen },
+  { name: 'Tier Progress', href: '/partner/dashboard/tier', icon: Award },
 ];
 
 const secondaryNavigation = [
@@ -100,7 +106,6 @@ export default function Sidebar({
 
       <nav className="flex-1 px-4 space-y-2 overflow-y-auto">
         {navigation
-          .filter((item) => !item.roles || item.roles.includes(partnerType))
           .map((item) => {
             const isActive = pathname === item.href;
             return (

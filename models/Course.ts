@@ -26,6 +26,7 @@ export interface ICourse extends Document {
     }[];
     passingScore: number;
   };
+  sortOrder: number;
   published: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -73,6 +74,7 @@ const CourseSchema: Schema = new Schema({
   },
   lessons: [LessonSchema],
   exam: { type: ExamSchema },
+  sortOrder: { type: Number, default: 99 },
   published: { type: Boolean, default: false },
 }, { timestamps: true });
 
