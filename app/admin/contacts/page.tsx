@@ -2,7 +2,6 @@
 import { auth } from '@/auth';
 import dbConnect from '@/lib/mongodb';
 import Contact, { IContact } from '@/models/Contact';
-import Link from 'next/link';
 import ContactsClient from '@/components/admin/ContactsClient';
 import { redirect } from 'next/navigation';
 

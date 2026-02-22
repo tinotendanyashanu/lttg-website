@@ -19,16 +19,16 @@ export default async function AdminLayout({
   console.log('[AdminLayout] Authorized');
 
   return (
-    <div className="min-h-screen bg-slate-50 flex">
+    <div className="min-h-screen bg-[#F7F9FC] flex overflow-hidden font-sans">
       {/* Sidebar Area - Fixed width */}
-      <div className="w-72 flex-shrink-0 hidden lg:block">
+      <div className="w-72 shrink-0 hidden lg:block">
          <AdminSidebar />
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto">
          <AdminHeader user={session.user} />
-         <main className="flex-1 p-6 lg:p-8 max-w-7xl mx-auto w-full">
+         <main className="flex-1 p-6 lg:p-10 max-w-[1600px] w-full mx-auto">
             {children}
          </main>
       </div>

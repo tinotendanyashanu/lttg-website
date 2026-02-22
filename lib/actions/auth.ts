@@ -1,12 +1,19 @@
 'use server';
 
-import { signIn, signOut } from '@/auth';
+import { signIn, signOut, auth } from '@/auth';
 import { AuthError } from 'next-auth';
+import bcrypt from 'bcryptjs';
+import mongoose from 'mongoose';
 import dbConnect from '@/lib/mongodb';
 import Partner from '@/models/Partner';
-import bcrypt from 'bcryptjs';
 import { SignupSchema } from '@/lib/schemas';
 import { sendEmail, EmailTemplates } from '@/lib/email';
+import { headers } from 'next/headers';
+import { CURRENT_TERMS_VERSION } from '@/lib/constants';
+import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
+import AffiliateRiskFlag from '@/models/AffiliateRiskFlag';
+import AuditLog from '@/models/AuditLog';
 
 
 export async function authenticate(
@@ -14,7 +21,8 @@ export async function authenticate(
   formData: FormData,
 ) {
   try {
-    const email = formData.get('email') as string;
+    let email = formData.get('email') as string;
+    if (email) email = email.toLowerCase();
     await dbConnect();
     const user = await Partner.findOne({ email });
     
@@ -51,8 +59,12 @@ export async function registerPartner(prevState: unknown, formData: FormData) {
     name: formData.get('name'),
     email: formData.get('email'),
     password: formData.get('password'),
-    companyName: formData.get('companyName'),
+    country: formData.get('country'),
     partnerType: formData.get('partnerType'),
+    primaryPlatform: formData.get('primaryPlatform') || undefined,
+    profileUrl: formData.get('profileUrl') || undefined,
+    audienceSize: formData.get('audienceSize') || undefined,
+    termsAccepted: formData.get('termsAccepted'),
   });
 
   if (!validatedFields.success) {
@@ -62,7 +74,8 @@ export async function registerPartner(prevState: unknown, formData: FormData) {
     };
   }
 
-  const { name, email, password, companyName } = validatedFields.data;
+  let { name, email, password, country, partnerType, primaryPlatform, profileUrl, audienceSize } = validatedFields.data;
+  email = email.toLowerCase();
 
   try {
     await dbConnect();
@@ -74,13 +87,10 @@ export async function registerPartner(prevState: unknown, formData: FormData) {
       };
     }
 
-    const { partnerType } = validatedFields.data;
     let referralCode = undefined;
-    let tier = 'referral';
+    let tier = 'creator';
 
-    if (partnerType === 'creator') {
-        tier = 'creator';
-        // Generate a base slug from name
+    if (partnerType === 'influencer') {
         const slugBase = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
         const randomSuffix = crypto.randomBytes(3).toString('hex');
         referralCode = `leo-${slugBase}-${randomSuffix}`;
@@ -90,22 +100,66 @@ export async function registerPartner(prevState: unknown, formData: FormData) {
     const verificationToken = crypto.randomBytes(32).toString('hex');
     const verificationTokenExpiry = new Date(Date.now() + 3600 * 1000); // 1 hour
 
-    await Partner.create({
+    // Extract IP for legal compliance
+    let clientIp = 'unknown';
+    try {
+      const headersList = await headers();
+      clientIp = headersList.get('x-forwarded-for')?.split(',')[0]?.trim() 
+        || headersList.get('x-real-ip') 
+        || 'unknown';
+    } catch (e) {
+      // Ignore if called outside request scope (e.g. testing scripts)
+    }
+
+    const newPartner = await Partner.create({
       name,
       email,
-      companyName,
       password: hashedPassword,
+      countryOfResidence: country,
       role: 'partner',
       partnerType,
+      primaryPlatform,
+      profileUrl,
+      audienceSize,
       tier,
       referralCode,
-      status: 'pending', 
+      status: 'active', 
+      emailVerified: false,
+      kycStatus: 'not_started',
+      riskLevel: 'low',
+      debtBalance: 0,
       verificationToken,
       verificationTokenExpiry,
+      // Legal & Compliance — immutable after creation
+      termsAccepted: true,
+      termsAcceptedAt: new Date(),
+      termsAcceptedIp: clientIp,
+      termsVersion: CURRENT_TERMS_VERSION,
+    });
+
+    // Check for multiple accounts from the same IP
+    if (clientIp !== 'unknown') {
+      const accountsCount = await Partner.countDocuments({ termsAcceptedIp: clientIp });
+      if (accountsCount > 1) {
+        await AffiliateRiskFlag.create({
+          partnerId: newPartner._id,
+          type: 'multiple_accounts_ip',
+          severity: 'low',
+          message: `Multiple accounts created from IP: ${clientIp}`
+        });
+      }
+    }
+
+    await AuditLog.create({
+      entityType: 'partner',
+      entityId: newPartner._id as mongoose.Types.ObjectId,
+      action: 'partner_signup',
+      performedBy: newPartner._id as mongoose.Types.ObjectId,
+      details: { partnerType, country },
     });
     
     // Send verification email
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/+$/, '') || 'http://localhost:3000';
     const verificationLink = `${baseUrl}/partner/verify?token=${verificationToken}`;
     
     await sendEmail({
@@ -116,10 +170,22 @@ export async function registerPartner(prevState: unknown, formData: FormData) {
 
     // NO Admin Notification
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Registration error:', error);
+
+    if (error?.name === 'ValidationError') {
+       const fieldErrors: Record<string, string[]> = {};
+       for (const field in error.errors) {
+         fieldErrors[field] = [error.errors[field].message];
+       }
+       return {
+         message: 'Validation Error: Please check your inputs.',
+         errors: fieldErrors,
+       };
+    }
+
     return {
-      message: 'Database Error: Failed to Register.',
+      message: error instanceof Error ? error.message : 'Database Error: Failed to Register.',
     };
   }
 
@@ -127,22 +193,64 @@ export async function registerPartner(prevState: unknown, formData: FormData) {
 }
 
 export async function verifyEmail(token: string) {
-    await dbConnect();
-    const partner = await Partner.findOne({ 
-        verificationToken: token,
-        verificationTokenExpiry: { $gt: Date.now() }
-    });
+    try {
+        await dbConnect();
+        const partner = await Partner.findOne({ 
+            verificationToken: token,
+            verificationTokenExpiry: { $gt: new Date() }
+        });
 
-    if (!partner) {
-        return { success: false, message: 'Invalid or expired token.' };
+        if (!partner) {
+            return { success: false, message: 'Invalid or expired token.' };
+        }
+
+        await Partner.updateOne(
+            { _id: partner._id },
+            { 
+               $set: { status: 'active', emailVerified: true },
+               $unset: { verificationToken: "", verificationTokenExpiry: "" }
+            }
+        );
+
+        return { success: true, message: 'Account activated successfully!' };
+    } catch(err: any) {
+        console.error('Verify Email Error:', err);
+        return { success: false, message: 'Server error during activation.' };
     }
+}
 
-    partner.status = 'active';
-    partner.verificationToken = undefined;
-    partner.verificationTokenExpiry = undefined;
-    await partner.save();
+export async function resendVerificationEmail() {
+    try {
+        const session = await auth();
+        if (!session?.user?.email) return { success: false, message: 'Not logged in' };
+        
+        await dbConnect();
+        const partner = await Partner.findOne({ email: session.user.email });
+        if (!partner) return { success: false, message: 'Partner not found.' };
+        if (partner.emailVerified) return { success: false, message: 'Email already verified.' };
 
-    return { success: true, message: 'Account activated successfully!' };
+        const verificationToken = crypto.randomBytes(32).toString('hex');
+        const verificationTokenExpiry = new Date(Date.now() + 3600 * 1000); // 1 hour
+
+        await Partner.updateOne(
+            { _id: partner._id },
+            { $set: { verificationToken, verificationTokenExpiry } }
+        );
+
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/+$/, '') || 'http://localhost:3000';
+        const verificationLink = `${baseUrl}/partner/verify?token=${verificationToken}`;
+        
+        await sendEmail({
+            to: partner.email,
+            subject: 'Activate your Leo The Tech Guy Account',
+            html: EmailTemplates.verifyEmail(partner.name, verificationLink),
+        });
+
+        return { success: true, message: 'Verification email sent!' };
+    } catch(err: any) {
+         console.error("resendVerificationEmail error", err);
+         return { success: false, message: "Failed to resend verification email." };
+    }
 }
 
 export async function forgotPassword(prevState: unknown, formData: FormData) {
@@ -164,7 +272,7 @@ export async function forgotPassword(prevState: unknown, formData: FormData) {
     partner.resetPasswordTokenExpiry = resetTokenExpiry;
     await partner.save();
 
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/+$/, '') || 'http://localhost:3000';
     const resetLink = `${baseUrl}/partner/reset-password?token=${resetToken}`;
 
     await sendEmail({
@@ -196,7 +304,7 @@ export async function resetPassword(prevState: unknown, formData: FormData) {
     await dbConnect();
     const partner = await Partner.findOne({
         resetPasswordToken: token,
-        resetPasswordTokenExpiry: { $gt: Date.now() }
+        resetPasswordTokenExpiry: { $gt: new Date() }
     });
 
     if (!partner) {
@@ -214,4 +322,35 @@ export async function resetPassword(prevState: unknown, formData: FormData) {
 
 export async function handleSignOut() {
     await signOut();
+}
+
+// --- Legal & Compliance: Terms Re-Acceptance ---
+
+export async function acceptTerms(prevState: unknown, formData: FormData) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { message: 'Unauthorized' };
+  }
+
+  const accepted = formData.get('termsAccepted');
+  if (accepted !== 'true') {
+    return { message: 'You must accept the Affiliate Agreement.' };
+  }
+
+  await dbConnect();
+
+  const headersList = await headers();
+  const clientIp = headersList.get('x-forwarded-for')?.split(',')[0]?.trim() 
+    || headersList.get('x-real-ip') 
+    || 'unknown';
+
+  await Partner.findByIdAndUpdate(session.user.id, {
+    termsAccepted: true,
+    termsAcceptedAt: new Date(),
+    termsAcceptedIp: clientIp,
+    termsVersion: CURRENT_TERMS_VERSION,
+  });
+
+  revalidatePath('/partner/dashboard');
+  redirect('/partner/dashboard');
 }

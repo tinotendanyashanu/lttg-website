@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import { ICommercialPlaybookConfig, IPricingTier, IServiceGuide, IRegionalGuideline, IScript } from '@/models/CommercialPlaybookConfig';
+import { IPricingTier, IServiceGuide, IRegionalGuideline, IScript } from '@/models/CommercialPlaybookConfig';
 import { Save, Plus, Trash2, Globe, Book, DollarSign, AlertTriangle, MessageSquare } from 'lucide-react';
 
 interface PlaybookConfigData {
@@ -18,7 +18,7 @@ interface PlaybookEditorProps {
 }
 
 // Helper to render simple text input
-const TextInput = ({ label, value, onChange, placeholder = '' }: any) => (
+const TextInput = ({ label, value, onChange, placeholder = '' }: { label: string, value: string, onChange: (v: string) => void, placeholder?: string }) => (
   <div className="mb-4">
     <label className="block text-sm font-medium text-slate-700 mb-1">{label}</label>
     <input
@@ -32,7 +32,7 @@ const TextInput = ({ label, value, onChange, placeholder = '' }: any) => (
 );
 
 // Helper for Text Area
-const TextArea = ({ label, value, onChange, placeholder = '' }: any) => (
+const TextArea = ({ label, value, onChange, placeholder = '' }: { label: string, value: string, onChange: (v: string) => void, placeholder?: string }) => (
   <div className="mb-4">
     <label className="block text-sm font-medium text-slate-700 mb-1">{label}</label>
     <textarea
@@ -82,19 +82,13 @@ export default function PlaybookEditor({ initialConfig }: PlaybookEditorProps) {
   };
 
   // --- Handlers for Service Guides ---
-  const updateServiceGuide = (index: number, field: keyof IServiceGuide, value: any) => {
+  const updateServiceGuide = (index: number, field: keyof IServiceGuide, value: string | string[]) => {
     const newGuides = [...config.serviceGuides];
     newGuides[index] = { ...newGuides[index], [field]: value };
     setConfig({ ...config, serviceGuides: newGuides });
   };
   
-  const updateServiceGuideArrayInfo = (index: number, field: 'includes' | 'doesNotInclude', itemIndex: number, value: string) => {
-      const newGuides = [...config.serviceGuides];
-      const newArray = [...newGuides[index][field]];
-      newArray[itemIndex] = value;
-      newGuides[index] = { ...newGuides[index], [field]: newArray };
-      setConfig({ ...config, serviceGuides: newGuides });
-  }
+
 
   // --- Handlers for Regional Guidelines ---
   const updateRegional = (field: keyof IRegionalGuideline, value: string) => {

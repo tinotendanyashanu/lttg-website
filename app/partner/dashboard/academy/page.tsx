@@ -17,11 +17,13 @@ export default async function AcademyPage() {
   await dbConnect();
   const partner = await PartnerModel.findOne({ email: session.user.email }).select('partnerType partnerProgress').lean() as unknown as Partner;
   const progressList = partner?.partnerProgress || [];
-  const partnerType = partner?.partnerType || 'standard';
+  
+  // Map new partnerType values to legacy academy audience types
+  const audienceType = partner?.partnerType === 'influencer' ? 'creator' : 'standard';
 
   const filteredCourses = courses.filter((course) => {
       if (!course.targetAudience || course.targetAudience.includes('all')) return true;
-      return course.targetAudience.includes(partnerType);
+      return course.targetAudience.includes(audienceType);
   });
 
   return (

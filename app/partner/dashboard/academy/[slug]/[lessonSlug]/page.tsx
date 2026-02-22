@@ -1,12 +1,12 @@
 import { auth } from '@/auth';
 import dbConnect from '@/lib/mongodb';
 import CourseModel from '@/models/Course';
-import { getPartnerProgress, completeLesson } from '@/lib/actions/academy';
-import { redirect, notFound } from 'next/navigation';
+import { getPartnerProgress } from '@/lib/actions/academy';
+import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, CheckCircle, PlayCircle } from 'lucide-react';
+import { ArrowLeft, PlayCircle } from 'lucide-react';
 
-import { Course, Lesson, PartnerProgress } from '@/types';
+import { Course } from '@/types';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import CompleteLessonButton from '@/components/academy/CompleteLessonButton';

@@ -6,7 +6,7 @@ import PlaybookEditor from '@/components/admin/commercial-playbook/PlaybookEdito
 export default async function AdminCommercialPlaybookPage() {
   await dbConnect();
   
-  let config = await CommercialPlaybookConfig.findOne({}).lean() as unknown as ICommercialPlaybookConfig;
+  const config = await CommercialPlaybookConfig.findOne({}).lean() as unknown as ICommercialPlaybookConfig;
 
   // If no config, create default (should be handled by API too, but good fallback)
   if (!config) {

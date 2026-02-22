@@ -13,6 +13,7 @@ export default function DealActionForm({ deal, partnerName }: { deal: Deal, part
   const [finalValue, setFinalValue] = useState(deal.finalValue || deal.estimatedValue);
   const [commissionRate, setCommissionRate] = useState(deal.commissionRate || 0.10);
   const [status, setStatus] = useState(deal.dealStatus);
+  const [paymentStatus, setPaymentStatus] = useState(deal.paymentStatus || 'pending');
   
   // Feedback state
   const [error, setError] = useState<string | null>(null);
@@ -29,7 +30,7 @@ export default function DealActionForm({ deal, partnerName }: { deal: Deal, part
       setError(null);
       setSuccess(null);
       try {
-          await updateDealStatus(deal._id, status, Number(finalValue), Number(commissionRate));
+          await updateDealStatus(deal._id, status, Number(finalValue), Number(commissionRate), paymentStatus);
           setSuccess('Deal status updated successfully');
           router.refresh();
       } catch (err: unknown) {
@@ -106,6 +107,17 @@ export default function DealActionForm({ deal, partnerName }: { deal: Deal, part
                 </select>
             </div>
             <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Client Payment Status</label>
+                <select 
+                    value={paymentStatus} 
+                    onChange={(e) => setPaymentStatus(e.target.value as Deal['paymentStatus'])}
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                >
+                    <option value="pending">Pending</option>
+                    <option value="received">Received</option>
+                </select>
+            </div>
+            <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Final Deal Value ($)</label>
                 <input 
                     type="number" 
@@ -137,7 +149,7 @@ export default function DealActionForm({ deal, partnerName }: { deal: Deal, part
       </div>
 
       {/* Commission Payment Card - Only if closed/approved */}
-      {['approved', 'closed'].includes(deal.dealStatus) && deal.paymentStatus !== 'commission_paid' && (
+      {['approved', 'closed'].includes(deal.dealStatus) && deal.commissionStatus !== 'Paid' && (
           <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden">
              <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500" />
             <h3 className="text-lg font-bold text-slate-900 mb-4">Record Commission Payment</h3>
@@ -190,7 +202,7 @@ export default function DealActionForm({ deal, partnerName }: { deal: Deal, part
           </div>
       )}
       
-       {deal.paymentStatus === 'commission_paid' && (
+       {deal.commissionStatus === 'Paid' && (
            <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center text-emerald-700">
                <span className="font-bold mr-2">✓ Commission Paid</span>
                <span>on {new Date().toLocaleDateString()} (Check Audit Logs for details)</span>

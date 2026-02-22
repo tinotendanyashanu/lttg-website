@@ -12,8 +12,7 @@ async function getDeals(userId: string, query: string, status: string) {
   const partner = await PartnerModel.findById(userId).lean() as unknown as Partner;
   if (!partner) return [];
 
-  // Build filter
-  const filter: any = { partnerId: partner._id };
+  const filter: Record<string, unknown> = { partnerId: partner._id, commissionSource: { $ne: 'ACADEMY_BONUS' } };
   
   if (status !== 'all') {
     filter.dealStatus = status;
@@ -45,14 +44,14 @@ export default async function DealsPage(props: {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
         <div>
           <h2 className="text-2xl font-bold text-slate-900">Deals</h2>
           <p className="text-slate-500">Manage your registered opportunities.</p>
         </div>
         <Link 
           href="/partner/dashboard/deals/register" 
-          className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 transition-colors shadow-sm shadow-emerald-200"
+          className="self-start sm:self-auto inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 transition-colors shadow-sm shadow-emerald-200"
         >
           <Plus className="mr-2 h-4 w-4" />
           Register New Deal
@@ -91,7 +90,47 @@ export default async function DealsPage(props: {
       </div>
 
       <div className="bg-white rounded-4xl border border-slate-100 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* Mobile card list */}
+        <div className="sm:hidden divide-y divide-slate-50">
+          {deals.length > 0 ? (
+            deals.map((deal) => (
+              <div key={deal._id} className="p-4 space-y-2">
+                <div className="flex items-start justify-between gap-2">
+                  <p className="font-bold text-slate-900 text-sm">{deal.clientName}</p>
+                  <span className={`shrink-0 inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold capitalize 
+                    ${deal.dealStatus === 'approved' ? 'bg-emerald-100 text-emerald-700' : 
+                      deal.dealStatus === 'closed' ? 'bg-blue-100 text-blue-700' :
+                      deal.dealStatus === 'rejected' ? 'bg-red-100 text-red-700' :
+                      'bg-amber-100 text-amber-700'}`}>
+                    {deal.dealStatus.replace('_', ' ')}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="font-bold text-emerald-600">
+                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(deal.commissionAmount || ((deal.finalValue || deal.estimatedValue) * deal.commissionRate))}
+                    <span className="text-xs text-slate-400 font-medium ml-1">({(deal.commissionRate * 100).toFixed(0)}%)</span>
+                  </span>
+                  <span className="text-slate-400 text-xs">{new Date(deal.createdAt).toLocaleDateString()}</span>
+                </div>
+                <p className="text-xs text-slate-500">
+                  Value: {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(deal.finalValue || deal.estimatedValue)}
+                </p>
+                <div className="pt-2">
+                  <Link href={`/partner/dashboard/deals/${deal._id}`} className="text-xs font-bold text-emerald-600 hover:text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-lg inline-block">
+                    View Details &rarr;
+                  </Link>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="px-4 py-12 text-center text-slate-400 font-medium text-sm">
+              No deals found. <Link href="/partner/dashboard/deals/register" className="text-emerald-600 hover:underline">Register your first deal</Link> to start earning.
+            </div>
+          )}
+        </div>
+
+        {/* Desktop table */}
+        <div className="hidden sm:block overflow-x-auto">
             <table className="w-full text-left text-sm text-slate-600">
                 <thead className="bg-white text-slate-500 font-bold uppercase text-xs tracking-wider">
                     <tr>
@@ -101,6 +140,7 @@ export default async function DealsPage(props: {
                         <th className="px-8 py-6 border-b border-slate-50">Potential Earnings</th>
                         <th className="px-8 py-6 border-b border-slate-50">Status</th>
                         <th className="px-8 py-6 border-b border-slate-50">Date</th>
+                        <th className="px-8 py-6 border-b border-slate-50 text-right">Actions</th>
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
@@ -126,11 +166,16 @@ export default async function DealsPage(props: {
                                     </span>
                                 </td>
                                 <td className="px-8 py-5 text-slate-400 font-medium">{new Date(deal.createdAt).toLocaleDateString()}</td>
+                                <td className="px-8 py-5 text-right">
+                                    <Link href={`/partner/dashboard/deals/${deal._id}`} className="text-xs font-bold text-emerald-600 hover:text-emerald-700 opacity-0 group-hover:opacity-100 transition-opacity bg-emerald-50 px-3 py-1.5 rounded-lg inline-block">
+                                        View
+                                    </Link>
+                                </td>
                             </tr>
                         ))
                     ) : (
                         <tr>
-                            <td colSpan={6} className="px-8 py-16 text-center text-slate-400 font-medium">
+                            <td colSpan={7} className="px-8 py-16 text-center text-slate-400 font-medium">
                                 No deals found. <Link href="/partner/dashboard/deals/register" className="text-emerald-600 hover:underline">Register your first deal</Link> to start earning.
                             </td>
                         </tr>

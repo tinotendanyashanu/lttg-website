@@ -5,6 +5,7 @@ import { useFormStatus } from 'react-dom';
 import { registerPartner } from '@/lib/actions/auth';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useState } from 'react';
 
 const initialState = {
   message: '',
@@ -13,6 +14,7 @@ const initialState = {
 
 export default function SignupPage() {
   const [state, dispatch] = useActionState(registerPartner, initialState);
+  const [partnerType, setPartnerType] = useState('partner');
 
   return (
     <div className="min-h-screen grid grid-cols-1 md:grid-cols-2">
@@ -37,45 +39,63 @@ export default function SignupPage() {
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Company Name <span className="text-slate-400 font-normal">(Optional)</span></label>
-              <input 
-                type="text" 
-                name="companyName" 
-                className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
-                placeholder="Acme Inc."
-              />
-            </div>
-
-            <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">Partner Type</label>
               <div className="grid grid-cols-1 gap-3">
                 <label className="relative flex items-start p-3 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-50 transition-colors has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-50">
-                  <input type="radio" name="partnerType" value="standard" defaultChecked className="mt-1 mr-3 text-emerald-600 focus:ring-emerald-500" />
+                  <input 
+                    type="radio" 
+                    name="partnerType" 
+                    value="partner" 
+                    checked={partnerType === 'partner'}
+                    onChange={(e) => setPartnerType(e.target.value)}
+                    className="mt-1 mr-3 text-emerald-600 focus:ring-emerald-500" 
+                  />
                   <div>
-                    <span className="block text-sm font-medium text-slate-900">Business / Agency</span>
-                    <span className="block text-xs text-slate-500 mt-0.5">For consultants and agencies referring clients.</span>
+                    <span className="block text-sm font-medium text-slate-900">Partner (Manual Referral)</span>
+                    <span className="block text-xs text-slate-500 mt-0.5">For consultants, agencies, and businesses referring clients directly.</span>
                   </div>
                 </label>
                 <label className="relative flex items-start p-3 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-50 transition-colors has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-50">
-                  <input type="radio" name="partnerType" value="creator" className="mt-1 mr-3 text-emerald-600 focus:ring-emerald-500" />
+                  <input 
+                    type="radio" 
+                    name="partnerType" 
+                    value="influencer" 
+                    checked={partnerType === 'influencer'}
+                    onChange={(e) => setPartnerType(e.target.value)}
+                    className="mt-1 mr-3 text-emerald-600 focus:ring-emerald-500" 
+                  />
                   <div>
-                    <span className="block text-sm font-medium text-slate-900">Content Creator</span>
-                    <span className="block text-xs text-slate-500 mt-0.5">For YouTubers, bloggers, and social media influencers.</span>
+                    <span className="block text-sm font-medium text-slate-900">Influencer</span>
+                    <span className="block text-xs text-slate-500 mt-0.5">For creators, YouTubers, and social media influencers using referral links.</span>
                   </div>
                 </label>
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Email Address</label>
-              <input 
-                type="email" 
-                name="email" 
-                required 
-                className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
-                placeholder="you@company.com"
-              />
-              {state?.errors?.email && <p className="text-red-500 text-xs mt-1">{state.errors.email}</p>}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Country</label>
+                <input 
+                  type="text" 
+                  name="country" 
+                  required 
+                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                  placeholder="e.g. United States"
+                />
+                {state?.errors?.country && <p className="text-red-500 text-xs mt-1">{state.errors.country}</p>}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Email Address</label>
+                <input 
+                  type="email" 
+                  name="email" 
+                  required 
+                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                  placeholder="you@company.com"
+                />
+                {state?.errors?.email && <p className="text-red-500 text-xs mt-1">{state.errors.email}</p>}
+              </div>
             </div>
 
             <div>
@@ -90,13 +110,88 @@ export default function SignupPage() {
               />
               {state?.errors?.password && <p className="text-red-500 text-xs mt-1">{state.errors.password}</p>}
             </div>
-            
+
+            {partnerType === 'influencer' && (
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg space-y-4">
+                <h3 className="text-sm font-medium text-slate-900">Creator Details (Optional)</h3>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Primary Platform</label>
+                  <select 
+                    name="primaryPlatform" 
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all bg-white"
+                  >
+                    <option value="">Select Platform</option>
+                    <option value="youtube">YouTube</option>
+                    <option value="instagram">Instagram</option>
+                    <option value="tiktok">TikTok</option>
+                    <option value="twitter">X (Twitter)</option>
+                    <option value="linkedin">LinkedIn</option>
+                    <option value="blog">Blog / Website</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Profile URL</label>
+                  <input 
+                    type="url" 
+                    name="profileUrl" 
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                    placeholder="https://"
+                  />
+                  {state?.errors?.profileUrl && <p className="text-red-500 text-xs mt-1">{state.errors.profileUrl}</p>}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Audience Size</label>
+                  <select 
+                    name="audienceSize" 
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all bg-white"
+                  >
+                    <option value="">Select Size</option>
+                    <option value="under_1k">Under 1,000</option>
+                    <option value="1k_10k">1,000 - 10,000</option>
+                    <option value="10k_50k">10,000 - 50,000</option>
+                    <option value="50k_100k">50,000 - 100,000</option>
+                    <option value="over_100k">Over 100,000</option>
+                  </select>
+                </div>
+              </div>
+            )}
+
+
             {/* Success/Error Message */}
             {state?.message && (
                 <div className={`p-3 rounded-lg text-sm ${state.success ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'}`}>
                     {state.message}
                 </div>
             )}
+
+            {/* Terms & Conditions Checkbox */}
+            <div className="pt-2">
+              <label className="flex items-start gap-3 cursor-pointer group">
+                <input
+                  type="checkbox"
+                  name="termsAccepted"
+                  value="true"
+                  required
+                  className="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                />
+                <span className="text-sm text-slate-600 leading-snug">
+                  I have read and agree to the{' '}
+                  <a
+                    href="/legal/affiliate-agreement"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-emerald-600 hover:text-emerald-700 font-medium underline underline-offset-2"
+                  >
+                    Affiliate Agreement (v1.0)
+                  </a>
+                </span>
+              </label>
+              {state?.errors?.termsAccepted && <p className="text-red-500 text-xs mt-1">{state.errors.termsAccepted}</p>}
+            </div>
 
             <SignupButton />
             

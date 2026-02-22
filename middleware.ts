@@ -8,8 +8,6 @@ export default auth((req) => {
   const { nextUrl } = req;
   const refCode = nextUrl.searchParams.get('ref');
   
-  console.log(`[Middleware] Request: ${nextUrl.pathname}${refCode ? ` | Ref: ${refCode}` : ''}`);
-
   // 1. Handle Referral Tracking
   if (refCode) {
     const response = NextResponse.next();
@@ -18,7 +16,20 @@ export default auth((req) => {
       path: '/',
       sameSite: 'lax',
     });
-    console.log(`[Middleware] Set ref cookie: ${refCode}`);
+
+    // Fire and forget tracking API call
+    fetch(`${nextUrl.origin}/api/tracking/click`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        refCode, 
+        userAgent: req.headers.get('user-agent') || '', 
+        ip: req.headers.get('x-forwarded-for') || '' 
+      })
+    }).catch(() => {
+      // Silently fail in production
+    });
+
     return response;
   }
 

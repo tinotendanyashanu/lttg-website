@@ -39,34 +39,18 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
 
 
         if (parsedCredentials.success) {
-          const { email, password } = parsedCredentials.data;
-          console.log(`[Auth] Attempting login for: ${email}`);
+          let { email, password } = parsedCredentials.data;
+          email = email.toLowerCase();
           
           await dbConnect();
           const user = await Partner.findOne({ email });
           
-          if (!user) {
-            console.log(`[Auth] User not found: ${email}`);
-            return null;
-          }
-          
-          console.log(`[Auth] User found: ${user.email}, Role: ${user.role}, Status: ${user.status}`);
-
-          // If user has no password (e.g. strict OAuth or legacy), return null for credentials provider
-          if (!user.password) {
-             console.log(`[Auth] User has no password set.`);
-             return null;
-          }
-
-          // Check if user is active
-          if (user.status !== 'active') {
-             console.log(`[Auth] User ${email} is not active. Status: ${user.status}`);
+          if (!user || !user.password || user.status !== 'active') {
              return null;
           }
 
           const passwordsMatch = await bcrypt.compare(password, user.password);
           if (passwordsMatch) {
-            console.log(`[Auth] Password match success.`);
             return {
               id: user._id.toString(),
               name: user.name,
@@ -74,11 +58,7 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
               role: user.role,
               tier: user.tier,
             };
-          } else {
-            console.log(`[Auth] Password mismatch.`);
           }
-        } else {
-            console.log(`[Auth] Invalid credentials format.`);
         }
         
         return null;

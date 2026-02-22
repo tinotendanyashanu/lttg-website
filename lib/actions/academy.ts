@@ -1,11 +1,15 @@
 'use server';
 
+import mongoose from 'mongoose';
 import { auth } from '@/auth';
 import dbConnect from '@/lib/mongodb';
 import Course from '@/models/Course';
 import Partner from '@/models/Partner';
+import Deal from '@/models/Deal';
+import AuditLog from '@/models/AuditLog';
 import { Partner as IPartner } from '@/types';
 import { revalidatePath } from 'next/cache';
+import { recordLedgerEntry } from '@/lib/services/ledger';
 
 export async function submitExam(courseId: string, answers: number[]) {
   const session = await auth();
@@ -61,24 +65,71 @@ export async function submitExam(courseId: string, answers: number[]) {
   // Check for All Courses Completed Bonus
   if (passed && !partner.hasReceivedAcademyBonus) {
       const allCourses = await Course.find({ published: true });
-      // Note: We just updated/pushed the current course, so if count matches, they are done.
-      // But we need to be careful if partnerProgress has duplicates or old data.
-      // Ideally we check if every published course ID is present and completed in partnerProgress.
       
       const allCompleted = allCourses.every((c) => 
           partner.partnerProgress.some((p) => p.courseId === c._id.toString() && p.isCompleted)
       );
 
       if (allCompleted) {
-          partner.hasReceivedAcademyBonus = true;
-          partner.stats.pendingCommission += 10; // $10 Bonus
-          partner.stats.totalCommissionEarned += 10; // It is earned, just pending payment
-          
-          // Log it? (Would need to import AuditLog)
-      }
-  }
+          const mSession = await mongoose.startSession();
+          mSession.startTransaction();
 
-  await partner.save();
+          try {
+            // 1. Create separate Deal entry for bonus
+            const bonusDeal = new Deal({
+              partnerId: partner._id,
+              clientName: "Internal Reward",
+              serviceType: "Internal",
+              dealStatus: "closed",
+              paymentStatus: "received",
+              commissionStatus: "Approved",
+              commissionAmount: 10,
+              commissionSource: "ACADEMY_BONUS",
+              estimatedValue: 0,
+              commissionRate: 0,
+              paymentReceivedAt: new Date(),
+              closedAt: new Date()
+            });
+            await bonusDeal.save({ session: mSession });
+
+            // 2. Update Partner
+            partner.hasReceivedAcademyBonus = true;
+            partner.academyBonusIssuedAt = new Date();
+            await partner.save({ session: mSession });
+
+            // 2.5 Record Ledger Entry
+            await recordLedgerEntry({
+              partnerId: partner._id,
+              type: 'academy_bonus',
+              amount: 10
+            }, mSession);
+
+            // 3. Audit Log
+            await AuditLog.create([{
+              entityType: 'partner',
+              entityId: partner._id,
+              action: 'academy_bonus_issued',
+              performedBy: 'system',
+              details: { dealId: bonusDeal._id, amount: 10 },
+              metadata: { dealId: bonusDeal._id, amount: 10 }
+            }], { session: mSession });
+
+            await mSession.commitTransaction();
+          } catch (error) {
+            await mSession.abortTransaction();
+            // Silently fail or log to a proper logging service in production
+            // Return or handle as needed, but we don't want to fail the whole exam submission
+            // We just failed the bonus, which is bad, but we still want to save progress
+            throw error; 
+          } finally {
+            mSession.endSession();
+          }
+      } else {
+         await partner.save();
+      }
+  } else {
+     await partner.save();
+  }
 
   revalidatePath(`/partner/dashboard/academy`);
   return { success: true, score, passed, passingScore: course.exam.passingScore };
@@ -157,7 +208,6 @@ export async function seedCourses() {
     const count = await Course.countDocuments();
     if (count > 0) return;
 
-    console.log('Seeding Academy Courses...');
 
     for (const courseData of initialCourses) {
       await Course.create({
@@ -166,8 +216,7 @@ export async function seedCourses() {
       });
     }
 
-    console.log('Seeding Complete');
   } catch (error) {
-    console.error('Error seeding courses:', error);
+    // Log to a proper service in production
   }
 }

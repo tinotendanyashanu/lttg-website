@@ -1,8 +1,7 @@
 import React from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import Link from 'next/link';
-import { Youtube, Instagram, Twitter, ExternalLink, Play, ArrowRight } from 'lucide-react';
+import { Youtube, Instagram, Twitter, Play, ArrowRight } from 'lucide-react';
 
 export const metadata = {
   title: "Learn System Architecture | Leo The Tech Guy",

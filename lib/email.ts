@@ -52,10 +52,8 @@ export async function sendEmail({
       html,
       replyTo: replyTo,
     });
-    console.log(`Email sent to ${to}:`, data);
     return { success: true, data };
   } catch (error) {
-    console.error(`Error sending email to ${to}:`, error);
     return { success: false, error };
   }
 }
@@ -77,9 +75,8 @@ export async function sendAdminNotification({
           html: `<p>${text}</p>`,
           replyTo: replyTo,
       });
-      console.log(`Admin notification sent:`, data);
   } catch (error) {
-      console.error('Failed to send admin notification', error);
+      // Silently fail in production
   }
 }
 

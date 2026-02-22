@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { ArrowRight, Mail, MapPin, Twitter, Instagram, Facebook, Youtube, Send, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import { Mail, MapPin, Twitter, Youtube, Send, Loader2, CheckCircle, AlertCircle, Instagram, Facebook } from 'lucide-react';
 
 export default function Contact() {
   const [loading, setLoading] = useState(false);

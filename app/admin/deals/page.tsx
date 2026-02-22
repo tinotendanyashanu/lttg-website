@@ -1,6 +1,4 @@
-import { auth } from '@/auth';
 import dbConnect from '@/lib/mongodb';
-import Link from 'next/link';
 import Deal, { IDeal } from '@/models/Deal';
 import { IPartner } from '@/models/Partner';
 import DealsClient from '@/components/admin/DealsClient';
@@ -9,7 +7,7 @@ type PopulatedDeal = Omit<IDeal, 'partnerId'> & { partnerId: IPartner };
 
 async function getDeals() {
   await dbConnect();
-  return Deal.find({}).populate('partnerId', 'name email').sort({ createdAt: -1 }).lean();
+  return Deal.find({ commissionSource: { $ne: 'ACADEMY_BONUS' } }).populate('partnerId', 'name email').sort({ createdAt: -1 }).lean();
 }
 
 export default async function AdminDealsPage() {

@@ -32,7 +32,7 @@ export async function adminSendPasswordReset(partnerId: string) {
         partner.resetPasswordTokenExpiry = resetTokenExpiry;
         await partner.save();
 
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/+$/, '') || 'http://localhost:3000';
         const resetLink = `${baseUrl}/partner/reset-password?token=${resetToken}`;
 
         // Send Email
@@ -48,6 +48,7 @@ export async function adminSendPasswordReset(partnerId: string) {
             entityId: partnerId,
             action: 'admin_password_reset_sent',
             performedBy: admin.id,
+            details: { partnerEmail: partner.email },
             metadata: { partnerEmail: partner.email }
         });
 
