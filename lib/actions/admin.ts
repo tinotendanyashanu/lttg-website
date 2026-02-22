@@ -35,7 +35,6 @@ async function checkAndUpgradeTier(partnerId: string) {
     // If an admin has manually overridden or locked this tier, the system must
     // never auto-change it. Silent exit — no error, no downgrade.
     if (partner.tierOverride || partner.tierLocked) {
-        console.log(`[TIER GUARD] Auto-upgrade skipped for partner ${partnerId}. tierOverride=${partner.tierOverride}, tierLocked=${partner.tierLocked}`);
         return;
     }
     // ─────────────────────────────────────────────────────────────────────────

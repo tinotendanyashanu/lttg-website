@@ -117,7 +117,7 @@ export async function submitExam(courseId: string, answers: number[]) {
             await mSession.commitTransaction();
           } catch (error) {
             await mSession.abortTransaction();
-            console.error("Failed to issue Academy Bonus:", error);
+            // Silently fail or log to a proper logging service in production
             // Return or handle as needed, but we don't want to fail the whole exam submission
             // We just failed the bonus, which is bad, but we still want to save progress
             throw error; 
@@ -208,7 +208,6 @@ export async function seedCourses() {
     const count = await Course.countDocuments();
     if (count > 0) return;
 
-    console.log('Seeding Academy Courses...');
 
     for (const courseData of initialCourses) {
       await Course.create({
@@ -217,8 +216,7 @@ export async function seedCourses() {
       });
     }
 
-    console.log('Seeding Complete');
   } catch (error) {
-    console.error('Error seeding courses:', error);
+    // Log to a proper service in production
   }
 }

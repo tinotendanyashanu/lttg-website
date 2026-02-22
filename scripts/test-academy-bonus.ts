@@ -42,7 +42,7 @@ async function main() {
     email: dummyEmail,
     role: 'partner',
     status: 'active',
-    partnerType: 'standard',
+    partnerType: 'partner',
     tier: 'referral'
   });
 
@@ -188,7 +188,7 @@ async function main() {
     email: dummyEmail2,
     role: 'partner',
     status: 'active',
-    partnerType: 'standard',
+    partnerType: 'partner',
     tier: 'referral',
     hasReceivedAcademyBonus: true, // Already true
     stats: {

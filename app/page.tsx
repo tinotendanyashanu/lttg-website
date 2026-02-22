@@ -26,7 +26,7 @@ export default function Home() {
       if (isMuted) {
         audioRef.current.pause();
       } else {
-        audioRef.current.play().catch(e => console.log("Audio play failed:", e));
+        audioRef.current.play().catch(() => {});
       }
     }
   }, [isMuted]);
@@ -36,7 +36,7 @@ export default function Home() {
     const currentVideo = videoRefs.current[currentVideoIndex];
     if (currentVideo) {
       currentVideo.currentTime = 0;
-      currentVideo.play().catch(e => console.log("Video play failed:", e));
+      currentVideo.play().catch(() => {});
     }
 
     // Pause other videos to prevent them from triggering onEnded or using resources

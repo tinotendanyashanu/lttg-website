@@ -101,10 +101,15 @@ export async function registerPartner(prevState: unknown, formData: FormData) {
     const verificationTokenExpiry = new Date(Date.now() + 3600 * 1000); // 1 hour
 
     // Extract IP for legal compliance
-    const headersList = await headers();
-    const clientIp = headersList.get('x-forwarded-for')?.split(',')[0]?.trim() 
-      || headersList.get('x-real-ip') 
-      || 'unknown';
+    let clientIp = 'unknown';
+    try {
+      const headersList = await headers();
+      clientIp = headersList.get('x-forwarded-for')?.split(',')[0]?.trim() 
+        || headersList.get('x-real-ip') 
+        || 'unknown';
+    } catch (e) {
+      // Ignore if called outside request scope (e.g. testing scripts)
+    }
 
     const newPartner = await Partner.create({
       name,
