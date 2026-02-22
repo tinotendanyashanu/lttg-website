@@ -8,7 +8,6 @@ export interface PartnerProgress {
 }
 
 export interface Partner {
-  [key: string]: unknown;
   _id: string;
   name: string;
   email: string;
@@ -19,6 +18,10 @@ export interface Partner {
   tierLocked?: boolean;
   referralCode?: string;
   status: 'active' | 'suspended' | 'pending';
+  emailVerified: boolean;
+  kycStatus: string;
+  riskLevel: 'low' | 'medium' | 'high';
+  debtBalance: number;
   bankDetails?: {
     accountName: string;
     accountNumber: string;

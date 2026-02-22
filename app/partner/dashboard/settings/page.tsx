@@ -73,7 +73,7 @@ export default async function SettingsPage() {
       {/* Tier Switching */}
       <TierSwitcher 
         currentTier={partner.tier || 'referral'} 
-        isLocked={partner.tierLocked || false} 
+        isLocked={!!partner.tierLocked} 
       />
 
       {/* Bank Details Form */}

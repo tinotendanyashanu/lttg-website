@@ -36,11 +36,14 @@ export default async function DashboardLayout({
     redirect('/partner/verify-email');
   }
 
+  // Map partnerType for components that expect legacy 'standard' | 'creator'
+  const audienceType = partner.partnerType === 'influencer' ? 'creator' : 'standard';
+
   return (
     <>
       <OnboardingTour
         userHasCompleted={partner.hasCompletedOnboarding || false}
-        partnerType={partner.partnerType || 'partner'}
+        partnerType={audienceType}
       />
       <DashboardShell user={partner} partnerType={partner.partnerType || 'partner'}>
         {children}

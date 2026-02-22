@@ -4,6 +4,7 @@ import { useActionState, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { updatePayoutSettings } from '@/lib/actions/settings';
 import { CheckCircle, AlertCircle, AlertTriangle } from 'lucide-react';
+import { Partner } from '@/types';
 
 interface SettingsState {
   message: string;
@@ -34,7 +35,7 @@ function SaveButton() {
   );
 }
 
-export default function PayoutSettingsForm({ partner }: { partner: Record<string, unknown> & { payoutMethod?: string, countryOfResidence?: string, localRemittanceDetails?: Record<string, string> } }) {
+export default function PayoutSettingsForm({ partner }: { partner: Partner }) {
   const [state, dispatch] = useActionState(updatePayoutSettings, initialState);
   const [method, setMethod] = useState(partner.payoutMethod || '');
 
