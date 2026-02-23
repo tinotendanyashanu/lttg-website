@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import { 
   ArrowRight, ShieldCheck, Globe, Users, BarChart, 
   UserCheck, Link as LinkIcon, Clock, Wallet,
-  Sparkles, Network, Crown, ChevronRight, CheckCircle
+  Sparkles, Network, Crown, ChevronRight, Check, CheckCircle
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { HeroIllustration, DashboardMockupIllustration, BackgroundGrid } from '@/components/partner/PartnerIllustrations';
