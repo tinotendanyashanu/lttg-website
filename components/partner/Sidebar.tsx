@@ -15,7 +15,11 @@ import {
   BookOpen,
   Link2,
   PlusCircle,
-  X
+  X,
+  Twitter,
+  Instagram,
+  Facebook,
+  Youtube
 } from 'lucide-react';
 import { handleSignOut } from '@/lib/actions/auth';
 import Image from 'next/image';
@@ -161,7 +165,21 @@ export default function Sidebar({
         })}
       </nav>
 
-      <div className="p-4 border-t border-slate-100">
+      <div className="p-4 border-t border-slate-100 space-y-3">
+        <div className="flex items-center justify-center gap-3 py-1">
+          <a href="https://x.com/LeoTheTechGuy" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-black transition-colors" aria-label="X">
+            <Twitter className="h-4 w-4" />
+          </a>
+          <a href="https://instagram.com/Leothetechguy" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-[#E4405F] transition-colors" aria-label="Instagram">
+            <Instagram className="h-4 w-4" />
+          </a>
+          <a href="https://facebook.com/Leothetechguy" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-[#1877F2] transition-colors" aria-label="Facebook">
+            <Facebook className="h-4 w-4" />
+          </a>
+          <a href="https://www.youtube.com/@LeoTheTechGuy" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-[#FF0000] transition-colors" aria-label="YouTube">
+            <Youtube className="h-4 w-4" />
+          </a>
+        </div>
         <form action={handleSignOut}>
           <button
             className="flex items-center w-full px-4 py-3 text-sm font-medium text-slate-500 rounded-full hover:bg-red-50 hover:text-red-600 transition-colors"

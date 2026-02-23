@@ -2,12 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { 
   ArrowRight, ShieldCheck, Globe, Users, BarChart, 
   UserCheck, Link as LinkIcon, Clock, Wallet,
-  Sparkles, Network, Crown, X, ChevronRight, Check, CheckCircle
+  Sparkles, Network, Crown, ChevronRight, CheckCircle
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { HeroIllustration, DashboardMockupIllustration, BackgroundGrid } from '@/components/partner/PartnerIllustrations';
@@ -64,105 +63,10 @@ const TierProgressBar = () => {
 };
 
 export default function PartnerPage() {
-  const router = useRouter();
-  const [isLegalModalOpen, setIsLegalModalOpen] = useState(false);
-  const [agreedToTerms, setAgreedToTerms] = useState(false);
-
-  const handleApplyClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsLegalModalOpen(true);
-  };
-
-  const handleContinue = () => {
-    if (agreedToTerms) {
-      router.push('/partner/signup');
-    }
-  };
-
   return (
     <div className="min-h-screen bg-white font-sans text-slate-900 selection:bg-[#0071e3]/20 selection:text-[#0071e3]">
       <Navbar />
-      
-      {/* Legal Modal overflow */}
-      <AnimatePresence>
-        {isLegalModalOpen && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/40 backdrop-blur-sm"
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.98, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.98, y: 10 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
-              className="bg-white max-w-2xl w-full rounded-[2rem] shadow-2xl flex flex-col max-h-[90vh] overflow-hidden border border-slate-100"
-            >
-              <div className="px-8 py-8 border-b border-slate-100 flex justify-between items-center bg-[#F5F5F7]">
-                <h2 className="text-2xl font-semibold tracking-tight text-slate-900">Partner Agreement</h2>
-                <button 
-                  onClick={() => setIsLegalModalOpen(false)}
-                  className="p-2 text-slate-400 hover:text-slate-900 bg-white rounded-full hover:bg-slate-50 transition-colors shadow-sm"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-              
-              <div className="p-10 overflow-y-auto text-slate-600 text-sm leading-relaxed">
-                <p className="mb-4"><strong>Effective Date:</strong> January 1, 2026</p>
-                <p className="mb-8 text-lg text-slate-500 font-medium">
-                  Welcome to the Leo Systems Partner Network. By clicking &quot;I agree&quot;, you accept these terms governing your participation.
-                </p>
-                
-                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-widest mb-3">1. Program Overview</h3>
-                <p className="mb-8">
-                  Partners are independent contractors and not employees or agents of Leo Systems. You agree to represent our services accurately and ethically.
-                </p>
 
-                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-widest mb-3">2. Commissions & Payments</h3>
-                <p className="mb-8">
-                  Commissions are earned strictly on successfully closed and paid deals. A mandatory 14-day hold period applies post-payment before commissions become eligible for payout. The minimum payout threshold is $50.00.
-                </p>
-
-                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-widest mb-3">3. Term & Termination</h3>
-                <p className="mb-4">
-                  Either party may terminate this agreement at any time with 30 days written notice. Leo Systems reserves the right to terminate immediately for violation of these terms or fraudulent activity.
-                </p>
-              </div>
-
-              <div className="p-8 border-t border-slate-100 bg-[#F5F5F7] flex flex-col sm:flex-row justify-between items-center gap-6">
-                <label className="flex items-center gap-4 cursor-pointer group">
-                  <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-all border-2 ${agreedToTerms ? 'bg-[#0071e3] border-[#0071e3]' : 'bg-white border-slate-300 group-hover:border-[#0071e3]'}`}>
-                    <Check className={`w-3.5 h-3.5 text-white ${agreedToTerms ? 'scale-100 opacity-100' : 'scale-0 opacity-0'} transition-all`} />
-                  </div>
-                  <input 
-                    type="checkbox" 
-                    className="sr-only" 
-                    checked={agreedToTerms}
-                    onChange={(e) => setAgreedToTerms(e.target.checked)}
-                  />
-                  <span className="text-sm font-semibold text-slate-700 select-none">
-                    I agree to the Terms
-                  </span>
-                </label>
-                
-                <button
-                  onClick={handleContinue}
-                  disabled={!agreedToTerms}
-                  className={`px-8 py-4 rounded-full text-sm font-bold transition-all ${
-                    agreedToTerms 
-                      ? 'bg-black text-white hover:bg-neutral-800 shadow-md transform hover:-translate-y-0.5' 
-                      : 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                  }`}
-                >
-                  Continue to Registration
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Hero Section - Clean White Flat Base */}
       <section className="relative pt-32 lg:pt-48 pb-32 overflow-hidden bg-white">
@@ -194,13 +98,13 @@ export default function PartnerPage() {
                 transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
                 className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
               >
-                <button 
-                  onClick={handleApplyClick}
+                <Link 
+                  href="/partner/signup"
                   className="inline-flex items-center justify-center px-10 py-5 text-base font-bold text-white bg-black rounded-full hover:bg-neutral-800 transition-colors shadow-lg shadow-neutral-200"
                 >
                   Apply to Program
                   <ArrowRight className="ml-2 w-5 h-5" />
-                </button>
+                </Link>
                 <Link 
                   href="/partner/login" 
                   className="inline-flex items-center justify-center px-10 py-5 text-base font-bold text-slate-900 bg-[#F5F5F7] rounded-full hover:bg-slate-200 transition-colors"
@@ -451,12 +355,12 @@ export default function PartnerPage() {
         <div className="max-w-4xl mx-auto px-6 text-center">
           <h2 className="text-4xl md:text-5xl font-semibold tracking-tighter text-slate-900 mb-8">Ready to architect the future?</h2>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-             <button 
-               onClick={handleApplyClick}
+             <Link 
+               href="/partner/signup"
                className="px-10 py-5 bg-black text-white text-lg font-bold rounded-full hover:bg-neutral-800 transition-colors shadow-lg shadow-neutral-200"
              >
                 Apply to Program
-             </button>
+             </Link>
              <Link href="/partner/login" className="px-10 py-5 text-lg font-bold text-slate-900 bg-white border border-slate-200 rounded-full hover:bg-slate-50 transition-colors">
                 Partner Login
              </Link>

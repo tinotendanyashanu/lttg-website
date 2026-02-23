@@ -4,7 +4,6 @@ import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { registerPartner } from '@/lib/actions/auth';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useState } from 'react';
 
 const initialState = {
@@ -33,7 +32,7 @@ export default function SignupPage() {
                 name="name" 
                 required 
                 className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
-                placeholder="John Doe"
+                placeholder="Leo Tech"
               />
               {state?.errors?.name && <p className="text-red-500 text-xs mt-1">{state.errors.name}</p>}
             </div>
@@ -52,7 +51,7 @@ export default function SignupPage() {
                   />
                   <div>
                     <span className="block text-sm font-medium text-slate-900">Partner (Manual Referral)</span>
-                    <span className="block text-xs text-slate-500 mt-0.5">For consultants, agencies, and businesses referring clients directly.</span>
+                    <span className="block text-xs text-slate-500 mt-0.5">For Individuals, consultants, agencies, and businesses referring clients directly.</span>
                   </div>
                 </label>
                 <label className="relative flex items-start p-3 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-50 transition-colors has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-50">
@@ -80,7 +79,7 @@ export default function SignupPage() {
                   name="country" 
                   required 
                   className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
-                  placeholder="e.g. United States"
+                  placeholder="e.g. Poland"
                 />
                 {state?.errors?.country && <p className="text-red-500 text-xs mt-1">{state.errors.country}</p>}
               </div>
@@ -202,21 +201,109 @@ export default function SignupPage() {
         </div>
       </div>
 
-       {/* Right Side - Visual */}
-       <div className="hidden md:flex flex-col justify-center p-12 bg-slate-900 text-white relative overflow-hidden">
-        {/* Background Image */}
-        <div className="absolute inset-0 z-0 opacity-40">
-            <Image 
-                src="/images/partner-signup.png" 
-                alt="Partner collaboration" 
-                fill
-                className="object-cover"
-                priority
-            />
+       {/* Right Side - Vector Visual */}
+       <div className="hidden md:flex flex-col items-center justify-center p-12 bg-slate-900 text-white relative overflow-hidden">
+        {/* Abstract Vector Background */}
+        <div className="absolute inset-0 z-0">
+          <svg className="w-full h-full" viewBox="0 0 800 900" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+            {/* Background gradient circles */}
+            <circle cx="400" cy="450" r="350" fill="url(#radialGlow)" opacity="0.3" />
+            <circle cx="650" cy="200" r="200" fill="url(#radialGlow2)" opacity="0.15" />
+            <circle cx="150" cy="700" r="180" fill="url(#radialGlow2)" opacity="0.1" />
+
+            {/* Grid pattern */}
+            <g opacity="0.06" stroke="#10b981" strokeWidth="0.5">
+              {[...Array(20)].map((_, i) => (
+                <line key={`h${i}`} x1="0" y1={i * 45} x2="800" y2={i * 45} />
+              ))}
+              {[...Array(18)].map((_, i) => (
+                <line key={`v${i}`} x1={i * 45} y1="0" x2={i * 45} y2="900" />
+              ))}
+            </g>
+
+            {/* Floating geometric shapes */}
+            <g opacity="0.12">
+              <rect x="100" y="120" width="60" height="60" rx="12" stroke="#34d399" strokeWidth="1.5" transform="rotate(15 130 150)" />
+              <rect x="600" y="650" width="80" height="80" rx="16" stroke="#6ee7b7" strokeWidth="1.5" transform="rotate(-20 640 690)" />
+              <circle cx="680" cy="350" r="30" stroke="#34d399" strokeWidth="1.5" />
+              <circle cx="120" cy="500" r="20" stroke="#6ee7b7" strokeWidth="1" />
+              <polygon points="350,80 370,120 330,120" stroke="#34d399" strokeWidth="1.5" fill="none" />
+              <polygon points="700,500 730,560 670,560" stroke="#6ee7b7" strokeWidth="1.5" fill="none" />
+            </g>
+
+            {/* Central partnership illustration */}
+            <g transform="translate(400, 360)">
+              {/* Connection lines */}
+              <g opacity="0.2" stroke="#34d399" strokeWidth="1" strokeDasharray="4 4">
+                <line x1="-120" y1="-60" x2="0" y2="-120" />
+                <line x1="120" y1="-60" x2="0" y2="-120" />
+                <line x1="-120" y1="-60" x2="120" y2="-60" />
+                <line x1="-120" y1="-60" x2="-60" y2="60" />
+                <line x1="120" y1="-60" x2="60" y2="60" />
+                <line x1="-60" y1="60" x2="60" y2="60" />
+              </g>
+
+              {/* Network nodes */}
+              <g>
+                {/* Top node - main */}
+                <circle cx="0" cy="-120" r="28" fill="#064e3b" stroke="#10b981" strokeWidth="2" />
+                <circle cx="0" cy="-120" r="14" fill="#10b981" opacity="0.3" />
+                <path d="M-6,-126 L0,-114 L6,-126" stroke="#34d399" strokeWidth="2" fill="none" strokeLinecap="round" />
+
+                {/* Left node */}
+                <circle cx="-120" cy="-60" r="22" fill="#064e3b" stroke="#10b981" strokeWidth="1.5" />
+                <rect x="-130" y="-66" width="20" height="12" rx="3" fill="#10b981" opacity="0.3" />
+
+                {/* Right node */}
+                <circle cx="120" cy="-60" r="22" fill="#064e3b" stroke="#10b981" strokeWidth="1.5" />
+                <circle cx="120" cy="-60" r="8" fill="#10b981" opacity="0.3" />
+
+                {/* Bottom left */}
+                <circle cx="-60" cy="60" r="18" fill="#064e3b" stroke="#6ee7b7" strokeWidth="1.5" />
+                
+                {/* Bottom right */}
+                <circle cx="60" cy="60" r="18" fill="#064e3b" stroke="#6ee7b7" strokeWidth="1.5" />
+              </g>
+
+              {/* Handshake icon in center */}
+              <g transform="translate(0, -20)">
+                <circle cx="0" cy="0" r="40" fill="#064e3b" stroke="#10b981" strokeWidth="2" opacity="0.8" />
+                <path d="M-14,-6 C-14,-6 -8,-12 0,-12 C8,-12 14,-6 14,-6" stroke="#34d399" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+                <path d="M-14,6 C-14,6 -8,12 0,12 C8,12 14,6 14,6" stroke="#34d399" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+                <line x1="-14" y1="-6" x2="-14" y2="6" stroke="#34d399" strokeWidth="2.5" strokeLinecap="round" />
+                <line x1="14" y1="-6" x2="14" y2="6" stroke="#34d399" strokeWidth="2.5" strokeLinecap="round" />
+              </g>
+
+              {/* Pulse rings */}
+              <circle cx="0" cy="-20" r="55" stroke="#10b981" strokeWidth="0.5" opacity="0.15" />
+              <circle cx="0" cy="-20" r="75" stroke="#10b981" strokeWidth="0.5" opacity="0.08" />
+            </g>
+
+            {/* Floating particles */}
+            <g opacity="0.3">
+              <circle cx="200" cy="200" r="3" fill="#34d399" />
+              <circle cx="550" cy="150" r="2" fill="#6ee7b7" />
+              <circle cx="650" cy="450" r="2.5" fill="#34d399" />
+              <circle cx="180" cy="650" r="2" fill="#6ee7b7" />
+              <circle cx="450" cy="750" r="3" fill="#34d399" />
+              <circle cx="300" cy="300" r="1.5" fill="#6ee7b7" />
+              <circle cx="500" cy="550" r="2" fill="#34d399" />
+              <circle cx="350" cy="600" r="1.5" fill="#6ee7b7" />
+            </g>
+
+            {/* Gradients */}
+            <defs>
+              <radialGradient id="radialGlow" cx="0.5" cy="0.5" r="0.5">
+                <stop offset="0%" stopColor="#10b981" />
+                <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
+              </radialGradient>
+              <radialGradient id="radialGlow2" cx="0.5" cy="0.5" r="0.5">
+                <stop offset="0%" stopColor="#6ee7b7" />
+                <stop offset="100%" stopColor="#6ee7b7" stopOpacity="0" />
+              </radialGradient>
+            </defs>
+          </svg>
         </div>
-        
-        {/* Gradient Overlay */}
-        <div className="absolute inset-0 z-0 bg-gradient-to-t from-emerald-900/90 via-emerald-900/50 to-transparent" />
 
         <div className="relative z-10 max-w-md mt-auto">
           <h2 className="text-4xl font-bold mb-6 text-white drop-shadow-md">Build with us.</h2>
