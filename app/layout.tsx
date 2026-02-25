@@ -57,7 +57,8 @@ const jsonLd = {
   "sameAs": [
     "https://instagram.com/leothetechguy",
     "https://x.com/LeoTheTechGuy",
-    "https://www.youtube.com/@LeoTheTechGuy"
+    "https://www.youtube.com/@LeoTheTechGuy",
+    "https://discord.gg/6rW46Cdf"
   ],
   "jobTitle": "Creative Technologist",
   "worksFor": {

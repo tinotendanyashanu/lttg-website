@@ -2,6 +2,7 @@ import React from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Youtube, Instagram, Twitter, Play, ArrowRight } from 'lucide-react';
+import { FaDiscord } from 'react-icons/fa';
 
 export const metadata = {
   title: "Learn System Architecture | Leo The Tech Guy",
@@ -78,6 +79,7 @@ export default function MediaPage() {
                        <a href="https://www.youtube.com/@LeoTheTechGuy" className="p-2 bg-white rounded-full text-[#FF0000] hover:bg-red-50 transition-colors"><Youtube className="w-5 h-5"/></a>
                        <a href="https://instagram.com/leothetechguy" className="p-2 bg-white rounded-full text-pink-600 hover:bg-pink-50 transition-colors"><Instagram className="w-5 h-5"/></a>
                        <a href="https://x.com/LeoTheTechGuy" className="p-2 bg-white rounded-full text-slate-900 hover:bg-slate-100 transition-colors"><Twitter className="w-5 h-5"/></a>
+                       <a href="https://discord.gg/6rW46Cdf" className="p-2 bg-white rounded-full text-[#5865F2] hover:bg-indigo-50 transition-colors"><FaDiscord className="w-5 h-5"/></a>
                    </div>
                </div>
                
