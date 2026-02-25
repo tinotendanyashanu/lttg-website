@@ -21,6 +21,7 @@ import {
   Facebook,
   Youtube
 } from 'lucide-react';
+import { FaDiscord } from 'react-icons/fa';
 import { handleSignOut } from '@/lib/actions/auth';
 import Image from 'next/image';
 import { Partner } from '@/types';
@@ -178,6 +179,9 @@ export default function Sidebar({
           </a>
           <a href="https://www.youtube.com/@LeoTheTechGuy" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-[#FF0000] transition-colors" aria-label="YouTube">
             <Youtube className="h-4 w-4" />
+          </a>
+          <a href="https://discord.gg/6rW46Cdf" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-[#5865F2] transition-colors" aria-label="Discord">
+            <FaDiscord className="h-4 w-4" />
           </a>
         </div>
         <form action={handleSignOut}>

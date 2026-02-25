@@ -160,9 +160,9 @@ export default function SignupPage() {
             )}
 
 
-            {/* Success/Error Message */}
+            {/* Error Message */}
             {state?.message && (
-                <div className={`p-3 rounded-lg text-sm ${state.success ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'}`}>
+                <div className="p-3 rounded-lg text-sm bg-red-50 text-red-700">
                     {state.message}
                 </div>
             )}

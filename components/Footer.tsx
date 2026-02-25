@@ -1,5 +1,6 @@
 import React from 'react';
 import { Mail, MapPin, Twitter, Instagram, Facebook, Youtube } from 'lucide-react';
+import { FaDiscord } from 'react-icons/fa';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -71,6 +72,9 @@ const Footer = () => {
               </a>
               <a href="https://www.youtube.com/@LeoTheTechGuy" className="text-slate-400 hover:text-[#FF0000] transition-colors" aria-label="YouTube">
                 <Youtube className="w-5 h-5 stroke-width-1.5" />
+              </a>
+              <a href="https://discord.gg/6rW46Cdf" className="text-slate-400 hover:text-[#5865F2] transition-colors" aria-label="Discord">
+                <FaDiscord className="w-5 h-5" />
               </a>
             </div>
           </div>

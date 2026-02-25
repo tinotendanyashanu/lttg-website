@@ -35,6 +35,10 @@ export async function authenticate(
 
     await signIn('credentials', { ...Object.fromEntries(formData), redirectTo });
   } catch (error) {
+    // Surface a clear message when email verification is required
+    if (error instanceof Error && error.message === 'EMAIL_NOT_VERIFIED') {
+      return 'Please verify your email before logging in. Check your inbox for the activation link.';
+    }
     if (error instanceof AuthError) {
       switch (error.type) {
         case 'CredentialsSignin':
@@ -88,7 +92,8 @@ export async function registerPartner(prevState: unknown, formData: FormData) {
     }
 
     let referralCode = undefined;
-    let tier = 'creator';
+    // Influencers start on creator tier; regular partners start on referral tier
+    let tier = partnerType === 'influencer' ? 'creator' : 'referral';
 
     if (partnerType === 'influencer') {
         const slugBase = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
@@ -189,7 +194,11 @@ export async function registerPartner(prevState: unknown, formData: FormData) {
     };
   }
 
-  return { success: true, message: 'Account created! Please check your email to activate your account.' };
+  // Auto-sign-in the newly registered user and redirect to verify-email page.
+  // The verify-email page will show the "check your inbox" prompt.
+  // The dashboard gate in auth.config.ts will prevent access until email is verified.
+  await signIn('credentials', { email, password: validatedFields.data.password, redirect: false });
+  redirect('/partner/verify-email');
 }
 
 export async function verifyEmail(token: string) {

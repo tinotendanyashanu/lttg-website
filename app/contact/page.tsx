@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Mail, MapPin, Twitter, Youtube, Send, Loader2, CheckCircle, AlertCircle, Instagram, Facebook } from 'lucide-react';
+import { FaDiscord } from 'react-icons/fa';
 
 export default function Contact() {
   const [loading, setLoading] = useState(false);
@@ -103,6 +104,10 @@ export default function Contact() {
                   <a href="https://instagram.com/Leothetechguy" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-full px-6 py-4 bg-gradient-to-r from-orange-500 via-pink-500 to-purple-600 text-white rounded-xl font-semibold hover:from-orange-600 hover:via-pink-600 hover:to-purple-700 transition-all shadow-lg shadow-pink-500/20 group transform hover:-translate-y-1">
                     <Instagram className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform" />
                     Follow on Instagram
+                  </a>
+                  <a href="https://discord.gg/6rW46Cdf" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-full px-6 py-4 bg-[#5865F2] text-white rounded-xl font-semibold hover:bg-[#4752C4] transition-all shadow-lg shadow-indigo-500/20 group transform hover:-translate-y-1">
+                    <FaDiscord className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform" />
+                    Join Discord Community
                   </a>
                 </div>
               </div>
@@ -243,6 +248,9 @@ export default function Contact() {
                 </a>
                 <a href="https://www.youtube.com/@LeoTheTechGuy" className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center hover:bg-[#FF0000] hover:border-[#FF0000] hover:text-white text-slate-400 transition-all duration-300" aria-label="Follow on YouTube">
                   <Youtube className="w-6 h-6" />
+                </a>
+                <a href="https://discord.gg/6rW46Cdf" className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center hover:bg-[#5865F2] hover:border-[#5865F2] hover:text-white text-slate-400 transition-all duration-300" aria-label="Join Discord">
+                  <FaDiscord className="w-6 h-6" />
                 </a>
               </div>
             </div>

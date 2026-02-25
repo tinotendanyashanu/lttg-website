@@ -107,6 +107,7 @@ function BaseTemplate(content: string) {
             <a href="https://x.com/LeoTheTechGuy" style="${SOCIAL_LINK_STYLE}">X (Twitter)</a>
             <a href="https://instagram.com/Leothetechguy" style="${SOCIAL_LINK_STYLE}">Instagram</a>
             <a href="https://facebook.com/Leothetechguy" style="${SOCIAL_LINK_STYLE}">Facebook</a>
+            <a href="https://discord.gg/6rW46Cdf" style="${SOCIAL_LINK_STYLE}">Discord</a>
           </div>
 
           <p style="margin: 0; font-weight: 600; color: #1e293b;">LeoTheTechGuy</p>

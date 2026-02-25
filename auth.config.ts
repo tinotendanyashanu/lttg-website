@@ -10,28 +10,32 @@ export const authConfig = {
       const isLoggedIn = !!auth?.user;
       const isOnDashboard = nextUrl.pathname.startsWith('/partner/dashboard');
       const isOnAdmin = nextUrl.pathname.startsWith('/admin');
-      
-      console.log(`[Auth Config] Authorized check: ${nextUrl.pathname} | isLoggedIn: ${isLoggedIn} | Role: ${auth?.user?.role}`);
 
+      // Gate: if logged in but email not verified, redirect away from dashboard
       if (isOnDashboard) {
-        if (isLoggedIn) return true;
-        return false; 
+        if (!isLoggedIn) return false;
+        // isEmailVerified is our custom boolean field (separate from NextAuth's Date-typed emailVerified)
+        if (!auth?.user?.isEmailVerified) {
+          const verifyUrl = new URL('/partner/verify-email', nextUrl.origin);
+          return Response.redirect(verifyUrl);
+        }
+        return true;
       }
-      
+
       if (isOnAdmin) {
         if (isLoggedIn && auth?.user?.role === 'admin') return true;
-        console.log('[Auth Config] Admin check failed');
-        return false; 
+        return false;
       }
-      
+
       return true;
     },
     jwt({ token, user }) {
       if (user) {
-        console.log(`[Auth Config] JWT Callback - User: ${user.email} | Role: ${user.role}`);
         token.role = user.role;
         token.id = user.id;
         token.tier = user.tier;
+        // Propagate our custom boolean verification field
+        token.isEmailVerified = user.isEmailVerified;
       }
       return token;
     },
@@ -40,7 +44,7 @@ export const authConfig = {
         session.user.role = token.role;
         session.user.id = token.id as string;
         session.user.tier = token.tier;
-        console.log(`[Auth Config] Session Callback - Role: ${session.user.role}`);
+        session.user.isEmailVerified = token.isEmailVerified;
       }
       return session;
     },
