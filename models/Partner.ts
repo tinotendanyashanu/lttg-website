@@ -5,7 +5,8 @@ export interface IPartner extends Document {
   email: string;
   companyName?: string;
   password?: string; // Optional because initial signups might be OAuth or awaiting password set
-  role: 'partner' | 'admin';
+  role: 'partner' | 'admin' | 'intern';
+  commissionRate?: number;
   partnerType: 'partner' | 'influencer';
   primaryPlatform?: 'youtube' | 'instagram' | 'tiktok' | 'twitter' | 'linkedin' | 'blog' | 'other';
   profileUrl?: string;
@@ -78,9 +79,10 @@ const PartnerSchema: Schema = new Schema({
   password: { type: String },
   role: { 
     type: String, 
-    enum: ['partner', 'admin'],
+    enum: ['partner', 'admin', 'intern'],
     default: 'partner' 
   },
+  commissionRate: { type: Number, default: 0 },
   partnerType: {
     type: String,
     enum: ['partner', 'influencer'],

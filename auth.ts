@@ -11,14 +11,14 @@ import { authConfig } from './auth.config';
 // with NextAuth's built-in 'emailVerified' (Date | null) type.
 declare module 'next-auth' {
   interface User {
-    role?: 'partner' | 'admin';
+    role?: 'partner' | 'admin' | 'intern';
     tier?: string;
     id?: string;
     isEmailVerified?: boolean;
   }
   interface Session {
     user: {
-      role?: 'partner' | 'admin';
+      role?: 'partner' | 'admin' | 'intern';
       tier?: string;
       id?: string;
       isEmailVerified?: boolean;
@@ -28,14 +28,14 @@ declare module 'next-auth' {
 
 declare module '@auth/core/jwt' {
   interface JWT {
-    role?: 'partner' | 'admin';
+    role?: 'partner' | 'admin' | 'intern';
     tier?: string;
     id?: string;
     isEmailVerified?: boolean;
   }
 }
 
-export const { auth, signIn, signOut, handlers } = NextAuth({
+const nextAuthResult = NextAuth({
   ...authConfig,
   providers: [
     Credentials({
@@ -65,7 +65,7 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
             id: user._id.toString(),
             name: user.name,
             email: user.email,
-            role: user.role,
+            role: user.role || 'intern',
             tier: user.tier,
             isEmailVerified: user.emailVerified,
           };
@@ -76,3 +76,5 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
     }),
   ],
 });
+
+export const { auth, signIn, signOut, handlers } = nextAuthResult;

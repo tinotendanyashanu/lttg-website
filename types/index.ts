@@ -129,7 +129,7 @@ export interface Payout {
   updatedAt: string;
 }
 
-export type LeadStatus = 'new' | 'contacted' | 'qualified' | 'converted' | 'rejected';
+export type LeadStatus = 'new' | 'contacted' | 'qualified' | 'converted' | 'rejected' | 'closed';
 export type LeadSource = 'manual' | 'referral_link' | 'contact_form' | 'consultation_form' | 'project_inquiry';
 
 export interface Lead {
@@ -145,4 +145,21 @@ export interface Lead {
   converted: boolean;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface TeamType {
+  _id: string;
+  name: string;
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AccountType {
+  _id: string;
+  email: string;
+  roles: string[];
+  teamId?: string | TeamType;
+  isActive: boolean;
+  createdAt: string;
 }

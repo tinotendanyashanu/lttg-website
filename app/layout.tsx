@@ -79,6 +79,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="scroll-smooth" suppressHydrationWarning>
+      <head>
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
+      </head>
       <body className={`${inter.className} bg-zinc-50 text-slate-800 relative overflow-x-hidden selection:bg-indigo-100 selection:text-indigo-900`} suppressHydrationWarning>
         <React.Suspense fallback={null}>
           <AnalyticsTracker />

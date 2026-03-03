@@ -1,40 +1,61 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
-export type LeadStatus = 'new' | 'contacted' | 'qualified' | 'converted' | 'rejected';
+export type LeadStatus = 'new' | 'contacted' | 'qualified' | 'converted' | 'rejected' | 'closed';
 export type LeadSource = 'manual' | 'referral_link' | 'contact_form' | 'consultation_form' | 'project_inquiry';
 
 export interface ILead extends Document {
-  partnerId: mongoose.Types.ObjectId;
-  clientName: string;
-  clientEmail: string;
+  // Partner System fields
+  partnerId?: mongoose.Types.ObjectId;
+  clientName?: string;
+  clientEmail?: string;
   clientPhone?: string;
-  source: LeadSource;
+  source?: LeadSource;
   status: LeadStatus;
   relatedDealId?: mongoose.Types.ObjectId;
-  // Legacy fields kept for backward compatibility
-  bookedCall: boolean;
-  converted: boolean;
+  bookedCall?: boolean;
+  converted?: boolean;
+  
+  // Intern Lead System fields
+  accountId?: mongoose.Types.ObjectId;
+  businessName?: string;
+  contactName?: string;
+  phone?: string;
+  serviceInterest?: string;
+  notes?: string;
+  dealValue?: number;
+
   createdAt: Date;
   updatedAt: Date;
 }
 
 const LeadSchema: Schema = new Schema({
-  partnerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Partner', required: true },
-  clientName: { type: String, required: true },
-  clientEmail: { type: String, required: true },
+  // Partner System
+  partnerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Partner' }, // Relaxed required
+  clientName: { type: String }, // Relaxed required
+  clientEmail: { type: String }, // Relaxed required
   clientPhone: { type: String },
   source: {
     type: String,
     enum: ['manual', 'referral_link', 'contact_form', 'consultation_form', 'project_inquiry'],
     default: 'referral_link'
   },
+  
+  // Intern System
+  accountId: { type: Schema.Types.ObjectId, ref: 'Account' },
+  businessName: { type: String },
+  contactName: { type: String },
+  phone: { type: String },
+  serviceInterest: { type: String },
+  notes: { type: String },
+  dealValue: { type: Number },
+
+  // Shared
   status: {
     type: String,
-    enum: ['new', 'contacted', 'qualified', 'converted', 'rejected'],
+    enum: ['new', 'contacted', 'qualified', 'converted', 'rejected', 'closed'],
     default: 'new'
   },
   relatedDealId: { type: mongoose.Schema.Types.ObjectId, ref: 'Deal' },
-  // Legacy fields
   bookedCall: { type: Boolean, default: false },
   converted: { type: Boolean, default: false },
 }, { timestamps: true });
@@ -43,6 +64,7 @@ const LeadSchema: Schema = new Schema({
 LeadSchema.index({ partnerId: 1, createdAt: -1 });
 LeadSchema.index({ partnerId: 1, status: 1 });
 LeadSchema.index({ clientEmail: 1 }, { sparse: true });
+LeadSchema.index({ accountId: 1, createdAt: -1 });
 
 const Lead: Model<ILead> = mongoose.models.Lead || mongoose.model<ILead>('Lead', LeadSchema);
 
