@@ -11,6 +11,10 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'api.dicebear.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'pub-01b9a208b3354278b07d052222dd1f6a.r2.dev',
+      },
     ],
   },
   async headers() {

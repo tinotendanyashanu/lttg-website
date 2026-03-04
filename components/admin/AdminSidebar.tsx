@@ -21,6 +21,7 @@ const navigation = [
   { name: 'Payouts', href: '/admin/payouts', icon: CreditCard },
   { name: 'Audit Logs', href: '/admin/audit', icon: ShieldAlert },
   { name: 'Commercial Playbook', href: '/admin/commercial-playbook', icon: BookOpen },
+  { name: 'Knowledge Base', href: '/portal/knowledge-base', icon: BookOpen },
   { name: 'Messages', href: '/admin/contacts', icon: MessageSquare },
 ];
 

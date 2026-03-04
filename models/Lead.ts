@@ -23,6 +23,8 @@ export interface ILead extends Document {
   serviceInterest?: string;
   notes?: string;
   dealValue?: number;
+  teamId?: mongoose.Types.ObjectId;
+  assignedTo?: mongoose.Types.ObjectId;
 
   createdAt: Date;
   updatedAt: Date;
@@ -48,6 +50,8 @@ const LeadSchema: Schema = new Schema({
   serviceInterest: { type: String },
   notes: { type: String },
   dealValue: { type: Number },
+  teamId: { type: Schema.Types.ObjectId, ref: 'Team' },
+  assignedTo: { type: Schema.Types.ObjectId, ref: 'Account' },
 
   // Shared
   status: {

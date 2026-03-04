@@ -1,21 +1,49 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface IAccount extends Document {
+  fullName: string;
   email: string;
   passwordHash: string;
   roles: string[];
   teamId?: mongoose.Types.ObjectId;
   isActive: boolean;
+  profileImageUrl?: string;
+  jobTitle?: string;
+  department?: string;
+  phoneNumber?: string;
+  location?: string;
+  bio?: string;
+  lastLoginAt?: Date;
   createdAt: Date;
+  commissionStats: {
+    pendingCommission: number;
+    approvedBalance: number;
+    paidCommission: number;
+    totalEarned: number;
+  };
 }
 
 const AccountSchema: Schema = new Schema({
+  fullName: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   passwordHash: { type: String, required: true },
   roles: { type: [String], default: [] },
   teamId: { type: Schema.Types.ObjectId, ref: 'Team' },
   isActive: { type: Boolean, default: true },
-  createdAt: { type: Date, default: Date.now }
+  profileImageUrl: { type: String },
+  jobTitle: { type: String },
+  department: { type: String },
+  phoneNumber: { type: String },
+  location: { type: String },
+  bio: { type: String },
+  lastLoginAt: { type: Date },
+  createdAt: { type: Date, default: Date.now },
+  commissionStats: {
+    pendingCommission: { type: Number, default: 0 },
+    approvedBalance: { type: Number, default: 0 },
+    paidCommission: { type: Number, default: 0 },
+    totalEarned: { type: Number, default: 0 },
+  },
 });
 
 export const Account: Model<IAccount> =

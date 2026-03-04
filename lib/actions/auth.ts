@@ -23,14 +23,23 @@ export async function authenticate(
   try {
     let email = formData.get('email') as string;
     if (email) email = email.toLowerCase();
-    await dbConnect();
-    const user = await Partner.findOne({ email });
     
-    // Default redirect
+    await dbConnect();
+    const partner = await Partner.findOne({ email });
+    const { Account } = await import('@/models/Account');
+    const accountUser = await Account.findOne({ email });
+
+    // Determine target redirect based on user's resolved role
     let redirectTo = '/partner/dashboard';
     
-    if (user && user.role === 'admin') {
-        redirectTo = '/admin';
+    if (partner && partner.role === 'partner') {
+         redirectTo = '/partner/dashboard';
+    } else if (accountUser) {
+         if (accountUser.roles.includes('admin')) {
+             redirectTo = '/portal/admin';
+         } else if (accountUser.roles.includes('employee') || accountUser.roles.includes('intern')) {
+             redirectTo = '/portal';
+         }
     }
 
     await signIn('credentials', { ...Object.fromEntries(formData), redirectTo });
@@ -52,11 +61,6 @@ export async function authenticate(
 }
 
 import crypto from 'crypto';
-
-// ... (existing helper function authenticate if needed, but we are replacing the whole file content for cleanliness or partials?)
-// I'll stick to replacing chunks to be safe.
-
-// ... authenticate function ...
 
 export async function registerPartner(prevState: unknown, formData: FormData) {
   const validatedFields = SignupSchema.safeParse({

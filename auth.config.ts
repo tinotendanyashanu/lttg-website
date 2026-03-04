@@ -1,28 +1,57 @@
 import type { NextAuthConfig } from 'next-auth';
 
 export const authConfig = {
+  session: {
+    strategy: 'jwt' as const,
+    // Server-side safety fallback: expire after 8 hours of inactivity.
+    // The browser-side session cookie (no maxAge on cookie) ensures the
+    // session is cleared immediately when the tab/browser is closed.
+    maxAge: 8 * 60 * 60, // 8 hours
+    updateAge: 60 * 60, // Update token every hour to ensure sliding window sessions
+  },
   pages: {
     signIn: '/partner/login',
     newUser: '/partner/signup',
   },
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
-      const isDev = process.env.NODE_ENV === 'development';
-      const isLoggedIn = !!auth?.user || isDev;
+      const isLoggedIn = !!auth?.user;
       const isOnDashboard = nextUrl.pathname.startsWith('/partner/dashboard');
       const isOnAdmin = nextUrl.pathname.startsWith('/admin');
       const isOnPortal = nextUrl.pathname.startsWith('/portal');
 
+      // If they are on the actual portal login page, do not gate it
+      if (nextUrl.pathname === '/portal/login') {
+         // Do not auto-redirect to /portal here. If the user's DB account was deleted or their 
+         // portal roles were removed, but their NextAuth cookie is still active, redirecting 
+         // them to /portal will bounce them back to /portal/login, causing an infinite loop.
+         // Let the portal login page simply render. If they login again, it overwrites the session.
+         return true;
+      }
+
       if (isOnPortal) {
-        if (!isLoggedIn) return false;
-        return true;
+        if (!isLoggedIn) {
+             const loginUrl = new URL('/portal/login', nextUrl.origin);
+             return Response.redirect(loginUrl);
+        }
+        // Only internal roles (or admins) allowed in the portal dashboard
+        if (auth?.user?.role === 'admin' || auth?.user?.role === 'employee' || auth?.user?.role === 'intern') {
+          return true;
+        }
+        return false;
       }
 
       // Gate: if logged in but email not verified, redirect away from dashboard
       if (isOnDashboard) {
         if (!isLoggedIn) return false;
+        
+        // Ensure only partners access the partner dashboard
+        if (auth?.user?.role !== 'partner') {
+          return false;
+        }
+
         // isEmailVerified is our custom boolean field (separate from NextAuth's Date-typed emailVerified)
-        if (!isDev && !auth?.user?.isEmailVerified) {
+        if (!auth?.user?.isEmailVerified) {
           const verifyUrl = new URL('/partner/verify-email', nextUrl.origin);
           return Response.redirect(verifyUrl);
         }
@@ -30,7 +59,7 @@ export const authConfig = {
       }
 
       if (isOnAdmin) {
-        if (isLoggedIn && (isDev || auth?.user?.role === 'admin')) return true;
+        if (isLoggedIn && auth?.user?.role === 'admin') return true;
         return false;
       }
 

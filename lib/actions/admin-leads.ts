@@ -5,6 +5,7 @@ import dbConnect from '@/lib/mongodb';
 import Lead from '@/models/Lead';
 import Commission from '@/models/Commission';
 import InternProfile from '@/models/InternProfile';
+import { ActivityLog } from '@/models/ActivityLog';
 import { getAccountByEmail } from '@/lib/data/account';
 import { revalidatePath } from 'next/cache';
 
@@ -65,8 +66,17 @@ export async function updateAdminLeadStatus(leadId: string, newStatus: AllowedAd
       }
     }
 
+    const prevStatus = lead.status;
     lead.status = newStatus;
     await lead.save();
+
+    await ActivityLog.create({
+      caseId: lead._id,
+      actorAccountId: account._id,
+      actionType: 'status_changed',
+      previousValue: prevStatus,
+      newValue: newStatus,
+    });
 
     revalidatePath('/portal/case-management');
     revalidatePath(`/portal/case-management/${leadId}`);

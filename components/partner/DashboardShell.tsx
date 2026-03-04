@@ -16,6 +16,7 @@ export default function DashboardShell({
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   return (
     <div className="min-h-screen bg-[#f8f9fa]">
@@ -33,10 +34,12 @@ export default function DashboardShell({
         partnerType={partnerType}
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
+        isCollapsed={isCollapsed}
+        onToggleCollapse={() => setIsCollapsed(!isCollapsed)}
       />
 
       {/* Main content area */}
-      <div className="lg:pl-64 transition-all duration-300">
+      <div className={`transition-all duration-300 ${isCollapsed ? 'lg:pl-20' : 'lg:pl-64'}`}>
         {/* Sticky header */}
         <header className="bg-white/50 backdrop-blur-sm sticky top-0 z-20 h-16 lg:h-20 flex items-center px-4 sm:px-8 lg:px-10 justify-between gap-4">
           {/* Hamburger — mobile only */}

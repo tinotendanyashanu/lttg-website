@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Search, Bell, Loader2, X, AlertCircle } from 'lucide-react';
+import { Search, Bell, Loader2, X, AlertCircle, Users, Briefcase } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -161,7 +161,13 @@ export default function AdminHeader({ user }: { user: { name?: string | null, em
                                         result.type === 'deal' ? 'bg-blue-50 text-blue-600 group-hover:bg-blue-100' :
                                         'bg-emerald-50 text-emerald-600 group-hover:bg-emerald-100'
                                     }`}>
-                                        <Search className="h-4 w-4" /> {/* Or specific icons based on type */}
+                                        {result.type === 'partner' ? (
+                                            <Users className="h-4 w-4" />
+                                        ) : result.type === 'deal' ? (
+                                            <Briefcase className="h-4 w-4" />
+                                        ) : (
+                                            <Search className="h-4 w-4" />
+                                        )}
                                     </div>
                                     <div>
                                         <p className="text-sm font-semibold text-slate-900 line-clamp-1">{result.title}</p>

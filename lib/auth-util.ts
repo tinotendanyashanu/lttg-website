@@ -1,20 +1,17 @@
-import { auth } from '@/auth';
+import { auth } from "@/auth";
+
+export async function getSession() {
+    return await auth();
+}
+
+export async function getRole() {
+    const session = await auth();
+    // Assuming standard structure, but we check account roles in page.tsx anyway
+    // So this might just return a basic default if not implemented fully here
+    return session?.user ? 'employee' : null;
+}
 
 export async function getSessionWithDevBypass() {
-  let session = await auth();
-
-  if (process.env.NODE_ENV === 'development') {
-    session = {
-      user: {
-        id: 'dev-mock-id',
-        name: 'Dev User',
-        email: 'dev@leotech.com',
-        role: 'admin',
-        isEmailVerified: true,
-      } as any,
-      expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-    };
-  }
-
-  return session;
+  return auth();
 }
+
