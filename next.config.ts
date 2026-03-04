@@ -25,6 +25,10 @@ const nextConfig: NextConfig = {
       { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
       { key: 'Permissions-Policy', value: 'geolocation=(), microphone=(), camera=(), interest-cohort=()' },
       { key: 'X-XSS-Protection', value: '0' },
+      {
+        key: 'Content-Security-Policy',
+        value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' blob: data: https://images.unsplash.com https://api.dicebear.com https://pub-01b9a208b3354278b07d052222dd1f6a.r2.dev; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://*.r2.dev; frame-src 'self'; object-src 'none';"
+      },
     ];
 
     const assetCaching = [

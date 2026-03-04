@@ -3,11 +3,19 @@ import type { NextAuthConfig } from 'next-auth';
 export const authConfig = {
   session: {
     strategy: 'jwt' as const,
-    // Server-side safety fallback: expire after 8 hours of inactivity.
-    // The browser-side session cookie (no maxAge on cookie) ensures the
-    // session is cleared immediately when the tab/browser is closed.
     maxAge: 8 * 60 * 60, // 8 hours
     updateAge: 60 * 60, // Update token every hour to ensure sliding window sessions
+  },
+  cookies: {
+    sessionToken: {
+      name: `__Secure-next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: true,
+      },
+    },
   },
   pages: {
     signIn: '/partner/login',

@@ -3,6 +3,7 @@ import dbConnect from '@/lib/mongodb';
 import { Case } from '@/models/Case';
 import { Account } from '@/models/Account';
 import { auth } from '@/auth';
+import { CaseSchema } from '@/lib/schemas';
 
 export async function GET(req: NextRequest) {
   try {
@@ -63,6 +64,17 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
+    const parsedData = CaseSchema.safeParse(body);
+
+    if (!parsedData.success) {
+      return NextResponse.json({ 
+        error: 'Invalid input', 
+        details: parsedData.error.flatten().fieldErrors 
+      }, { status: 400 });
+    }
+
+    const { businessName, contactName, email, phone, serviceInterest, dealValue } = parsedData.data;
+
     const account = await Account.findById(session.user.id);
     if (!account) return NextResponse.json({ error: 'Account not found' }, { status: 404 });
 
@@ -74,11 +86,12 @@ export async function POST(req: NextRequest) {
 
     const newCase = new Case({
       caseId,
-      businessName: body.businessName,
-      contactName: body.contactName,
-      phone: body.phone,
-      serviceInterest: body.serviceInterest,
-      dealValue: body.dealValue || 0,
+      businessName,
+      contactName,
+      email,
+      phone,
+      serviceInterest,
+      dealValue,
       status: 'new',
       ownerId: session.user.id,
       participants: [session.user.id],
