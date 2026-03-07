@@ -3,6 +3,7 @@ import { z } from 'zod';
 export const LoginSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }),
   password: z.string().min(1, { message: "Password is required" }),
+  loginSource: z.string().optional(),
 });
 
 export const SignupSchema = z.object({
@@ -17,4 +18,13 @@ export const SignupSchema = z.object({
   termsAccepted: z.literal('true', {
     message: "You must accept the Affiliate Agreement",
   }),
+});
+
+export const CaseSchema = z.object({
+  businessName: z.string().optional(),
+  contactName: z.string().min(2, { message: "Contact name is required" }),
+  email: z.string().email({ message: "Invalid email address" }),
+  phone: z.string().min(10, { message: "Phone number is required" }),
+  serviceInterest: z.string().min(1, { message: "Service interest is required" }),
+  dealValue: z.number().optional().default(0),
 });

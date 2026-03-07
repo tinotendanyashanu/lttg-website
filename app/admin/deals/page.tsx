@@ -2,6 +2,7 @@ import dbConnect from '@/lib/mongodb';
 import Deal, { IDeal } from '@/models/Deal';
 import { IPartner } from '@/models/Partner';
 import DealsClient from '@/components/admin/DealsClient';
+import AdminPageBanner from '@/components/admin/AdminPageBanner';
 
 type PopulatedDeal = Omit<IDeal, 'partnerId'> & { partnerId: IPartner };
 
@@ -24,14 +25,12 @@ export default async function AdminDealsPage() {
   }));
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-900">Deal Pipeline</h2>
-          <p className="text-slate-500">Manage registered deals and process commissions.</p>
-        </div>
-      </div>
-
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <AdminPageBanner
+        icon="work"
+        title="Deal Pipeline"
+        description="Manage registered deals, update statuses, and process commissions."
+      />
       <DealsClient data={tableData} />
     </div>
   );

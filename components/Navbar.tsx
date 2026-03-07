@@ -52,7 +52,10 @@ const Navbar = () => {
           </div>
 
           {/* Desktop CTA */}
-          <div className="hidden md:flex items-center">
+          <div className="hidden md:flex items-center gap-3">
+            <Link href="/portal/client/login" className="text-sm font-medium text-slate-500 hover:text-slate-900 border border-slate-200 hover:border-slate-400 px-4 py-2 rounded-lg transition-all duration-200">
+              Client Portal
+            </Link>
             <Link href="/contact" className="group relative px-5 py-2 text-sm font-medium text-[#4C8BFF] bg-white border border-[#4C8BFF]/30 rounded-lg hover:border-[#4C8BFF] hover:shadow-[0_0_15px_rgba(76,139,255,0.2)] transition-all duration-300 overflow-hidden">
               <span className="relative z-10">Work With Me</span>
               <div className="absolute inset-0 h-full w-full bg-[#4C8BFF]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -93,7 +96,10 @@ const Navbar = () => {
             <Link href="/partner" className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50/50">Partner</Link>
             <Link href="/tech-stack" className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50/50">Resources</Link>
             <Link href="/contact" className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50/50">Contact</Link>
-            <div className="pt-4">
+            <div className="pt-4 space-y-2">
+              <Link href="/portal/client/login" className="block w-full text-center px-5 py-3 text-base font-medium text-slate-600 border border-slate-200 rounded-lg bg-white">
+                Client Portal Login
+              </Link>
               <Link href="/contact" className="block w-full text-center px-5 py-3 text-base font-medium text-[#4C8BFF] border border-[#4C8BFF] rounded-lg bg-white shadow-sm">
                 Work With Me
               </Link>

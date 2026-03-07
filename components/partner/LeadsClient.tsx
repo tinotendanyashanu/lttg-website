@@ -13,9 +13,10 @@ const STATUS_COLORS: Record<LeadStatus, string> = {
   qualified: 'bg-purple-100 text-purple-700',
   converted: 'bg-emerald-100 text-emerald-700',
   rejected: 'bg-red-100 text-red-700',
+  closed: 'bg-slate-100 text-slate-700',
 };
 
-const STATUS_OPTIONS: LeadStatus[] = ['new', 'contacted', 'qualified', 'converted', 'rejected'];
+const STATUS_OPTIONS: LeadStatus[] = ['new', 'contacted', 'qualified', 'converted', 'rejected', 'closed'];
 
 export default function LeadsClient({
   leads,
@@ -82,7 +83,7 @@ export default function LeadsClient({
           </form>
         </div>
         <div className="flex space-x-2 overflow-x-auto pb-1 md:pb-0">
-          {['all', 'new', 'contacted', 'qualified', 'converted', 'rejected'].map((s) => (
+          {['all', 'new', 'contacted', 'qualified', 'converted', 'rejected', 'closed'].map((s) => (
             <Link
               key={s}
               href={`?status=${s}&q=${query}`}

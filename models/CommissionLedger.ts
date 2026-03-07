@@ -9,17 +9,20 @@ export type CommissionLedgerType =
   | 'adjustment';
 
 export interface ICommissionLedger extends Document {
-  partnerId: mongoose.Types.ObjectId;
+  partnerId?: mongoose.Types.ObjectId;  // for partners
+  accountId?: mongoose.Types.ObjectId;  // for interns/employees
   type: CommissionLedgerType;
   amount: number;
   relatedDealId?: mongoose.Types.ObjectId;
+  relatedCaseId?: mongoose.Types.ObjectId;
   batchId?: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }
 
 const CommissionLedgerSchema: Schema = new Schema({
-  partnerId: { type: Schema.Types.ObjectId, ref: 'Partner', required: true, index: true },
+  partnerId: { type: Schema.Types.ObjectId, ref: 'Partner', index: true },
+  accountId: { type: Schema.Types.ObjectId, ref: 'Account', index: true },
   type: {
     type: String,
     enum: [
@@ -34,6 +37,7 @@ const CommissionLedgerSchema: Schema = new Schema({
   },
   amount: { type: Number, required: true },
   relatedDealId: { type: Schema.Types.ObjectId, ref: 'Deal' },
+  relatedCaseId: { type: Schema.Types.ObjectId, ref: 'Case' },
   batchId: { type: Schema.Types.ObjectId, ref: 'PayoutBatch' },
 }, { timestamps: true });
 

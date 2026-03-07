@@ -7,9 +7,15 @@ import Partner from '../models/Partner';
 dotenv.config({ path: '.env.local' });
 
 const MONGODB_URI = process.env.MONGODB_URI;
+const SEED_ADMIN_PASSWORD = process.env.SEED_ADMIN_PASSWORD;
 
 if (!MONGODB_URI) {
-  console.error('Please define the MONGODB_URI environment variable inside .env.local');
+  console.error('Please define MONGODB_URI in .env.local');
+  process.exit(1);
+}
+
+if (!SEED_ADMIN_PASSWORD) {
+  console.error('Please define SEED_ADMIN_PASSWORD in .env.local before running this script.');
   process.exit(1);
 }
 
@@ -23,34 +29,31 @@ async function seedAdmin() {
 
     if (existingAdmin) {
       console.log('Admin user already exists.');
-      // Optional: Update to ensure role is admin
       if (existingAdmin.role !== 'admin') {
-          existingAdmin.role = 'admin';
-          await existingAdmin.save();
-          console.log('Updated existing user to admin role.');
+        existingAdmin.role = 'admin';
+        await existingAdmin.save();
+        console.log('Updated existing user to admin role.');
       }
     } else {
-      const hashedPassword = await bcrypt.hash('admin123', 10);
-      
+      const hashedPassword = await bcrypt.hash(SEED_ADMIN_PASSWORD!, 10);
+
       const newAdmin = new Partner({
         name: 'Leo Admin',
         email: adminEmail,
         password: hashedPassword,
         role: 'admin',
-        tier: 'enterprise', // Irrelevant for admin but good for schema
+        tier: 'enterprise',
         status: 'active',
         stats: {
-            totalReferredRevenue: 0,
-            totalCommissionEarned: 0,
-            pendingCommission: 0,
-            paidCommission: 0
-        }
+          totalReferredRevenue: 0,
+          totalCommissionEarned: 0,
+          pendingCommission: 0,
+          paidCommission: 0,
+        },
       });
 
       await newAdmin.save();
-      console.log('Admin user created successfully.');
-      console.log('Email:', adminEmail);
-      console.log('Password: admin123');
+      console.log('Admin user created successfully. Email:', adminEmail);
     }
 
   } catch (error) {

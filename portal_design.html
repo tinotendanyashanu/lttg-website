@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>LeoTech Admin Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#2D2D2D", // Dark charcoal for primary actions/branding
+                        "background-light": "#F4F5F7",
+                        "background-dark": "#121212",
+                        "surface-light": "#FFFFFF",
+                        "surface-dark": "#1E1E1E",
+                        "accent-green": "#4ADE80",
+                        "accent-red": "#F87171",
+                        "accent-blue": "#60A5FA",
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Inter', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        DEFAULT: "1rem", // Soft rounded corners like the image
+                        'xl': '1.5rem',
+                        '2xl': '2rem',
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'glow': '0 0 15px rgba(74, 222, 128, 0.3)',
+                    }
+                },
+            },
+        };
+    </script>
+<style>::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #D1D5DB;
+            border-radius: 10px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #4B5563;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-gray-800 dark:text-gray-200 font-sans transition-colors duration-300 min-h-screen p-4 md:p-6 lg:p-8 flex justify-center items-center">
+<div class="w-full max-w-[1600px] h-[95vh] bg-surface-light dark:bg-surface-dark rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row relative transition-colors duration-300">
+<aside class="w-20 lg:w-64 bg-surface-light dark:bg-surface-dark border-r border-gray-100 dark:border-gray-800 flex flex-col py-8 px-4 flex-shrink-0 transition-all duration-300">
+<div class="flex items-center gap-3 mb-10 pl-2">
+<div class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center">
+<span class="material-icons-outlined text-xl">grid_view</span>
+</div>
+<span class="text-xl font-bold tracking-tight hidden lg:block text-gray-900 dark:text-white">LeoTech</span>
+</div>
+<nav class="flex-1 space-y-2">
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white font-medium shadow-sm transition-colors" href="#">
+<span class="material-icons-outlined">dashboard</span>
+<span class="hidden lg:block">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white transition-colors group" href="#">
+<span class="material-icons-outlined group-hover:scale-110 transition-transform">folder_open</span>
+<span class="hidden lg:block">Leads/Cases</span>
+<span class="ml-auto hidden lg:flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-accent-blue rounded-full">3</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white transition-colors group" href="#">
+<span class="material-icons-outlined group-hover:scale-110 transition-transform">people_outline</span>
+<span class="hidden lg:block">Team</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white transition-colors group" href="#">
+<span class="material-icons-outlined group-hover:scale-110 transition-transform">monetization_on</span>
+<span class="hidden lg:block">Commissions</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white transition-colors group" href="#">
+<span class="material-icons-outlined group-hover:scale-110 transition-transform">school</span>
+<span class="hidden lg:block">Knowledge</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white transition-colors group" href="#">
+<span class="material-icons-outlined group-hover:scale-110 transition-transform">campaign</span>
+<span class="hidden lg:block">Announcements</span>
+</a>
+</nav>
+<div class="space-y-4 mt-auto">
+<button class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors mx-auto lg:mx-0" onclick="document.documentElement.classList.toggle('dark')">
+<span class="material-icons-outlined dark:hidden">dark_mode</span>
+<span class="material-icons-outlined hidden dark:block">light_mode</span>
+</button>
+</div>
+</aside>
+<main class="flex-1 flex flex-col min-w-0 bg-[#FAFAFA] dark:bg-[#18181b] overflow-hidden">
+<header class="h-20 px-8 flex items-center justify-between flex-shrink-0 bg-[#FAFAFA] dark:bg-[#18181b]">
+<h1 class="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+<div class="flex items-center gap-4">
+<div class="hidden md:flex items-center bg-white dark:bg-[#27272a] rounded-full px-4 py-2.5 w-64 shadow-sm border border-gray-100 dark:border-gray-700">
+<span class="material-icons-outlined text-gray-400 text-xl">search</span>
+<input class="bg-transparent border-none text-sm w-full focus:ring-0 text-gray-700 dark:text-gray-200 placeholder-gray-400" placeholder="Search anything..." type="text"/>
+</div>
+<button class="bg-primary hover:bg-black text-white px-5 py-2.5 rounded-full text-sm font-medium transition-colors shadow-lg shadow-gray-300/50 dark:shadow-none">
+                        Create Case
+                    </button>
+<button class="w-10 h-10 rounded-full bg-white dark:bg-[#27272a] border border-gray-100 dark:border-gray-700 flex items-center justify-center text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors relative">
+<span class="material-icons-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-white dark:border-[#27272a]"></span>
+</button>
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-white dark:border-gray-700 shadow-sm cursor-pointer">
+<img alt="User Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAE5pTl8BUE1mofAS2Fb-Q2TowrEFsvDpM2mJtZKwyYqjXPTbL9nfEX53AWXd-w8YbZvUcmk2v5dqJSmFnAYrtuWpiEz1A7w_pOOgw6tSRSkN-Tij7-3eK0EkdhT1jCQ1K4zCInqO5l0LrMMF_xOnr3cRVGDWLxWFeAm5kg89gKFyN6mGkd4530wc5x_TlPvtfz3ZjNbFCw0ZEaYUrgwXuxIgU-zAVDmKH6TznZ9ZZSxRzNhoU1MvyEUA8TXtn4M9IibbawRA5LPA0"/>
+</div>
+</div>
+</header>
+<div class="flex-1 overflow-y-auto p-8 pt-2">
+<div class="flex flex-col lg:flex-row gap-6 h-full">
+<div class="flex-1 flex flex-col gap-6">
+<div class="flex justify-between items-center mb-[-10px]">
+<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Overview</h2>
+<button class="text-sm text-gray-500 flex items-center gap-1 bg-white dark:bg-[#27272a] px-3 py-1 rounded-full shadow-sm border border-gray-100 dark:border-gray-700">
+                                Last month <span class="material-icons-outlined text-base">expand_more</span>
+</button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="bg-white dark:bg-[#27272a] p-6 rounded-2xl shadow-soft dark:shadow-none border border-gray-100 dark:border-gray-800 relative group hover:shadow-lg transition-shadow">
+<div class="flex items-start justify-between mb-4">
+<div class="flex items-center gap-2 text-gray-500 dark:text-gray-400">
+<span class="material-icons-outlined text-lg">folder_shared</span>
+<span class="font-medium">Total Leads</span>
+</div>
+<span class="bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400 text-xs font-semibold px-2 py-1 rounded flex items-center gap-1">
+<span class="material-icons-outlined text-xs transform rotate-180">arrow_outward</span> 36.8%
+                                    </span>
+</div>
+<div class="flex items-end gap-3">
+<h3 class="text-5xl font-bold text-gray-900 dark:text-white">1,293</h3>
+<span class="text-sm text-gray-400 pb-2">vs last month</span>
+</div>
+</div>
+<div class="bg-white dark:bg-[#27272a] p-6 rounded-2xl shadow-soft dark:shadow-none border border-gray-100 dark:border-gray-800 relative group hover:shadow-lg transition-shadow">
+<div class="flex items-start justify-between mb-4">
+<div class="flex items-center gap-2 text-gray-500 dark:text-gray-400">
+<span class="material-icons-outlined text-lg">account_balance_wallet</span>
+<span class="font-medium">Pending Commissions</span>
+</div>
+<span class="bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 text-xs font-semibold px-2 py-1 rounded flex items-center gap-1">
+<span class="material-icons-outlined text-xs">arrow_outward</span> 36.8%
+                                    </span>
+</div>
+<div class="flex items-end gap-3">
+<h3 class="text-5xl font-bold text-gray-900 dark:text-white">$256k</h3>
+<span class="text-sm text-gray-400 pb-2">vs last month</span>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-[#27272a] p-6 rounded-2xl shadow-soft dark:shadow-none border border-gray-100 dark:border-gray-800">
+<div class="mb-4">
+<h3 class="font-medium text-gray-800 dark:text-gray-200">857 new customers today!</h3>
+<p class="text-sm text-gray-500 dark:text-gray-400">Send a welcome message to all new customers.</p>
+</div>
+<div class="flex items-center gap-8 overflow-x-auto pb-2">
+<div class="text-center group cursor-pointer">
+<img alt="Gladyce" class="w-14 h-14 rounded-full object-cover mb-2 border-2 border-transparent group-hover:border-primary transition-all" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBIIeVfMaFWZIXmhBBPUJNHEmceOqUhXOe0XHovpwBXuJSDWzK4slK_WRS6LTBWh1Slm8kSX9oJkMkfdeMbgoa_3V1Nkyg7gdN-W-oSZmzveZIULkgR3T2ySIwOSoDW4D4_AAc9_GQZTRI9tZqUwig9BvC7QTDj7zK6Aw2U2p4yaJc0T-RZKIHOycRoudBKQs3nM1sgY6WmMeWl78QMw8o7T_T5URcisItTAkcUXK_JT8XCQflhfTk1Sdhlh0590IffTodOOd0kF2g"/>
+<span class="text-xs font-medium text-gray-600 dark:text-gray-300">Gladyce</span>
+</div>
+<div class="text-center group cursor-pointer">
+<img alt="Elbert" class="w-14 h-14 rounded-full object-cover mb-2 border-2 border-transparent group-hover:border-primary transition-all" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAESHgMmXZkKH6LScEdR_SCtnbo6evqW1RI6HBVc-h8xQpZALDkuYM05JoRBEOe_w1hF3jLft1o62Yx75JDRZIh934rzCH-Jt7ijm5TkpbI7AsEYsbrlvM_x2kqZOzy5qZa_Rdz3BFL3DoROt2erUdZ94_0_-kC3nTCe-c-Pz2iM7qBzfJp3X6ZiqQhHocy42dGOrbSa7gKfl3xvWT_ktvtSzZOKVkpPaULUpo59Lk_ogsuBGTlRZiynzcFOFGD6U-lRJEBI9LligI"/>
+<span class="text-xs font-medium text-gray-600 dark:text-gray-300">Elbert</span>
+</div>
+<div class="text-center group cursor-pointer">
+<img alt="Dash" class="w-14 h-14 rounded-full object-cover mb-2 border-2 border-transparent group-hover:border-primary transition-all" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDy2-VN7B0nah8hmRnjpU1OcvoP2TG2tQRx3g3VzKDxvz3EipZzqqhXBCU_IuhIukc05asDIm7BWLqcJkepc2OE5FL0g2YaZQOicn9nK8kXVrFAMWk2Yjx-3trl4pthc2R8SknTFdh_Uaen113fE1utviyIuiqEUmvhyIYLojbCKZ0RX8PaC0NnrGYPCmOA_draJNef_ktf_sPtSQJS0jEBuOudQith-cXo924qRx_bWzt9nnM98GWJfXMyMXwLycqevKaZ1Zef18A"/>
+<span class="text-xs font-medium text-gray-600 dark:text-gray-300">Dash</span>
+</div>
+<div class="text-center group cursor-pointer">
+<img alt="Joyce" class="w-14 h-14 rounded-full object-cover mb-2 border-2 border-transparent group-hover:border-primary transition-all" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBNB1726ahdH9b6xwzloK58GdYEzHKDxomK7GZjAULMjFFeNEp9bL2E6kHAfufA0xcbZTfKQQ215iQsvULcsMeWRJA9c8779mkicjyx5dypWUKiD-mUs4cWRV7krEmuASghbuPHTjJyfvJUiDT_Eo8MZ1tM41-cKGRkCq690WZt8Q5s8gGn8CXt_Rrc0i_kHIZjbbwvH8b2u43Dp-H2dsY46nn8iO1VTN-Kb2UMYmas2YVc44ZC0N08_-_96nX3b3meRXf8m0AD9VY"/>
+<span class="text-xs font-medium text-gray-600 dark:text-gray-300">Joyce</span>
+</div>
+<div class="text-center group cursor-pointer">
+<img alt="Marina" class="w-14 h-14 rounded-full object-cover mb-2 border-2 border-transparent group-hover:border-primary transition-all" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB-oqE2rAtiI7FRLFWd9NgdLyUXvukvBNQBPti4lv8qohr3TMkZ8Q7yii2ocoQp2UC162uYyOc7LQds3EQzQs1Mp7dIAhphAO5bQ0FTOBu7X9uSpoTisW0ROzfrQGI87NZJZaHoAulY086LPgYp4sF3k-Be8OSgdW0EnstJLm77Rdczf-CT661pO12xZxdw-OYH-_GdmvyAn46J3rLg0igOxJH5_1NjDU6QPeez07Q7YqII-_iYfnlgFzwmufPxoFUVn0e3fTP_UCY"/>
+<span class="text-xs font-medium text-gray-600 dark:text-gray-300">Marina</span>
+</div>
+<div class="text-center ml-auto">
+<button class="w-14 h-14 rounded-full border border-gray-200 dark:border-gray-600 flex items-center justify-center text-gray-400 hover:text-primary hover:border-primary transition-all mb-2">
+<span class="material-icons-outlined">arrow_forward</span>
+</button>
+<span class="text-xs font-medium text-gray-600 dark:text-gray-300">View all</span>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-[#27272a] p-6 rounded-2xl shadow-soft dark:shadow-none border border-gray-100 dark:border-gray-800 flex-1 min-h-[300px] flex flex-col justify-between relative overflow-hidden">
+<div class="flex justify-between items-center z-10 relative">
+<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Lead Activity Volume</h2>
+<button class="text-sm text-gray-500 flex items-center gap-1 bg-gray-50 dark:bg-gray-800 px-3 py-1 rounded-full">
+                                    Last 7 days <span class="material-icons-outlined text-base">expand_more</span>
+</button>
+</div>
+<div class="flex items-end justify-between h-48 mt-8 px-4 z-10 relative">
+<div class="w-full absolute bottom-0 left-0 text-[10rem] font-bold text-gray-50 dark:text-white/5 pointer-events-none z-0 leading-none tracking-tighter">
+                                    $10.2m
+                                </div>
+<div class="w-12 bg-gray-100 dark:bg-gray-700 rounded-t-lg h-24 hover:bg-gray-200 dark:hover:bg-gray-600 transition-all cursor-pointer"></div>
+<div class="w-12 bg-gray-200 dark:bg-gray-700 rounded-t-lg h-32 hover:bg-gray-300 dark:hover:bg-gray-600 transition-all cursor-pointer"></div>
+<div class="w-12 bg-gray-100 dark:bg-gray-700 rounded-t-lg h-20 hover:bg-gray-200 dark:hover:bg-gray-600 transition-all cursor-pointer"></div>
+<div class="w-12 bg-gradient-to-t from-green-200 to-green-400 dark:from-green-900 dark:to-green-600 rounded-t-lg h-48 shadow-glow relative group cursor-pointer">
+<div class="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-primary text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                        2.2m Leads
+                                        <div class="absolute bottom-[-4px] left-1/2 transform -translate-x-1/2 w-2 h-2 bg-primary rotate-45"></div>
+</div>
+<div class="absolute -top-3 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-white border-2 border-green-500 rounded-full"></div>
+</div>
+<div class="w-12 bg-gray-200 dark:bg-gray-700 rounded-t-lg h-28 hover:bg-gray-300 dark:hover:bg-gray-600 transition-all cursor-pointer"></div>
+<div class="w-12 bg-gray-100 dark:bg-gray-700 rounded-t-lg h-16 hover:bg-gray-200 dark:hover:bg-gray-600 transition-all cursor-pointer"></div>
+<div class="w-12 bg-gray-200 dark:bg-gray-700 rounded-t-lg h-36 hover:bg-gray-300 dark:hover:bg-gray-600 transition-all cursor-pointer"></div>
+</div>
+</div>
+</div>
+<div class="w-full lg:w-80 xl:w-96 flex flex-col gap-6">
+<div class="bg-white dark:bg-[#27272a] p-6 rounded-2xl shadow-soft dark:shadow-none border border-gray-100 dark:border-gray-800 flex-1">
+<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-6">Recent Leads</h2>
+<div class="space-y-6">
+<div class="flex items-center gap-4 group cursor-pointer">
+<div class="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+<span class="material-icons-outlined">business</span>
+</div>
+<div class="flex-1">
+<h4 class="font-semibold text-gray-800 dark:text-gray-200 text-sm group-hover:text-primary transition-colors">TechCorp Systems</h4>
+<p class="text-xs text-gray-400">Software Upgrade</p>
+</div>
+<div class="text-right">
+<div class="text-sm font-bold text-gray-900 dark:text-white">$3,250</div>
+<span class="text-[10px] font-medium text-green-600 bg-green-100 dark:bg-green-900/30 dark:text-green-400 px-1.5 py-0.5 rounded">Active</span>
+</div>
+</div>
+<div class="flex items-center gap-4 group cursor-pointer">
+<div class="w-12 h-12 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 relative overflow-hidden">
+<img alt="Abstract" class="w-full h-full object-cover opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBzRZWvUU1LRZU2ppxE8QYe8QtqRfd0zB00We0INLyoew8BSpXds6tDEQABGhvKLyc7iC5gpv4QMXKY-p7zVGN0j-29oX6DKYGSX6iRtylI-EiNdPwTFm40pgEzKLulDqwF9oOQhMpCwGIYCMiiMJMxnZtJWNBXB2-otT8J9x8ITOhaGSf8gUc8mEvDBQ_Z9590oqsSk2PoyOrcw5yqrF9tiOENXs1nS_ddwtjx9yo16ATwehymnk_AMydzZRydynWw8Cz_akD2PKk"/>
+</div>
+<div class="flex-1">
+<h4 class="font-semibold text-gray-800 dark:text-gray-200 text-sm group-hover:text-primary transition-colors">Bento Studio</h4>
+<p class="text-xs text-gray-400">New Illustration</p>
+</div>
+<div class="text-right">
+<div class="text-sm font-bold text-gray-900 dark:text-white">$7,890</div>
+<span class="text-[10px] font-medium text-green-600 bg-green-100 dark:bg-green-900/30 dark:text-green-400 px-1.5 py-0.5 rounded">Active</span>
+</div>
+</div>
+<div class="flex items-center gap-4 group cursor-pointer">
+<div class="w-12 h-12 rounded-xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-600 dark:text-orange-400">
+<span class="material-icons-outlined">flight</span>
+</div>
+<div class="flex-1">
+<h4 class="font-semibold text-gray-800 dark:text-gray-200 text-sm group-hover:text-primary transition-colors">Travel Agency X</h4>
+<p class="text-xs text-gray-400">Web Redesign</p>
+</div>
+<div class="text-right">
+<div class="text-sm font-bold text-gray-900 dark:text-white">$1,500</div>
+<span class="text-[10px] font-medium text-red-600 bg-red-100 dark:bg-red-900/30 dark:text-red-400 px-1.5 py-0.5 rounded">Offline</span>
+</div>
+</div>
+<div class="flex items-center gap-4 group cursor-pointer">
+<div class="w-12 h-12 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400">
+<span class="material-icons-outlined">spa</span>
+</div>
+<div class="flex-1">
+<h4 class="font-semibold text-gray-800 dark:text-gray-200 text-sm group-hover:text-primary transition-colors">SimpleSocial Inc</h4>
+<p class="text-xs text-gray-400">Design Kit</p>
+</div>
+<div class="text-right">
+<div class="text-sm font-bold text-gray-900 dark:text-white">$9,999</div>
+<span class="text-[10px] font-medium text-green-600 bg-green-100 dark:bg-green-900/30 dark:text-green-400 px-1.5 py-0.5 rounded">Active</span>
+</div>
+</div>
+</div>
+<button class="w-full mt-8 py-3 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                                All Leads
+                            </button>
+</div>
+<div class="bg-white dark:bg-[#27272a] p-6 rounded-2xl shadow-soft dark:shadow-none border border-gray-100 dark:border-gray-800">
+<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Comments</h2>
+<div class="space-y-6">
+<div class="flex gap-3">
+<img alt="User" class="w-10 h-10 rounded-full object-cover flex-shrink-0" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAtL8uxAK0m1M7UtI9v1l0URKBlZtVmTlkmvYekfjnInLsbFkcqcMEx9LPLvm4ZW_xPxmH7PyYYbKuZWnw0M8jaOMmp9eUT6yg2TWLyyuPImKGDSUrMsJ636C3DjKY5zCCxwBbhaTC0UPLCuEsRxZRA7rZ_0MUHSqYWRKOxEKHbf9BF2QQfXND-46iqINJr5h-pP1eSKGT-yTqz5GlutPGLpqi_bC77Vsd0BWQN2pk0c7kAKdiVDjpJWllemHK7ubMEypw_hieK_Ss"/>
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="text-sm font-semibold text-gray-900 dark:text-white">Joyce</span>
+<span class="text-xs text-gray-400">on Bento Pro 2.0</span>
+</div>
+<p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                                            Great work! When will the HTML version be available? ⚡
+                                        </p>
+<div class="mt-2 text-[10px] text-gray-400">09:00 AM</div>
+</div>
+</div>
+<div class="flex gap-3 opacity-60 hover:opacity-100 transition-opacity">
+<img alt="User" class="w-10 h-10 rounded-full object-cover flex-shrink-0" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBzSPqRRNU6hod5q_TYFfMbDa4NjblUhEvLtukH9W2Y0EyEhxnPGC1W6cvYgRN5SWdVH841rWdW3AW9fSRw66mCQtNSkVpE0d_uU_zXvVUETdBHW-br6F2IXQ5VxHqVOJ28mDlTm1RtTx4f4mgVac_BeOaF99Sq6ZgoY01ZwMivS-Cr7U_3ntip7f-77vBbOs2THBNUzjoL2uTwVkqQTbkzDEIOfFrJhApwjh0ZmZnJOYaIaGX8P07mYvOz-XWZkQf5ohH1hFdt8_8"/>
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="text-sm font-semibold text-gray-900 dark:text-white">Gladyce</span>
+<span class="text-xs text-gray-400">on Food Delivery App</span>
+</div>
+<p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-2">
+                                            This is amazing! I really like the color palette used here.
+                                        </p>
+<div class="mt-2 text-[10px] text-gray-400">Yesterday</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+
+</body></html>

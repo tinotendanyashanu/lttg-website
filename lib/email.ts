@@ -240,5 +240,46 @@ export const EmailTemplates = {
       <p>The funds should be available in your designated account according to your bank's processing times.</p>
       <p>Thank you for your continued partnership.</p>
       <p style="margin-top: 32px;">Regards,<br /><strong style="color: #1e293b;">Leo</strong></p>
-    `)
+    `),
+
+  clientWelcome: (name: string, setupLink: string) =>
+    BaseTemplate(`
+      <h2 style="color: #0f172a; font-size: 20px; margin-top: 0; margin-bottom: 24px;">Welcome to Your Client Portal</h2>
+      <p>Hello ${name},</p>
+      <p>Your client account has been created on the LeoTheTechGuy platform. You now have access to a secure portal where you can track your cases, review invoices, communicate with our team, and manage all your engagements.</p>
+      <p>To get started, please set up your password by clicking the button below:</p>
+      <div style="margin: 32px 0;">
+        <a href="${setupLink}" style="background-color: #2563eb; color: #ffffff; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block;">Set Up My Password</a>
+      </div>
+      <p style="font-size: 14px; color: #64748b;">This link expires in 48 hours for security. If you did not expect this invitation, please contact us at contact@leothetechguy.com.</p>
+      <p style="margin-top: 32px;">Best regards,<br /><strong style="color: #1e293b;">The LeoTheTechGuy Team</strong></p>
+    `),
+
+  clientPasswordSetupConfirmation: (name: string) =>
+    BaseTemplate(`
+      <h2 style="color: #10b981; font-size: 20px; margin-top: 0; margin-bottom: 24px;">Account Activated</h2>
+      <p>Hello ${name},</p>
+      <p>Your client portal account has been successfully activated. You can now log in at any time to access your portal.</p>
+      <div style="margin: 32px 0;">
+        <a href="https://leothetechguy.com/portal/login" style="background-color: #0f172a; color: #ffffff; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block;">Access Client Portal</a>
+      </div>
+      <p style="margin-top: 32px;">Best regards,<br /><strong style="color: #1e293b;">The LeoTheTechGuy Team</strong></p>
+    `),
+
+  adminLoginOTP: (otp: string, ipHint?: string) =>
+    BaseTemplate(`
+      <h2 style="color: #0f172a; font-size: 20px; margin-top: 0; margin-bottom: 24px;">Admin Login Verification</h2>
+      <p>A login attempt was made to the LeoTheTechGuy Admin Panel. Use the code below to complete sign-in.</p>
+      <div style="margin: 32px 0; text-align: center;">
+        <div style="display: inline-block; background-color: #0f172a; color: #ffffff; font-family: 'JetBrains Mono', 'Courier New', monospace; font-size: 36px; font-weight: 700; letter-spacing: 12px; padding: 20px 36px; border-radius: 12px; border: 2px solid #334155;">
+          ${otp}
+        </div>
+      </div>
+      <p style="font-size: 14px; color: #64748b; text-align: center; margin-top: 0;">This code expires in <strong>10 minutes</strong>.</p>
+      ${ipHint ? `<div style="background-color: #fef9c3; border: 1px solid #fde047; border-radius: 8px; padding: 16px; margin: 24px 0; font-size: 13px; color: #854d0e;">
+        <strong>Security notice:</strong> This request originated from IP <code>${ipHint}</code>. If this was not you, change your admin password immediately.
+      </div>` : ''}
+      <p style="font-size: 14px; color: #64748b;">If you did not attempt to log in, your password may be compromised. Please take action immediately.</p>
+      <p style="margin-top: 32px; font-size: 13px; color: #94a3b8;">— LeoTheTechGuy Security System</p>
+    `),
 };

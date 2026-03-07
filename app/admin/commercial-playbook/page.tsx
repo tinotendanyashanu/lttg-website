@@ -2,6 +2,7 @@ import React from 'react';
 import dbConnect from '@/lib/mongodb';
 import CommercialPlaybookConfig, { ICommercialPlaybookConfig } from '@/models/CommercialPlaybookConfig';
 import PlaybookEditor from '@/components/admin/commercial-playbook/PlaybookEditor';
+import AdminPageBanner from '@/components/admin/AdminPageBanner';
 
 export default async function AdminCommercialPlaybookPage() {
   await dbConnect();
@@ -21,13 +22,12 @@ export default async function AdminCommercialPlaybookPage() {
   const serializedConfig = config ? JSON.parse(JSON.stringify(config)) : null;
 
   return (
-    <div className="space-y-6 pb-20">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Commercial Playbook Editor</h1>
-        <p className="text-slate-500 text-sm">
-            Manage pricing tiers, service guides, and sales scripts seen by partners.
-        </p>
-      </div>
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
+      <AdminPageBanner
+        icon="auto_stories"
+        title="Commercial Playbook"
+        description="Manage pricing tiers, service guides, and sales scripts seen by partners."
+      />
 
       {serializedConfig ? (
         <PlaybookEditor initialConfig={serializedConfig} />

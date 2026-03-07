@@ -1,9 +1,8 @@
 
-import { auth } from '@/auth';
 import dbConnect from '@/lib/mongodb';
 import Contact, { IContact } from '@/models/Contact';
 import ContactsClient from '@/components/admin/ContactsClient';
-import { redirect } from 'next/navigation';
+import AdminPageBanner from '@/components/admin/AdminPageBanner';
 
 async function getContacts() {
   await dbConnect();
@@ -13,13 +12,8 @@ async function getContacts() {
 }
 
 export default async function AdminContactsPage() {
-  const session = await auth();
-    if (!session?.user || session.user.role !== 'admin') {
-        redirect('/partner/login');
-    }
-
   const contacts = await getContacts();
-  
+
   // Transform data for table
   const tableData = contacts.map((contact: IContact) => ({
       ...contact,
@@ -32,14 +26,12 @@ export default async function AdminContactsPage() {
   }));
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-900">Contact Submissions</h2>
-          <p className="text-slate-500">View and manage inquiries from the contact form.</p>
-        </div>
-      </div>
-
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <AdminPageBanner
+        icon="message"
+        title="Contact Submissions"
+        description="View and manage inquiries from the contact form."
+      />
       <ContactsClient data={tableData} />
     </div>
   );

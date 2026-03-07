@@ -1,4 +1,3 @@
-import { auth } from '@/auth';
 import dbConnect from '@/lib/mongodb';
 import PayoutBatch from '@/models/PayoutBatch';
 import Partner from '@/models/Partner';
@@ -10,6 +9,7 @@ import AdminPayoutClient from './AdminPayoutClient';
 import BatchActionsClient from './BatchActionsClient';
 import { getAllPartnerBalances } from '@/lib/services/ledger';
 import Link from 'next/link';
+import AdminPageBanner from '@/components/admin/AdminPageBanner';
 
 
 export const dynamic = 'force-dynamic';
@@ -63,17 +63,15 @@ async function getAdminPayoutData() {
 }
 
 export default async function AdminPayoutsPage() {
-  const session = await auth();
-  if (session?.user?.role !== 'admin') return null;
-
   const data = await getAdminPayoutData();
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h2 className="text-2xl font-bold text-slate-900">Payouts Management</h2>
-        <p className="text-slate-500">Manage monthly commission payouts, track balances, and process batches.</p>
-      </div>
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <AdminPageBanner
+        icon="payments"
+        title="Payouts Management"
+        description="Manage monthly commission payouts, track balances, and process batches."
+      />
 
       {/* Risk Flag Warning Banner */}
       {data.unresolvedHighFlags.length > 0 && (

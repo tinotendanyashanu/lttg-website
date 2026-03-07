@@ -4,10 +4,12 @@ import mongoose from 'mongoose';
 
 export async function recordLedgerEntry(
   data: {
-    partnerId: string | mongoose.Types.ObjectId;
+    partnerId?: string | mongoose.Types.ObjectId;
+    accountId?: string | mongoose.Types.ObjectId;
     type: CommissionLedgerType;
     amount: number;
     relatedDealId?: string | mongoose.Types.ObjectId;
+    relatedCaseId?: string | mongoose.Types.ObjectId;
     batchId?: string | mongoose.Types.ObjectId;
   },
   session?: mongoose.ClientSession

@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>LeoTech Internal OS - Lead Management</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#2F2F2F", // Dark charcoal from screenshot header button
+                        "primary-hover": "#4a4a4a",
+                        "accent-green": "#86EFAC", // For positive statuses
+                        "accent-red": "#FCA5A5", // For negative statuses
+                        "accent-blue": "#93C5FD", // For neutral/info
+                        "background-light": "#F4F4F4", // Light grey background from screenshot
+                        "background-dark": "#18181b", // Dark mode background
+                        "surface-light": "#FFFFFF", // White cards
+                        "surface-dark": "#27272a", // Dark mode cards
+                        "text-primary-light": "#111827",
+                        "text-secondary-light": "#6B7280",
+                        "text-primary-dark": "#F3F4F6",
+                        "text-secondary-dark": "#9CA3AF",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "1rem", // Rounded corners as per bento grid style
+                        "xl": "1rem",
+                        "2xl": "1.5rem",
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                    }
+                },
+            },
+        };
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-text-primary-light dark:text-text-primary-dark antialiased transition-colors duration-200 min-h-screen p-4 md:p-8 flex justify-center">
+<div class="w-full max-w-[1440px] flex gap-6">
+<aside class="hidden lg:flex flex-col w-64 shrink-0 space-y-8">
+<div class="flex items-center gap-3 px-4">
+<div class="w-10 h-10 bg-primary dark:bg-white rounded-full flex items-center justify-center text-white dark:text-black">
+<span class="material-icons-outlined">grid_view</span>
+</div>
+<h1 class="text-xl font-bold tracking-tight">LeoTech OS</h1>
+</div>
+<nav class="flex flex-col space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-text-secondary-light dark:text-text-secondary-dark hover:bg-surface-light dark:hover:bg-surface-dark transition-colors" href="#">
+<span class="material-icons-outlined">dashboard</span>
+<span class="font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-surface-light dark:bg-surface-dark text-primary dark:text-white shadow-sm font-semibold transition-colors" href="#">
+<span class="material-icons-outlined">folder_shared</span>
+<span>Case Management</span>
+</a>
+<a class="flex items-center justify-between px-4 py-3 rounded-xl text-text-secondary-light dark:text-text-secondary-dark hover:bg-surface-light dark:hover:bg-surface-dark transition-colors group" href="#">
+<div class="flex items-center gap-3">
+<span class="material-icons-outlined">groups</span>
+<span class="font-medium">Teams</span>
+</div>
+<span class="material-icons-outlined text-sm opacity-0 group-hover:opacity-100">expand_more</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-text-secondary-light dark:text-text-secondary-dark hover:bg-surface-light dark:hover:bg-surface-dark transition-colors" href="#">
+<span class="material-icons-outlined">monetization_on</span>
+<span class="font-medium">Commissions</span>
+</a>
+<a class="flex items-center justify-between px-4 py-3 rounded-xl text-text-secondary-light dark:text-text-secondary-dark hover:bg-surface-light dark:hover:bg-surface-dark transition-colors group" href="#">
+<div class="flex items-center gap-3">
+<span class="material-icons-outlined">library_books</span>
+<span class="font-medium">Knowledge</span>
+</div>
+<span class="material-icons-outlined text-sm opacity-0 group-hover:opacity-100">expand_more</span>
+</a>
+</nav>
+<div class="mt-auto pt-8 flex flex-col gap-4">
+<div class="flex gap-2 px-4">
+<button class="p-2 rounded-full bg-surface-light dark:bg-surface-dark hover:bg-gray-200 dark:hover:bg-gray-700 transition">
+<span class="material-icons-outlined text-xl">settings</span>
+</button>
+<button class="p-2 rounded-full bg-surface-light dark:bg-surface-dark hover:bg-gray-200 dark:hover:bg-gray-700 transition">
+<span class="material-icons-outlined text-xl">dark_mode</span>
+</button>
+</div>
+</div>
+</aside>
+<main class="flex-1 flex flex-col gap-6 w-full max-w-full overflow-hidden">
+<header class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+<h2 class="text-3xl font-bold text-text-primary-light dark:text-white">Leads</h2>
+<div class="flex items-center gap-4 flex-1 justify-end">
+<div class="relative w-full max-w-md hidden md:block">
+<span class="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary-light dark:text-text-secondary-dark material-icons-outlined">search</span>
+<input class="w-full bg-surface-light dark:bg-surface-dark border-none rounded-full py-3 pl-12 pr-4 text-sm focus:ring-2 focus:ring-primary dark:focus:ring-white transition-shadow shadow-sm dark:text-white placeholder-gray-400" placeholder="Search leads, companies..." type="text"/>
+</div>
+<button class="bg-primary hover:bg-primary-hover text-white px-6 py-3 rounded-full font-medium flex items-center gap-2 transition-transform active:scale-95 shadow-lg">
+<span class="material-icons-outlined text-lg">add</span>
+                        Create Lead
+                    </button>
+<div class="flex gap-2">
+<button class="p-3 bg-surface-light dark:bg-surface-dark rounded-full hover:bg-white dark:hover:bg-gray-700 transition shadow-sm">
+<span class="material-icons-outlined block">notifications</span>
+</button>
+<img alt="Profile" class="w-12 h-12 rounded-full border-2 border-white dark:border-gray-700 shadow-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBkqlIereeyK9b7PGMqHWd2jNUkf8gP1nVRs3aEryzRYBMUu_uGqWuZP07vZ1oYlw4RCrNBz73XKOeqg9_2BK2OD4rT9phVGkSSW9x_AfzvupDKCoKRAsDawnyvW1Igta8PWO7t2_P3O3ufJDicwth1Pyv6MeWINJFEdpgY4xoH0DYsE4-f-W3RerPBFBsrZzbVqFdw3JArVCkztKuVSU_9A3Saef15bR9Hz9z9n74iFp0bOPs4vN0I9vUAcRHeK8PXL1KT50VDoNE"/>
+</div>
+</div>
+</header>
+<div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+<button class="bg-surface-light dark:bg-surface-dark p-4 rounded-xl shadow-soft text-left hover:shadow-md transition-all border-2 border-transparent focus:border-primary group">
+<span class="text-text-secondary-light dark:text-text-secondary-dark text-sm font-medium">All Leads</span>
+<div class="text-2xl font-bold mt-1 group-hover:text-primary dark:group-hover:text-white">142</div>
+</button>
+<button class="bg-surface-light dark:bg-surface-dark p-4 rounded-xl shadow-soft text-left hover:shadow-md transition-all border-2 border-transparent focus:border-blue-500 group relative overflow-hidden">
+<div class="absolute right-0 top-0 p-2 opacity-10">
+<span class="material-icons-outlined text-4xl text-blue-500">fiber_new</span>
+</div>
+<span class="text-blue-600 dark:text-blue-400 text-sm font-bold flex items-center gap-1">
+<div class="w-2 h-2 rounded-full bg-blue-500"></div> New
+                    </span>
+<div class="text-2xl font-bold mt-1">24</div>
+</button>
+<button class="bg-surface-light dark:bg-surface-dark p-4 rounded-xl shadow-soft text-left hover:shadow-md transition-all border-2 border-transparent focus:border-yellow-500 group relative overflow-hidden">
+<div class="absolute right-0 top-0 p-2 opacity-10">
+<span class="material-icons-outlined text-4xl text-yellow-500">contact_phone</span>
+</div>
+<span class="text-yellow-600 dark:text-yellow-400 text-sm font-bold flex items-center gap-1">
+<div class="w-2 h-2 rounded-full bg-yellow-500"></div> Contacted
+                    </span>
+<div class="text-2xl font-bold mt-1">48</div>
+</button>
+<button class="bg-surface-light dark:bg-surface-dark p-4 rounded-xl shadow-soft text-left hover:shadow-md transition-all border-2 border-transparent focus:border-green-500 group relative overflow-hidden">
+<div class="absolute right-0 top-0 p-2 opacity-10">
+<span class="material-icons-outlined text-4xl text-green-500">check_circle</span>
+</div>
+<span class="text-green-600 dark:text-green-400 text-sm font-bold flex items-center gap-1">
+<div class="w-2 h-2 rounded-full bg-green-500"></div> Closed
+                    </span>
+<div class="text-2xl font-bold mt-1">56</div>
+</button>
+<button class="bg-surface-light dark:bg-surface-dark p-4 rounded-xl shadow-soft text-left hover:shadow-md transition-all border-2 border-transparent focus:border-red-500 group relative overflow-hidden">
+<div class="absolute right-0 top-0 p-2 opacity-10">
+<span class="material-icons-outlined text-4xl text-red-500">cancel</span>
+</div>
+<span class="text-red-600 dark:text-red-400 text-sm font-bold flex items-center gap-1">
+<div class="w-2 h-2 rounded-full bg-red-500"></div> Rejected
+                    </span>
+<div class="text-2xl font-bold mt-1">14</div>
+</button>
+</div>
+<div class="flex flex-col lg:flex-row gap-6 h-full min-h-0">
+<div class="flex-1 flex flex-col gap-4 overflow-y-auto pr-2 pb-4">
+<div class="bg-surface-light dark:bg-surface-dark p-5 rounded-2xl shadow-soft hover:shadow-lg transition-all group cursor-pointer border border-transparent hover:border-gray-200 dark:hover:border-gray-700">
+<div class="flex justify-between items-start mb-4">
+<div class="flex gap-4 items-center">
+<div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800 flex items-center justify-center text-blue-600 dark:text-blue-300 font-bold text-xl">
+                                    AP
+                                </div>
+<div>
+<h3 class="font-bold text-lg text-text-primary-light dark:text-white">Apex Innovations</h3>
+<p class="text-sm text-text-secondary-light dark:text-text-secondary-dark">Sarah Jenkins • CEO</p>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<span class="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide mb-1">New Lead</span>
+<span class="text-text-secondary-light dark:text-text-secondary-dark text-xs">2h ago</span>
+</div>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+<div class="bg-background-light dark:bg-background-dark p-3 rounded-xl">
+<span class="text-xs text-text-secondary-light dark:text-text-secondary-dark block mb-1">Service</span>
+<span class="font-semibold text-sm block">Web Development</span>
+</div>
+<div class="bg-background-light dark:bg-background-dark p-3 rounded-xl">
+<span class="text-xs text-text-secondary-light dark:text-text-secondary-dark block mb-1">Deal Value</span>
+<span class="font-semibold text-sm block">$12,500</span>
+</div>
+<div class="bg-background-light dark:bg-background-dark p-3 rounded-xl">
+<span class="text-xs text-text-secondary-light dark:text-text-secondary-dark block mb-1">Source</span>
+<span class="font-semibold text-sm block">LinkedIn</span>
+</div>
+<div class="bg-background-light dark:bg-background-dark p-3 rounded-xl">
+<span class="text-xs text-text-secondary-light dark:text-text-secondary-dark block mb-1">Probability</span>
+<span class="font-semibold text-sm block text-green-600 dark:text-green-400">High (80%)</span>
+</div>
+</div>
+<div class="flex gap-2 justify-end opacity-80 group-hover:opacity-100 transition-opacity pt-2 border-t border-gray-100 dark:border-gray-800">
+<button class="px-4 py-2 rounded-lg text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark hover:bg-background-light dark:hover:bg-background-dark transition flex items-center gap-2">
+<span class="material-icons-outlined text-base">history</span> History
+                            </button>
+<button class="px-4 py-2 rounded-lg text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark hover:bg-background-light dark:hover:bg-background-dark transition flex items-center gap-2">
+<span class="material-icons-outlined text-base">chat_bubble_outline</span> Comment
+                            </button>
+<button class="px-4 py-2 rounded-lg text-sm font-medium bg-primary text-white hover:bg-primary-hover transition shadow-sm flex items-center gap-2">
+<span class="material-icons-outlined text-base">edit</span> Edit Status
+                            </button>
+</div>
+</div>
+<div class="bg-surface-light dark:bg-surface-dark p-5 rounded-2xl shadow-soft hover:shadow-lg transition-all group cursor-pointer border border-transparent hover:border-gray-200 dark:hover:border-gray-700">
+<div class="flex justify-between items-start mb-4">
+<div class="flex gap-4 items-center">
+<div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900 dark:to-purple-800 flex items-center justify-center text-purple-600 dark:text-purple-300 font-bold text-xl">
+                                    FL
+                                </div>
+<div>
+<h3 class="font-bold text-lg text-text-primary-light dark:text-white">Fusion Labs</h3>
+<p class="text-sm text-text-secondary-light dark:text-text-secondary-dark">Michael Chen • CTO</p>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<span class="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide mb-1">Contacted</span>
+<span class="text-text-secondary-light dark:text-text-secondary-dark text-xs">1d ago</span>
+</div>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+<div class="bg-background-light dark:bg-background-dark p-3 rounded-xl">
+<span class="text-xs text-text-secondary-light dark:text-text-secondary-dark block mb-1">Service</span>
+<span class="font-semibold text-sm block">System Architecture</span>
+</div>
+<div class="bg-background-light dark:bg-background-dark p-3 rounded-xl">
+<span class="text-xs text-text-secondary-light dark:text-text-secondary-dark block mb-1">Deal Value</span>
+<span class="font-semibold text-sm block">$45,000</span>
+</div>
+<div class="bg-background-light dark:bg-background-dark p-3 rounded-xl">
+<span class="text-xs text-text-secondary-light dark:text-text-secondary-dark block mb-1">Source</span>
+<span class="font-semibold text-sm block">Referral</span>
+</div>
+<div class="bg-background-light dark:bg-background-dark p-3 rounded-xl">
+<span class="text-xs text-text-secondary-light dark:text-text-secondary-dark block mb-1">Probability</span>
+<span class="font-semibold text-sm block text-yellow-600 dark:text-yellow-400">Medium (50%)</span>
+</div>
+</div>
+<div class="flex gap-2 justify-end opacity-80 group-hover:opacity-100 transition-opacity pt-2 border-t border-gray-100 dark:border-gray-800">
+<button class="px-4 py-2 rounded-lg text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark hover:bg-background-light dark:hover:bg-background-dark transition flex items-center gap-2">
+<span class="material-icons-outlined text-base">history</span> History
+                            </button>
+<button class="px-4 py-2 rounded-lg text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark hover:bg-background-light dark:hover:bg-background-dark transition flex items-center gap-2">
+<span class="material-icons-outlined text-base">chat_bubble_outline</span> Comment
+                            </button>
+<button class="px-4 py-2 rounded-lg text-sm font-medium bg-primary text-white hover:bg-primary-hover transition shadow-sm flex items-center gap-2">
+<span class="material-icons-outlined text-base">edit</span> Edit Status
+                            </button>
+</div>
+</div>
+<div class="bg-surface-light dark:bg-surface-dark p-5 rounded-2xl shadow-soft hover:shadow-lg transition-all group cursor-pointer border border-transparent hover:border-gray-200 dark:hover:border-gray-700">
+<div class="flex justify-between items-start mb-4">
+<div class="flex gap-4 items-center">
+<div class="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900 dark:to-orange-800 flex items-center justify-center text-orange-600 dark:text-orange-300 font-bold text-xl">
+                                    SR
+                                </div>
+<div>
+<h3 class="font-bold text-lg text-text-primary-light dark:text-white">Sunrise Retail</h3>
+<p class="text-sm text-text-secondary-light dark:text-text-secondary-dark">David Ross • Marketing Dir.</p>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<span class="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide mb-1">Proposal Sent</span>
+<span class="text-text-secondary-light dark:text-text-secondary-dark text-xs">3d ago</span>
+</div>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+<div class="bg-background-light dark:bg-background-dark p-3 rounded-xl">
+<span class="text-xs text-text-secondary-light dark:text-text-secondary-dark block mb-1">Service</span>
+<span class="font-semibold text-sm block">Marketing Audit</span>
+</div>
+<div class="bg-background-light dark:bg-background-dark p-3 rounded-xl">
+<span class="text-xs text-text-secondary-light dark:text-text-secondary-dark block mb-1">Deal Value</span>
+<span class="font-semibold text-sm block">$8,200</span>
+</div>
+<div class="bg-background-light dark:bg-background-dark p-3 rounded-xl">
+<span class="text-xs text-text-secondary-light dark:text-text-secondary-dark block mb-1">Source</span>
+<span class="font-semibold text-sm block">Website</span>
+</div>
+<div class="bg-background-light dark:bg-background-dark p-3 rounded-xl">
+<span class="text-xs text-text-secondary-light dark:text-text-secondary-dark block mb-1">Probability</span>
+<span class="font-semibold text-sm block text-green-600 dark:text-green-400">High (90%)</span>
+</div>
+</div>
+<div class="flex gap-2 justify-end opacity-80 group-hover:opacity-100 transition-opacity pt-2 border-t border-gray-100 dark:border-gray-800">
+<button class="px-4 py-2 rounded-lg text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark hover:bg-background-light dark:hover:bg-background-dark transition flex items-center gap-2">
+<span class="material-icons-outlined text-base">history</span> History
+                            </button>
+<button class="px-4 py-2 rounded-lg text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark hover:bg-background-light dark:hover:bg-background-dark transition flex items-center gap-2">
+<span class="material-icons-outlined text-base">chat_bubble_outline</span> Comment
+                            </button>
+<button class="px-4 py-2 rounded-lg text-sm font-medium bg-primary text-white hover:bg-primary-hover transition shadow-sm flex items-center gap-2">
+<span class="material-icons-outlined text-base">edit</span> Edit Status
+                            </button>
+</div>
+</div>
+<div class="bg-surface-light dark:bg-surface-dark p-5 rounded-2xl shadow-soft hover:shadow-lg transition-all group cursor-pointer border border-transparent hover:border-gray-200 dark:hover:border-gray-700">
+<div class="flex justify-between items-start mb-4">
+<div class="flex gap-4 items-center">
+<div class="w-12 h-12 rounded-xl bg-gradient-to-br from-red-100 to-red-200 dark:from-red-900 dark:to-red-800 flex items-center justify-center text-red-600 dark:text-red-300 font-bold text-xl">
+                                    GT
+                                </div>
+<div>
+<h3 class="font-bold text-lg text-text-primary-light dark:text-white">Global Tech Solutions</h3>
+<p class="text-sm text-text-secondary-light dark:text-text-secondary-dark">Amanda Lee • VP Ops</p>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<span class="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide mb-1">Rejected</span>
+<span class="text-text-secondary-light dark:text-text-secondary-dark text-xs">5d ago</span>
+</div>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+<div class="bg-background-light dark:bg-background-dark p-3 rounded-xl">
+<span class="text-xs text-text-secondary-light dark:text-text-secondary-dark block mb-1">Service</span>
+<span class="font-semibold text-sm block">Full Stack App</span>
+</div>
+<div class="bg-background-light dark:bg-background-dark p-3 rounded-xl">
+<span class="text-xs text-text-secondary-light dark:text-text-secondary-dark block mb-1">Deal Value</span>
+<span class="font-semibold text-sm block">$65,000</span>
+</div>
+<div class="bg-background-light dark:bg-background-dark p-3 rounded-xl">
+<span class="text-xs text-text-secondary-light dark:text-text-secondary-dark block mb-1">Source</span>
+<span class="font-semibold text-sm block">Cold Outreach</span>
+</div>
+<div class="bg-background-light dark:bg-background-dark p-3 rounded-xl">
+<span class="text-xs text-text-secondary-light dark:text-text-secondary-dark block mb-1">Probability</span>
+<span class="font-semibold text-sm block text-red-600 dark:text-red-400">0%</span>
+</div>
+</div>
+<div class="flex gap-2 justify-end opacity-80 group-hover:opacity-100 transition-opacity pt-2 border-t border-gray-100 dark:border-gray-800">
+<button class="px-4 py-2 rounded-lg text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark hover:bg-background-light dark:hover:bg-background-dark transition flex items-center gap-2">
+<span class="material-icons-outlined text-base">history</span> History
+                            </button>
+<button class="px-4 py-2 rounded-lg text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark hover:bg-background-light dark:hover:bg-background-dark transition flex items-center gap-2">
+<span class="material-icons-outlined text-base">chat_bubble_outline</span> Comment
+                            </button>
+<button class="px-4 py-2 rounded-lg text-sm font-medium bg-primary text-white hover:bg-primary-hover transition shadow-sm flex items-center gap-2">
+<span class="material-icons-outlined text-base">edit</span> Re-open
+                            </button>
+</div>
+</div>
+</div>
+<div class="hidden xl:block w-80 shrink-0">
+<div class="bg-surface-light dark:bg-surface-dark p-6 rounded-2xl shadow-soft h-full flex flex-col sticky top-0">
+<h3 class="font-bold text-lg mb-6">Recent Activity</h3>
+<div class="space-y-6 relative before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-[2px] before:bg-gray-100 dark:before:bg-gray-800">
+<div class="relative pl-8">
+<div class="absolute left-0 top-1 w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center border-2 border-surface-light dark:border-surface-dark z-10">
+<div class="w-2 h-2 rounded-full bg-blue-500"></div>
+</div>
+<div class="text-sm">
+<p class="font-semibold text-text-primary-light dark:text-white">New lead created</p>
+<p class="text-xs text-text-secondary-light dark:text-text-secondary-dark mt-0.5">Apex Innovations was added by <span class="font-medium text-primary dark:text-white">Joyce</span>.</p>
+<p class="text-xs text-gray-400 mt-1">2 hours ago</p>
+</div>
+</div>
+<div class="relative pl-8">
+<div class="absolute left-0 top-1 w-5 h-5 rounded-full bg-yellow-100 dark:bg-yellow-900 flex items-center justify-center border-2 border-surface-light dark:border-surface-dark z-10">
+<div class="w-2 h-2 rounded-full bg-yellow-500"></div>
+</div>
+<div class="text-sm">
+<p class="font-semibold text-text-primary-light dark:text-white">Status Updated</p>
+<p class="text-xs text-text-secondary-light dark:text-text-secondary-dark mt-0.5">Fusion Labs moved to <span class="font-medium text-yellow-600">Contacted</span>.</p>
+<p class="text-xs text-gray-400 mt-1">Yesterday</p>
+</div>
+</div>
+<div class="relative pl-8">
+<div class="absolute left-0 top-1 w-5 h-5 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center border-2 border-surface-light dark:border-surface-dark z-10">
+<div class="w-2 h-2 rounded-full bg-green-500"></div>
+</div>
+<div class="text-sm">
+<p class="font-semibold text-text-primary-light dark:text-white">Proposal Sent</p>
+<p class="text-xs text-text-secondary-light dark:text-text-secondary-dark mt-0.5">Proposal PDF sent to David Ross at Sunrise Retail.</p>
+<p class="text-xs text-gray-400 mt-1">3 days ago</p>
+</div>
+</div>
+<div class="relative pl-8">
+<div class="absolute left-0 top-1 w-5 h-5 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center border-2 border-surface-light dark:border-surface-dark z-10">
+<span class="material-icons-outlined text-[10px] text-gray-500 dark:text-gray-300">comment</span>
+</div>
+<div class="text-sm">
+<p class="font-semibold text-text-primary-light dark:text-white">New Comment</p>
+<div class="mt-1 bg-background-light dark:bg-background-dark p-2 rounded text-xs text-text-secondary-light dark:text-text-secondary-dark italic">"Client asked for a revised timeline. Need to check with dev team."</div>
+<p class="text-xs text-gray-400 mt-1">4 days ago</p>
+</div>
+</div>
+</div>
+<div class="mt-auto pt-6 border-t border-gray-100 dark:border-gray-800">
+<div class="flex justify-between items-center mb-2">
+<h4 class="font-semibold text-sm">Monthly Goal</h4>
+<span class="text-xs bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 px-2 py-0.5 rounded-full">On Track</span>
+</div>
+<div class="h-2 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[75%] rounded-full"></div>
+</div>
+<div class="flex justify-between mt-2 text-xs text-text-secondary-light dark:text-text-secondary-dark">
+<span>$125k closed</span>
+<span>Goal: $165k</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+
+</body></html>

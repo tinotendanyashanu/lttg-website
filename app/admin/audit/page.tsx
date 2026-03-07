@@ -1,6 +1,7 @@
 import dbConnect from '@/lib/mongodb';
 import AuditLog, { IAuditLog } from '@/models/AuditLog';
 import { IPartner } from '@/models/Partner';
+import AdminPageBanner from '@/components/admin/AdminPageBanner';
 
 type PopulatedAuditLog = Omit<IAuditLog, 'performedBy'> & { performedBy: IPartner | null };
 
@@ -17,13 +18,14 @@ export default async function AuditPage() {
   const logs = await getAuditLogs();
 
   return (
-    <div className="space-y-6">
-       <div>
-          <h2 className="text-2xl font-bold text-slate-900">Audit Logs</h2>
-          <p className="text-slate-500">Security trail of all sensitive events.</p>
-        </div>
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <AdminPageBanner
+        icon="security"
+        title="Audit Trail"
+        description="Security trail of all sensitive system events."
+      />
 
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-[#27272a] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-soft overflow-hidden">
         <div className="overflow-x-auto">
             <table className="w-full text-left text-sm text-slate-600">
                 <thead className="bg-slate-50 text-slate-500 font-medium uppercase text-xs">
