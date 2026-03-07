@@ -33,9 +33,13 @@ export default auth((req) => {
 
   const refCode = nextUrl.searchParams.get('ref');
   
+  // Forward the current pathname as a header so server components (layouts) can read it
+  const requestHeaders = new Headers(req.headers);
+  requestHeaders.set('x-pathname', nextUrl.pathname);
+
   // 1. Handle Referral Tracking
   if (refCode) {
-    const response = NextResponse.next();
+    const response = NextResponse.next({ request: { headers: requestHeaders } });
     response.cookies.set('leo_partner_ref', refCode, {
       maxAge: 60 * 60 * 24 * 90,
       path: '/',
@@ -61,7 +65,7 @@ export default auth((req) => {
   }
 
   // NextAuth handles the rest based on authConfig.callbacks.authorized
-  return NextResponse.next();
+  return NextResponse.next({ request: { headers: requestHeaders } });
 });
 
 export const config = {

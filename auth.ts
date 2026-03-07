@@ -11,14 +11,14 @@ import { authConfig } from './auth.config';
 // with NextAuth's built-in 'emailVerified' (Date | null) type.
 declare module 'next-auth' {
   interface User {
-    role?: 'partner' | 'admin' | 'employee' | 'intern';
+    role?: 'partner' | 'admin' | 'employee' | 'intern' | 'client';
     tier?: string;
     id?: string;
     isEmailVerified?: boolean;
   }
   interface Session {
     user: {
-      role?: 'partner' | 'admin' | 'employee' | 'intern';
+      role?: 'partner' | 'admin' | 'employee' | 'intern' | 'client';
       tier?: string;
       id?: string;
       isEmailVerified?: boolean;
@@ -28,7 +28,7 @@ declare module 'next-auth' {
 
 declare module '@auth/core/jwt' {
   interface JWT {
-    role?: 'partner' | 'admin' | 'employee' | 'intern';
+    role?: 'partner' | 'admin' | 'employee' | 'intern' | 'client';
     tier?: string;
     id?: string;
     isEmailVerified?: boolean;
@@ -45,7 +45,7 @@ const nextAuthResult = NextAuth({
         if (parsedCredentials.success) {
           let { email, password, loginSource } = parsedCredentials.data;
           email = email.toLowerCase();
-          
+
           await dbConnect();
 
           // 1. Check Partner collection (partner login)
@@ -70,7 +70,7 @@ const nextAuthResult = NextAuth({
             }
           }
 
-          // 2. Check Account collection (admins, employees, interns)
+          // 2. Check Account collection (admins, employees, interns, clients)
           if (!loginSource || loginSource === 'portal') {
             const { Account } = await import('@/models/Account');
             const accountUser = await Account.findOne({ email });
@@ -78,9 +78,10 @@ const nextAuthResult = NextAuth({
             if (accountUser && accountUser.isActive) {
               const passwordsMatch = await bcrypt.compare(password, accountUser.passwordHash);
               if (passwordsMatch) {
-                let primaryRole: 'admin' | 'employee' | 'intern' = 'intern';
+                let primaryRole: 'admin' | 'employee' | 'intern' | 'client' = 'intern';
                 if (accountUser.roles.includes('admin')) primaryRole = 'admin';
                 else if (accountUser.roles.includes('employee')) primaryRole = 'employee';
+                else if (accountUser.roles.includes('client')) primaryRole = 'client';
 
                 return {
                   id: accountUser._id.toString(),
@@ -95,7 +96,7 @@ const nextAuthResult = NextAuth({
 
           return null;
         }
-        
+
         return null;
       },
     }),

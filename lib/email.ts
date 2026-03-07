@@ -240,5 +240,29 @@ export const EmailTemplates = {
       <p>The funds should be available in your designated account according to your bank's processing times.</p>
       <p>Thank you for your continued partnership.</p>
       <p style="margin-top: 32px;">Regards,<br /><strong style="color: #1e293b;">Leo</strong></p>
-    `)
+    `),
+
+  clientWelcome: (name: string, setupLink: string) =>
+    BaseTemplate(`
+      <h2 style="color: #0f172a; font-size: 20px; margin-top: 0; margin-bottom: 24px;">Welcome to Your Client Portal</h2>
+      <p>Hello ${name},</p>
+      <p>Your client account has been created on the LeoTheTechGuy platform. You now have access to a secure portal where you can track your cases, review invoices, communicate with our team, and manage all your engagements.</p>
+      <p>To get started, please set up your password by clicking the button below:</p>
+      <div style="margin: 32px 0;">
+        <a href="${setupLink}" style="background-color: #2563eb; color: #ffffff; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block;">Set Up My Password</a>
+      </div>
+      <p style="font-size: 14px; color: #64748b;">This link expires in 48 hours for security. If you did not expect this invitation, please contact us at contact@leothetechguy.com.</p>
+      <p style="margin-top: 32px;">Best regards,<br /><strong style="color: #1e293b;">The LeoTheTechGuy Team</strong></p>
+    `),
+
+  clientPasswordSetupConfirmation: (name: string) =>
+    BaseTemplate(`
+      <h2 style="color: #10b981; font-size: 20px; margin-top: 0; margin-bottom: 24px;">Account Activated</h2>
+      <p>Hello ${name},</p>
+      <p>Your client portal account has been successfully activated. You can now log in at any time to access your portal.</p>
+      <div style="margin: 32px 0;">
+        <a href="https://leothetechguy.com/portal/login" style="background-color: #0f172a; color: #ffffff; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block;">Access Client Portal</a>
+      </div>
+      <p style="margin-top: 32px;">Best regards,<br /><strong style="color: #1e293b;">The LeoTheTechGuy Team</strong></p>
+    `),
 };

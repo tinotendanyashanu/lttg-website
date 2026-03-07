@@ -21,6 +21,16 @@ export interface IAccount extends Document {
     paidCommission: number;
     totalEarned: number;
   };
+  clientProfile?: {
+    companyName?: string;
+    companyAddress?: string;
+    phone?: string;
+    website?: string;
+    industry?: string;
+    companySize?: string;
+    notes?: string;
+  };
+  passwordSetupRequired?: boolean;
 }
 
 const AccountSchema: Schema = new Schema({
@@ -44,6 +54,16 @@ const AccountSchema: Schema = new Schema({
     paidCommission: { type: Number, default: 0 },
     totalEarned: { type: Number, default: 0 },
   },
+  clientProfile: {
+    companyName: { type: String },
+    companyAddress: { type: String },
+    phone: { type: String },
+    website: { type: String },
+    industry: { type: String },
+    companySize: { type: String },
+    notes: { type: String },
+  },
+  passwordSetupRequired: { type: Boolean, default: false },
 });
 
 export const Account: Model<IAccount> =

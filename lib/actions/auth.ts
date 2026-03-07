@@ -39,6 +39,8 @@ export async function authenticate(
              redirectTo = '/portal/admin';
          } else if (accountUser.roles.includes('employee') || accountUser.roles.includes('intern')) {
              redirectTo = '/portal';
+         } else if (accountUser.roles.includes('client')) {
+             redirectTo = '/portal/client/dashboard';
          }
     }
 

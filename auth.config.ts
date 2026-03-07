@@ -30,21 +30,64 @@ export const authConfig = {
 
       // If they are on the actual portal login page, do not gate it
       if (nextUrl.pathname === '/portal/login') {
-         // Do not auto-redirect to /portal here. If the user's DB account was deleted or their 
-         // portal roles were removed, but their NextAuth cookie is still active, redirecting 
+         // Do not auto-redirect to /portal here. If the user's DB account was deleted or their
+         // portal roles were removed, but their NextAuth cookie is still active, redirecting
          // them to /portal will bounce them back to /portal/login, causing an infinite loop.
          // Let the portal login page simply render. If they login again, it overwrites the session.
          return true;
       }
 
-      if (isOnPortal) {
-        if (!isLoggedIn) {
-             const loginUrl = new URL('/portal/login', nextUrl.origin);
-             return Response.redirect(loginUrl);
+      // Client portal login — public, but redirect already-signed-in clients to their dashboard
+      if (nextUrl.pathname === '/portal/client/login') {
+        if (auth?.user?.role === 'client') {
+          return Response.redirect(new URL('/portal/client/dashboard', nextUrl.origin));
         }
-        // Only internal roles (or admins) allowed in the portal dashboard
-        if (auth?.user?.role === 'admin' || auth?.user?.role === 'employee' || auth?.user?.role === 'intern') {
+        return true;
+      }
+
+      if (isOnPortal) {
+        // Allow unauthenticated access to password setup and reset routes
+        if (
+          nextUrl.pathname === '/portal/setup-password' ||
+          nextUrl.pathname === '/portal/reset-password'
+        ) {
           return true;
+        }
+
+        // Client portal routes — handle separately with client-specific login redirect
+        const isOnClientPortal = nextUrl.pathname.startsWith('/portal/client');
+        if (isOnClientPortal) {
+          if (!isLoggedIn) {
+            return Response.redirect(new URL('/portal/client/login', nextUrl.origin));
+          }
+          if (auth?.user?.role === 'client') return true;
+          // Internal staff trying to access client portal → redirect to their portal
+          if (
+            auth?.user?.role === 'admin' ||
+            auth?.user?.role === 'employee' ||
+            auth?.user?.role === 'intern'
+          ) {
+            return Response.redirect(new URL('/portal', nextUrl.origin));
+          }
+          return Response.redirect(new URL('/portal/client/login', nextUrl.origin));
+        }
+
+        if (!isLoggedIn) {
+          const loginUrl = new URL('/portal/login', nextUrl.origin);
+          return Response.redirect(loginUrl);
+        }
+
+        // Main portal — internal staff only
+        if (
+          auth?.user?.role === 'admin' ||
+          auth?.user?.role === 'employee' ||
+          auth?.user?.role === 'intern'
+        ) {
+          return true;
+        }
+        // Clients trying to access main portal → redirect to client portal
+        if (auth?.user?.role === 'client') {
+          return Response.redirect(new URL('/portal/client/dashboard', nextUrl.origin));
         }
         return false;
       }
@@ -52,7 +95,7 @@ export const authConfig = {
       // Gate: if logged in but email not verified, redirect away from dashboard
       if (isOnDashboard) {
         if (!isLoggedIn) return false;
-        
+
         // Ensure only partners access the partner dashboard
         if (auth?.user?.role !== 'partner') {
           return false;
