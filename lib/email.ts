@@ -265,4 +265,21 @@ export const EmailTemplates = {
       </div>
       <p style="margin-top: 32px;">Best regards,<br /><strong style="color: #1e293b;">The LeoTheTechGuy Team</strong></p>
     `),
+
+  adminLoginOTP: (otp: string, ipHint?: string) =>
+    BaseTemplate(`
+      <h2 style="color: #0f172a; font-size: 20px; margin-top: 0; margin-bottom: 24px;">Admin Login Verification</h2>
+      <p>A login attempt was made to the LeoTheTechGuy Admin Panel. Use the code below to complete sign-in.</p>
+      <div style="margin: 32px 0; text-align: center;">
+        <div style="display: inline-block; background-color: #0f172a; color: #ffffff; font-family: 'JetBrains Mono', 'Courier New', monospace; font-size: 36px; font-weight: 700; letter-spacing: 12px; padding: 20px 36px; border-radius: 12px; border: 2px solid #334155;">
+          ${otp}
+        </div>
+      </div>
+      <p style="font-size: 14px; color: #64748b; text-align: center; margin-top: 0;">This code expires in <strong>10 minutes</strong>.</p>
+      ${ipHint ? `<div style="background-color: #fef9c3; border: 1px solid #fde047; border-radius: 8px; padding: 16px; margin: 24px 0; font-size: 13px; color: #854d0e;">
+        <strong>Security notice:</strong> This request originated from IP <code>${ipHint}</code>. If this was not you, change your admin password immediately.
+      </div>` : ''}
+      <p style="font-size: 14px; color: #64748b;">If you did not attempt to log in, your password may be compromised. Please take action immediately.</p>
+      <p style="margin-top: 32px; font-size: 13px; color: #94a3b8;">— LeoTheTechGuy Security System</p>
+    `),
 };

@@ -5,6 +5,7 @@ import dbConnect from '@/lib/mongodb';
 import Partner from '@/models/Partner';
 import { LoginSchema } from '@/lib/schemas';
 import { authConfig } from './auth.config';
+import { AdminLoginToken } from '@/models/AdminLoginToken';
 
 // Augment NextAuth types with custom fields
 // Note: Using 'isEmailVerified' (boolean) as a separate field to avoid conflicting
@@ -38,6 +39,7 @@ declare module '@auth/core/jwt' {
 const nextAuthResult = NextAuth({
   ...authConfig,
   providers: [
+    // Standard credentials login (partners + portal staff)
     Credentials({
       async authorize(credentials) {
         const parsedCredentials = LoginSchema.safeParse(credentials);
@@ -98,6 +100,38 @@ const nextAuthResult = NextAuth({
         }
 
         return null;
+      },
+    }),
+
+    // Admin 2-step OTP login — verifies a time-limited one-time code sent to the admin email
+    Credentials({
+      id: 'adminOtp',
+      async authorize(credentials) {
+        const { tokenId, otp } = (credentials ?? {}) as { tokenId?: string; otp?: string };
+        if (!tokenId || !otp || !/^\d{6}$/.test(otp)) return null;
+
+        await dbConnect();
+        const { Account } = await import('@/models/Account');
+
+        const token = await AdminLoginToken.findById(tokenId);
+        if (!token || token.used || token.expiresAt < new Date()) return null;
+
+        const otpValid = await bcrypt.compare(otp, token.otpHash);
+        if (!otpValid) return null;
+
+        // Mark token used before issuing session
+        await AdminLoginToken.findByIdAndUpdate(tokenId, { used: true });
+
+        const account = await Account.findById(token.accountId);
+        if (!account || !account.isActive || !account.roles.includes('admin')) return null;
+
+        return {
+          id: account._id.toString(),
+          name: account.fullName,
+          email: account.email,
+          role: 'admin' as const,
+          isEmailVerified: true,
+        };
       },
     }),
   ],

@@ -110,8 +110,21 @@ export const authConfig = {
       }
 
       if (isOnAdmin) {
+        // Allow admin login pages through without authentication
+        const isAdminLoginPage =
+          nextUrl.pathname === '/admin/login' ||
+          nextUrl.pathname === '/admin/login/verify';
+
+        if (isAdminLoginPage) {
+          // Already authenticated admins visiting the login page → send to dashboard
+          if (isLoggedIn && auth?.user?.role === 'admin') {
+            return Response.redirect(new URL('/admin', nextUrl.origin));
+          }
+          return true;
+        }
+
         if (isLoggedIn && auth?.user?.role === 'admin') return true;
-        return false;
+        return Response.redirect(new URL('/admin/login', nextUrl.origin));
       }
 
       return true;

@@ -1,6 +1,7 @@
 import dbConnect from '@/lib/mongodb';
 import Partner, { IPartner } from '@/models/Partner';
 import PartnersClient from '@/components/admin/PartnersClient';
+import AdminPageBanner from '@/components/admin/AdminPageBanner';
 
 async function getPartners() {
   await dbConnect();
@@ -24,14 +25,12 @@ export default async function AdminPartnersPage() {
   }));
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-900">Partner Management</h2>
-          <p className="text-slate-500">Approve applications and manage partner accounts.</p>
-        </div>
-      </div>
-
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <AdminPageBanner
+        icon="handshake"
+        title="Partner Management"
+        description="Approve applications, manage tiers, and oversee partner accounts."
+      />
       <PartnersClient data={tableData} />
     </div>
   );
