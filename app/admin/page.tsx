@@ -77,16 +77,59 @@ async function getAdminStats() {
     value: loc.count,
   }));
 
-  const revenueData = [
-    { label: 'Jan', value: 4000 }, { label: 'Feb', value: 3000 }, { label: 'Mar', value: 2000 },
-    { label: 'Apr', value: 2780 }, { label: 'May', value: 1890 }, { label: 'Jun', value: 2390 },
-    { label: 'Jul', value: 3490 },
-  ];
-  const partnerGrowthData = [
-    { label: 'Jan', value: 10 }, { label: 'Feb', value: 15 }, { label: 'Mar', value: 20 },
-    { label: 'Apr', value: 25 }, { label: 'May', value: 35 }, { label: 'Jun', value: 45 },
-    { label: 'Jul', value: 60 },
-  ];
+  // Real revenue: sum of deal values (finalValue ?? estimatedValue) for closed/approved deals, by month
+  const sevenMonthsAgo = new Date();
+  sevenMonthsAgo.setMonth(sevenMonthsAgo.getMonth() - 6);
+  sevenMonthsAgo.setDate(1);
+  sevenMonthsAgo.setHours(0, 0, 0, 0);
+
+  const rawRevenue = await Deal.aggregate([
+    {
+      $match: {
+        dealStatus: { $in: ['approved', 'closed'] },
+        commissionSource: { $ne: 'ACADEMY_BONUS' },
+        updatedAt: { $gte: sevenMonthsAgo },
+      },
+    },
+    {
+      $group: {
+        _id: { $dateToString: { format: '%Y-%m', date: '$updatedAt' } },
+        total: { $sum: { $ifNull: ['$finalValue', '$estimatedValue'] } },
+      },
+    },
+    { $sort: { _id: 1 } },
+  ]);
+
+  // Real partner growth: cumulative partner signups by month
+  const rawPartnerGrowth = await Partner.aggregate([
+    { $match: { role: 'partner', createdAt: { $gte: sevenMonthsAgo } } },
+    {
+      $group: {
+        _id: { $dateToString: { format: '%Y-%m', date: '$createdAt' } },
+        count: { $sum: 1 },
+      },
+    },
+    { $sort: { _id: 1 } },
+  ]);
+
+  // Build last 7 month labels and look up real values
+  const revenueData: { label: string; value: number }[] = [];
+  const partnerGrowthData: { label: string; value: number }[] = [];
+  let cumulativePartners = await Partner.countDocuments({
+    role: 'partner',
+    createdAt: { $lt: sevenMonthsAgo },
+  });
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setMonth(d.getMonth() - i);
+    const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    const monthLabel = d.toLocaleDateString('en-US', { month: 'short' });
+    const rev = rawRevenue.find((r: { _id: string; total: number }) => r._id === monthKey);
+    revenueData.push({ label: monthLabel, value: rev ? Math.round(rev.total) : 0 });
+    const pg = rawPartnerGrowth.find((p: { _id: string; count: number }) => p._id === monthKey);
+    cumulativePartners += pg ? pg.count : 0;
+    partnerGrowthData.push({ label: monthLabel, value: cumulativePartners });
+  }
 
   return {
     partnerCount, pendingPartners, dealCount, pendingDeals,

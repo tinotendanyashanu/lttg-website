@@ -90,13 +90,13 @@ export default function SimpleLineChart({
         <div>
             {/* Header */}
             <div className="flex items-center justify-between mb-5">
-                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">{title}</h3>
+                <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">{title}</h3>
                 <div className="flex items-center space-x-4">
                     <div className="flex items-center space-x-1.5">
                         <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: strokeHex }}></div>
-                        <span className="text-xs font-medium text-slate-500">Visitors</span>
+                        <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Visitors</span>
                     </div>
-                    <span className="text-xs font-bold text-slate-900 bg-slate-100 px-2.5 py-1 rounded-md">
+                    <span className="text-xs font-bold text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-800 px-2.5 py-1 rounded-md">
                         {totalValue.toLocaleString()} total
                     </span>
                 </div>
