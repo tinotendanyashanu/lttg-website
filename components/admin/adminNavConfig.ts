@@ -16,15 +16,18 @@ export const NAV_SECTIONS: NavSection[] = [
     id: 'overview',
     label: null,
     items: [
-      { name: 'Overview', href: '/admin', icon: 'dashboard', exact: true },
+      { name: 'Overview',   href: '/admin',            icon: 'dashboard',  exact: true },
+      { name: 'Analytics',  href: '/admin/analytics',  icon: 'bar_chart' },
     ],
   },
   {
     id: 'business',
     label: 'Business',
     items: [
-      { name: 'Clients', href: '/admin/clients', icon: 'business' },
-      { name: 'Cases',   href: '/admin/cases',   icon: 'folder_shared' },
+      { name: 'Clients',   href: '/admin/clients',  icon: 'business' },
+      { name: 'Cases',     href: '/admin/cases',    icon: 'folder_shared' },
+      { name: 'Invoices',  href: '/admin/invoices', icon: 'receipt_long' },
+      { name: 'Tickets',   href: '/admin/tickets',  icon: 'support_agent' },
     ],
   },
   {
