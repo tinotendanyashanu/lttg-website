@@ -19,8 +19,7 @@ const adminAllowedIps: string[] = process.env.ADMIN_ALLOWED_IPS
 export default auth((req) => {
   const { nextUrl } = req;
   // x-forwarded-for may be a comma-separated list; the first value is the client IP.
-  // req.ip is the most reliable source in Next.js Edge middleware where available.
-  const ip = req.ip || (req.headers.get('x-forwarded-for') || '127.0.0.1').split(',')[0].trim();
+  const ip = (req.headers.get('x-forwarded-for') || '127.0.0.1').split(',')[0].trim();
 
   // Block /admin routes for IPs not in the allowlist (when the list is configured).
   if (nextUrl.pathname.startsWith('/admin') && adminAllowedIps.length > 0) {
