@@ -10,9 +10,25 @@ const rateLimitMap = new Map<string, { count: number; lastReset: number }>();
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
 const MAX_REQUESTS = 100; // 100 requests per minute
 
+// Admin IP allowlist — set ADMIN_ALLOWED_IPS in .env.local as a comma-separated list.
+// If the env var is empty or unset, the allowlist check is skipped (open to all IPs).
+const adminAllowedIps: string[] = process.env.ADMIN_ALLOWED_IPS
+  ? process.env.ADMIN_ALLOWED_IPS.split(',').map((ip) => ip.trim()).filter(Boolean)
+  : [];
+
 export default auth((req) => {
   const { nextUrl } = req;
-  const ip = req.headers.get('x-forwarded-for') || '127.0.0.1';
+  // x-forwarded-for may be a comma-separated list; the first value is the client IP.
+  // req.ip is the most reliable source in Next.js Edge middleware where available.
+  const ip = req.ip || (req.headers.get('x-forwarded-for') || '127.0.0.1').split(',')[0].trim();
+
+  // Block /admin routes for IPs not in the allowlist (when the list is configured).
+  if (nextUrl.pathname.startsWith('/admin') && adminAllowedIps.length > 0) {
+    if (!adminAllowedIps.includes(ip)) {
+      // TEMPORARY: show detected IP for debugging — remove once allowlist is confirmed working
+      return new NextResponse(`Forbidden. Detected IP: ${ip}`, { status: 403 });
+    }
+  }
   
   // Rate Limiting Logic
   const now = Date.now();
