@@ -282,4 +282,133 @@ export const EmailTemplates = {
       <p style="font-size: 14px; color: #64748b;">If you did not attempt to log in, your password may be compromised. Please take action immediately.</p>
       <p style="margin-top: 32px; font-size: 13px; color: #94a3b8;">— LeoTheTechGuy Security System</p>
     `),
+
+  invoiceIssued: (
+    clientName: string,
+    invoiceNumber: string,
+    amount: number,
+    currency: string,
+    dueAt: string | null,
+    lineItems: { description: string; quantity: number; unitPrice: number; total: number }[],
+    notes: string | null,
+    portalLink: string,
+  ) =>
+    BaseTemplate(`
+      <h2 style="color: #0f172a; font-size: 20px; margin-top: 0; margin-bottom: 8px;">Invoice ${invoiceNumber}</h2>
+      <p style="margin-top: 0; color: #64748b; font-size: 14px;">A new invoice has been issued to your account.</p>
+
+      <p>Hello ${clientName},</p>
+      <p>Please find your invoice details below. You can view and manage this invoice directly in your client portal.</p>
+
+      ${dueAt ? `<div style="background-color: #fff7ed; border: 1px solid #fed7aa; border-radius: 8px; padding: 16px; margin: 24px 0;">
+        <p style="margin: 0; font-size: 13px; color: #9a3412; font-weight: 600;">Payment Due: ${dueAt}</p>
+      </div>` : ''}
+
+      <!-- Line items table -->
+      <table style="width: 100%; border-collapse: collapse; margin: 24px 0; font-size: 14px;">
+        <thead>
+          <tr style="background-color: #f8fafc; border-bottom: 2px solid #e2e8f0;">
+            <th style="text-align: left; padding: 10px 12px; color: #64748b; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">Description</th>
+            <th style="text-align: center; padding: 10px 12px; color: #64748b; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">Qty</th>
+            <th style="text-align: right; padding: 10px 12px; color: #64748b; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">Unit Price</th>
+            <th style="text-align: right; padding: 10px 12px; color: #64748b; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${lineItems.map((item, i) => `
+            <tr style="border-bottom: 1px solid #f1f5f9; background-color: ${i % 2 === 0 ? '#ffffff' : '#fafbfc'};">
+              <td style="padding: 12px; color: #334155;">${item.description}</td>
+              <td style="padding: 12px; text-align: center; color: #64748b;">${item.quantity}</td>
+              <td style="padding: 12px; text-align: right; color: #64748b;">${currency} ${item.unitPrice.toFixed(2)}</td>
+              <td style="padding: 12px; text-align: right; font-weight: 600; color: #1e293b;">${currency} ${item.total.toFixed(2)}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+        <tfoot>
+          <tr style="background-color: #f8fafc; border-top: 2px solid #e2e8f0;">
+            <td colspan="3" style="padding: 14px 12px; text-align: right; font-weight: 700; color: #1e293b; font-size: 15px;">Total Amount Due</td>
+            <td style="padding: 14px 12px; text-align: right; font-weight: 800; color: #2563eb; font-size: 16px;">${currency} ${amount.toFixed(2)}</td>
+          </tr>
+        </tfoot>
+      </table>
+
+      ${notes ? `<div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 16px 0;">
+        <p style="margin: 0 0 6px 0; font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">Notes</p>
+        <p style="margin: 0; font-size: 14px; color: #475569;">${notes}</p>
+      </div>` : ''}
+
+      <div style="margin: 32px 0;">
+        <a href="${portalLink}" style="background-color: #2563eb; color: #ffffff; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block;">View Invoice in Portal</a>
+      </div>
+
+      <p style="font-size: 14px; color: #64748b;">If you have any questions about this invoice, please contact us or reply to this email.</p>
+      <p style="margin-top: 32px;">Best regards,<br /><strong style="color: #1e293b;">The LeoTheTechGuy Team</strong></p>
+    `),
+
+  invoiceReminder: (clientName: string, invoiceNumber: string, amount: number, currency: string, dueAt: string, portalLink: string) =>
+    BaseTemplate(`
+      <h2 style="color: #dc2626; font-size: 20px; margin-top: 0; margin-bottom: 24px;">Payment Reminder: Invoice ${invoiceNumber}</h2>
+      <p>Hello ${clientName},</p>
+      <p>This is a friendly reminder that invoice <strong>${invoiceNumber}</strong> for <strong>${currency} ${amount.toFixed(2)}</strong> was due on <strong>${dueAt}</strong> and remains outstanding.</p>
+      <p>Please log in to your client portal to review and action this invoice at your earliest convenience.</p>
+      <div style="margin: 32px 0;">
+        <a href="${portalLink}" style="background-color: #dc2626; color: #ffffff; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block;">View Invoice</a>
+      </div>
+      <p style="font-size: 14px; color: #64748b;">If you have already made payment, please disregard this notice. Contact us if you have any questions.</p>
+      <p style="margin-top: 32px;">Regards,<br /><strong style="color: #1e293b;">The LeoTheTechGuy Team</strong></p>
+    `),
+
+  invoiceStatusUpdate: (clientName: string, invoiceNumber: string, status: string, portalLink: string) =>
+    BaseTemplate(`
+      <h2 style="color: #0f172a; font-size: 20px; margin-top: 0; margin-bottom: 24px;">Invoice Update: ${invoiceNumber}</h2>
+      <p>Hello ${clientName},</p>
+      <p>Your invoice <strong>${invoiceNumber}</strong> has been updated. The current status is now: <strong style="text-transform: capitalize;">${status}</strong>.</p>
+      ${status === 'paid' ? '<p style="color: #059669; font-weight: 600;">Thank you for your payment! Your account has been updated accordingly.</p>' : ''}
+      <div style="margin: 32px 0;">
+        <a href="${portalLink}" style="background-color: #0f172a; color: #ffffff; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block;">View Invoice</a>
+      </div>
+      <p style="margin-top: 32px;">Regards,<br /><strong style="color: #1e293b;">The LeoTheTechGuy Team</strong></p>
+    `),
+
+  ticketReply: (clientName: string, ticketId: string, subject: string, replyContent: string, portalLink: string) =>
+    BaseTemplate(`
+      <h2 style="color: #0f172a; font-size: 20px; margin-top: 0; margin-bottom: 24px;">New Reply on Ticket ${ticketId}</h2>
+      <p>Hello ${clientName},</p>
+      <p>Our support team has responded to your ticket: <strong>${subject}</strong></p>
+      <div style="background-color: #f8fafc; border-left: 4px solid #2563eb; padding: 20px 24px; border-radius: 0 8px 8px 0; margin: 24px 0;">
+        <p style="margin: 0 0 8px 0; font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">Team Response</p>
+        <p style="margin: 0; color: #334155; line-height: 1.6; white-space: pre-wrap;">${replyContent}</p>
+      </div>
+      <div style="margin: 32px 0;">
+        <a href="${portalLink}" style="background-color: #2563eb; color: #ffffff; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block;">View Ticket</a>
+      </div>
+      <p style="margin-top: 32px;">Regards,<br /><strong style="color: #1e293b;">The LeoTheTechGuy Support Team</strong></p>
+    `),
+
+  ticketStatusUpdate: (clientName: string, ticketId: string, subject: string, newStatus: string, portalLink: string) =>
+    BaseTemplate(`
+      <h2 style="color: #0f172a; font-size: 20px; margin-top: 0; margin-bottom: 24px;">Ticket Status Update: ${ticketId}</h2>
+      <p>Hello ${clientName},</p>
+      <p>The status of your support ticket <strong>${subject}</strong> has been updated to: <strong style="text-transform: capitalize;">${newStatus.replace(/_/g, ' ')}</strong>.</p>
+      ${newStatus === 'resolved' || newStatus === 'closed' ? '<p style="color: #059669;">Your issue has been resolved. If you need further assistance, please open a new ticket.</p>' : ''}
+      ${newStatus === 'waiting_client' ? '<p style="color: #d97706;">Our team is waiting for your response. Please log in to your portal to continue.</p>' : ''}
+      <div style="margin: 32px 0;">
+        <a href="${portalLink}" style="background-color: #0f172a; color: #ffffff; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block;">View Ticket</a>
+      </div>
+      <p style="margin-top: 32px;">Regards,<br /><strong style="color: #1e293b;">The LeoTheTechGuy Support Team</strong></p>
+    `),
+
+  newMessageNotification: (clientName: string, senderName: string, preview: string, portalLink: string) =>
+    BaseTemplate(`
+      <h2 style="color: #0f172a; font-size: 20px; margin-top: 0; margin-bottom: 24px;">New Message from ${senderName}</h2>
+      <p>Hello ${clientName},</p>
+      <p>You have received a new message in your client portal.</p>
+      <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin: 24px 0;">
+        <p style="margin: 0; color: #475569; font-style: italic; line-height: 1.6;">"${preview}${preview.length >= 100 ? '…' : ''}"</p>
+      </div>
+      <div style="margin: 32px 0;">
+        <a href="${portalLink}" style="background-color: #0f172a; color: #ffffff; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block;">Read Message</a>
+      </div>
+      <p style="margin-top: 32px;">Regards,<br /><strong style="color: #1e293b;">The LeoTheTechGuy Team</strong></p>
+    `),
 };

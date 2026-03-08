@@ -28,6 +28,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { name: 'Cases',     href: '/admin/cases',    icon: 'folder_shared' },
       { name: 'Invoices',  href: '/admin/invoices', icon: 'receipt_long' },
       { name: 'Tickets',   href: '/admin/tickets',  icon: 'support_agent' },
+      { name: 'Messages',  href: '/admin/messages', icon: 'chat' },
     ],
   },
   {

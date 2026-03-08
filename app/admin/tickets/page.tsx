@@ -129,10 +129,10 @@ export default async function AdminTicketsPage() {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <Link
-                          href={`/portal/client/tickets/${String(ticket._id)}`}
+                          href={`/admin/tickets/${String(ticket._id)}`}
                           className="text-xs font-semibold text-brand-primary hover:underline"
                         >
-                          View
+                          Manage
                         </Link>
                       </td>
                     </tr>

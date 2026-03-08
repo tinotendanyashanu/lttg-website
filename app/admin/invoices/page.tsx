@@ -1,7 +1,8 @@
 import dbConnect from '@/lib/mongodb';
-import { ClientInvoice, IClientInvoice } from '@/models/ClientInvoice';
+import { ClientInvoice } from '@/models/ClientInvoice';
 import { Account } from '@/models/Account';
 import AdminPageBanner from '@/components/admin/AdminPageBanner';
+import CreateInvoiceModal from '@/components/admin/CreateInvoiceModal';
 import Link from 'next/link';
 
 export const metadata = { title: 'Invoices | Admin' };
@@ -23,7 +24,6 @@ async function getInvoices() {
     .limit(200)
     .lean();
 
-  // Collect unique clientIds and batch-load names
   const clientIds = [...new Set(invoices.map((inv: any) => String(inv.clientId)))];
   const accounts = await Account.find({ _id: { $in: clientIds } }, 'fullName email').lean();
   const accountMap: Record<string, { fullName?: string; email: string }> = {};
@@ -31,7 +31,6 @@ async function getInvoices() {
     accountMap[String(acc._id)] = { fullName: acc.fullName, email: acc.email };
   }
 
-  // Totals
   const totalPaid = invoices
     .filter((i: any) => i.status === 'paid')
     .reduce((s: number, i: any) => s + (i.amount || 0), 0);
@@ -39,25 +38,34 @@ async function getInvoices() {
     .filter((i: any) => ['issued', 'sent', 'overdue'].includes(i.status))
     .reduce((s: number, i: any) => s + (i.amount || 0), 0);
   const overdueCount = invoices.filter((i: any) => i.status === 'overdue').length;
+  const draftCount = invoices.filter((i: any) => i.status === 'draft').length;
 
-  return { invoices, accountMap, totalPaid, totalOutstanding, overdueCount };
+  return { invoices, accountMap, totalPaid, totalOutstanding, overdueCount, draftCount };
+}
+
+async function getClients() {
+  await dbConnect();
+  const clients = await Account.find({ roles: 'client', isActive: true }, 'fullName email').sort({ fullName: 1 }).lean();
+  return clients.map((c: any) => ({ _id: String(c._id), fullName: c.fullName, email: c.email }));
 }
 
 const fmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
 
 export default async function AdminInvoicesPage() {
-  const { invoices, accountMap, totalPaid, totalOutstanding, overdueCount } = await getInvoices();
+  const [{ invoices, accountMap, totalPaid, totalOutstanding, overdueCount, draftCount }, clients] =
+    await Promise.all([getInvoices(), getClients()]);
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-10">
       <AdminPageBanner
         icon="receipt_long"
         title="Client Invoices"
-        description="View and manage all client invoices across every portal account."
+        description="Create, send, and manage all client invoices. Invoices appear instantly in the client portal."
+        action={<CreateInvoiceModal clients={clients} />}
       />
 
       {/* Summary cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-white dark:bg-[#27272a] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-soft p-5">
           <p className="text-[10px] font-bold text-gray-400 dark:text-gray-600 uppercase tracking-widest mb-1">Total Collected</p>
           <p className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400">{fmt.format(totalPaid)}</p>
@@ -67,16 +75,22 @@ export default async function AdminInvoicesPage() {
           <p className="text-2xl font-extrabold text-amber-500 dark:text-amber-400">{fmt.format(totalOutstanding)}</p>
         </div>
         <div className="bg-white dark:bg-[#27272a] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-soft p-5">
-          <p className="text-[10px] font-bold text-gray-400 dark:text-gray-600 uppercase tracking-widest mb-1">Overdue Invoices</p>
+          <p className="text-[10px] font-bold text-gray-400 dark:text-gray-600 uppercase tracking-widest mb-1">Overdue</p>
           <p className="text-2xl font-extrabold text-red-600 dark:text-red-400">{overdueCount}</p>
+        </div>
+        <div className="bg-white dark:bg-[#27272a] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-soft p-5">
+          <p className="text-[10px] font-bold text-gray-400 dark:text-gray-600 uppercase tracking-widest mb-1">Drafts</p>
+          <p className="text-2xl font-extrabold text-gray-500 dark:text-gray-400">{draftCount}</p>
         </div>
       </div>
 
       {/* Invoices table */}
       <div className="bg-white dark:bg-[#27272a] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-soft overflow-hidden">
-        <div className="px-6 py-5 border-b border-gray-100 dark:border-gray-800">
-          <h3 className="text-sm font-bold text-gray-900 dark:text-white">All Invoices</h3>
-          <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{invoices.length} invoice{invoices.length !== 1 ? 's' : ''} total</p>
+        <div className="px-6 py-5 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
+          <div>
+            <h3 className="text-sm font-bold text-gray-900 dark:text-white">All Invoices</h3>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{invoices.length} invoice{invoices.length !== 1 ? 's' : ''} total</p>
+          </div>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
@@ -95,7 +109,7 @@ export default async function AdminInvoicesPage() {
               {invoices.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-6 py-12 text-center text-gray-400 dark:text-gray-600 text-sm">
-                    No invoices yet.
+                    No invoices yet. Click "New Invoice" to create one.
                   </td>
                 </tr>
               ) : (
@@ -135,10 +149,10 @@ export default async function AdminInvoicesPage() {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <Link
-                          href={`/portal/client/invoices/${String(inv._id)}`}
+                          href={`/admin/invoices/${String(inv._id)}`}
                           className="text-xs font-semibold text-brand-primary hover:underline"
                         >
-                          View
+                          Manage
                         </Link>
                       </td>
                     </tr>
