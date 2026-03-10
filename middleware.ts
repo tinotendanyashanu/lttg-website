@@ -24,8 +24,7 @@ export default auth((req) => {
   // Block /admin routes for IPs not in the allowlist (when the list is configured).
   if (nextUrl.pathname.startsWith('/admin') && adminAllowedIps.length > 0) {
     if (!adminAllowedIps.includes(ip)) {
-      // TEMPORARY: show detected IP for debugging — remove once allowlist is confirmed working
-      return new NextResponse(`Forbidden. Detected IP: ${ip}`, { status: 403 });
+      return new NextResponse('Forbidden', { status: 403 });
     }
   }
   
