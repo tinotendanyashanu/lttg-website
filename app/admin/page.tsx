@@ -13,12 +13,47 @@ import {
   Clock,
   FolderOpen,
   DollarSign,
+  Receipt,
+  MessageCircle,
+  Ticket,
+  Plus,
 } from 'lucide-react';
 import Link from 'next/link';
 import KPICard from '@/components/admin/KPICard';
 import SimpleBarChart from '@/components/admin/SimpleBarChart';
 import SimpleLineChart from '@/components/admin/SimpleLineChart';
 import { getAdminDashboardStats } from '@/lib/actions/portal-admin';
+
+async function getClientOpsStats() {
+  await dbConnect();
+  const { ClientInvoice } = await import('@/models/ClientInvoice');
+  const { SupportTicket } = await import('@/models/SupportTicket');
+  const { MessageThread } = await import('@/models/MessageThread');
+
+  const [
+    outstandingAmount,
+    overdueCount,
+    openTickets,
+    urgentTickets,
+    unreadMessages,
+    totalInvoices,
+  ] = await Promise.all([
+    ClientInvoice.aggregate([
+      { $match: { status: { $in: ['issued', 'sent', 'overdue'] } } },
+      { $group: { _id: null, total: { $sum: '$amount' } } },
+    ]).then((r: any[]) => r[0]?.total || 0),
+    ClientInvoice.countDocuments({ status: 'overdue' }),
+    SupportTicket.countDocuments({ status: { $in: ['open', 'in_progress'] } }),
+    SupportTicket.countDocuments({ priority: 'urgent', status: { $nin: ['resolved', 'closed'] } }),
+    MessageThread.aggregate([
+      { $group: { _id: null, total: { $sum: '$unreadByTeam' } } },
+    ]).then((r: any[]) => r[0]?.total || 0),
+    ClientInvoice.countDocuments(),
+  ]);
+
+  return { outstandingAmount, overdueCount, openTickets, urgentTickets, unreadMessages, totalInvoices };
+}
+
 
 async function getAdminStats() {
   await dbConnect();
@@ -140,13 +175,15 @@ async function getAdminStats() {
 }
 
 export default async function AdminDashboard() {
-  const [partnerResult, portalResult] = await Promise.allSettled([
+  const [partnerResult, portalResult, clientOpsResult] = await Promise.allSettled([
     getAdminStats(),
     getAdminDashboardStats(),
+    getClientOpsStats(),
   ]);
 
   const stats = partnerResult.status === 'fulfilled' ? partnerResult.value : null;
   const portalStats = portalResult.status === 'fulfilled' ? portalResult.value?.data : null;
+  const clientOps = clientOpsResult.status === 'fulfilled' ? clientOpsResult.value : null;
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -211,6 +248,116 @@ export default async function AdminDashboard() {
           />
         </div>
       )}
+
+      {/* Client Operations */}
+      <div>
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 rounded-lg">
+              <Receipt className="h-4 w-4" />
+            </div>
+            <h2 className="text-base font-bold text-gray-900 dark:text-white">Client Operations</h2>
+          </div>
+        </div>
+
+        {/* KPI row */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
+          <KPICard
+            title="Outstanding Invoices"
+            value={new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(clientOps?.outstandingAmount ?? 0)}
+            icon={Receipt}
+            color="bg-amber-500"
+            trend={clientOps?.overdueCount ? { value: clientOps.overdueCount, label: 'overdue', positive: false } : undefined}
+          />
+          <KPICard
+            title="Total Invoices"
+            value={clientOps?.totalInvoices ?? 0}
+            icon={DollarSign}
+            color="bg-indigo-500"
+            trend={{ value: 0, label: 'all time', positive: true }}
+          />
+          <KPICard
+            title="Open Tickets"
+            value={clientOps?.openTickets ?? 0}
+            icon={Ticket}
+            color={clientOps?.urgentTickets ? 'bg-red-500' : 'bg-sky-500'}
+            trend={clientOps?.urgentTickets ? { value: clientOps.urgentTickets, label: 'urgent', positive: false } : undefined}
+          />
+          <KPICard
+            title="Unread Messages"
+            value={clientOps?.unreadMessages ?? 0}
+            icon={MessageCircle}
+            color={clientOps?.unreadMessages ? 'bg-violet-500' : 'bg-gray-400'}
+            trend={clientOps?.unreadMessages ? { value: clientOps.unreadMessages, label: 'need response', positive: false } : undefined}
+          />
+        </div>
+
+        {/* Quick actions */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Link
+            href="/admin/invoices"
+            className="group flex items-center justify-between bg-white dark:bg-[#27272a] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-soft p-4 hover:border-brand-primary/30 dark:hover:border-brand-primary/20 transition-all"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-900/10 flex items-center justify-center">
+                <Receipt className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-gray-900 dark:text-white">Invoices</p>
+                <p className="text-xs text-gray-400">Create, send &amp; track</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-brand-primary bg-brand-primary/10 rounded-lg px-2 py-1 flex items-center gap-1">
+                <Plus className="h-3 w-3" />New
+              </span>
+              <span className="material-icons-outlined text-gray-300 dark:text-gray-600 text-[18px] group-hover:text-brand-primary transition-colors">chevron_right</span>
+            </div>
+          </Link>
+
+          <Link
+            href="/admin/tickets"
+            className="group flex items-center justify-between bg-white dark:bg-[#27272a] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-soft p-4 hover:border-brand-primary/30 dark:hover:border-brand-primary/20 transition-all"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-900/10 flex items-center justify-center">
+                <Ticket className="h-5 w-5 text-sky-600 dark:text-sky-400" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-gray-900 dark:text-white">Support Tickets</p>
+                <p className="text-xs text-gray-400">Reply &amp; resolve</p>
+              </div>
+            </div>
+            {(clientOps?.openTickets ?? 0) > 0 && (
+              <span className="inline-flex items-center justify-center min-w-[22px] h-5.5 px-1.5 rounded-full bg-red-500 text-white text-[10px] font-bold">
+                {clientOps?.openTickets}
+              </span>
+            )}
+            <span className="material-icons-outlined text-gray-300 dark:text-gray-600 text-[18px] group-hover:text-brand-primary transition-colors">chevron_right</span>
+          </Link>
+
+          <Link
+            href="/admin/messages"
+            className="group flex items-center justify-between bg-white dark:bg-[#27272a] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-soft p-4 hover:border-brand-primary/30 dark:hover:border-brand-primary/20 transition-all"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-violet-50 dark:bg-violet-900/10 flex items-center justify-center">
+                <MessageCircle className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-gray-900 dark:text-white">Client Messages</p>
+                <p className="text-xs text-gray-400">Read &amp; respond</p>
+              </div>
+            </div>
+            {(clientOps?.unreadMessages ?? 0) > 0 && (
+              <span className="inline-flex items-center justify-center min-w-[22px] h-5.5 px-1.5 rounded-full bg-violet-500 text-white text-[10px] font-bold">
+                {clientOps?.unreadMessages}
+              </span>
+            )}
+            <span className="material-icons-outlined text-gray-300 dark:text-gray-600 text-[18px] group-hover:text-brand-primary transition-colors">chevron_right</span>
+          </Link>
+        </div>
+      </div>
 
       {/* Site Matrix */}
       <div>
