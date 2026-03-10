@@ -242,16 +242,23 @@ export const EmailTemplates = {
       <p style="margin-top: 32px;">Regards,<br /><strong style="color: #1e293b;">Leo</strong></p>
     `),
 
-  clientWelcome: (name: string, setupLink: string) =>
+  clientWelcome: (name: string, setupLink: string, loginEmail?: string) =>
     BaseTemplate(`
       <h2 style="color: #0f172a; font-size: 20px; margin-top: 0; margin-bottom: 24px;">Welcome to Your Client Portal</h2>
       <p>Hello ${name},</p>
       <p>Your client account has been created on the LeoTheTechGuy platform. You now have access to a secure portal where you can track your cases, review invoices, communicate with our team, and manage all your engagements.</p>
+      ${loginEmail ? `<div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px 20px; margin: 24px 0;">
+        <p style="margin: 0 0 4px 0; font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">Your Login Email</p>
+        <p style="margin: 0; font-size: 15px; font-weight: 600; color: #0f172a;">${loginEmail}</p>
+      </div>` : ''}
       <p>To get started, please set up your password by clicking the button below:</p>
       <div style="margin: 32px 0;">
         <a href="${setupLink}" style="background-color: #2563eb; color: #ffffff; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block;">Set Up My Password</a>
       </div>
       <p style="font-size: 14px; color: #64748b;">This link expires in 48 hours for security. If you did not expect this invitation, please contact us at contact@leothetechguy.com.</p>
+      <p style="margin-top: 24px; font-size: 14px; color: #475569;">Once your password is set up, you can log in to your portal at any time here:<br />
+        <a href="https://leothetechguy.com/portal/client/login" style="color: #2563eb;">https://leothetechguy.com/portal/client/login</a>
+      </p>
       <p style="margin-top: 32px;">Best regards,<br /><strong style="color: #1e293b;">The LeoTheTechGuy Team</strong></p>
     `),
 
@@ -261,7 +268,7 @@ export const EmailTemplates = {
       <p>Hello ${name},</p>
       <p>Your client portal account has been successfully activated. You can now log in at any time to access your portal.</p>
       <div style="margin: 32px 0;">
-        <a href="https://leothetechguy.com/portal/login" style="background-color: #0f172a; color: #ffffff; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block;">Access Client Portal</a>
+        <a href="https://leothetechguy.com/portal/client/login" style="background-color: #0f172a; color: #ffffff; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block;">Access Client Portal</a>
       </div>
       <p style="margin-top: 32px;">Best regards,<br /><strong style="color: #1e293b;">The LeoTheTechGuy Team</strong></p>
     `),
@@ -410,5 +417,60 @@ export const EmailTemplates = {
         <a href="${portalLink}" style="background-color: #0f172a; color: #ffffff; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block;">Read Message</a>
       </div>
       <p style="margin-top: 32px;">Regards,<br /><strong style="color: #1e293b;">The LeoTheTechGuy Team</strong></p>
+    `),
+
+  contractSent: (clientName: string, contractNumber: string, title: string, portalLink: string) =>
+    BaseTemplate(`
+      <h2 style="color: #0f172a; font-size: 20px; margin-top: 0; margin-bottom: 24px;">Contract Ready for Your Signature</h2>
+      <p>Hello ${clientName},</p>
+      <p>A contract has been prepared for your review and signature.</p>
+      <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin: 24px 0;">
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr>
+            <td style="padding: 8px 0; color: #64748b; font-size: 13px; width: 140px;">Contract Number</td>
+            <td style="padding: 8px 0; color: #0f172a; font-weight: 600; font-size: 13px; font-family: monospace;">${contractNumber}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; color: #64748b; font-size: 13px;">Title</td>
+            <td style="padding: 8px 0; color: #0f172a; font-weight: 600; font-size: 13px;">${title}</td>
+          </tr>
+        </table>
+      </div>
+      <p>Please log in to your client portal to review and sign the contract at your earliest convenience.</p>
+      <div style="margin: 32px 0;">
+        <a href="${portalLink}" style="background-color: #0f172a; color: #ffffff; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block;">Review &amp; Sign Contract</a>
+      </div>
+      <p style="margin-top: 32px;">Regards,<br /><strong style="color: #1e293b;">The LeoTheTechGuy Team</strong></p>
+    `),
+
+  contractSigned: (adminName: string, clientName: string, contractNumber: string, title: string, signedAt: string, adminLink: string) =>
+    BaseTemplate(`
+      <h2 style="color: #059669; font-size: 20px; margin-top: 0; margin-bottom: 24px;">Contract Signed</h2>
+      <p>Hello ${adminName},</p>
+      <p><strong>${clientName}</strong> has signed a contract.</p>
+      <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 20px; margin: 24px 0;">
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr>
+            <td style="padding: 8px 0; color: #64748b; font-size: 13px; width: 140px;">Contract Number</td>
+            <td style="padding: 8px 0; color: #0f172a; font-weight: 600; font-size: 13px; font-family: monospace;">${contractNumber}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; color: #64748b; font-size: 13px;">Title</td>
+            <td style="padding: 8px 0; color: #0f172a; font-weight: 600; font-size: 13px;">${title}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; color: #64748b; font-size: 13px;">Signed By</td>
+            <td style="padding: 8px 0; color: #0f172a; font-weight: 600; font-size: 13px;">${clientName}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; color: #64748b; font-size: 13px;">Signed At</td>
+            <td style="padding: 8px 0; color: #0f172a; font-size: 13px;">${signedAt}</td>
+          </tr>
+        </table>
+      </div>
+      <div style="margin: 32px 0;">
+        <a href="${adminLink}" style="background-color: #0f172a; color: #ffffff; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block;">View Contract</a>
+      </div>
+      <p style="margin-top: 32px;">Regards,<br /><strong style="color: #1e293b;">The LeoTheTechGuy Platform</strong></p>
     `),
 };
