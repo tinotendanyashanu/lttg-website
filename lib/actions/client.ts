@@ -418,7 +418,7 @@ export async function updateClientProfile(prevState: unknown, formData: FormData
     { _id: session.user.id },
     {
       $set: {
-        name: formData.get('name'),
+        fullName: formData.get('name'),
         'clientProfile.phone': formData.get('phone'),
       },
     }

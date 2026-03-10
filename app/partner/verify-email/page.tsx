@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { auth } from '@/auth';
 import dbConnect from '@/lib/mongodb';
 import PartnerModel from '@/models/Partner';
