@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface IAuditLog extends Document {
-  entityType: 'deal' | 'partner' | 'payout';
+  entityType: 'deal' | 'partner' | 'payout' | 'contract' | 'invoice' | 'ticket' | 'client';
   entityId: mongoose.Types.ObjectId;
   action: string;
   details: Record<string, unknown> | string;
@@ -13,7 +13,7 @@ export interface IAuditLog extends Document {
 const AuditLogSchema: Schema = new Schema({
   entityType: {
     type: String,
-    enum: ['deal', 'partner', 'payout'],
+    enum: ['deal', 'partner', 'payout', 'contract', 'invoice', 'ticket', 'client'],
     required: true
   },
   entityId: { type: Schema.Types.ObjectId, required: true },

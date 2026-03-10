@@ -72,12 +72,18 @@ const nextAuthResult = NextAuth({
             }
           }
 
-          // 2. Check Account collection (admins, employees, interns, clients)
+          // 2. Check Account collection (admins, employees, interns)
+          // loginSource 'portal' = employee/staff portal — reject clients
           if (!loginSource || loginSource === 'portal') {
             const { Account } = await import('@/models/Account');
             const accountUser = await Account.findOne({ email });
 
             if (accountUser && accountUser.isActive) {
+              // Block clients from logging in through the employee portal
+              if (loginSource === 'portal' && accountUser.roles.includes('client') && !accountUser.roles.includes('admin') && !accountUser.roles.includes('employee') && !accountUser.roles.includes('intern')) {
+                return null;
+              }
+
               const passwordsMatch = await bcrypt.compare(password, accountUser.passwordHash);
               if (passwordsMatch) {
                 let primaryRole: 'admin' | 'employee' | 'intern' | 'client' = 'intern';
@@ -90,6 +96,25 @@ const nextAuthResult = NextAuth({
                   name: accountUser.fullName,
                   email: accountUser.email,
                   role: primaryRole,
+                  isEmailVerified: true,
+                };
+              }
+            }
+          }
+
+          // 3. Check Account collection for clients only (client portal login)
+          if (loginSource === 'client_portal') {
+            const { Account } = await import('@/models/Account');
+            const accountUser = await Account.findOne({ email });
+
+            if (accountUser && accountUser.isActive && accountUser.roles.includes('client')) {
+              const passwordsMatch = await bcrypt.compare(password, accountUser.passwordHash);
+              if (passwordsMatch) {
+                return {
+                  id: accountUser._id.toString(),
+                  name: accountUser.fullName,
+                  email: accountUser.email,
+                  role: 'client' as const,
                   isEmailVerified: true,
                 };
               }

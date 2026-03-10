@@ -121,7 +121,7 @@ export default function ClientLoginPage() {
           </div>
 
           <form action={dispatch} className="space-y-4">
-            <input type="hidden" name="loginSource" value="portal" />
+            <input type="hidden" name="loginSource" value="client_portal" />
 
             <div>
               <label

@@ -33,15 +33,20 @@ export async function authenticate(
     // Determine target redirect based on user's resolved role
     let redirectTo = '/partner/dashboard';
     
-    if (loginSource === 'portal') {
+    if (loginSource === 'client_portal') {
+         // Client portal login — only allow clients
+         if (accountUser && accountUser.roles.includes('client')) {
+             redirectTo = '/portal/client/dashboard';
+         }
+    } else if (loginSource === 'portal') {
+         // Employee/staff portal login — reject pure clients
          if (accountUser) {
              if (accountUser.roles.includes('admin')) {
                  redirectTo = '/admin';
              } else if (accountUser.roles.includes('employee') || accountUser.roles.includes('intern')) {
                  redirectTo = '/portal';
-             } else if (accountUser.roles.includes('client')) {
-                 redirectTo = '/portal/client/dashboard';
              }
+             // Client-only accounts are blocked in the credentials provider, no redirect needed
          }
     } else {
          if (partner && partner.role === 'partner') {

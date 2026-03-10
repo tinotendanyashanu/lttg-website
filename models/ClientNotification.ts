@@ -7,6 +7,7 @@ export type NotificationType =
   | 'invoice_alert'
   | 'payment_received'
   | 'contract_update'
+  | 'contract_alert'
   | 'system';
 
 export interface IClientNotification extends Document {
@@ -31,6 +32,7 @@ const ClientNotificationSchema: Schema = new Schema({
       'invoice_alert',
       'payment_received',
       'contract_update',
+      'contract_alert',
       'system',
     ],
     required: true,
