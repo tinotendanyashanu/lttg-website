@@ -16,9 +16,12 @@ export interface IClientContract extends Document {
   title: string;
   type: string;
   status: ContractStatus;
+  content?: string;
   startDate?: Date;
   endDate?: Date;
   signedAt?: Date;
+  signerName?: string;
+  signerIp?: string;
   documentUrl?: string;
   value?: number;
   currency?: string;
@@ -47,9 +50,12 @@ const ClientContractSchema: Schema = new Schema(
       ],
       default: 'draft',
     },
+    content: { type: String },
     startDate: { type: Date },
     endDate: { type: Date },
     signedAt: { type: Date },
+    signerName: { type: String },
+    signerIp: { type: String },
     documentUrl: { type: String },
     value: { type: Number },
     currency: { type: String, default: 'USD' },

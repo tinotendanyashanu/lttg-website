@@ -109,7 +109,7 @@ export async function createClientAccount(data: {
   await sendEmail({
     to: account.email,
     subject: 'Welcome to Your LeoTheTechGuy Client Portal',
-    html: EmailTemplates.clientWelcome(account.fullName, setupLink),
+    html: EmailTemplates.clientWelcome(account.fullName, setupLink, account.email),
   });
 
   return { success: true, accountId: account._id.toString() };

@@ -5,6 +5,7 @@ import { getAccountByEmail } from '@/lib/data/account';
 import dbConnect from '@/lib/mongodb';
 import { ActivityLog } from '@/models/ActivityLog';
 import Lead from '@/models/Lead';
+import { createClientAccount } from '@/lib/actions/client';
 
 export async function getAdminClients() {
   await dbConnect();
@@ -69,7 +70,10 @@ export async function createAdminClient(data: any) {
   if (!session?.user?.email) throw new Error('Not authenticated');
 
   const account = await getAccountByEmail(session.user.email);
-  if (!account || !account.roles.includes('admin')) throw new Error('Unauthorized');
+  const allowedRoles = ['admin', 'employee', 'partner'];
+  if (!account || !account.roles.some((r: string) => allowedRoles.includes(r))) {
+    throw new Error('Unauthorized');
+  }
 
   const client = await Lead.create({
     ...data,
@@ -82,6 +86,23 @@ export async function createAdminClient(data: any) {
     actionType: 'client_created',
     newValue: client.businessName,
   });
+
+  // Create a portal account for the client and send them a welcome email with login details
+  if (data.clientEmail) {
+    try {
+      await createClientAccount({
+        fullName: data.contactName || data.businessName || 'Client',
+        email: data.clientEmail,
+        phone: data.phone,
+        companyName: data.businessName,
+      });
+    } catch (err: any) {
+      // If a portal account with this email already exists, skip silently
+      if (!err?.message?.includes('already exists')) {
+        console.error('Failed to create portal account for client:', err);
+      }
+    }
+  }
 
   return { success: true, client: JSON.parse(JSON.stringify(client)) };
 }

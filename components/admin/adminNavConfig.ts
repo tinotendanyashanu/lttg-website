@@ -24,11 +24,12 @@ export const NAV_SECTIONS: NavSection[] = [
     id: 'business',
     label: 'Business',
     items: [
-      { name: 'Clients',   href: '/admin/clients',  icon: 'business' },
-      { name: 'Cases',     href: '/admin/cases',    icon: 'folder_shared' },
-      { name: 'Invoices',  href: '/admin/invoices', icon: 'receipt_long' },
-      { name: 'Tickets',   href: '/admin/tickets',  icon: 'support_agent' },
-      { name: 'Messages',  href: '/admin/messages', icon: 'chat' },
+      { name: 'Clients',   href: '/admin/clients',   icon: 'business' },
+      { name: 'Cases',     href: '/admin/cases',     icon: 'folder_shared' },
+      { name: 'Contracts', href: '/admin/contracts', icon: 'description' },
+      { name: 'Invoices',  href: '/admin/invoices',  icon: 'receipt_long' },
+      { name: 'Tickets',   href: '/admin/tickets',   icon: 'support_agent' },
+      { name: 'Messages',  href: '/admin/messages',  icon: 'chat' },
     ],
   },
   {
