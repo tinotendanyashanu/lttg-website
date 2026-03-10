@@ -23,6 +23,7 @@ export async function authenticate(
   try {
     let email = formData.get('email') as string;
     if (email) email = email.toLowerCase();
+    const loginSource = formData.get('loginSource') as string | undefined;
     
     await dbConnect();
     const partner = await Partner.findOne({ email });
@@ -32,15 +33,27 @@ export async function authenticate(
     // Determine target redirect based on user's resolved role
     let redirectTo = '/partner/dashboard';
     
-    if (partner && partner.role === 'partner') {
-         redirectTo = '/partner/dashboard';
-    } else if (accountUser) {
-         if (accountUser.roles.includes('admin')) {
-             redirectTo = '/portal/admin';
-         } else if (accountUser.roles.includes('employee') || accountUser.roles.includes('intern')) {
-             redirectTo = '/portal';
-         } else if (accountUser.roles.includes('client')) {
-             redirectTo = '/portal/client/dashboard';
+    if (loginSource === 'portal') {
+         if (accountUser) {
+             if (accountUser.roles.includes('admin')) {
+                 redirectTo = '/admin';
+             } else if (accountUser.roles.includes('employee') || accountUser.roles.includes('intern')) {
+                 redirectTo = '/portal';
+             } else if (accountUser.roles.includes('client')) {
+                 redirectTo = '/portal/client/dashboard';
+             }
+         }
+    } else {
+         if (partner && partner.role === 'partner') {
+              redirectTo = '/partner/dashboard';
+         } else if (accountUser) {
+              if (accountUser.roles.includes('admin')) {
+                  redirectTo = '/admin';
+              } else if (accountUser.roles.includes('employee') || accountUser.roles.includes('intern')) {
+                  redirectTo = '/portal';
+              } else if (accountUser.roles.includes('client')) {
+                  redirectTo = '/portal/client/dashboard';
+              }
          }
     }
 
