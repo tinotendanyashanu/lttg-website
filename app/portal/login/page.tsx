@@ -41,8 +41,17 @@ export default function PortalLoginPage() {
               <span>LEO THE TECH GUY</span>
             </Link>
           </div>
-          <h1 className="text-3xl font-bold mb-2">Portal Access</h1>
-          <p className="text-neutral-500 mb-8">Authenticate with your LeoTech credentials.</p>
+          <h1 className="text-3xl font-bold mb-2">Employee Portal</h1>
+          <p className="text-neutral-500 mb-6">Sign in with your internal LeoTech credentials.</p>
+          <div className="mb-6 p-3 rounded-lg bg-neutral-900 border border-neutral-800 flex items-center gap-3">
+            <span className="material-icons-outlined text-blue-400 text-[18px]">info</span>
+            <p className="text-xs text-neutral-400">
+              Are you a <span className="text-white font-medium">client</span>?{' '}
+              <Link href="/portal/client/login" className="text-blue-400 hover:underline font-medium">
+                Go to Client Login →
+              </Link>
+            </p>
+          </div>
           
           <form action={dispatch} className="space-y-4">
             {/* Hidden field to hint to the action where we want to go back to if we are internal */}
