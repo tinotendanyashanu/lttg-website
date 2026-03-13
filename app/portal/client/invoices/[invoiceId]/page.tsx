@@ -2,22 +2,42 @@ import { auth } from '@/auth';
 import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
 import dbConnect from '@/lib/mongodb';
+import DownloadPDFButton from '@/components/portal/DownloadPDFButton';
 
-const STATUS_STYLES: Record<string, string> = {
-  draft: 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400',
-  issued: 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400',
-  sent: 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400',
-  paid: 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400',
-  overdue: 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400',
-  cancelled: 'bg-gray-50 text-gray-400 dark:bg-gray-900/20 dark:text-gray-500',
+const COMPANY = {
+  name: 'LeoTheTechGuy',
+  email: 'contact@leothetechguy.com',
+  address: 'Warsaw, Poland',
+  website: 'leothetechguy.com',
+  logo: 'https://leothetechguy.com/logo_transparent.png',
 };
 
-async function getInvoice(clientId: string, invoiceId: string) {
+const STATUS_STYLES: Record<string, { bg: string; text: string; label: string }> = {
+  draft:     { bg: 'bg-gray-100 dark:bg-gray-800',         text: 'text-gray-500 dark:text-gray-400',      label: 'Draft' },
+  issued:    { bg: 'bg-blue-50 dark:bg-blue-900/20',       text: 'text-blue-700 dark:text-blue-400',      label: 'Issued' },
+  sent:      { bg: 'bg-sky-50 dark:bg-sky-900/20',         text: 'text-sky-700 dark:text-sky-400',        label: 'Sent' },
+  paid:      { bg: 'bg-emerald-50 dark:bg-emerald-900/20', text: 'text-emerald-700 dark:text-emerald-400',label: 'Paid' },
+  overdue:   { bg: 'bg-red-50 dark:bg-red-900/20',         text: 'text-red-700 dark:text-red-400',        label: 'Overdue' },
+  cancelled: { bg: 'bg-gray-50 dark:bg-gray-900/20',       text: 'text-gray-400 dark:text-gray-500',      label: 'Cancelled' },
+};
+
+async function getInvoiceWithClient(clientId: string, invoiceId: string) {
   try {
     await dbConnect();
     const { ClientInvoice } = await import('@/models/ClientInvoice');
-    const inv = await ClientInvoice.findOne({ _id: invoiceId, clientId }).lean();
-    return inv ? JSON.parse(JSON.stringify(inv)) : null;
+    const { Account } = await import('@/models/Account');
+
+    const [inv, account] = await Promise.all([
+      ClientInvoice.findOne({ _id: invoiceId, clientId }).lean(),
+      Account.findById(clientId, 'fullName email clientProfile').lean(),
+    ]);
+
+    return inv
+      ? {
+          invoice: JSON.parse(JSON.stringify(inv)),
+          account: account ? JSON.parse(JSON.stringify(account)) : null,
+        }
+      : null;
   } catch (_) {
     return null;
   }
@@ -32,130 +52,211 @@ export default async function InvoiceDetailPage({
   const session = await auth();
   if (!session?.user?.id) redirect('/portal/login');
 
-  const inv = await getInvoice(session.user.id, invoiceId);
-  if (!inv) notFound();
+  const data = await getInvoiceWithClient(session.user.id, invoiceId);
+  if (!data) notFound();
+
+  const { invoice: inv, account } = data;
+  const currency = inv.currency || 'USD';
+  const fmt = (n: number) =>
+    new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 2 }).format(n);
 
   const isPending = ['issued', 'sent', 'overdue'].includes(inv.status);
+  const status = STATUS_STYLES[inv.status] ?? STATUS_STYLES['issued'];
+
+  const issuedLabel = inv.issuedAt
+    ? new Date(inv.issuedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+    : '—';
+  const dueLabel = inv.dueAt
+    ? new Date(inv.dueAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+    : '—';
+  const paidLabel = inv.paidAt
+    ? new Date(inv.paidAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+    : null;
 
   return (
-    <div className="space-y-6 max-w-2xl">
-      <Link
-        href="/portal/client/invoices"
-        className="inline-flex items-center gap-1.5 text-gray-500 hover:text-gray-900 dark:hover:text-white text-sm transition-colors"
-      >
-        <span className="material-icons-outlined text-[16px]">arrow_back</span>
-        Back to Invoices
-      </Link>
+    <>
+      {/* Print styles — hide everything except #invoice-document */}
+      <style>{`
+        @media print {
+          body * { visibility: hidden !important; }
+          #invoice-document, #invoice-document * { visibility: visible !important; }
+          #invoice-document { position: fixed; top: 0; left: 0; width: 100%; }
+          @page { margin: 20mm; }
+        }
+      `}</style>
 
-      <div className="bg-white dark:bg-[#27272a] rounded-2xl shadow-soft border border-gray-100 dark:border-gray-800 p-8">
-        {/* Invoice header */}
-        <div className="flex items-start justify-between mb-8">
-          <div>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white mb-1">Invoice</p>
-            <p className="font-mono text-gray-400 text-sm">
-              #{inv.invoiceNumber || invoiceId.slice(-8).toUpperCase()}
-            </p>
-          </div>
-          <span
-            className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase ${
-              STATUS_STYLES[inv.status] || STATUS_STYLES.issued
-            }`}
-          >
-            {inv.status}
-          </span>
+      <div className="space-y-5 max-w-3xl print:hidden">
+        <Link
+          href="/portal/client/invoices"
+          className="inline-flex items-center gap-1.5 text-gray-500 hover:text-gray-900 dark:hover:text-white text-sm transition-colors"
+        >
+          <span className="material-icons-outlined text-[16px]">arrow_back</span>
+          Back to Invoices
+        </Link>
+      </div>
+
+      {/* Actions bar */}
+      <div className="flex items-center justify-between max-w-3xl mt-4 mb-5 print:hidden">
+        <div>
+          <p className="text-xl font-bold text-gray-900 dark:text-white">{inv.invoiceNumber}</p>
+          <p className="text-sm text-gray-400 mt-0.5">{inv.description || 'Invoice'}</p>
         </div>
-
-        {/* Dates */}
-        <div className="grid grid-cols-2 gap-4 mb-8">
-          <div>
-            <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Issued</p>
-            <p className="text-sm font-medium text-gray-900 dark:text-white">
-              {inv.issuedAt ? new Date(inv.issuedAt).toLocaleDateString() : '—'}
-            </p>
-          </div>
-          <div>
-            <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Due</p>
-            <p className={`text-sm font-medium ${inv.status === 'overdue' ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white'}`}>
-              {inv.dueAt ? new Date(inv.dueAt).toLocaleDateString() : '—'}
-            </p>
-          </div>
+        <div className="flex items-center gap-3">
+          {inv.pdfUrl && (
+            <a
+              href={inv.pdfUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-full px-4 py-2 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+            >
+              <span className="material-icons-outlined text-[16px]">download</span>
+              Attached PDF
+            </a>
+          )}
+          <DownloadPDFButton invoiceNumber={inv.invoiceNumber} />
         </div>
+      </div>
 
-        {/* Line items */}
-        {inv.lineItems && inv.lineItems.length > 0 && (
-          <div className="mb-8">
-            <div className="border border-gray-100 dark:border-gray-800 rounded-xl overflow-hidden">
+      {/* ── Invoice Document ── */}
+      <div id="invoice-document" className="max-w-3xl">
+        <div className="bg-white dark:bg-[#1c1c1f] rounded-2xl shadow-soft border border-gray-100 dark:border-gray-800 overflow-hidden">
+
+          {/* Header band */}
+          <div className="bg-gray-900 dark:bg-[#111113] px-8 py-6 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={COMPANY.logo} alt={COMPANY.name} className="h-9 w-auto brightness-0 invert" />
+              <div>
+                <p className="text-white font-bold text-base leading-tight">{COMPANY.name}</p>
+                <p className="text-gray-400 text-xs">{COMPANY.website}</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-white font-black text-2xl tracking-wide">INVOICE</p>
+              <p className="text-gray-400 text-sm font-mono mt-0.5">{inv.invoiceNumber}</p>
+            </div>
+          </div>
+
+          <div className="px-8 py-7 space-y-7">
+
+            {/* Status + dates row */}
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <span className={`inline-flex items-center px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider ${status.bg} ${status.text}`}>
+                {status.label}
+              </span>
+              <div className="flex gap-6 text-right">
+                <div>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Issue Date</p>
+                  <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 mt-0.5">{issuedLabel}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Due Date</p>
+                  <p className={`text-sm font-semibold mt-0.5 ${inv.status === 'overdue' ? 'text-red-600 dark:text-red-400' : 'text-gray-800 dark:text-gray-200'}`}>
+                    {dueLabel}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* From / To */}
+            <div className="grid grid-cols-2 gap-6">
+              <div className="bg-gray-50 dark:bg-gray-800/40 rounded-xl p-4">
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">From</p>
+                <p className="text-sm font-bold text-gray-900 dark:text-white">{COMPANY.name}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{COMPANY.email}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{COMPANY.address}</p>
+              </div>
+              <div className="bg-gray-50 dark:bg-gray-800/40 rounded-xl p-4">
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Bill To</p>
+                <p className="text-sm font-bold text-gray-900 dark:text-white">{account?.fullName || '—'}</p>
+                {account?.clientProfile?.companyName && (
+                  <p className="text-xs font-medium text-gray-600 dark:text-gray-300 mt-0.5">{account.clientProfile.companyName}</p>
+                )}
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{account?.email || '—'}</p>
+              </div>
+            </div>
+
+            {/* Line items */}
+            <div className="rounded-xl border border-gray-100 dark:border-gray-800 overflow-hidden">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-gray-50 dark:bg-gray-800/50">
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-400">Description</th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold text-gray-400">Qty</th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold text-gray-400">Rate</th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold text-gray-400">Amount</th>
+                  <tr className="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-800">
+                    <th className="px-5 py-3 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">Description</th>
+                    <th className="px-5 py-3 text-center text-[10px] font-bold text-gray-400 uppercase tracking-widest w-16">Qty</th>
+                    <th className="px-5 py-3 text-right text-[10px] font-bold text-gray-400 uppercase tracking-widest w-28">Rate</th>
+                    <th className="px-5 py-3 text-right text-[10px] font-bold text-gray-400 uppercase tracking-widest w-28">Amount</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
-                  {inv.lineItems.map((item: any, i: number) => (
-                    <tr key={i}>
-                      <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{item.description}</td>
-                      <td className="px-4 py-3 text-right text-gray-500">{item.quantity || 1}</td>
-                      <td className="px-4 py-3 text-right text-gray-500">${(item.unitPrice || item.rate || 0).toLocaleString()}</td>
-                      <td className="px-4 py-3 text-right font-medium text-gray-900 dark:text-white">
-                        ${(item.total || item.amount || 0).toLocaleString()}
-                      </td>
+                  {inv.lineItems && inv.lineItems.length > 0 ? (
+                    inv.lineItems.map((item: any, i: number) => (
+                      <tr key={i} className="hover:bg-gray-50/40 dark:hover:bg-gray-800/20 transition-colors">
+                        <td className="px-5 py-3.5 text-gray-700 dark:text-gray-200 font-medium">{item.description}</td>
+                        <td className="px-5 py-3.5 text-center text-gray-500 dark:text-gray-400 tabular-nums">{item.quantity ?? 1}</td>
+                        <td className="px-5 py-3.5 text-right text-gray-500 dark:text-gray-400 tabular-nums">{fmt(item.unitPrice ?? item.rate ?? 0)}</td>
+                        <td className="px-5 py-3.5 text-right font-semibold text-gray-900 dark:text-white tabular-nums">{fmt(item.total ?? item.amount ?? 0)}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={4} className="px-5 py-6 text-center text-gray-400 text-sm">No line items.</td>
                     </tr>
-                  ))}
+                  )}
                 </tbody>
               </table>
+
+              {/* Total row */}
+              <div className="border-t-2 border-gray-200 dark:border-gray-700 bg-gray-50/80 dark:bg-gray-800/30 px-5 py-4 flex items-center justify-between">
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Total Amount Due</p>
+                <p className="text-2xl font-black text-gray-900 dark:text-white tabular-nums">{fmt(inv.amount ?? 0)}</p>
+              </div>
+            </div>
+
+            {/* Notes */}
+            {inv.notes && (
+              <div className="bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/30 rounded-xl p-4">
+                <p className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-widest mb-1.5">Notes</p>
+                <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">{inv.notes}</p>
+              </div>
+            )}
+
+            {/* Paid badge */}
+            {inv.status === 'paid' && paidLabel && (
+              <div className="flex items-center gap-2.5 bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-900/30 rounded-xl p-4">
+                <span className="material-icons-outlined text-emerald-600 dark:text-emerald-400 text-[20px]">check_circle</span>
+                <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">
+                  Payment received on {paidLabel}
+                </p>
+              </div>
+            )}
+
+            {/* Footer line */}
+            <div className="pt-2 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between">
+              <p className="text-xs text-gray-400">Thank you for your business.</p>
+              <p className="text-xs text-gray-400 font-mono">{inv.invoiceNumber}</p>
             </div>
           </div>
-        )}
-
-        {/* Total */}
-        <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-800">
-          <p className="text-lg font-bold text-gray-900 dark:text-white">Total</p>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white">
-            {inv.currency || '$'}{(inv.amount || 0).toLocaleString()}
-          </p>
         </div>
 
-        {inv.status === 'paid' && inv.paidAt && (
-          <div className="mt-4 flex items-center gap-2 text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/10 rounded-xl p-3">
-            <span className="material-icons-outlined text-[16px]">check_circle</span>
-            <p className="text-sm font-medium">Paid on {new Date(inv.paidAt).toLocaleDateString()}</p>
+        {/* Payment required alert — outside document for print hiding */}
+        {isPending && (
+          <div className="mt-5 bg-orange-50 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-900/30 rounded-2xl p-4 flex items-center justify-between gap-4 print:hidden">
+            <div className="flex items-center gap-3">
+              <span className="material-icons-outlined text-orange-500 text-[20px]">payment</span>
+              <p className="text-sm text-orange-800 dark:text-orange-400 font-medium">
+                Payment required. Contact our team to arrange payment.
+              </p>
+            </div>
+            <Link
+              href="/portal/client/messages"
+              className="inline-flex items-center gap-1.5 bg-orange-600 hover:bg-orange-700 text-white rounded-full px-4 py-2 text-sm font-medium transition-colors shrink-0"
+            >
+              <span className="material-icons-outlined text-[14px]">chat</span>
+              Contact Team
+            </Link>
           </div>
         )}
       </div>
-
-      {isPending && (
-        <div className="bg-orange-50 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-900/30 rounded-2xl p-4 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <span className="material-icons-outlined text-orange-500">payment</span>
-            <p className="text-sm text-orange-800 dark:text-orange-400 font-medium">
-              Payment required. Contact our team to arrange payment.
-            </p>
-          </div>
-          <Link
-            href="/portal/client/messages"
-            className="inline-flex items-center gap-1.5 bg-orange-600 hover:bg-orange-700 text-white rounded-full px-4 py-2 text-sm font-medium transition-colors shrink-0"
-          >
-            <span className="material-icons-outlined text-[14px]">chat</span>
-            Contact Team
-          </Link>
-        </div>
-      )}
-
-      {inv.pdfUrl && (
-        <a
-          href={inv.pdfUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-full px-5 py-2.5 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-        >
-          <span className="material-icons-outlined text-[16px]">picture_as_pdf</span>
-          Download PDF
-        </a>
-      )}
-    </div>
+    </>
   );
 }

@@ -61,49 +61,70 @@ export default async function AdminInvoiceDetailPage({ params }: { params: Promi
         {/* Main invoice content */}
         <div className="lg:col-span-2 space-y-5">
           {/* Invoice Header Info */}
-          <div className="bg-white dark:bg-[#27272a] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-soft p-6">
-            <div className="flex flex-wrap items-center justify-between gap-4 mb-5">
-              <div>
-                <p className="text-2xl font-extrabold text-gray-900 dark:text-white font-mono">{invoice.invoiceNumber}</p>
-                <p className="text-sm text-gray-400 mt-0.5">{invoice.description || 'No description'}</p>
-              </div>
-              <span className={`inline-flex items-center px-3 py-1 rounded-lg text-sm font-bold capitalize border ${STATUS_STYLES[invoice.status] ?? STATUS_STYLES['draft']}`}>
-                {invoice.status}
-              </span>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-gray-100 dark:border-gray-800">
-              {[
-                { label: 'Client', value: client?.fullName || 'Unknown' },
-                { label: 'Email', value: client?.email || '—' },
-                {
-                  label: 'Issue Date',
-                  value: invoice.issuedAt
-                    ? new Date(invoice.issuedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
-                    : '—',
-                },
-                {
-                  label: 'Due Date',
-                  value: invoice.dueAt
-                    ? new Date(invoice.dueAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
-                    : '—',
-                },
-              ].map((item) => (
-                <div key={item.label}>
-                  <p className="text-[10px] font-bold text-gray-400 dark:text-gray-600 uppercase tracking-widest mb-1">{item.label}</p>
-                  <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate">{item.value}</p>
+          <div className="bg-white dark:bg-[#27272a] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-soft overflow-hidden">
+            {/* Branding band */}
+            <div className="bg-gray-900 dark:bg-[#111113] px-6 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="https://leothetechguy.com/logo_transparent.png"
+                  alt="LeoTheTechGuy"
+                  className="h-7 w-auto brightness-0 invert"
+                />
+                <div>
+                  <p className="text-white font-bold text-sm leading-tight">LeoTheTechGuy</p>
+                  <p className="text-gray-500 text-[10px]">contact@leothetechguy.com</p>
                 </div>
-              ))}
+              </div>
+              <div className="text-right">
+                <p className="text-white font-black text-lg tracking-wider">INVOICE</p>
+                <p className="text-gray-400 text-xs font-mono">{invoice.invoiceNumber}</p>
+              </div>
             </div>
 
-            {invoice.paidAt && (
-              <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
-                <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
-                  <span className="material-icons-outlined text-[14px]">check_circle</span>
-                  Paid on {new Date(invoice.paidAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+            <div className="p-6">
+              <div className="flex flex-wrap items-center justify-between gap-4 mb-5">
+                <div>
+                  <p className="text-sm text-gray-400 mt-0.5">{invoice.description || 'No description'}</p>
+                </div>
+                <span className={`inline-flex items-center px-3 py-1 rounded-lg text-sm font-bold capitalize border ${STATUS_STYLES[invoice.status] ?? STATUS_STYLES['draft']}`}>
+                  {invoice.status}
                 </span>
               </div>
-            )}
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-gray-100 dark:border-gray-800">
+                {[
+                  { label: 'Client', value: client?.fullName || 'Unknown' },
+                  { label: 'Email', value: client?.email || '—' },
+                  {
+                    label: 'Issue Date',
+                    value: invoice.issuedAt
+                      ? new Date(invoice.issuedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+                      : '—',
+                  },
+                  {
+                    label: 'Due Date',
+                    value: invoice.dueAt
+                      ? new Date(invoice.dueAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+                      : '—',
+                  },
+                ].map((item) => (
+                  <div key={item.label}>
+                    <p className="text-[10px] font-bold text-gray-400 dark:text-gray-600 uppercase tracking-widest mb-1">{item.label}</p>
+                    <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate">{item.value}</p>
+                  </div>
+                ))}
+              </div>
+
+              {invoice.paidAt && (
+                <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+                    <span className="material-icons-outlined text-[14px]">check_circle</span>
+                    Paid on {new Date(invoice.paidAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Line Items */}
@@ -160,8 +181,8 @@ export default async function AdminInvoiceDetailPage({ params }: { params: Promi
           {/* Client Portal Link */}
           <div className="flex items-center justify-between bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30 rounded-2xl p-4">
             <div>
-              <p className="text-sm font-semibold text-blue-700 dark:text-blue-400">Client View</p>
-              <p className="text-xs text-blue-500 dark:text-blue-500 mt-0.5">Preview this invoice as the client sees it</p>
+              <p className="text-sm font-semibold text-blue-700 dark:text-blue-400">Client Invoice View</p>
+              <p className="text-xs text-blue-500 dark:text-blue-500 mt-0.5">See the designed invoice + PDF download as the client sees it</p>
             </div>
             <a
               href={`/portal/client/invoices/${invoiceId}`}

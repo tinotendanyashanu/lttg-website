@@ -16,7 +16,7 @@ export async function getAdminUsers() {
   const account = await getAccountByEmail(session.user.email);
   if (!account || !account.roles.includes('admin')) throw new Error('Unauthorized');
 
-  const users = await Account.find().sort({ createdAt: -1 }).lean();
+  const users = await Account.find({ roles: { $nin: ['client'] } }).sort({ createdAt: -1 }).lean();
 
   return { success: true, users: JSON.parse(JSON.stringify(users)) };
 }

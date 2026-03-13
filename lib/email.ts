@@ -299,58 +299,134 @@ export const EmailTemplates = {
     lineItems: { description: string; quantity: number; unitPrice: number; total: number }[],
     notes: string | null,
     portalLink: string,
-  ) =>
-    BaseTemplate(`
-      <h2 style="color: #0f172a; font-size: 20px; margin-top: 0; margin-bottom: 8px;">Invoice ${invoiceNumber}</h2>
-      <p style="margin-top: 0; color: #64748b; font-size: 14px;">A new invoice has been issued to your account.</p>
+  ) => `
+    <div style="background-color: #f1f5f9; padding: 40px 0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+      <div style="max-width: 620px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.08);">
 
-      <p>Hello ${clientName},</p>
-      <p>Please find your invoice details below. You can view and manage this invoice directly in your client portal.</p>
-
-      ${dueAt ? `<div style="background-color: #fff7ed; border: 1px solid #fed7aa; border-radius: 8px; padding: 16px; margin: 24px 0;">
-        <p style="margin: 0; font-size: 13px; color: #9a3412; font-weight: 600;">Payment Due: ${dueAt}</p>
-      </div>` : ''}
-
-      <!-- Line items table -->
-      <table style="width: 100%; border-collapse: collapse; margin: 24px 0; font-size: 14px;">
-        <thead>
-          <tr style="background-color: #f8fafc; border-bottom: 2px solid #e2e8f0;">
-            <th style="text-align: left; padding: 10px 12px; color: #64748b; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">Description</th>
-            <th style="text-align: center; padding: 10px 12px; color: #64748b; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">Qty</th>
-            <th style="text-align: right; padding: 10px 12px; color: #64748b; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">Unit Price</th>
-            <th style="text-align: right; padding: 10px 12px; color: #64748b; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${lineItems.map((item, i) => `
-            <tr style="border-bottom: 1px solid #f1f5f9; background-color: ${i % 2 === 0 ? '#ffffff' : '#fafbfc'};">
-              <td style="padding: 12px; color: #334155;">${item.description}</td>
-              <td style="padding: 12px; text-align: center; color: #64748b;">${item.quantity}</td>
-              <td style="padding: 12px; text-align: right; color: #64748b;">${currency} ${item.unitPrice.toFixed(2)}</td>
-              <td style="padding: 12px; text-align: right; font-weight: 600; color: #1e293b;">${currency} ${item.total.toFixed(2)}</td>
+        <!-- Invoice Header Band -->
+        <div style="background-color: #0f172a; padding: 28px 36px; display: flex; align-items: center; justify-content: space-between;">
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td style="vertical-align: middle;">
+                <img src="${LOGO_URL}" alt="LeoTheTechGuy" style="height: 34px; width: auto; filter: brightness(0) invert(1);" />
+                <div style="margin-top: 6px;">
+                  <span style="color: #ffffff; font-weight: 700; font-size: 14px;">LeoTheTechGuy</span><br />
+                  <span style="color: #94a3b8; font-size: 11px;">contact@leothetechguy.com &nbsp;·&nbsp; Warsaw, Poland</span>
+                </div>
+              </td>
+              <td style="text-align: right; vertical-align: top;">
+                <div style="color: #ffffff; font-size: 24px; font-weight: 900; letter-spacing: 2px;">INVOICE</div>
+                <div style="color: #94a3b8; font-size: 13px; font-family: monospace; margin-top: 4px;">${invoiceNumber}</div>
+              </td>
             </tr>
-          `).join('')}
-        </tbody>
-        <tfoot>
-          <tr style="background-color: #f8fafc; border-top: 2px solid #e2e8f0;">
-            <td colspan="3" style="padding: 14px 12px; text-align: right; font-weight: 700; color: #1e293b; font-size: 15px;">Total Amount Due</td>
-            <td style="padding: 14px 12px; text-align: right; font-weight: 800; color: #2563eb; font-size: 16px;">${currency} ${amount.toFixed(2)}</td>
-          </tr>
-        </tfoot>
-      </table>
+          </table>
+        </div>
 
-      ${notes ? `<div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 16px 0;">
-        <p style="margin: 0 0 6px 0; font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">Notes</p>
-        <p style="margin: 0; font-size: 14px; color: #475569;">${notes}</p>
-      </div>` : ''}
+        <!-- Invoice Meta -->
+        <div style="padding: 28px 36px 0 36px;">
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <!-- Bill To -->
+              <td style="vertical-align: top; width: 50%;">
+                <div style="background-color: #f8fafc; border-radius: 8px; padding: 16px 18px;">
+                  <p style="margin: 0 0 8px 0; font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.08em;">Bill To</p>
+                  <p style="margin: 0; font-size: 14px; font-weight: 700; color: #0f172a;">${clientName}</p>
+                </div>
+              </td>
+              <!-- Dates -->
+              <td style="vertical-align: top; width: 50%; padding-left: 16px;">
+                <div style="background-color: #f8fafc; border-radius: 8px; padding: 16px 18px;">
+                  <table style="width: 100%; border-collapse: collapse;">
+                    ${dueAt ? `
+                    <tr>
+                      <td style="font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.08em; padding-bottom: 6px;">Due Date</td>
+                      <td style="text-align: right; font-size: 13px; font-weight: 700; color: #dc2626; padding-bottom: 6px;">${dueAt}</td>
+                    </tr>` : ''}
+                    <tr>
+                      <td style="font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.08em;">Status</td>
+                      <td style="text-align: right;">
+                        <span style="background-color: #dbeafe; color: #1d4ed8; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 3px 8px; border-radius: 4px;">Issued</span>
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+              </td>
+            </tr>
+          </table>
+        </div>
 
-      <div style="margin: 32px 0;">
-        <a href="${portalLink}" style="background-color: #2563eb; color: #ffffff; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block;">View Invoice in Portal</a>
+        <!-- Line Items -->
+        <div style="padding: 24px 36px 0 36px;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+            <thead>
+              <tr style="background-color: #0f172a;">
+                <th style="text-align: left; padding: 10px 14px; color: #94a3b8; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; border-radius: 6px 0 0 0;">Description</th>
+                <th style="text-align: center; padding: 10px 10px; color: #94a3b8; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; width: 50px;">Qty</th>
+                <th style="text-align: right; padding: 10px 14px; color: #94a3b8; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; width: 100px;">Unit Price</th>
+                <th style="text-align: right; padding: 10px 14px; color: #94a3b8; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; width: 100px; border-radius: 0 6px 0 0;">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${lineItems.map((item, i) => `
+                <tr style="background-color: ${i % 2 === 0 ? '#ffffff' : '#f8fafc'}; border-bottom: 1px solid #f1f5f9;">
+                  <td style="padding: 12px 14px; color: #334155; font-weight: 500;">${item.description}</td>
+                  <td style="padding: 12px 10px; text-align: center; color: #64748b;">${item.quantity}</td>
+                  <td style="padding: 12px 14px; text-align: right; color: #64748b; font-family: monospace;">${currency} ${item.unitPrice.toFixed(2)}</td>
+                  <td style="padding: 12px 14px; text-align: right; font-weight: 600; color: #1e293b; font-family: monospace;">${currency} ${item.total.toFixed(2)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+
+          <!-- Total -->
+          <div style="background-color: #0f172a; border-radius: 0 0 8px 8px; padding: 14px 14px; display: flex; justify-content: space-between; align-items: center;">
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="color: #94a3b8; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;">Total Amount Due</td>
+                <td style="text-align: right; color: #ffffff; font-size: 20px; font-weight: 900; font-family: monospace;">${currency} ${amount.toFixed(2)}</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+
+        ${notes ? `
+        <!-- Notes -->
+        <div style="padding: 20px 36px 0 36px;">
+          <div style="background-color: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 14px 16px;">
+            <p style="margin: 0 0 6px 0; font-size: 10px; font-weight: 700; color: #92400e; text-transform: uppercase; letter-spacing: 0.08em;">Notes</p>
+            <p style="margin: 0; font-size: 13px; color: #78350f; line-height: 1.6;">${notes}</p>
+          </div>
+        </div>` : ''}
+
+        <!-- Greeting + CTA -->
+        <div style="padding: 28px 36px; color: #334155; font-size: 14px; line-height: 1.7;">
+          <p style="margin: 0 0 12px 0;">Hello <strong>${clientName}</strong>,</p>
+          <p style="margin: 0 0 20px 0;">A new invoice has been issued to your account. Please review the details above and use your client portal to track payment status.</p>
+          <div style="margin: 28px 0;">
+            <a href="${portalLink}" style="background-color: #2563eb; color: #ffffff; padding: 13px 28px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 14px; display: inline-block;">View Invoice in Portal</a>
+          </div>
+          <p style="font-size: 13px; color: #94a3b8;">If you have any questions about this invoice, simply reply to this email or contact us at contact@leothetechguy.com.</p>
+          <p style="margin-top: 28px; margin-bottom: 0;">Best regards,<br /><strong style="color: #1e293b;">The LeoTheTechGuy Team</strong></p>
+        </div>
+
+        <!-- Footer -->
+        <div style="background-color: #f8fafc; padding: 32px 36px; text-align: center; border-top: 1px solid #e2e8f0; color: #64748b; font-size: 12px; line-height: 1.6;">
+          <div style="margin-bottom: 16px;">
+            <a href="https://leothetechguy.com" style="display: inline-block; margin: 0 8px; color: #64748b; text-decoration: none;">Website</a>
+            <a href="https://youtube.com/@LeoTheTechGuy" style="display: inline-block; margin: 0 8px; color: #64748b; text-decoration: none;">YouTube</a>
+            <a href="https://x.com/LeoTheTechGuy" style="display: inline-block; margin: 0 8px; color: #64748b; text-decoration: none;">X (Twitter)</a>
+            <a href="https://discord.gg/6rW46Cdf" style="display: inline-block; margin: 0 8px; color: #64748b; text-decoration: none;">Discord</a>
+          </div>
+          <p style="margin: 0; font-weight: 600; color: #1e293b;">LeoTheTechGuy</p>
+          <p style="margin: 4px 0;">Warsaw, Poland. Serving clients worldwide.</p>
+          <p style="margin: 4px 0;"><a href="mailto:contact@leothetechguy.com" style="color: #64748b; text-decoration: none;">contact@leothetechguy.com</a></p>
+          <div style="margin-top: 20px; font-size: 10px; color: #94a3b8;">
+            &copy; ${new Date().getFullYear()} LeoTheTechGuy. All rights reserved.
+          </div>
+        </div>
       </div>
-
-      <p style="font-size: 14px; color: #64748b;">If you have any questions about this invoice, please contact us or reply to this email.</p>
-      <p style="margin-top: 32px;">Best regards,<br /><strong style="color: #1e293b;">The LeoTheTechGuy Team</strong></p>
-    `),
+    </div>
+  `,
 
   invoiceReminder: (clientName: string, invoiceNumber: string, amount: number, currency: string, dueAt: string, portalLink: string) =>
     BaseTemplate(`
