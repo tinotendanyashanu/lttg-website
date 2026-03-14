@@ -3,6 +3,8 @@ import { getAccountByEmail } from '@/lib/data/account';
 import { redirect } from 'next/navigation';
 import dbConnect from '@/lib/mongodb';
 import { Case } from '@/models/Case';
+import Lead from '@/models/Lead';
+import { createClientAccount } from '@/lib/actions/client';
 import Link from 'next/link';
 import SubmitCaseClient from '@/components/portal/case-management/SubmitCaseClient';
 
@@ -99,6 +101,50 @@ export default async function SubmitLeadPage() {
       participants: [account._id],
       teamId: account.teamId
     });
+
+    // Auto-create client profile and portal account if not already in the system
+    if (email) {
+      const existingLead = await Lead.findOne({
+        $or: [{ clientEmail: email }, { email }]
+      }).lean();
+
+      if (!existingLead) {
+        try {
+          const result = await createClientAccount({
+            fullName: contactName || businessName || 'Client',
+            email,
+            phone,
+            companyName: businessName,
+          });
+          await Lead.create({
+            contactName,
+            businessName,
+            clientEmail: email,
+            phone,
+            serviceInterest,
+            status: 'new',
+            accountId: result.accountId,
+          });
+        } catch (err: any) {
+          // If account already exists, create the lead record without an accountId
+          if (err?.message?.includes('already exists')) {
+            const existingByEmail = await Lead.findOne({ clientEmail: email }).lean();
+            if (!existingByEmail) {
+              await Lead.create({
+                contactName,
+                businessName,
+                clientEmail: email,
+                phone,
+                serviceInterest,
+                status: 'new',
+              });
+            }
+          } else {
+            console.error('Failed to create client account during case submission:', err);
+          }
+        }
+      }
+    }
 
     return { success: true };
   }

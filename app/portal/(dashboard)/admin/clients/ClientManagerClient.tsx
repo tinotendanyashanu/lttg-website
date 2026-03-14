@@ -1,7 +1,15 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { updateAdminClient, archiveAdminClient, createAdminClient } from '@/lib/actions/portal-admin-clients';
+import {
+  updateAdminClient,
+  archiveAdminClient,
+  createAdminClient,
+  resetClientPortalPassword,
+  resendClientPortalInvite,
+  createPortalAccountForClient,
+  toggleClientPortalStatus,
+} from '@/lib/actions/portal-admin-clients';
 import { useRouter } from 'next/navigation';
 
 type StatusFilter = 'active' | 'archived' | 'all';
@@ -45,6 +53,7 @@ export default function ClientManagerClient({ initialClients }: { initialClients
   const [archiveConfirm, setArchiveConfirm] = useState(false);
 
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [portalActionLoading, setPortalActionLoading] = useState<string | null>(null);
 
   function showToast(message: string, type: 'success' | 'error') {
     setToast({ message, type });
@@ -131,6 +140,40 @@ export default function ClientManagerClient({ initialClients }: { initialClients
       showToast('Failed to create client. Please try again.', 'error');
     } finally {
       setIsCreatingNew(false);
+    }
+  };
+
+  const handlePortalAction = async (action: string) => {
+    if (!selectedClient) return;
+    setPortalActionLoading(action);
+    try {
+      if (action === 'reset_password') {
+        await resetClientPortalPassword(selectedClient._id);
+        showToast('Password reset link sent to client.', 'success');
+      } else if (action === 'resend_invite') {
+        await resendClientPortalInvite(selectedClient._id);
+        showToast('Portal invite resent successfully.', 'success');
+      } else if (action === 'create_account') {
+        const res = await createPortalAccountForClient(selectedClient._id);
+        setClients(clients.map((c: any) =>
+          c._id === selectedClient._id ? { ...c, accountId: { _id: res.accountId, email: selectedClient.clientEmail } } : c
+        ));
+        setSelectedClient({ ...selectedClient, accountId: { _id: res.accountId, email: selectedClient.clientEmail } });
+        showToast('Portal account created. Welcome email sent.', 'success');
+        router.refresh();
+      } else if (action === 'toggle_status') {
+        const res = await toggleClientPortalStatus(selectedClient._id);
+        const updatedAccount = { ...selectedClient.accountId, isActive: res.isActive };
+        setClients(clients.map((c: any) =>
+          c._id === selectedClient._id ? { ...c, accountId: updatedAccount } : c
+        ));
+        setSelectedClient({ ...selectedClient, accountId: updatedAccount });
+        showToast(`Portal account ${res.isActive ? 'activated' : 'suspended'}.`, 'success');
+      }
+    } catch (err: any) {
+      showToast(err.message || 'Action failed. Please try again.', 'error');
+    } finally {
+      setPortalActionLoading(null);
     }
   };
 
@@ -383,13 +426,6 @@ export default function ClientManagerClient({ initialClients }: { initialClients
                   <textarea name="notes" defaultValue={selectedClient.notes} rows={3} className="w-full px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20 resize-none" />
                 </div>
 
-                {selectedClient.accountId && (
-                  <div className="flex items-center gap-2 text-xs text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-3 py-2 rounded-lg">
-                    <span className="material-icons-outlined text-[15px]">verified_user</span>
-                    Portal account active · {selectedClient.accountId?.email}
-                  </div>
-                )}
-
                 <button
                   disabled={isSaving}
                   type="submit"
@@ -399,7 +435,73 @@ export default function ClientManagerClient({ initialClients }: { initialClients
                 </button>
               </form>
 
-              <div className="pt-6 mt-4 border-t border-gray-100 dark:border-gray-800">
+              {/* Portal Account Management */}
+              <div className="mt-5 pt-5 border-t border-gray-100 dark:border-gray-800 space-y-2">
+                <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold mb-3">Portal Account</p>
+
+                {selectedClient.accountId ? (
+                  <>
+                    <div className="flex items-center justify-between text-xs bg-gray-50 dark:bg-gray-800 px-3 py-2 rounded-lg mb-3">
+                      <div className="flex items-center gap-1.5 text-green-600 dark:text-green-400">
+                        <span className="material-icons-outlined text-[15px]">verified_user</span>
+                        {selectedClient.accountId?.email}
+                      </div>
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                        selectedClient.accountId?.isActive !== false
+                          ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                          : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                      }`}>
+                        {selectedClient.accountId?.isActive !== false ? 'Active' : 'Suspended'}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => handlePortalAction('reset_password')}
+                      disabled={portalActionLoading !== null}
+                      className="w-full flex items-center justify-center gap-2 bg-orange-50 hover:bg-orange-100 dark:bg-orange-900/10 dark:hover:bg-orange-900/20 text-orange-600 dark:text-orange-400 border border-orange-100 dark:border-orange-900/30 px-3 py-2.5 rounded-xl text-xs font-medium transition-all disabled:opacity-60"
+                    >
+                      <span className="material-icons-outlined text-[15px]">lock_reset</span>
+                      {portalActionLoading === 'reset_password' ? 'Sending...' : 'Reset Portal Password'}
+                    </button>
+                    <button
+                      onClick={() => handlePortalAction('resend_invite')}
+                      disabled={portalActionLoading !== null}
+                      className="w-full flex items-center justify-center gap-2 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/10 dark:hover:bg-blue-900/20 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/30 px-3 py-2.5 rounded-xl text-xs font-medium transition-all disabled:opacity-60"
+                    >
+                      <span className="material-icons-outlined text-[15px]">forward_to_inbox</span>
+                      {portalActionLoading === 'resend_invite' ? 'Sending...' : 'Resend Portal Invite'}
+                    </button>
+                    <button
+                      onClick={() => handlePortalAction('toggle_status')}
+                      disabled={portalActionLoading !== null}
+                      className={`w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-medium transition-all disabled:opacity-60 border ${
+                        selectedClient.accountId?.isActive !== false
+                          ? 'bg-red-50 hover:bg-red-100 dark:bg-red-900/10 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 border-red-100 dark:border-red-900/30'
+                          : 'bg-green-50 hover:bg-green-100 dark:bg-green-900/10 dark:hover:bg-green-900/20 text-green-600 dark:text-green-400 border-green-100 dark:border-green-900/30'
+                      }`}
+                    >
+                      <span className="material-icons-outlined text-[15px]">
+                        {selectedClient.accountId?.isActive !== false ? 'block' : 'check_circle'}
+                      </span>
+                      {portalActionLoading === 'toggle_status'
+                        ? 'Updating...'
+                        : selectedClient.accountId?.isActive !== false
+                          ? 'Suspend Portal Access'
+                          : 'Activate Portal Access'}
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={() => handlePortalAction('create_account')}
+                    disabled={portalActionLoading !== null}
+                    className="w-full flex items-center justify-center gap-2 bg-brand-primary hover:bg-brand-primary/90 text-white px-3 py-2.5 rounded-xl text-xs font-medium transition-all disabled:opacity-60 shadow-sm"
+                  >
+                    <span className="material-icons-outlined text-[15px]">person_add</span>
+                    {portalActionLoading === 'create_account' ? 'Creating...' : 'Create Portal Account'}
+                  </button>
+                )}
+              </div>
+
+              <div className="pt-5 mt-2 border-t border-gray-100 dark:border-gray-800">
                 {archiveConfirm ? (
                   <div className="bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/30 rounded-xl p-4 space-y-3">
                     <p className="text-sm text-red-700 dark:text-red-400 font-medium">Archive this client? This will close the account.</p>
