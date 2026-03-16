@@ -98,6 +98,18 @@ export async function createAdminInvoice(data: {
   const amount = data.lineItems.reduce((sum, item) => sum + item.total, 0);
   const currency = data.currency || 'USD';
 
+  // Compute USD equivalent (non-blocking — failure doesn't block creation)
+  let usdAmount: number | undefined;
+  let exchangeRateUsed: number | undefined;
+  try {
+    const { toUSD } = await import('@/lib/services/exchangeRates');
+    const usdResult = await toUSD(amount, currency);
+    if (usdResult) {
+      usdAmount = usdResult.usdAmount;
+      exchangeRateUsed = usdResult.exchangeRateUsed;
+    }
+  } catch (_) {}
+
   const invoice = await ClientInvoice.create({
     invoiceNumber,
     clientId: data.clientId,
@@ -110,7 +122,26 @@ export async function createAdminInvoice(data: {
     issuedAt: data.status !== 'draft' ? (data.issuedAt ? new Date(data.issuedAt) : new Date()) : undefined,
     dueAt: data.dueAt ? new Date(data.dueAt) : undefined,
     notes: data.notes?.trim() || undefined,
+    amountPaid: 0,
+    remainingBalance: amount,
+    usdAmount,
+    exchangeRateUsed,
   });
+
+  // Log to case activity timeline if invoice is linked to a case
+  if (data.caseId) {
+    try {
+      const { ActivityLog } = await import('@/models/ActivityLog');
+      await ActivityLog.create({
+        caseId: data.caseId,
+        actorAccountId: admin.id,
+        actionType: 'invoice_created',
+        newValue: `${currency} ${amount.toFixed(2)} — ${invoiceNumber}`,
+      });
+    } catch (_) {
+      // Non-blocking
+    }
+  }
 
   // Audit trail
   await AuditLog.create({
@@ -167,7 +198,7 @@ export async function createAdminInvoice(data: {
 
 export async function updateAdminInvoiceStatus(
   invoiceId: string,
-  newStatus: 'draft' | 'issued' | 'sent' | 'paid' | 'overdue' | 'cancelled',
+  newStatus: 'draft' | 'issued' | 'sent' | 'paid' | 'partially_paid' | 'overdue' | 'cancelled',
   sendNotification = true,
 ) {
   const admin = await checkAdmin();
@@ -316,4 +347,102 @@ export async function deleteAdminInvoice(invoiceId: string) {
 
   revalidatePath('/admin/invoices');
   return { success: true };
+}
+
+// ── Record a payment against an invoice ───────────────────────────────────────
+
+export async function recordInvoicePayment(
+  invoiceId: string,
+  payload: { amount: number; method: string; notes?: string },
+) {
+  const admin = await checkAdmin();
+  await dbConnect();
+
+  const { ClientInvoice } = await import('@/models/ClientInvoice');
+  const { ClientNotification } = await import('@/models/ClientNotification');
+  const AuditLog = (await import('@/models/AuditLog')).default;
+
+  const invoice = await ClientInvoice.findById(invoiceId);
+  if (!invoice) throw new Error('Invoice not found');
+  if (invoice.status === 'paid' || invoice.status === 'cancelled') {
+    throw new Error('Cannot record payment for a paid or cancelled invoice.');
+  }
+
+  const remaining = invoice.remainingBalance ?? invoice.amount - (invoice.amountPaid ?? 0);
+  if (payload.amount <= 0) throw new Error('Payment amount must be greater than zero.');
+  if (payload.amount > remaining + 0.001) {
+    throw new Error(`Payment amount (${payload.amount}) exceeds remaining balance (${remaining.toFixed(2)}).`);
+  }
+
+  const newAmountPaid = (invoice.amountPaid ?? 0) + payload.amount;
+  const newRemainingBalance = invoice.amount - newAmountPaid;
+  const isFullyPaid = newRemainingBalance <= 0.001;
+  const newStatus = isFullyPaid ? 'paid' : 'partially_paid';
+
+  invoice.amountPaid = newAmountPaid;
+  invoice.remainingBalance = Math.max(0, newRemainingBalance);
+  invoice.status = newStatus;
+  if (isFullyPaid && !invoice.paidAt) invoice.paidAt = new Date();
+
+  // Back-fill usdAmount if missing (e.g. invoices created before exchange rate feature)
+  if (!invoice.usdAmount) {
+    try {
+      const { toUSD } = await import('@/lib/services/exchangeRates');
+      const usdResult = await toUSD(invoice.amount, invoice.currency || 'USD');
+      if (usdResult) {
+        invoice.usdAmount = usdResult.usdAmount;
+        invoice.exchangeRateUsed = usdResult.exchangeRateUsed;
+      }
+    } catch (_) {}
+  }
+
+  invoice.paymentHistory.push({
+    amount: payload.amount,
+    currency: invoice.currency || 'USD',
+    method: payload.method,
+    notes: payload.notes?.trim() || undefined,
+    recordedBy: admin.id,
+    recordedAt: new Date(),
+  });
+
+  await invoice.save();
+
+  // Log to case activity timeline
+  if (invoice.caseId) {
+    try {
+      const { ActivityLog } = await import('@/models/ActivityLog');
+      await ActivityLog.create({
+        caseId: invoice.caseId,
+        actorAccountId: admin.id,
+        actionType: 'payment_received',
+        newValue: `${invoice.currency} ${payload.amount.toFixed(2)} via ${payload.method}`,
+      });
+    } catch (_) {}
+  }
+
+  // Client notification
+  await ClientNotification.create({
+    clientId: invoice.clientId,
+    type: 'payment_received',
+    title: `Payment Received — ${invoice.invoiceNumber}`,
+    message: isFullyPaid
+      ? `Your invoice ${invoice.invoiceNumber} has been fully paid. Thank you!`
+      : `A payment of ${invoice.currency} ${payload.amount.toFixed(2)} was recorded on invoice ${invoice.invoiceNumber}. Remaining: ${invoice.currency} ${invoice.remainingBalance.toFixed(2)}.`,
+    actionUrl: `/portal/client/invoices/${invoiceId}`,
+  });
+
+  await AuditLog.create({
+    entityType: 'invoice',
+    entityId: invoiceId,
+    action: 'payment_recorded',
+    performedBy: admin.id,
+    details: { invoiceNumber: invoice.invoiceNumber, amount: payload.amount, method: payload.method },
+    metadata: { invoiceNumber: invoice.invoiceNumber, newStatus, remainingBalance: invoice.remainingBalance },
+  });
+
+  revalidatePath('/admin/invoices');
+  revalidatePath(`/admin/invoices/${invoiceId}`);
+  revalidatePath('/portal/client/invoices');
+  revalidatePath(`/portal/client/invoices/${invoiceId}`);
+  return { success: true, newStatus, remainingBalance: invoice.remainingBalance };
 }

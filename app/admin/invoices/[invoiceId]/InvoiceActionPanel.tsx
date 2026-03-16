@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { updateAdminInvoiceStatus, sendInvoiceReminder, deleteAdminInvoice } from '@/lib/actions/admin-invoices';
+import { updateAdminInvoiceStatus, sendInvoiceReminder, deleteAdminInvoice, recordInvoicePayment } from '@/lib/actions/admin-invoices';
 import { useRouter } from 'next/navigation';
 
 const STATUS_OPTIONS = [
@@ -9,9 +9,12 @@ const STATUS_OPTIONS = [
   { value: 'issued', label: 'Issued' },
   { value: 'sent', label: 'Sent' },
   { value: 'paid', label: 'Paid' },
+  { value: 'partially_paid', label: 'Partially Paid' },
   { value: 'overdue', label: 'Overdue' },
   { value: 'cancelled', label: 'Cancelled' },
 ] as const;
+
+const PAYMENT_METHODS = ['Bank Transfer', 'Card', 'Cash', 'Crypto', 'PayPal', 'Other'];
 
 type InvoiceStatus = (typeof STATUS_OPTIONS)[number]['value'];
 
@@ -19,14 +22,21 @@ interface Props {
   invoiceId: string;
   currentStatus: InvoiceStatus;
   invoiceNumber: string;
+  currency?: string;
+  remainingBalance?: number;
 }
 
-export default function InvoiceActionPanel({ invoiceId, currentStatus, invoiceNumber }: Props) {
+export default function InvoiceActionPanel({ invoiceId, currentStatus, invoiceNumber, currency = 'USD', remainingBalance }: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<InvoiceStatus>(currentStatus);
   const [notify, setNotify] = useState(true);
+
+  // Record Payment state
+  const [payAmount, setPayAmount] = useState('');
+  const [payMethod, setPayMethod] = useState('Bank Transfer');
+  const [payNotes, setPayNotes] = useState('');
 
   function showMsg(type: 'success' | 'error', text: string) {
     setMessage({ type, text });
@@ -53,6 +63,22 @@ export default function InvoiceActionPanel({ invoiceId, currentStatus, invoiceNu
         showMsg('success', 'Reminder email sent to client.');
       } catch (err: any) {
         showMsg('error', err?.message || 'Failed to send reminder.');
+      }
+    });
+  }
+
+  function handleRecordPayment() {
+    const amount = parseFloat(payAmount);
+    if (isNaN(amount) || amount <= 0) return showMsg('error', 'Enter a valid payment amount.');
+    startTransition(async () => {
+      try {
+        const result = await recordInvoicePayment(invoiceId, { amount, method: payMethod, notes: payNotes });
+        showMsg('success', `Payment of ${currency} ${amount.toFixed(2)} recorded. Status: ${result.newStatus.replace('_', ' ')}.`);
+        setPayAmount('');
+        setPayNotes('');
+        router.refresh();
+      } catch (err: any) {
+        showMsg('error', err?.message || 'Failed to record payment.');
       }
     });
   }
@@ -111,6 +137,51 @@ export default function InvoiceActionPanel({ invoiceId, currentStatus, invoiceNu
           </button>
         </div>
       </div>
+
+      {/* Record Payment */}
+      {currentStatus !== 'paid' && currentStatus !== 'cancelled' && (
+        <div className="bg-white dark:bg-[#27272a] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-soft p-5">
+          <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-1">Record Payment</h3>
+          {remainingBalance !== undefined && (
+            <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">
+              Remaining: <span className="font-semibold text-gray-700 dark:text-gray-300">{currency} {remainingBalance.toFixed(2)}</span>
+            </p>
+          )}
+          <div className="space-y-3">
+            <input
+              type="number"
+              min="0.01"
+              step="0.01"
+              placeholder="Payment amount"
+              value={payAmount}
+              onChange={(e) => setPayAmount(e.target.value)}
+              className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1c1c1e] text-gray-900 dark:text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/30"
+            />
+            <select
+              value={payMethod}
+              onChange={(e) => setPayMethod(e.target.value)}
+              className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1c1c1e] text-gray-900 dark:text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/30"
+            >
+              {PAYMENT_METHODS.map((m) => <option key={m} value={m}>{m}</option>)}
+            </select>
+            <input
+              type="text"
+              placeholder="Notes (optional)"
+              value={payNotes}
+              onChange={(e) => setPayNotes(e.target.value)}
+              className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1c1c1e] text-gray-900 dark:text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/30"
+            />
+            <button
+              onClick={handleRecordPayment}
+              disabled={isPending || !payAmount}
+              className="w-full inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors"
+            >
+              <span className="material-icons-outlined text-[16px]">payments</span>
+              Record Payment
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Quick Actions */}
       <div className="bg-white dark:bg-[#27272a] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-soft p-5">

@@ -245,3 +245,22 @@ export async function toggleClientPortalStatus(clientId: string) {
 
   return { success: true, isActive: newStatus };
 }
+
+// ── Smart client duplicate check ──────────────────────────────────────────────
+
+export async function checkClientDuplicates(input: {
+  email?: string;
+  phone?: string;
+  businessName?: string;
+}) {
+  await dbConnect();
+  const session = await getSessionWithDevBypass();
+  if (!session?.user?.email) throw new Error('Not authenticated');
+
+  const account = await getAccountByEmail(session.user.email);
+  if (!account || !account.roles.includes('admin')) throw new Error('Unauthorized');
+
+  const { findPotentialDuplicates } = await import('@/lib/services/clientMatching');
+  const duplicates = await findPotentialDuplicates(input);
+  return { duplicates };
+}

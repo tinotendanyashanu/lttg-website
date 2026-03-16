@@ -6,7 +6,7 @@ import { NAV_SECTIONS, NavItem } from './adminNavConfig';
 
 interface SearchResult {
   id: string;
-  type: 'partner' | 'deal' | 'payout';
+  type: 'client' | 'case' | 'invoice' | 'partner' | 'deal' | 'payout';
   title: string;
   subtitle: string;
   url: string;
@@ -16,11 +16,14 @@ interface Props {
   onClose: () => void;
 }
 
-const TYPE_CONFIG = {
-  partner: { icon: 'handshake',    color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-  deal:    { icon: 'work',         color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-  payout:  { icon: 'payments',     color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
-} as const;
+const TYPE_CONFIG: Record<string, { icon: string; color: string }> = {
+  client:  { icon: 'person',        color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+  case:    { icon: 'folder_open',   color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400' },
+  invoice: { icon: 'receipt_long',  color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
+  partner: { icon: 'handshake',     color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+  deal:    { icon: 'work',          color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+  payout:  { icon: 'payments',      color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
+};
 
 // Flatten all nav items for keyboard navigation
 const ALL_NAV_ITEMS: NavItem[] = NAV_SECTIONS.flatMap(s => s.items);
@@ -167,7 +170,7 @@ export default function AdminCommandPalette({ onClose }: Props) {
                     Results
                   </p>
                   {searchResults.map((result, i) => {
-                    const cfg = TYPE_CONFIG[result.type] ?? TYPE_CONFIG.partner;
+                    const cfg = TYPE_CONFIG[result.type] ?? TYPE_CONFIG['partner'];
                     return (
                       <button
                         key={`${result.type}-${result.id}`}
@@ -187,8 +190,11 @@ export default function AdminCommandPalette({ onClose }: Props) {
                           <p className="text-xs text-gray-400 dark:text-gray-500 truncate">{result.subtitle}</p>
                         </div>
                         <span className={`ml-auto text-[10px] font-bold uppercase tracking-wider shrink-0 ${
-                          result.type === 'partner' ? 'text-purple-500' :
-                          result.type === 'deal' ? 'text-blue-500' :
+                          result.type === 'client'  ? 'text-blue-500'    :
+                          result.type === 'case'    ? 'text-sky-500'     :
+                          result.type === 'invoice' ? 'text-amber-500'   :
+                          result.type === 'partner' ? 'text-purple-500'  :
+                          result.type === 'deal'    ? 'text-indigo-500'  :
                           'text-emerald-500'
                         }`}>
                           {result.type}

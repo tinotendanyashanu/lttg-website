@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import {
   updateAdminClient,
   archiveAdminClient,
@@ -9,8 +9,10 @@ import {
   resendClientPortalInvite,
   createPortalAccountForClient,
   toggleClientPortalStatus,
+  checkClientDuplicates,
 } from '@/lib/actions/portal-admin-clients';
 import { useRouter } from 'next/navigation';
+import InternalNotesPanel from '@/components/admin/InternalNotesPanel';
 
 type StatusFilter = 'active' | 'archived' | 'all';
 
@@ -54,6 +56,9 @@ export default function ClientManagerClient({ initialClients }: { initialClients
 
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [portalActionLoading, setPortalActionLoading] = useState<string | null>(null);
+  const [duplicateWarnings, setDuplicateWarnings] = useState<any[]>([]);
+  const [duplicateChecked, setDuplicateChecked] = useState(false);
+  const createFormRef = useRef<HTMLFormElement>(null);
 
   function showToast(message: string, type: 'success' | 'error') {
     setToast({ message, type });
@@ -115,18 +120,41 @@ export default function ClientManagerClient({ initialClients }: { initialClients
 
   const handleCreateClient = async (e: { preventDefault(): void; currentTarget: HTMLFormElement }) => {
     e.preventDefault();
-    setIsCreatingNew(true);
     const formData = new FormData(e.currentTarget);
     const data = {
-      businessName: formData.get('businessName'),
-      contactName: formData.get('contactName'),
-      clientEmail: formData.get('clientEmail'),
-      phone: formData.get('phone'),
-      serviceInterest: formData.get('serviceInterest'),
-      source: formData.get('source'),
+      businessName: formData.get('businessName') as string,
+      contactName: formData.get('contactName') as string,
+      clientEmail: formData.get('clientEmail') as string,
+      phone: formData.get('phone') as string,
+      serviceInterest: formData.get('serviceInterest') as string,
+      source: formData.get('source') as string,
       status: 'new',
     };
 
+    // Step 1: duplicate check (skip if already confirmed)
+    if (!duplicateChecked) {
+      setIsCreatingNew(true);
+      try {
+        const { duplicates } = await checkClientDuplicates({
+          email: data.clientEmail,
+          phone: data.phone,
+          businessName: data.businessName,
+        });
+        if (duplicates.length > 0) {
+          setDuplicateWarnings(duplicates);
+          setIsCreatingNew(false);
+          return; // stop — show warning to user
+        }
+      } catch {
+        // Non-blocking — proceed without check if it fails
+      }
+      setIsCreatingNew(false);
+    }
+
+    // Step 2: create the client
+    setIsCreatingNew(true);
+    setDuplicateWarnings([]);
+    setDuplicateChecked(false);
     try {
       const res = await createAdminClient(data);
       if (res.success) {
@@ -314,7 +342,7 @@ export default function ClientManagerClient({ initialClients }: { initialClients
                   <span className="material-icons-outlined">close</span>
                 </button>
               </div>
-              <form onSubmit={handleCreateClient} className="space-y-4">
+              <form ref={createFormRef} onSubmit={handleCreateClient} className="space-y-4">
                 <div>
                   <label className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1 block">Business Name</label>
                   <input name="businessName" type="text" required className="w-full px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20" />
@@ -347,6 +375,70 @@ export default function ClientManagerClient({ initialClients }: { initialClients
                     <option value="Other">Other</option>
                   </select>
                 </div>
+                {/* Duplicate warnings */}
+                {duplicateWarnings.length > 0 && (
+                  <div className="rounded-xl border border-amber-200 dark:border-amber-700/50 bg-amber-50 dark:bg-amber-900/10 p-4 space-y-3">
+                    <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400">
+                      <span className="material-icons-outlined text-[18px]">warning</span>
+                      <p className="text-sm font-semibold">Possible duplicates found</p>
+                    </div>
+                    <div className="space-y-2">
+                      {duplicateWarnings.map((d: any) => {
+                        const matchLabel = d.matchReason === 'email' ? 'Email match' : d.matchReason === 'phone' ? 'Phone match' : 'Name match';
+                        const confidenceColor = d.confidence === 'high'
+                          ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                          : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400';
+                        return (
+                          <div key={d._id} className="flex items-start justify-between gap-3 bg-white dark:bg-[#1c1c1e] rounded-lg p-3 border border-amber-100 dark:border-amber-800/30">
+                            <div className="min-w-0">
+                              <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{d.businessName || d.contactName || 'Unknown'}</p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{d.clientEmail || 'No email'} · {d.phone || 'No phone'}</p>
+                              <div className="flex items-center gap-1.5 mt-1">
+                                <span className="text-[10px] text-gray-400">{matchLabel}</span>
+                                <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-semibold ${confidenceColor}`}>
+                                  {d.confidence}
+                                </span>
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setIsCreating(false);
+                                setDuplicateWarnings([]);
+                                setDuplicateChecked(false);
+                                setSelectedClient(d);
+                              }}
+                              className="shrink-0 text-xs text-brand-primary hover:underline font-medium whitespace-nowrap"
+                            >
+                              Use existing
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div className="flex gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setDuplicateChecked(true);
+                          setDuplicateWarnings([]);
+                          createFormRef.current?.requestSubmit();
+                        }}
+                        className="flex-1 bg-amber-600 hover:bg-amber-700 text-white py-2 rounded-lg text-xs font-medium transition-colors"
+                      >
+                        Proceed anyway
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDuplicateWarnings([])}
+                        className="flex-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 py-2 rounded-lg text-xs font-medium transition-colors"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 <button
                   disabled={isCreatingNew}
                   type="submit"
@@ -499,6 +591,15 @@ export default function ClientManagerClient({ initialClients }: { initialClients
                     {portalActionLoading === 'create_account' ? 'Creating...' : 'Create Portal Account'}
                   </button>
                 )}
+              </div>
+
+              {/* Internal Notes */}
+              <div className="mt-5 pt-5 border-t border-gray-100 dark:border-gray-800">
+                <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold mb-3">
+                  Internal Notes
+                  <span className="ml-1.5 text-gray-300 dark:text-gray-600 font-normal normal-case">(private to staff)</span>
+                </p>
+                <InternalNotesPanel entityType="client" entityId={selectedClient._id} />
               </div>
 
               <div className="pt-5 mt-2 border-t border-gray-100 dark:border-gray-800">

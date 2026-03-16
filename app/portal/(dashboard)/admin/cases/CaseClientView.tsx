@@ -3,6 +3,8 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { updateAdminCaseStatus, updateAdminCaseDealValue, updateAdminCaseParticipants, closeAdminCase, addAdminCaseNote, getAdminCaseCommissions } from '@/lib/actions/portal-admin';
 import { useRouter } from 'next/navigation';
+import CaseActivityTimeline from '@/components/admin/CaseActivityTimeline';
+import InternalNotesPanel from '@/components/admin/InternalNotesPanel';
 
 export default function CaseClientView({ initialCases, users }: { initialCases: any[], users: any[] }) {
   const router = useRouter();
@@ -24,6 +26,9 @@ export default function CaseClientView({ initialCases, users }: { initialCases: 
   // Commission Breakdown
   const [commissions, setCommissions] = useState<any>(null);
   const [allocations, setAllocations] = useState<any[]>([]);
+
+  // Sidebar tab
+  const [sidebarTab, setSidebarTab] = useState<'details' | 'activity' | 'notes'>('details');
 
   useEffect(() => {
     if (selectedCase) {
@@ -213,7 +218,7 @@ export default function CaseClientView({ initialCases, users }: { initialCases: 
                 filteredCases.map((c: any) => (
                    <div 
                      key={c._id} 
-                     onClick={() => setSelectedCase(c)}
+                     onClick={() => { setSelectedCase(c); setSidebarTab('details'); }}
                      className={`p-5 rounded-2xl border cursor-pointer transition-all ${selectedCase?._id === c._id ? 'bg-brand-primary/5 border-brand-primary dark:bg-brand-primary/10' : 'bg-white dark:bg-[#27272a] border-gray-100 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-600'}`}
                    >
                       <div className="flex justify-between items-start mb-3">
@@ -248,8 +253,32 @@ export default function CaseClientView({ initialCases, users }: { initialCases: 
           <div className="xl:col-span-1">
              {selectedCase ? (
                 <div className="bg-white dark:bg-[#27272a] p-6 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm sticky top-8">
-                   <h3 className="font-bold text-gray-900 dark:text-white text-xl mb-4">Case Details</h3>
-                   
+                   {/* Sidebar tabs */}
+                   <div className="flex gap-1 mb-5 bg-gray-100 dark:bg-gray-800 rounded-xl p-1">
+                     {(['details', 'notes', 'activity'] as const).map((tab) => (
+                       <button
+                         key={tab}
+                         onClick={() => setSidebarTab(tab)}
+                         className={`flex-1 py-1.5 rounded-lg text-xs font-semibold capitalize transition-colors ${
+                           sidebarTab === tab
+                             ? 'bg-white dark:bg-[#1c1c1e] text-gray-900 dark:text-white shadow-sm'
+                             : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                         }`}
+                       >
+                         {tab === 'activity' ? 'Activity' : tab === 'notes' ? 'Notes' : 'Details'}
+                       </button>
+                     ))}
+                   </div>
+
+                   {sidebarTab === 'activity' ? (
+                     <div className="max-h-[600px] overflow-y-auto">
+                       <CaseActivityTimeline caseId={selectedCase._id} />
+                     </div>
+                   ) : sidebarTab === 'notes' ? (
+                     <div className="max-h-[600px] overflow-y-auto">
+                       <InternalNotesPanel entityType="case" entityId={selectedCase._id} />
+                     </div>
+                   ) : (
                    <div className="space-y-4">
                       <div>
                         <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold mb-1">Status</p>
@@ -388,6 +417,7 @@ export default function CaseClientView({ initialCases, users }: { initialCases: 
                           )}
                        </div>
                    </div>
+                   )} {/* end sidebarTab conditional */}
                 </div>
              ) : (
                 <div className="bg-gray-50 dark:bg-gray-800/50 p-6 rounded-3xl border border-gray-100 dark:border-gray-800 flex flex-col items-center justify-center text-center h-[400px]">

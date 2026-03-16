@@ -5,28 +5,32 @@ import { Search } from 'lucide-react';
 import Link from 'next/link';
 
 const STATUS_STYLES: Record<string, string> = {
-  draft:     'bg-gray-100 text-gray-600 border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700',
-  issued:    'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-900/40',
-  sent:      'bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-900/20 dark:text-sky-400 dark:border-sky-900/40',
-  paid:      'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-900/40',
-  overdue:   'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-900/40',
-  cancelled: 'bg-gray-100 text-gray-500 border-gray-200 dark:bg-gray-800 dark:text-gray-500 dark:border-gray-700',
+  draft:          'bg-gray-100 text-gray-600 border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700',
+  issued:         'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-900/40',
+  sent:           'bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-900/20 dark:text-sky-400 dark:border-sky-900/40',
+  paid:           'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-900/40',
+  partially_paid: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-900/40',
+  overdue:        'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-900/40',
+  cancelled:      'bg-gray-100 text-gray-500 border-gray-200 dark:bg-gray-800 dark:text-gray-500 dark:border-gray-700',
 };
 
 const STATUS_TABS = [
-  { value: 'all',       label: 'All' },
-  { value: 'draft',     label: 'Draft' },
-  { value: 'issued',    label: 'Issued' },
-  { value: 'sent',      label: 'Sent' },
-  { value: 'overdue',   label: 'Overdue' },
-  { value: 'paid',      label: 'Paid' },
-  { value: 'cancelled', label: 'Cancelled' },
+  { value: 'all',            label: 'All' },
+  { value: 'draft',          label: 'Draft' },
+  { value: 'issued',         label: 'Issued' },
+  { value: 'sent',           label: 'Sent' },
+  { value: 'partially_paid', label: 'Partial' },
+  { value: 'overdue',        label: 'Overdue' },
+  { value: 'paid',           label: 'Paid' },
+  { value: 'cancelled',      label: 'Cancelled' },
 ];
 
 export interface InvoiceRow {
   _id: string;
   invoiceNumber: string;
   amount: number;
+  amountPaid?: number;
+  remainingBalance?: number;
   currency?: string;
   status: string;
   issuedAt?: string;
@@ -157,11 +161,15 @@ export default function InvoicesTable({ invoices, accountMap }: InvoicesTablePro
                       </div>
                       <div className="text-[11px] text-gray-400">{client?.email || ''}</div>
                     </td>
-                    <td className="px-6 py-4 font-bold text-gray-900 dark:text-white tabular-nums text-xs">
-                      {new Intl.NumberFormat('en-US', {
-                        style: 'currency',
-                        currency: inv.currency || 'USD',
-                      }).format(inv.amount)}
+                    <td className="px-6 py-4 tabular-nums text-xs">
+                      <span className="font-bold text-gray-900 dark:text-white">
+                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: inv.currency || 'USD' }).format(inv.amount)}
+                      </span>
+                      {inv.status === 'partially_paid' && inv.remainingBalance != null && (
+                        <span className="block text-[11px] text-amber-600 font-medium">
+                          {new Intl.NumberFormat('en-US', { style: 'currency', currency: inv.currency || 'USD' }).format(inv.remainingBalance)} left
+                        </span>
+                      )}
                     </td>
                     <td className="px-6 py-4">
                       <span
@@ -169,7 +177,7 @@ export default function InvoicesTable({ invoices, accountMap }: InvoicesTablePro
                           STATUS_STYLES[inv.status] ?? STATUS_STYLES['draft']
                         }`}
                       >
-                        {inv.status}
+                        {inv.status === 'partially_paid' ? 'Partial' : inv.status}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-xs text-gray-500 dark:text-gray-400">

@@ -17,12 +17,144 @@ import {
   MessageCircle,
   Ticket,
   Plus,
+  TrendingUp,
+  AlertTriangle,
 } from 'lucide-react';
 import Link from 'next/link';
 import KPICard from '@/components/admin/KPICard';
 import SimpleBarChart from '@/components/admin/SimpleBarChart';
 import SimpleLineChart from '@/components/admin/SimpleLineChart';
 import { getAdminDashboardStats } from '@/lib/actions/portal-admin';
+
+async function getClientRevenueStats() {
+  await dbConnect();
+  const { ClientInvoice } = await import('@/models/ClientInvoice');
+
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  const [totalRevenue, outstanding, monthlyRevenue, avgInvoice] = await Promise.all([
+    // Total collected — prefer usdAmount for multi-currency accuracy
+    // For partially_paid: prorate usdAmount by paid fraction; for paid: use usdAmount directly
+    ClientInvoice.aggregate([
+      { $match: { status: { $in: ['paid', 'partially_paid'] } } },
+      {
+        $group: {
+          _id: null,
+          total: {
+            $sum: {
+              $cond: [
+                { $and: [{ $gt: ['$usdAmount', 0] }, { $gt: ['$amount', 0] }] },
+                {
+                  $multiply: [
+                    '$usdAmount',
+                    { $divide: [{ $ifNull: ['$amountPaid', '$amount'] }, '$amount'] },
+                  ],
+                },
+                { $ifNull: ['$amountPaid', '$amount'] },
+              ],
+            },
+          },
+        },
+      },
+    ]).then((r: any[]) => r[0]?.total || 0),
+
+    // Outstanding — prorate usdAmount by remaining fraction
+    ClientInvoice.aggregate([
+      { $match: { status: { $in: ['issued', 'sent', 'overdue', 'partially_paid'] } } },
+      {
+        $group: {
+          _id: null,
+          total: {
+            $sum: {
+              $cond: [
+                { $and: [{ $gt: ['$usdAmount', 0] }, { $gt: ['$amount', 0] }] },
+                {
+                  $multiply: [
+                    '$usdAmount',
+                    {
+                      $divide: [
+                        {
+                          $cond: [
+                            { $gt: [{ $ifNull: ['$remainingBalance', null] }, null] },
+                            '$remainingBalance',
+                            '$amount',
+                          ],
+                        },
+                        '$amount',
+                      ],
+                    },
+                  ],
+                },
+                {
+                  $cond: [
+                    { $gt: [{ $ifNull: ['$remainingBalance', null] }, null] },
+                    '$remainingBalance',
+                    '$amount',
+                  ],
+                },
+              ],
+            },
+          },
+        },
+      },
+    ]).then((r: any[]) => r[0]?.total || 0),
+
+    // Monthly revenue: invoices fully paid this month
+    ClientInvoice.aggregate([
+      { $match: { status: 'paid', paidAt: { $gte: startOfMonth } } },
+      {
+        $group: {
+          _id: null,
+          total: {
+            $sum: { $ifNull: ['$usdAmount', '$amount'] },
+          },
+        },
+      },
+    ]).then((r: any[]) => r[0]?.total || 0),
+
+    // Average invoice value (non-draft) in USD where available
+    ClientInvoice.aggregate([
+      { $match: { status: { $nin: ['draft', 'cancelled'] } } },
+      { $group: { _id: null, avg: { $avg: { $ifNull: ['$usdAmount', '$amount'] } } } },
+    ]).then((r: any[]) => r[0]?.avg || 0),
+  ]);
+
+  return { totalRevenue, outstanding, monthlyRevenue, avgInvoice };
+}
+
+async function getOperationalStats() {
+  await dbConnect();
+  const { Account } = await import('@/models/Account');
+  const { Case } = await import('@/models/Case');
+
+  const [totalClients, completedCases, waitingCases] = await Promise.all([
+    Account.countDocuments({ roles: 'client' }),
+    Case.countDocuments({ status: 'closed' }),
+    Case.countDocuments({ status: 'needs_assistance' }),
+  ]);
+
+  return { totalClients, completedCases, waitingCases };
+}
+
+async function getAlerts() {
+  await dbConnect();
+  const { ClientInvoice } = await import('@/models/ClientInvoice');
+  const { Case } = await import('@/models/Case');
+  const Commission = (await import('@/models/Commission')).default;
+
+  const threeDaysAgo = new Date();
+  threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+
+  const [overdueInvoices, inactiveCases, waitingCases, pendingCommissions] = await Promise.all([
+    ClientInvoice.countDocuments({ status: 'overdue' }),
+    Case.countDocuments({ status: 'active', updatedAt: { $lt: threeDaysAgo } }),
+    Case.countDocuments({ status: 'needs_assistance' }),
+    Commission.countDocuments({ status: 'pending' }),
+  ]);
+
+  return { overdueInvoices, inactiveCases, waitingCases, pendingCommissions };
+}
 
 async function getClientOpsStats() {
   await dbConnect();
@@ -39,8 +171,21 @@ async function getClientOpsStats() {
     totalInvoices,
   ] = await Promise.all([
     ClientInvoice.aggregate([
-      { $match: { status: { $in: ['issued', 'sent', 'overdue'] } } },
-      { $group: { _id: null, total: { $sum: '$amount' } } },
+      { $match: { status: { $in: ['issued', 'sent', 'overdue', 'partially_paid'] } } },
+      {
+        $group: {
+          _id: null,
+          total: {
+            $sum: {
+              $cond: [
+                { $gt: [{ $ifNull: ['$remainingBalance', null] }, null] },
+                '$remainingBalance',
+                '$amount',
+              ],
+            },
+          },
+        },
+      },
     ]).then((r: any[]) => r[0]?.total || 0),
     ClientInvoice.countDocuments({ status: 'overdue' }),
     SupportTicket.countDocuments({ status: { $in: ['open', 'in_progress'] } }),
@@ -175,18 +320,145 @@ async function getAdminStats() {
 }
 
 export default async function AdminDashboard() {
-  const [partnerResult, portalResult, clientOpsResult] = await Promise.allSettled([
-    getAdminStats(),
-    getAdminDashboardStats(),
-    getClientOpsStats(),
-  ]);
+  const [partnerResult, portalResult, clientOpsResult, revenueResult, operationalResult, alertsResult] =
+    await Promise.allSettled([
+      getAdminStats(),
+      getAdminDashboardStats(),
+      getClientOpsStats(),
+      getClientRevenueStats(),
+      getOperationalStats(),
+      getAlerts(),
+    ]);
 
   const stats = partnerResult.status === 'fulfilled' ? partnerResult.value : null;
   const portalStats = portalResult.status === 'fulfilled' ? portalResult.value?.data : null;
   const clientOps = clientOpsResult.status === 'fulfilled' ? clientOpsResult.value : null;
+  const revenue = revenueResult.status === 'fulfilled' ? revenueResult.value : null;
+  const operational = operationalResult.status === 'fulfilled' ? operationalResult.value : null;
+  const alerts = alertsResult.status === 'fulfilled' ? alertsResult.value : null;
+
+  const totalAlerts = alerts
+    ? (alerts.overdueInvoices + alerts.inactiveCases + alerts.waitingCases + alerts.pendingCommissions)
+    : 0;
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+
+      {/* Alerts */}
+      {alerts && totalAlerts > 0 && (
+        <div className="bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/30 rounded-2xl p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <AlertTriangle className="h-4 w-4 text-red-500" />
+            <h2 className="text-sm font-bold text-red-700 dark:text-red-400">Action Required</h2>
+            <span className="ml-auto text-xs font-bold text-red-500 bg-red-100 dark:bg-red-900/30 px-2 py-0.5 rounded-full">{totalAlerts} alert{totalAlerts !== 1 ? 's' : ''}</span>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            {alerts.overdueInvoices > 0 && (
+              <Link href="/admin/invoices" className="inline-flex items-center gap-1.5 bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded-xl px-3 py-2 text-xs font-semibold hover:bg-red-200 dark:hover:bg-red-900/30 transition-colors">
+                <span className="material-icons-outlined text-[14px]">receipt_long</span>
+                {alerts.overdueInvoices} Overdue Invoice{alerts.overdueInvoices !== 1 ? 's' : ''}
+              </Link>
+            )}
+            {alerts.inactiveCases > 0 && (
+              <Link href="/admin/cases" className="inline-flex items-center gap-1.5 bg-orange-100 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400 rounded-xl px-3 py-2 text-xs font-semibold hover:bg-orange-200 dark:hover:bg-orange-900/30 transition-colors">
+                <span className="material-icons-outlined text-[14px]">folder_open</span>
+                {alerts.inactiveCases} Case{alerts.inactiveCases !== 1 ? 's' : ''} Inactive 3+ Days
+              </Link>
+            )}
+            {alerts.waitingCases > 0 && (
+              <Link href="/admin/cases" className="inline-flex items-center gap-1.5 bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 rounded-xl px-3 py-2 text-xs font-semibold hover:bg-amber-200 dark:hover:bg-amber-900/30 transition-colors">
+                <span className="material-icons-outlined text-[14px]">pending</span>
+                {alerts.waitingCases} Waiting for Client
+              </Link>
+            )}
+            {alerts.pendingCommissions > 0 && (
+              <Link href="/admin/commissions" className="inline-flex items-center gap-1.5 bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 rounded-xl px-3 py-2 text-xs font-semibold hover:bg-blue-200 dark:hover:bg-blue-900/30 transition-colors">
+                <span className="material-icons-outlined text-[14px]">monetization_on</span>
+                {alerts.pendingCommissions} Pending Commission{alerts.pendingCommissions !== 1 ? 's' : ''}
+              </Link>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Financial Metrics */}
+      {revenue && (
+        <div>
+          <div className="flex items-center gap-2 mb-5">
+            <div className="p-1.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 rounded-lg">
+              <TrendingUp className="h-4 w-4" />
+            </div>
+            <h2 className="text-base font-bold text-gray-900 dark:text-white">Financial Metrics</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+            <KPICard
+              title="Total Revenue"
+              value={new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(revenue.totalRevenue)}
+              icon={DollarSign}
+              color="bg-emerald-500"
+              trend={{ value: 0, label: 'all paid invoices', positive: true }}
+            />
+            <KPICard
+              title="Outstanding"
+              value={new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(revenue.outstanding)}
+              icon={Receipt}
+              color="bg-amber-500"
+              trend={revenue.outstanding > 0 ? { value: 0, label: 'awaiting payment', positive: false } : undefined}
+            />
+            <KPICard
+              title="Monthly Revenue"
+              value={new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(revenue.monthlyRevenue)}
+              icon={TrendingUp}
+              color="bg-sky-500"
+              trend={{ value: 0, label: 'this month', positive: true }}
+            />
+            <KPICard
+              title="Avg Invoice"
+              value={new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(revenue.avgInvoice)}
+              icon={CreditCard}
+              color="bg-violet-500"
+              trend={{ value: 0, label: 'per invoice', positive: true }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Operational Metrics */}
+      {operational && (
+        <div>
+          <div className="flex items-center gap-2 mb-5">
+            <div className="p-1.5 bg-sky-100 dark:bg-sky-900/30 text-sky-600 rounded-lg">
+              <Activity className="h-4 w-4" />
+            </div>
+            <h2 className="text-base font-bold text-gray-900 dark:text-white">Operational Metrics</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <Link href="/admin/clients" className="block">
+              <KPICard
+                title="Total Clients"
+                value={operational.totalClients}
+                icon={Users}
+                color="bg-blue-500"
+                trend={{ value: 0, label: 'registered clients', positive: true }}
+              />
+            </Link>
+            <KPICard
+              title="Completed Cases"
+              value={operational.completedCases}
+              icon={FolderOpen}
+              color="bg-emerald-500"
+              trend={{ value: 0, label: 'all time', positive: true }}
+            />
+            <KPICard
+              title="Waiting on Client"
+              value={operational.waitingCases}
+              icon={Clock}
+              color={operational.waitingCases > 0 ? 'bg-amber-500' : 'bg-gray-400'}
+              trend={operational.waitingCases > 0 ? { value: operational.waitingCases, label: 'need client response', positive: false } : undefined}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Partner domain KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">

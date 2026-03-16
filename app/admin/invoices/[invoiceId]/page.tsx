@@ -7,12 +7,13 @@ import InvoiceActionPanel from './InvoiceActionPanel';
 export const dynamic = 'force-dynamic';
 
 const STATUS_STYLES: Record<string, string> = {
-  draft:     'bg-gray-100 text-gray-600 border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700',
-  issued:    'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-900/40',
-  sent:      'bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-900/20 dark:text-sky-400 dark:border-sky-900/40',
-  paid:      'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-900/40',
-  overdue:   'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-900/40',
-  cancelled: 'bg-gray-100 text-gray-500 border-gray-200 dark:bg-gray-800 dark:text-gray-500 dark:border-gray-700',
+  draft:           'bg-gray-100 text-gray-600 border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700',
+  issued:          'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-900/40',
+  sent:            'bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-900/20 dark:text-sky-400 dark:border-sky-900/40',
+  paid:            'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-900/40',
+  partially_paid:  'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-900/40',
+  overdue:         'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-900/40',
+  cancelled:       'bg-gray-100 text-gray-500 border-gray-200 dark:bg-gray-800 dark:text-gray-500 dark:border-gray-700',
 };
 
 async function getInvoiceData(invoiceId: string) {
@@ -170,6 +171,65 @@ export default async function AdminInvoiceDetailPage({ params }: { params: Promi
             </table>
           </div>
 
+          {/* Payment Progress */}
+          {(invoice.amountPaid > 0 || invoice.status === 'partially_paid') && (
+            <div className="bg-white dark:bg-[#27272a] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-soft p-6">
+              <h3 className="text-xs font-bold text-gray-400 dark:text-gray-600 uppercase tracking-wider mb-4">Payment Progress</h3>
+              <div className="grid grid-cols-3 gap-4 mb-4">
+                <div>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total</p>
+                  <p className="text-sm font-bold text-gray-900 dark:text-white tabular-nums">{fmt(invoice.amount)}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Paid</p>
+                  <p className="text-sm font-bold text-emerald-600 tabular-nums">{fmt(invoice.amountPaid ?? 0)}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Remaining</p>
+                  <p className="text-sm font-bold text-amber-600 tabular-nums">{fmt(invoice.remainingBalance ?? invoice.amount - (invoice.amountPaid ?? 0))}</p>
+                </div>
+              </div>
+              {/* Progress bar */}
+              <div className="w-full h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-emerald-500 rounded-full transition-all"
+                  style={{ width: `${Math.min(100, ((invoice.amountPaid ?? 0) / invoice.amount) * 100).toFixed(1)}%` }}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Payment History */}
+          {invoice.paymentHistory?.length > 0 && (
+            <div className="bg-white dark:bg-[#27272a] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-soft overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800">
+                <h3 className="text-sm font-bold text-gray-900 dark:text-white">Payment History</h3>
+              </div>
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50/50 dark:bg-gray-800/20 text-gray-400 dark:text-gray-600 font-semibold text-xs tracking-wider uppercase border-b border-gray-100 dark:border-gray-800">
+                  <tr>
+                    <th className="px-6 py-3 text-left">Date</th>
+                    <th className="px-6 py-3 text-left">Method</th>
+                    <th className="px-6 py-3 text-right">Amount</th>
+                    <th className="px-6 py-3 text-left">Notes</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
+                  {invoice.paymentHistory.map((p: any, i: number) => (
+                    <tr key={i} className="hover:bg-gray-50/30 dark:hover:bg-gray-800/20 transition-colors">
+                      <td className="px-6 py-3 text-gray-500 dark:text-gray-400 text-xs">
+                        {new Date(p.recordedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                      </td>
+                      <td className="px-6 py-3 text-gray-700 dark:text-gray-200">{p.method}</td>
+                      <td className="px-6 py-3 text-right font-semibold text-emerald-600 tabular-nums">{fmt(p.amount)}</td>
+                      <td className="px-6 py-3 text-gray-500 dark:text-gray-400 text-xs">{p.notes || '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
           {/* Notes */}
           {invoice.notes && (
             <div className="bg-white dark:bg-[#27272a] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-soft p-6">
@@ -202,6 +262,8 @@ export default async function AdminInvoiceDetailPage({ params }: { params: Promi
             invoiceId={invoiceId}
             currentStatus={invoice.status}
             invoiceNumber={invoice.invoiceNumber}
+            currency={currency}
+            remainingBalance={invoice.remainingBalance ?? invoice.amount - (invoice.amountPaid ?? 0)}
           />
 
           {/* Client Info Card */}

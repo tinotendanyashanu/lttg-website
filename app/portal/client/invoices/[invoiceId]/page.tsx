@@ -13,12 +13,13 @@ const COMPANY = {
 };
 
 const STATUS_STYLES: Record<string, { bg: string; text: string; label: string }> = {
-  draft:     { bg: 'bg-gray-100 dark:bg-gray-800',         text: 'text-gray-500 dark:text-gray-400',      label: 'Draft' },
-  issued:    { bg: 'bg-blue-50 dark:bg-blue-900/20',       text: 'text-blue-700 dark:text-blue-400',      label: 'Issued' },
-  sent:      { bg: 'bg-sky-50 dark:bg-sky-900/20',         text: 'text-sky-700 dark:text-sky-400',        label: 'Sent' },
-  paid:      { bg: 'bg-emerald-50 dark:bg-emerald-900/20', text: 'text-emerald-700 dark:text-emerald-400',label: 'Paid' },
-  overdue:   { bg: 'bg-red-50 dark:bg-red-900/20',         text: 'text-red-700 dark:text-red-400',        label: 'Overdue' },
-  cancelled: { bg: 'bg-gray-50 dark:bg-gray-900/20',       text: 'text-gray-400 dark:text-gray-500',      label: 'Cancelled' },
+  draft:          { bg: 'bg-gray-100 dark:bg-gray-800',          text: 'text-gray-500 dark:text-gray-400',       label: 'Draft' },
+  issued:         { bg: 'bg-blue-50 dark:bg-blue-900/20',        text: 'text-blue-700 dark:text-blue-400',       label: 'Issued' },
+  sent:           { bg: 'bg-sky-50 dark:bg-sky-900/20',          text: 'text-sky-700 dark:text-sky-400',         label: 'Sent' },
+  paid:           { bg: 'bg-emerald-50 dark:bg-emerald-900/20',  text: 'text-emerald-700 dark:text-emerald-400', label: 'Paid' },
+  partially_paid: { bg: 'bg-amber-50 dark:bg-amber-900/20',      text: 'text-amber-700 dark:text-amber-400',     label: 'Partially Paid' },
+  overdue:        { bg: 'bg-red-50 dark:bg-red-900/20',          text: 'text-red-700 dark:text-red-400',         label: 'Overdue' },
+  cancelled:      { bg: 'bg-gray-50 dark:bg-gray-900/20',        text: 'text-gray-400 dark:text-gray-500',       label: 'Cancelled' },
 };
 
 async function getInvoiceWithClient(clientId: string, invoiceId: string) {
@@ -60,7 +61,9 @@ export default async function InvoiceDetailPage({
   const fmt = (n: number) =>
     new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 2 }).format(n);
 
-  const isPending = ['issued', 'sent', 'overdue'].includes(inv.status);
+  const isPending = ['issued', 'sent', 'overdue', 'partially_paid'].includes(inv.status);
+  const amountPaid = inv.amountPaid ?? 0;
+  const remainingBalance = inv.remainingBalance ?? (inv.amount - amountPaid);
   const status = STATUS_STYLES[inv.status] ?? STATUS_STYLES['issued'];
 
   const issuedLabel = inv.issuedAt
@@ -211,6 +214,62 @@ export default async function InvoiceDetailPage({
                 <p className="text-2xl font-black text-gray-900 dark:text-white tabular-nums">{fmt(inv.amount ?? 0)}</p>
               </div>
             </div>
+
+            {/* Payment Progress (partially paid) */}
+            {inv.status === 'partially_paid' && amountPaid > 0 && (
+              <div className="bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/30 rounded-xl p-4 print:hidden">
+                <p className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-widest mb-3">Payment Progress</p>
+                <div className="grid grid-cols-3 gap-4 mb-3 text-center">
+                  <div>
+                    <p className="text-[10px] text-gray-400 uppercase tracking-widest mb-0.5">Total</p>
+                    <p className="text-sm font-bold text-gray-900 dark:text-white tabular-nums">{fmt(inv.amount)}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-gray-400 uppercase tracking-widest mb-0.5">Paid</p>
+                    <p className="text-sm font-bold text-emerald-600 tabular-nums">{fmt(amountPaid)}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-gray-400 uppercase tracking-widest mb-0.5">Remaining</p>
+                    <p className="text-sm font-bold text-amber-700 dark:text-amber-400 tabular-nums">{fmt(remainingBalance)}</p>
+                  </div>
+                </div>
+                <div className="w-full h-2 bg-amber-100 dark:bg-amber-900/30 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-emerald-500 rounded-full"
+                    style={{ width: `${Math.min(100, (amountPaid / inv.amount) * 100).toFixed(1)}%` }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Payment History */}
+            {inv.paymentHistory?.length > 0 && (
+              <div className="print:hidden">
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Payment History</p>
+                <div className="rounded-xl border border-gray-100 dark:border-gray-800 overflow-hidden">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-800">
+                        <th className="px-4 py-2.5 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">Date</th>
+                        <th className="px-4 py-2.5 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">Method</th>
+                        <th className="px-4 py-2.5 text-right text-[10px] font-bold text-gray-400 uppercase tracking-widest">Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
+                      {inv.paymentHistory.map((p: any, i: number) => (
+                        <tr key={i}>
+                          <td className="px-4 py-2.5 text-xs text-gray-500 dark:text-gray-400">
+                            {new Date(p.recordedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                          </td>
+                          <td className="px-4 py-2.5 text-xs text-gray-700 dark:text-gray-300">{p.method}</td>
+                          <td className="px-4 py-2.5 text-right text-xs font-semibold text-emerald-600 tabular-nums">{fmt(p.amount)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
 
             {/* Notes */}
             {inv.notes && (

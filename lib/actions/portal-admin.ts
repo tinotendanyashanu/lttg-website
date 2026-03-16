@@ -508,8 +508,52 @@ export async function getAdminCommissionOverview() {
     .populate('caseId', 'businessName caseId')
     .sort({ createdAt: -1 })
     .lean();
-    
+
   return { success: true, commissions: JSON.parse(JSON.stringify(commissions)) };
+}
+
+// ── Case Activity Timeline ─────────────────────────────────────────────────────
+
+export async function getCaseActivityLog(caseId: string) {
+  await dbConnect();
+  const session = await getSessionWithDevBypass();
+  if (!session?.user?.email) throw new Error('Not authenticated');
+
+  const account = await getAccountByEmail(session.user.email);
+  if (!account || !account.roles.some((r: string) => ['admin', 'employee', 'intern'].includes(r))) {
+    throw new Error('Unauthorized');
+  }
+
+  const logs = await ActivityLog.find({ caseId })
+    .sort({ createdAt: -1 })
+    .limit(100)
+    .populate('actorAccountId', 'fullName email')
+    .lean();
+
+  return { success: true, logs: JSON.parse(JSON.stringify(logs)) };
+}
+
+export async function getClientActivityLog(clientId: string) {
+  await dbConnect();
+  const session = await getSessionWithDevBypass();
+  if (!session?.user?.email) throw new Error('Not authenticated');
+
+  const account = await getAccountByEmail(session.user.email);
+  if (!account || !account.roles.some((r: string) => ['admin', 'employee', 'intern'].includes(r))) {
+    throw new Error('Unauthorized');
+  }
+
+  // Find all cases for this client
+  const cases = await Case.find({ $or: [{ email: account.email }, { ownerId: clientId }] }, '_id').lean();
+  const caseIds = cases.map((c: any) => c._id);
+
+  const logs = await ActivityLog.find({ caseId: { $in: caseIds } })
+    .sort({ createdAt: -1 })
+    .limit(200)
+    .populate('actorAccountId', 'fullName email')
+    .lean();
+
+  return { success: true, logs: JSON.parse(JSON.stringify(logs)) };
 }
 
 
