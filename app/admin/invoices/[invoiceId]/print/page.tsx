@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import dbConnect from '@/lib/mongodb';
+import PrintButton from './PrintButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -172,9 +173,7 @@ export default async function InvoicePrintPage({
         `}</style>
       </head>
       <body>
-        <button className="print-btn" onClick="window.print()">
-          &#x1F5A8; Print / Save PDF
-        </button>
+        <PrintButton className="print-btn" />
 
         <div className="page">
           {/* Header */}

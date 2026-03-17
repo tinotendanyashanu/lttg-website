@@ -1,6 +1,7 @@
 import { notFound, redirect } from 'next/navigation';
 import { auth } from '@/auth';
 import dbConnect from '@/lib/mongodb';
+import PrintButton from './PrintButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,8 +21,10 @@ export default async function ClientInvoicePrintPage({
   const { invoiceId } = await params;
   const session = await auth();
   if (!session?.user?.accountId && !session?.user?.id) redirect('/portal/login');
+  const accountId = session.user.accountId ?? session.user.id;
+  if (!accountId) redirect('/portal/login');
 
-  const invoice = await getInvoiceForClient(invoiceId, session.user.accountId || session.user.id);
+  const invoice = await getInvoiceForClient(invoiceId, accountId);
   if (!invoice) notFound();
 
   const currency = invoice.currency || 'USD';
@@ -81,7 +84,7 @@ export default async function ClientInvoicePrintPage({
         `}</style>
       </head>
       <body>
-        <button className="print-btn" onClick="window.print()">🖨 Print / Save PDF</button>
+        <PrintButton className="print-btn" />
         <div className="page">
           <div className="header">
             <div>

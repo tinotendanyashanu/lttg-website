@@ -48,7 +48,7 @@ export interface IClientInvoice extends Document {
   updatedAt: Date;
 }
 
-const ClientInvoiceSchema: Schema = new Schema(
+const ClientInvoiceSchema: Schema<IClientInvoice> = new Schema<IClientInvoice>(
   {
     invoiceNumber: { type: String, required: true, unique: true },
     clientId: { type: Schema.Types.ObjectId, ref: 'Account', required: true },
@@ -98,11 +98,10 @@ ClientInvoiceSchema.index({ clientId: 1, createdAt: -1 });
 ClientInvoiceSchema.index({ status: 1 });
 
 // Keep remainingBalance in sync whenever the document is saved
-ClientInvoiceSchema.pre('save', function (next) {
+ClientInvoiceSchema.pre('save', function (this: IClientInvoice) {
   if (this.remainingBalance === undefined || this.remainingBalance === null) {
     this.remainingBalance = this.amount - (this.amountPaid ?? 0);
   }
-  next();
 });
 
 export const ClientInvoice: Model<IClientInvoice> =

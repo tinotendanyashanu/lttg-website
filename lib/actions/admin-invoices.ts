@@ -2,6 +2,7 @@
 
 import { auth } from '@/auth';
 import { revalidatePath } from 'next/cache';
+import { Types } from 'mongoose';
 import dbConnect from '@/lib/mongodb';
 import { sendEmail, EmailTemplates } from '@/lib/email';
 
@@ -401,7 +402,9 @@ export async function recordInvoicePayment(
     currency: invoice.currency || 'USD',
     method: payload.method,
     notes: payload.notes?.trim() || undefined,
-    recordedBy: admin.id,
+    ...(admin.id && Types.ObjectId.isValid(admin.id)
+      ? { recordedBy: new Types.ObjectId(admin.id) }
+      : {}),
     recordedAt: new Date(),
   });
 

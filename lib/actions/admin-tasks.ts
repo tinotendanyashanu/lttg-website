@@ -56,7 +56,7 @@ export async function createAdminTask(data: {
   dueDate?: string;
   priority?: 'low' | 'normal' | 'high' | 'urgent';
 }) {
-  const actor = await requireStaff();
+  await requireStaff();
   await dbConnect();
   const { Task } = await import('@/models/Task');
 
@@ -69,7 +69,6 @@ export async function createAdminTask(data: {
     relatedCaseId: data.relatedCaseId || undefined,
     dueDate: data.dueDate ? new Date(data.dueDate) : undefined,
     status: 'pending',
-    createdBy: actor._id,
   });
 
   revalidatePath('/portal/admin/tasks');
@@ -107,7 +106,7 @@ export async function updateAdminTask(
 }
 
 export async function deleteAdminTask(taskId: string) {
-  const actor = await requireStaff();
+  await requireStaff();
   await dbConnect();
   const { Task } = await import('@/models/Task');
 
