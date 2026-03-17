@@ -9,7 +9,7 @@ async function getProfile(userId: string) {
     await dbConnect();
     const { Account } = await import('@/models/Account');
     const user = await Account.findById(userId, {
-      fullName: 1, email: 1, 'clientProfile.phone': 1,
+      fullName: 1, email: 1, 'clientProfile.phone': 1, 'clientProfile.companyName': 1,
     }).lean();
     return user ? JSON.parse(JSON.stringify(user)) : null;
   } catch (_) {
@@ -31,6 +31,7 @@ export default async function ProfileSettingsPage() {
         initialName={profile?.fullName || ''}
         initialEmail={profile?.email || ''}
         initialPhone={profile?.clientProfile?.phone || ''}
+        initialCompanyName={profile?.clientProfile?.companyName || ''}
       />
     </div>
   );

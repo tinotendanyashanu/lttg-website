@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { markCommissionPaid } from './actions';
-import { payInternEmployeeCommission } from '@/lib/actions/portal-admin';
+import { payInternEmployeeCommission, approveInternEmployeeCommissions } from '@/lib/actions/portal-admin';
 
 export default function CommissionManagerClient({ 
   initialCommissions, 
@@ -27,6 +27,12 @@ export default function CommissionManagerClient({
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterUser, setFilterUser] = useState('all');
   const [expandedCaseId, setExpandedCaseId] = useState<string | null>(null);
+
+  // Payout modal state
+  const [payingCommId, setPayingCommId] = useState<string | null>(null);
+  const [payMethod, setPayMethod] = useState('bank_transfer');
+  const [payReference, setPayReference] = useState('');
+  const [payError, setPayError] = useState('');
 
   const filteredCommissions = useMemo(() => {
     return commissions.filter(c => {
@@ -65,15 +71,33 @@ export default function CommissionManagerClient({
      }
   };
 
-  const handlePayInternalComm = async (commId: string) => {
+  const handlePayInternalComm = async () => {
+    if (!payingCommId) return;
+    if (!payReference.trim()) { setPayError('Reference / payment note is required.'); return; }
+    setPayError('');
     try {
       setIsPaying(true);
-      await payInternEmployeeCommission(commId, 'bank_transfer', 'Manual Payment via Portal');
-      setInternComms(internComms.map(c => c._id === commId ? { ...c, status: 'paid' } : c));
+      await payInternEmployeeCommission(payingCommId, payMethod, payReference.trim());
+      setInternComms(internComms.map(c => c._id === payingCommId ? { ...c, status: 'paid' } : c));
+      setPayingCommId(null);
+      setPayReference('');
       router.refresh();
-    } catch (err) {
-      console.error("Failed to pay commission", err);
-      alert('Failed to pay commission. Please ensure they have sufficient approved balance.');
+    } catch (err: any) {
+      setPayError(err.message || 'Failed to process payout. Check the approved balance.');
+    } finally {
+      setIsPaying(false);
+    }
+  };
+
+  const handleApproveAll = async () => {
+    if (!confirm('Approve all pending commissions?')) return;
+    try {
+      setIsPaying(true);
+      await approveInternEmployeeCommissions();
+      setInternComms(internComms.map(c => c.status === 'pending' ? { ...c, status: 'approved' } : c));
+      router.refresh();
+    } catch (err: any) {
+      alert(err.message || 'Failed to approve commissions.');
     } finally {
       setIsPaying(false);
     }
@@ -287,9 +311,9 @@ export default function CommissionManagerClient({
       ) : (
         /* Internal Commissions Tab */
         <div className="bg-white dark:bg-[#27272a] rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
-          <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
+          <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center gap-4">
              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Internal Commissions Overview</h3>
-             <div className="flex gap-4">
+             <div className="flex flex-wrap gap-3 items-center">
                 <div className="flex items-center gap-2">
                    <div className="w-3 h-3 rounded-full bg-blue-500"></div>
                    <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
@@ -302,6 +326,15 @@ export default function CommissionManagerClient({
                      Pending: ${internComms.filter(c => c.status === 'pending').reduce((sum, c) => sum + c.amount, 0).toFixed(2)}
                    </span>
                 </div>
+                {internComms.some(c => c.status === 'pending') && (
+                  <button
+                    onClick={handleApproveAll}
+                    disabled={isPaying}
+                    className="text-xs bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white px-3 py-1.5 rounded-lg font-medium transition-colors"
+                  >
+                    Approve All Pending
+                  </button>
+                )}
              </div>
           </div>
           <div className="overflow-x-auto">
@@ -370,9 +403,12 @@ export default function CommissionManagerClient({
                         {new Date(comm.createdAt).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4 text-right">
+                         {comm.status === 'pending' && (
+                           <span className="text-xs text-orange-500 font-medium">Awaiting approval</span>
+                         )}
                          {comm.status === 'approved' && (
                            <button
-                             onClick={() => handlePayInternalComm(comm._id)}
+                             onClick={() => { setPayingCommId(comm._id); setPayError(''); setPayReference(''); setPayMethod('bank_transfer'); }}
                              disabled={isPaying}
                              className="text-xs bg-brand-primary text-white hover:opacity-90 px-3 py-1.5 rounded-lg font-medium transition-opacity disabled:opacity-50"
                            >
@@ -390,6 +426,70 @@ export default function CommissionManagerClient({
                 )}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* Payout modal */}
+      {payingCommId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+          <div className="bg-white dark:bg-[#27272a] rounded-2xl border border-gray-200 dark:border-gray-700 shadow-xl w-full max-w-sm p-6 space-y-4 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between">
+              <h3 className="font-bold text-gray-900 dark:text-white">Record Payout</h3>
+              <button onClick={() => setPayingCommId(null)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                <span className="material-icons-outlined">close</span>
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold mb-1 block">Payment Method</label>
+                <select
+                  value={payMethod}
+                  onChange={e => setPayMethod(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm focus:outline-none"
+                >
+                  <option value="bank_transfer">Bank Transfer</option>
+                  <option value="cash">Cash</option>
+                  <option value="paypal">PayPal</option>
+                  <option value="wise">Wise</option>
+                  <option value="crypto">Crypto</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold mb-1 block">Reference / Notes *</label>
+                <input
+                  type="text"
+                  value={payReference}
+                  onChange={e => setPayReference(e.target.value)}
+                  placeholder="Transaction ID, notes, etc."
+                  className="w-full px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
+                />
+              </div>
+              {payError && (
+                <p className="text-xs text-red-500 flex items-center gap-1">
+                  <span className="material-icons-outlined text-[14px]">error_outline</span>
+                  {payError}
+                </p>
+              )}
+            </div>
+
+            <div className="flex gap-2 pt-1">
+              <button
+                onClick={handlePayInternalComm}
+                disabled={isPaying}
+                className="flex-1 bg-brand-primary hover:bg-brand-primary/90 disabled:opacity-60 text-white py-2.5 rounded-xl text-sm font-semibold transition-all"
+              >
+                {isPaying ? 'Processing...' : 'Confirm Payout'}
+              </button>
+              <button
+                onClick={() => setPayingCommId(null)}
+                className="flex-1 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 py-2.5 rounded-xl text-sm font-medium transition-all"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
       )}

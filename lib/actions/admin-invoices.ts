@@ -446,3 +446,28 @@ export async function recordInvoicePayment(
   revalidatePath(`/portal/client/invoices/${invoiceId}`);
   return { success: true, newStatus, remainingBalance: invoice.remainingBalance };
 }
+
+// ── Mark overdue invoices ─────────────────────────────────────────────────────
+// Safe to call on every dashboard load — uses updateMany with a precise filter.
+// Returns count of invoices newly marked overdue.
+
+export async function markOverdueInvoices(): Promise<number> {
+  await dbConnect();
+  const { ClientInvoice } = await import('@/models/ClientInvoice');
+
+  const result = await ClientInvoice.updateMany(
+    {
+      status: { $in: ['issued', 'sent'] },
+      dueAt: { $lt: new Date() },
+    },
+    { $set: { status: 'overdue' } },
+  );
+
+  if (result.modifiedCount > 0) {
+    revalidatePath('/admin/invoices');
+    revalidatePath('/portal/client/invoices');
+  }
+
+  return result.modifiedCount;
+}
+

@@ -226,6 +226,20 @@ export default function PortalShell({
 
             {isAdmin && (
               <Link
+                href="/portal/admin/tasks"
+                className={`flex items-center justify-center lg:justify-start gap-3 px-4 py-3 rounded-xl font-medium transition-colors group ${
+                  pathname.startsWith("/portal/admin/tasks")
+                    ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
+                    : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
+                }`}
+              >
+                <span className="material-icons-outlined group-hover:scale-110 transition-transform">task_alt</span>
+                <span className="hidden lg:block">Tasks</span>
+              </Link>
+            )}
+
+            {isAdmin && (
+              <Link
                 href="/portal/admin/teams"
                 className={`flex items-center justify-center lg:justify-start gap-3 px-4 py-3 rounded-xl font-medium transition-colors group ${
                   pathname === "/portal/admin/teams"

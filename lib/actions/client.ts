@@ -527,12 +527,15 @@ export async function updateClientProfile(prevState: unknown, formData: FormData
   await dbConnect();
   const { Account } = await import('@/models/Account');
 
+  const companyName = (formData.get('companyName') as string)?.trim() || undefined;
+
   await Account.updateOne(
     { _id: session.user.accountId || session.user.id },
     {
       $set: {
         fullName: formData.get('name'),
         'clientProfile.phone': formData.get('phone'),
+        ...(companyName !== undefined && { 'clientProfile.companyName': companyName }),
       },
     }
   );

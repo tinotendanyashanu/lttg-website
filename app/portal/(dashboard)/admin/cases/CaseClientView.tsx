@@ -5,6 +5,8 @@ import { updateAdminCaseStatus, updateAdminCaseDealValue, updateAdminCasePartici
 import { useRouter } from 'next/navigation';
 import CaseActivityTimeline from '@/components/admin/CaseActivityTimeline';
 import InternalNotesPanel from '@/components/admin/InternalNotesPanel';
+import DocumentsPanel from '@/components/admin/DocumentsPanel';
+import CaseMessageThread from '@/components/admin/CaseMessageThread';
 
 // SLA: days since last update — drives the staleness badge
 function getSLAStatus(updatedAt: string, status: string): { label: string; color: string } | null {
@@ -46,7 +48,7 @@ export default function CaseClientView({ initialCases, users }: { initialCases: 
   const [allocations, setAllocations] = useState<any[]>([]);
 
   // Sidebar tab
-  const [sidebarTab, setSidebarTab] = useState<'details' | 'activity' | 'notes'>('details');
+  const [sidebarTab, setSidebarTab] = useState<'details' | 'messages' | 'notes' | 'docs' | 'activity'>('details');
 
   useEffect(() => {
     if (selectedCase) {
@@ -304,26 +306,40 @@ export default function CaseClientView({ initialCases, users }: { initialCases: 
                 <div className="bg-white dark:bg-[#27272a] p-6 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm sticky top-8">
                    {/* Sidebar tabs */}
                    <div className="flex gap-1 mb-5 bg-gray-100 dark:bg-gray-800 rounded-xl p-1">
-                     {(['details', 'notes', 'activity'] as const).map((tab) => (
+                     {([
+                       { key: 'details',  label: 'Details' },
+                       { key: 'messages', label: 'Messages' },
+                       { key: 'notes',    label: 'Notes' },
+                       { key: 'docs',     label: 'Docs' },
+                       { key: 'activity', label: 'Log' },
+                     ] as const).map(({ key, label }) => (
                        <button
-                         key={tab}
-                         onClick={() => setSidebarTab(tab)}
-                         className={`flex-1 py-1.5 rounded-lg text-xs font-semibold capitalize transition-colors ${
-                           sidebarTab === tab
+                         key={key}
+                         onClick={() => setSidebarTab(key)}
+                         className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                           sidebarTab === key
                              ? 'bg-white dark:bg-[#1c1c1e] text-gray-900 dark:text-white shadow-sm'
                              : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                          }`}
                        >
-                         {tab === 'activity' ? 'Activity' : tab === 'notes' ? 'Notes' : 'Details'}
+                         {label}
                        </button>
                      ))}
                    </div>
 
-                   {sidebarTab === 'activity' ? (
+                   {sidebarTab === 'messages' ? (
+                     <div className="flex flex-col" style={{ height: 520 }}>
+                       <CaseMessageThread caseId={selectedCase._id} viewerRole="admin" />
+                     </div>
+                   ) : sidebarTab === 'activity' ? (
                      <div className="max-h-[600px] overflow-y-auto">
                        <CaseActivityTimeline caseId={selectedCase._id} />
                      </div>
-                   ) : sidebarTab === 'notes' ? (
+                   ) : sidebarTab === 'docs' ? (
+                     <div className="max-h-[600px] overflow-y-auto">
+                       <DocumentsPanel entityType="case" entityId={selectedCase._id} isAdmin={true} />
+                     </div>
+                  ) : sidebarTab === 'notes' ? (
                      <div className="max-h-[600px] overflow-y-auto">
                        <InternalNotesPanel entityType="case" entityId={selectedCase._id} />
                      </div>

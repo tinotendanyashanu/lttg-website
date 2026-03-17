@@ -7,17 +7,37 @@ export default function ProfileSettingsClient({
   initialName,
   initialEmail,
   initialPhone,
+  initialCompanyName,
 }: {
   initialName: string;
   initialEmail: string;
   initialPhone: string;
+  initialCompanyName?: string;
 }) {
   const [profileState, profileAction, profilePending] = useActionState(updateClientProfile, null);
   const [pwState, pwAction, pwPending] = useActionState(updateClientPassword, null);
   const [addUserState, addUserAction, addUserPending] = useActionState(addClientAccountUser, null);
 
+  const initials = initialName
+    ? initialName.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
+    : initialEmail[0]?.toUpperCase() || 'U';
+
   return (
     <div className="space-y-6">
+      {/* Avatar header */}
+      <div className="bg-white dark:bg-[#27272a] rounded-2xl shadow-soft border border-gray-100 dark:border-gray-800 p-6 flex items-center gap-5">
+        <div className="w-16 h-16 rounded-full bg-brand-primary flex items-center justify-center text-white text-xl font-bold shrink-0">
+          {initials}
+        </div>
+        <div>
+          <p className="font-semibold text-gray-900 dark:text-white text-lg leading-tight">{initialName || 'Your Name'}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{initialEmail}</p>
+          {initialCompanyName && (
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{initialCompanyName}</p>
+          )}
+        </div>
+      </div>
+
       {/* Profile */}
       <form action={profileAction} className="bg-white dark:bg-[#27272a] rounded-2xl shadow-soft border border-gray-100 dark:border-gray-800 p-6 space-y-5">
         <h3 className="font-semibold text-gray-900 dark:text-white">Personal Information</h3>
@@ -54,6 +74,18 @@ export default function ProfileSettingsClient({
               name="phone"
               defaultValue={initialPhone}
               type="tel"
+              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#18181b] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white transition-shadow"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">
+              Company Name
+            </label>
+            <input
+              name="companyName"
+              defaultValue={initialCompanyName}
+              type="text"
+              placeholder="Your company or business"
               className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#18181b] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white transition-shadow"
             />
           </div>

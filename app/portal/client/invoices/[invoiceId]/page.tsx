@@ -116,6 +116,15 @@ export default async function InvoiceDetailPage({
               Attached PDF
             </a>
           )}
+          <Link
+            href={`/portal/client/invoices/${inv._id}/print`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-full px-4 py-2 text-sm font-medium hover:bg-gray-700 dark:hover:bg-gray-100 transition-colors"
+          >
+            <span className="material-icons-outlined text-[16px]">print</span>
+            Print / PDF
+          </Link>
           <DownloadPDFButton invoiceNumber={inv.invoiceNumber} />
         </div>
       </div>

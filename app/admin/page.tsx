@@ -25,6 +25,7 @@ import KPICard from '@/components/admin/KPICard';
 import SimpleBarChart from '@/components/admin/SimpleBarChart';
 import SimpleLineChart from '@/components/admin/SimpleLineChart';
 import { getAdminDashboardStats } from '@/lib/actions/portal-admin';
+import { markOverdueInvoices } from '@/lib/actions/admin-invoices';
 
 async function getClientRevenueStats() {
   await dbConnect();
@@ -319,8 +320,65 @@ async function getAdminStats() {
   };
 }
 
+async function getMonthlyTrends() {
+  await dbConnect();
+  const { ClientInvoice } = await import('@/models/ClientInvoice');
+  const { Case } = await import('@/models/Case');
+
+  const now = new Date();
+  const twelveMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 11, 1);
+
+  const [revenueByMonth, casesByMonth] = await Promise.all([
+    ClientInvoice.aggregate([
+      { $match: { status: { $in: ['paid', 'partially_paid'] }, createdAt: { $gte: twelveMonthsAgo } } },
+      {
+        $group: {
+          _id: { year: { $year: '$createdAt' }, month: { $month: '$createdAt' } },
+          revenue: { $sum: { $ifNull: ['$usdAmount', '$amount'] } },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { '_id.year': 1, '_id.month': 1 } },
+    ]),
+    Case.aggregate([
+      { $match: { createdAt: { $gte: twelveMonthsAgo } } },
+      {
+        $group: {
+          _id: { year: { $year: '$createdAt' }, month: { $month: '$createdAt' } },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { '_id.year': 1, '_id.month': 1 } },
+    ]),
+  ]);
+
+  // Build 12-month label grid
+  const months: { label: string; key: string }[] = [];
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    months.push({
+      label: d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }),
+      key: `${d.getFullYear()}-${d.getMonth() + 1}`,
+    });
+  }
+
+  const revMap: Record<string, number> = {};
+  for (const r of revenueByMonth) revMap[`${r._id.year}-${r._id.month}`] = Math.round(r.revenue);
+
+  const caseMap: Record<string, number> = {};
+  for (const c of casesByMonth) caseMap[`${c._id.year}-${c._id.month}`] = c.count;
+
+  return {
+    revenueChart: months.map(m => ({ label: m.label, value: revMap[m.key] ?? 0 })),
+    caseVolumeChart: months.map(m => ({ label: m.label, value: caseMap[m.key] ?? 0 })),
+  };
+}
+
 export default async function AdminDashboard() {
-  const [partnerResult, portalResult, clientOpsResult, revenueResult, operationalResult, alertsResult] =
+  // Fire-and-forget overdue check on every dashboard load
+  markOverdueInvoices().catch(() => {});
+
+  const [partnerResult, portalResult, clientOpsResult, revenueResult, operationalResult, alertsResult, trendsResult] =
     await Promise.allSettled([
       getAdminStats(),
       getAdminDashboardStats(),
@@ -328,12 +386,14 @@ export default async function AdminDashboard() {
       getClientRevenueStats(),
       getOperationalStats(),
       getAlerts(),
+      getMonthlyTrends(),
     ]);
 
   const stats = partnerResult.status === 'fulfilled' ? partnerResult.value : null;
   const portalStats = portalResult.status === 'fulfilled' ? portalResult.value?.data : null;
   const clientOps = clientOpsResult.status === 'fulfilled' ? clientOpsResult.value : null;
   const revenue = revenueResult.status === 'fulfilled' ? revenueResult.value : null;
+  const trends = trendsResult.status === 'fulfilled' ? trendsResult.value : null;
   const operational = operationalResult.status === 'fulfilled' ? operationalResult.value : null;
   const alerts = alertsResult.status === 'fulfilled' ? alertsResult.value : null;
 
@@ -701,6 +761,18 @@ export default async function AdminDashboard() {
             <SimpleBarChart title="Partner Growth" data={stats?.partnerGrowthData ?? []} color="bg-blue-500" />
           </div>
         </div>
+
+        {/* 12-month revenue + case volume trends */}
+        {trends && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            <div className="bg-white dark:bg-[#27272a] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-soft p-6">
+              <SimpleBarChart title="Monthly Revenue (USD, 12mo)" data={trends.revenueChart} color="bg-emerald-500" />
+            </div>
+            <div className="bg-white dark:bg-[#27272a] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-soft p-6">
+              <SimpleBarChart title="New Cases per Month (12mo)" data={trends.caseVolumeChart} color="bg-brand-primary" />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Bottom: Partners table + Recent Activity */}

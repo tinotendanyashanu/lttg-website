@@ -42,13 +42,22 @@ export default async function AdminInvoiceDetailPage({ params }: { params: Promi
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-10">
-      <div className="flex items-center gap-3">
+      <div className="flex items-center justify-between gap-3">
         <Link
           href="/admin/invoices"
           className="inline-flex items-center gap-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-sm transition-colors"
         >
           <span className="material-icons-outlined text-[16px]">arrow_back</span>
           All Invoices
+        </Link>
+        <Link
+          href={`/admin/invoices/${invoiceId}/print`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl text-sm font-medium hover:bg-gray-700 dark:hover:bg-gray-100 transition-colors"
+        >
+          <span className="material-icons-outlined text-[16px]">print</span>
+          Print / PDF
         </Link>
       </div>
 
