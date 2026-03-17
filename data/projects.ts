@@ -95,6 +95,19 @@ export const projects: Project[] = [
     status: 'Live'
   },
   {
+    id: "zimcelebs-official",
+    title: "ZimCelebsOfficial.com",
+    category: "Editorial & Media",
+    description: "A premium Zimbabwean editorial and publishing platform built to deliver fast-moving news, entertainment, business, sport, and politics coverage at scale.",
+    impact: "Strengthened digital publishing reach with a modern, category-driven newsroom experience.",
+    link: "https://zimcelebsofficial.com/",
+    tags: ["Next.js", "Editorial", "News Platform", "SEO"],
+    size: 'medium',
+    gradient: "from-rose-500/20 to-orange-500/20",
+    icon: Globe,
+    status: 'Live'
+  },
+  {
     id: "sanganai",
     title: "Sanganai Events",
     category: "Event Management",
