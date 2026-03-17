@@ -9,7 +9,7 @@ async function getProfile(userId: string) {
     await dbConnect();
     const { Account } = await import('@/models/Account');
     const user = await Account.findById(userId, {
-      name: 1, email: 1, 'clientProfile.phone': 1,
+      fullName: 1, email: 1, 'clientProfile.phone': 1,
     }).lean();
     return user ? JSON.parse(JSON.stringify(user)) : null;
   } catch (_) {
@@ -21,14 +21,14 @@ export default async function ProfileSettingsPage() {
   const session = await auth();
   if (!session?.user?.id) redirect('/portal/login');
 
-  const profile = await getProfile(session.user.id);
+  const profile = await getProfile(session.user.accountId || session.user.id);
 
   return (
     <div className="space-y-6 max-w-2xl">
       <SettingsNav current="/portal/client/settings/profile" />
 
       <ProfileSettingsClient
-        initialName={profile?.name || ''}
+        initialName={profile?.fullName || ''}
         initialEmail={profile?.email || ''}
         initialPhone={profile?.clientProfile?.phone || ''}
       />

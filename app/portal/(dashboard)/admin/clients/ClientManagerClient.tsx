@@ -1,14 +1,15 @@
 'use client';
 
-import { useState, useMemo, useRef } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import {
   updateAdminClient,
   archiveAdminClient,
   createAdminClient,
   resetClientPortalPassword,
   resendClientPortalInvite,
-  createPortalAccountForClient,
   toggleClientPortalStatus,
+  addClientPortalUser,
+  getClientPortalUsers,
   checkClientDuplicates,
 } from '@/lib/actions/portal-admin-clients';
 import { useRouter } from 'next/navigation';
@@ -56,6 +57,10 @@ export default function ClientManagerClient({ initialClients }: { initialClients
 
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [portalActionLoading, setPortalActionLoading] = useState<string | null>(null);
+  const [portalUsersLoading, setPortalUsersLoading] = useState(false);
+  const [portalUsers, setPortalUsers] = useState<any[]>([]);
+  const [newPortalUserName, setNewPortalUserName] = useState('');
+  const [newPortalUserEmail, setNewPortalUserEmail] = useState('');
   const [duplicateWarnings, setDuplicateWarnings] = useState<any[]>([]);
   const [duplicateChecked, setDuplicateChecked] = useState(false);
   const createFormRef = useRef<HTMLFormElement>(null);
@@ -86,6 +91,47 @@ export default function ClientManagerClient({ initialClients }: { initialClients
 
   const activeCount = useMemo(() => clients.filter(c => !isArchived(c)).length, [clients]);
   const archivedCount = useMemo(() => clients.filter(c => isArchived(c)).length, [clients]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadPortalUsers() {
+      if (!selectedClient?._id) {
+        setPortalUsers([]);
+        return;
+      }
+
+      setPortalUsersLoading(true);
+      try {
+        const res = await getClientPortalUsers(selectedClient._id);
+        if (!cancelled) {
+          setPortalUsers(res?.users || []);
+          const primaryAccount = (res?.users || []).find((user: any) => user.isPrimary);
+          if (primaryAccount) {
+            setSelectedClient((current: any) =>
+              current?._id === selectedClient._id
+                ? { ...current, accountId: { ...primaryAccount } }
+                : current
+            );
+          }
+        }
+      } catch {
+        if (!cancelled) {
+          setPortalUsers([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setPortalUsersLoading(false);
+        }
+      }
+    }
+
+    loadPortalUsers();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedClient?._id]);
 
   const handleUpdateInfo = async (e: { preventDefault(): void; currentTarget: HTMLFormElement }) => {
     e.preventDefault();
@@ -181,14 +227,6 @@ export default function ClientManagerClient({ initialClients }: { initialClients
       } else if (action === 'resend_invite') {
         await resendClientPortalInvite(selectedClient._id);
         showToast('Portal invite resent successfully.', 'success');
-      } else if (action === 'create_account') {
-        const res = await createPortalAccountForClient(selectedClient._id);
-        setClients(clients.map((c: any) =>
-          c._id === selectedClient._id ? { ...c, accountId: { _id: res.accountId, email: selectedClient.clientEmail } } : c
-        ));
-        setSelectedClient({ ...selectedClient, accountId: { _id: res.accountId, email: selectedClient.clientEmail } });
-        showToast('Portal account created. Welcome email sent.', 'success');
-        router.refresh();
       } else if (action === 'toggle_status') {
         const res = await toggleClientPortalStatus(selectedClient._id);
         const updatedAccount = { ...selectedClient.accountId, isActive: res.isActive };
@@ -197,6 +235,34 @@ export default function ClientManagerClient({ initialClients }: { initialClients
         ));
         setSelectedClient({ ...selectedClient, accountId: updatedAccount });
         showToast(`Portal account ${res.isActive ? 'activated' : 'suspended'}.`, 'success');
+      } else if (action === 'add_user') {
+        if (!newPortalUserName.trim() || !newPortalUserEmail.trim()) {
+          showToast('Enter full name and email first.', 'error');
+          return;
+        }
+        const res = await addClientPortalUser(selectedClient._id, {
+          fullName: newPortalUserName.trim(),
+          email: newPortalUserEmail.trim().toLowerCase(),
+        });
+        if (res?.baseAccount) {
+          const updated = { ...selectedClient, accountId: res.baseAccount };
+          setSelectedClient(updated);
+          setClients(clients.map((c: any) => (c._id === selectedClient._id ? updated : c)));
+        }
+        setPortalUsers((current) => [
+          ...current,
+          {
+            _id: res.user._id,
+            fullName: res.user.fullName,
+            email: res.user.email,
+            isActive: false,
+            isPrimary: false,
+            linkedClientAccountId: res.baseAccount?._id || null,
+          },
+        ]);
+        setNewPortalUserName('');
+        setNewPortalUserEmail('');
+        showToast('Additional client user invited successfully.', 'success');
       }
     } catch (err: any) {
       showToast(err.message || 'Action failed. Please try again.', 'error');
@@ -582,16 +648,141 @@ export default function ClientManagerClient({ initialClients }: { initialClients
                     </button>
                   </>
                 ) : (
-                  <button
-                    onClick={() => handlePortalAction('create_account')}
-                    disabled={portalActionLoading !== null}
-                    className="w-full flex items-center justify-center gap-2 bg-brand-primary hover:bg-brand-primary/90 text-white px-3 py-2.5 rounded-xl text-xs font-medium transition-all disabled:opacity-60 shadow-sm"
-                  >
-                    <span className="material-icons-outlined text-[15px]">person_add</span>
-                    {portalActionLoading === 'create_account' ? 'Creating...' : 'Create Portal Account'}
-                  </button>
+                  <div className="w-full px-3 py-2.5 rounded-xl text-xs bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30 text-blue-700 dark:text-blue-300">
+                    Portal access is provisioned automatically when the client is created.
+                  </div>
                 )}
+
+                <div className="mt-3 rounded-xl border border-gray-200 dark:border-gray-700 p-3 space-y-2">
+                  <p className="text-[11px] text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold">
+                    Add Another Email / User
+                  </p>
+                  <input
+                    type="text"
+                    placeholder="Full name"
+                    value={newPortalUserName}
+                    onChange={(e) => setNewPortalUserName(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
+                  />
+                  <input
+                    type="email"
+                    placeholder="email@company.com"
+                    value={newPortalUserEmail}
+                    onChange={(e) => setNewPortalUserEmail(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
+                  />
+                  <button
+                    onClick={() => handlePortalAction('add_user')}
+                    disabled={portalActionLoading !== null}
+                    className="w-full flex items-center justify-center gap-2 bg-brand-primary/10 hover:bg-brand-primary/20 text-brand-primary border border-brand-primary/20 px-3 py-2.5 rounded-xl text-xs font-medium transition-all disabled:opacity-60"
+                  >
+                    <span className="material-icons-outlined text-[15px]">group_add</span>
+                    {portalActionLoading === 'add_user' ? 'Inviting...' : 'Invite Additional User'}
+                  </button>
+                </div>
+
+                <div className="mt-3 rounded-xl border border-gray-200 dark:border-gray-700 p-3 space-y-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-[11px] text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold">
+                      Linked Portal Accounts
+                    </p>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400">
+                      {portalUsers.length}
+                    </span>
+                  </div>
+
+                  {portalUsersLoading ? (
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Loading linked accounts...</p>
+                  ) : portalUsers.length === 0 ? (
+                    <p className="text-xs text-gray-500 dark:text-gray-400">No linked portal accounts found yet.</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {portalUsers.map((user) => (
+                        <div
+                          key={user._id}
+                          className="flex items-start justify-between gap-3 rounded-lg bg-gray-50 dark:bg-gray-800 px-3 py-2"
+                        >
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                              {user.fullName}
+                              {user.isPrimary ? ' (Primary)' : ''}
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user.email}</p>
+                          </div>
+                          <span
+                            className={`shrink-0 px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                              user.isActive
+                                ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                                : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                            }`}
+                          >
+                            {user.isActive ? 'Active' : 'Inactive'}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
+
+              {/* Onboarding Checklist */}
+              {(() => {
+                const checks = [
+                  {
+                    label: 'Client profile complete',
+                    done: !!(selectedClient.businessName && (selectedClient.clientEmail || selectedClient.accountId?.email) && (selectedClient.phone || selectedClient.clientPhone)),
+                  },
+                  {
+                    label: 'Portal account created',
+                    done: !!selectedClient.accountId,
+                  },
+                  {
+                    label: 'Status qualified or converted',
+                    done: ['qualified', 'converted'].includes(selectedClient.status),
+                  },
+                  {
+                    label: 'Service interest recorded',
+                    done: !!selectedClient.serviceInterest,
+                  },
+                  {
+                    label: 'Source recorded',
+                    done: !!selectedClient.source,
+                  },
+                ];
+                const doneCount = checks.filter(c => c.done).length;
+                const pct = Math.round((doneCount / checks.length) * 100);
+
+                return (
+                  <div className="mt-5 pt-5 border-t border-gray-100 dark:border-gray-800">
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold">
+                        Onboarding
+                      </p>
+                      <span className={`text-xs font-semibold ${pct === 100 ? 'text-green-600 dark:text-green-400' : 'text-amber-600 dark:text-amber-400'}`}>
+                        {doneCount}/{checks.length}
+                      </span>
+                    </div>
+                    <div className="w-full h-1.5 rounded-full bg-gray-100 dark:bg-gray-800 mb-3">
+                      <div
+                        className={`h-1.5 rounded-full transition-all ${pct === 100 ? 'bg-green-500' : 'bg-amber-400'}`}
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      {checks.map(c => (
+                        <div key={c.label} className="flex items-center gap-2">
+                          <span className={`material-icons-outlined text-[15px] ${c.done ? 'text-green-500' : 'text-gray-300 dark:text-gray-600'}`}>
+                            {c.done ? 'check_circle' : 'radio_button_unchecked'}
+                          </span>
+                          <span className={`text-xs ${c.done ? 'text-gray-700 dark:text-gray-300' : 'text-gray-400 dark:text-gray-600'}`}>
+                            {c.label}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* Internal Notes */}
               <div className="mt-5 pt-5 border-t border-gray-100 dark:border-gray-800">

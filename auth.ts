@@ -15,6 +15,7 @@ declare module 'next-auth' {
     role?: 'partner' | 'admin' | 'employee' | 'intern' | 'client';
     tier?: string;
     id?: string;
+    accountId?: string;
     isEmailVerified?: boolean;
   }
   interface Session {
@@ -22,6 +23,7 @@ declare module 'next-auth' {
       role?: 'partner' | 'admin' | 'employee' | 'intern' | 'client';
       tier?: string;
       id?: string;
+      accountId?: string;
       isEmailVerified?: boolean;
     } & import('next-auth').DefaultSession['user'];
   }
@@ -32,6 +34,7 @@ declare module '@auth/core/jwt' {
     role?: 'partner' | 'admin' | 'employee' | 'intern' | 'client';
     tier?: string;
     id?: string;
+    accountId?: string;
     isEmailVerified?: boolean;
   }
 }
@@ -62,6 +65,7 @@ const nextAuthResult = NextAuth({
                 }
                 return {
                   id: user._id.toString(),
+                  accountId: user._id.toString(),
                   name: user.name,
                   email: user.email,
                   role: user.role || 'partner',
@@ -93,6 +97,7 @@ const nextAuthResult = NextAuth({
 
                 return {
                   id: accountUser._id.toString(),
+                  accountId: accountUser._id.toString(),
                   name: accountUser.fullName,
                   email: accountUser.email,
                   role: primaryRole,
@@ -110,8 +115,12 @@ const nextAuthResult = NextAuth({
             if (accountUser && accountUser.isActive && accountUser.roles.includes('client')) {
               const passwordsMatch = await bcrypt.compare(password, accountUser.passwordHash);
               if (passwordsMatch) {
+                const resolvedClientId = accountUser.linkedClientAccountId
+                  ? accountUser.linkedClientAccountId.toString()
+                  : accountUser._id.toString();
                 return {
-                  id: accountUser._id.toString(),
+                  id: resolvedClientId,
+                  accountId: accountUser._id.toString(),
                   name: accountUser.fullName,
                   email: accountUser.email,
                   role: 'client' as const,
@@ -152,6 +161,7 @@ const nextAuthResult = NextAuth({
 
         return {
           id: account._id.toString(),
+          accountId: account._id.toString(),
           name: account.fullName,
           email: account.email,
           role: 'admin' as const,

@@ -115,6 +115,119 @@ export async function createClientAccount(data: {
   return { success: true, accountId: account._id.toString() };
 }
 
+export async function createLinkedClientAccountUser(data: {
+  baseClientAccountId: string;
+  fullName: string;
+  email: string;
+  phone?: string;
+  companyName?: string;
+}) {
+  await dbConnect();
+  const { Account } = await import('@/models/Account');
+
+  const normalizedEmail = data.email.trim().toLowerCase();
+  if (!normalizedEmail) {
+    throw new Error('Email is required.');
+  }
+
+  const baseAccount = await Account.findById(data.baseClientAccountId);
+  if (!baseAccount || !baseAccount.roles.includes('client')) {
+    throw new Error('Base client account not found.');
+  }
+
+  const existing = await Account.findOne({ email: normalizedEmail });
+  if (existing) {
+    throw new Error('An account with this email already exists.');
+  }
+
+  const tempHash = await bcrypt.hash(crypto.randomBytes(32).toString('hex'), 12);
+
+  const account = await Account.create({
+    fullName: data.fullName,
+    email: normalizedEmail,
+    passwordHash: tempHash,
+    roles: ['client'],
+    linkedClientAccountId: baseAccount._id,
+    phoneNumber: data.phone || baseAccount.phoneNumber,
+    clientProfile: {
+      companyName: data.companyName || baseAccount.clientProfile?.companyName,
+      companyAddress: baseAccount.clientProfile?.companyAddress,
+      phone: baseAccount.clientProfile?.phone,
+      website: baseAccount.clientProfile?.website,
+      industry: baseAccount.clientProfile?.industry,
+      companySize: baseAccount.clientProfile?.companySize,
+      notes: baseAccount.clientProfile?.notes,
+    },
+    isActive: false,
+    passwordSetupRequired: true,
+  });
+
+  const token = crypto.randomBytes(48).toString('hex');
+  const { PasswordSetupToken } = await import('@/models/PasswordSetupToken');
+  await PasswordSetupToken.create({
+    accountId: account._id,
+    email: account.email,
+    token,
+    expiresAt: new Date(Date.now() + 48 * 60 * 60 * 1000),
+  });
+
+  const baseUrl =
+    process.env.NEXT_PUBLIC_APP_URL?.replace(/\/+$/, '') || 'http://localhost:3000';
+  const setupLink = `${baseUrl}/portal/setup-password?token=${token}`;
+
+  await sendEmail({
+    to: account.email,
+    subject: 'Welcome to Your LeoTheTechGuy Client Portal',
+    html: EmailTemplates.clientWelcome(account.fullName, setupLink, account.email),
+  });
+
+  return { success: true, accountId: account._id.toString(), email: account.email };
+}
+
+export async function addClientAccountUser(prevState: unknown, formData: FormData) {
+  const session = await auth();
+  if (!session?.user?.email || session.user.role !== 'client') {
+    return { error: 'Unauthorized' };
+  }
+
+  const email = (formData.get('email') as string | null)?.trim().toLowerCase();
+  const fullName = (formData.get('fullName') as string | null)?.trim();
+
+  if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
+    return { error: 'Please provide a valid email address.' };
+  }
+  if (!fullName) {
+    return { error: 'Full name is required.' };
+  }
+
+  await dbConnect();
+  const { Account } = await import('@/models/Account');
+  const requester = await Account.findOne({ email: session.user.email.toLowerCase() });
+
+  if (!requester || !requester.roles.includes('client')) {
+    return { error: 'Client account not found.' };
+  }
+
+  const baseClientAccountId = requester.linkedClientAccountId
+    ? requester.linkedClientAccountId.toString()
+    : requester._id.toString();
+
+  try {
+    await createLinkedClientAccountUser({
+      baseClientAccountId,
+      fullName,
+      email,
+      phone: requester.phoneNumber,
+      companyName: requester.clientProfile?.companyName,
+    });
+  } catch (error: any) {
+    return { error: error?.message || 'Failed to add user.' };
+  }
+
+  revalidatePath('/portal/client/settings/profile');
+  return { success: true };
+}
+
 // ─── Dashboard Data ────────────────────────────────────────────────────────────
 
 export async function getClientDashboardData() {
@@ -400,7 +513,7 @@ export async function getClientProfile() {
   const session = await getClientSession();
   await dbConnect();
   const { Account } = await import('@/models/Account');
-  const account = await Account.findById(session.user.id).lean();
+  const account = await Account.findById(session.user.accountId || session.user.id).lean();
   if (!account) return null;
   return JSON.parse(JSON.stringify(account));
 }
@@ -415,7 +528,7 @@ export async function updateClientProfile(prevState: unknown, formData: FormData
   const { Account } = await import('@/models/Account');
 
   await Account.updateOne(
-    { _id: session.user.id },
+    { _id: session.user.accountId || session.user.id },
     {
       $set: {
         fullName: formData.get('name'),
@@ -473,14 +586,17 @@ export async function updateClientPassword(prevState: unknown, formData: FormDat
 
   await dbConnect();
   const { Account } = await import('@/models/Account');
-  const account = await Account.findById(session.user.id);
+  const account = await Account.findById(session.user.accountId || session.user.id);
   if (!account) return { error: 'Account not found.' };
 
   const valid = await bcrypt.compare(currentPassword, account.passwordHash);
   if (!valid) return { error: 'Current password is incorrect.' };
 
   const newHash = await bcrypt.hash(newPassword, 12);
-  await Account.updateOne({ _id: session.user.id }, { $set: { passwordHash: newHash } });
+  await Account.updateOne(
+    { _id: session.user.accountId || session.user.id },
+    { $set: { passwordHash: newHash } }
+  );
 
   return { success: true };
 }

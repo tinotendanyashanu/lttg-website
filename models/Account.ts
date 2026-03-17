@@ -5,6 +5,7 @@ export interface IAccount extends Document {
   email: string;
   passwordHash: string;
   roles: string[];
+  linkedClientAccountId?: mongoose.Types.ObjectId;
   teamId?: mongoose.Types.ObjectId;
   isActive: boolean;
   profileImageUrl?: string;
@@ -38,6 +39,7 @@ const AccountSchema: Schema = new Schema({
   email: { type: String, required: true, unique: true },
   passwordHash: { type: String, required: true },
   roles: { type: [String], default: [] },
+  linkedClientAccountId: { type: Schema.Types.ObjectId, ref: 'Account' },
   teamId: { type: Schema.Types.ObjectId, ref: 'Team' },
   isActive: { type: Boolean, default: true },
   profileImageUrl: { type: String },
@@ -65,6 +67,8 @@ const AccountSchema: Schema = new Schema({
   },
   passwordSetupRequired: { type: Boolean, default: false },
 });
+
+AccountSchema.index({ linkedClientAccountId: 1 });
 
 export const Account: Model<IAccount> =
   mongoose.models.Account || mongoose.model<IAccount>('Account', AccountSchema);

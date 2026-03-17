@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { Session } from "next-auth";
 import { signOut } from "next-auth/react";
 import Image from "next/image";
+import AdminNotificationBell from './AdminNotificationBell';
 
 export default function PortalShell({
   children,
@@ -337,7 +338,8 @@ export default function PortalShell({
                 )}
               </div>
               
-              <div className="flex items-center gap-3 ml-2">
+              <div className="flex items-center gap-2 ml-2">
+                {isAdmin && <AdminNotificationBell />}
                 <div className="text-right hidden sm:block">
                   <div className="text-sm font-semibold text-gray-900 dark:text-white leading-tight">
                     {user?.name || user?.email?.split('@')[0]}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState } from 'react';
-import { updateClientProfile, updateClientPassword } from '@/lib/actions/client';
+import { addClientAccountUser, updateClientProfile, updateClientPassword } from '@/lib/actions/client';
 
 export default function ProfileSettingsClient({
   initialName,
@@ -14,6 +14,7 @@ export default function ProfileSettingsClient({
 }) {
   const [profileState, profileAction, profilePending] = useActionState(updateClientProfile, null);
   const [pwState, pwAction, pwPending] = useActionState(updateClientPassword, null);
+  const [addUserState, addUserAction, addUserPending] = useActionState(addClientAccountUser, null);
 
   return (
     <div className="space-y-6">
@@ -126,6 +127,62 @@ export default function ProfileSettingsClient({
           {pwPending ? (
             <><span className="material-icons-outlined text-[16px] animate-spin">refresh</span>Updating...</>
           ) : 'Update Password'}
+        </button>
+      </form>
+
+      {/* Shared Access */}
+      <form action={addUserAction} className="bg-white dark:bg-[#27272a] rounded-2xl shadow-soft border border-gray-100 dark:border-gray-800 p-6 space-y-5">
+        <h3 className="font-semibold text-gray-900 dark:text-white">Add Another Account User</h3>
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          Invite another email to access this client account. They will receive a setup link by email.
+        </p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">
+              Full Name
+            </label>
+            <input
+              name="fullName"
+              type="text"
+              placeholder="Jane Doe"
+              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#18181b] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white transition-shadow"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">
+              Email
+            </label>
+            <input
+              name="email"
+              type="email"
+              placeholder="jane@company.com"
+              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#18181b] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white transition-shadow"
+            />
+          </div>
+        </div>
+
+        {addUserState?.success && (
+          <p className="text-sm text-green-600 dark:text-green-400 flex items-center gap-1.5">
+            <span className="material-icons-outlined text-[16px]">check_circle</span>
+            User invited successfully
+          </p>
+        )}
+        {addUserState?.error && (
+          <p className="text-sm text-red-500 flex items-center gap-1.5">
+            <span className="material-icons-outlined text-[16px]">error_outline</span>
+            {addUserState.error}
+          </p>
+        )}
+
+        <button
+          type="submit"
+          disabled={addUserPending}
+          className="inline-flex items-center gap-2 bg-[#2F2F2F] hover:bg-[#4a4a4a] disabled:opacity-50 text-white rounded-full px-5 py-2.5 text-sm font-medium transition-colors"
+        >
+          {addUserPending ? (
+            <><span className="material-icons-outlined text-[16px] animate-spin">refresh</span>Sending Invite...</>
+          ) : 'Invite User'}
         </button>
       </form>
     </div>

@@ -6,6 +6,7 @@ import dbConnect from '@/lib/mongodb';
 import { ActivityLog } from '@/models/ActivityLog';
 import Lead from '@/models/Lead';
 import { createClientAccount } from '@/lib/actions/client';
+import { createLinkedClientAccountUser } from '@/lib/actions/client';
 import { Account } from '@/models/Account';
 import { PasswordSetupToken } from '@/models/PasswordSetupToken';
 import { sendEmail, EmailTemplates } from '@/lib/email';
@@ -136,16 +137,43 @@ async function generatePortalSetupLink(accountId: string, email: string): Promis
   return `${baseUrl}/portal/setup-password?token=${token}`;
 }
 
+async function ensureLeadPortalAccount(lead: any) {
+  const leadId = (lead?._id || '').toString();
+  if (!leadId) throw new Error('Client not found');
+
+  if (lead.accountId) {
+    const existingLinked = await Account.findById(lead.accountId._id ?? lead.accountId);
+    if (existingLinked) return existingLinked;
+  }
+
+  const email = (lead.clientEmail || lead.email || '').toString().trim().toLowerCase();
+  if (!email) throw new Error('Client has no email address on record.');
+
+  let account = await Account.findOne({ email, roles: 'client' });
+
+  if (!account) {
+    const created = await createClientAccount({
+      fullName: lead.contactName || lead.clientName || lead.businessName || 'Client',
+      email,
+      phone: lead.phone || lead.clientPhone,
+      companyName: lead.businessName,
+    });
+    account = await Account.findById(created.accountId);
+  }
+
+  if (!account) throw new Error('Unable to provision client portal account.');
+
+  await Lead.findByIdAndUpdate(leadId, { $set: { accountId: account._id } });
+  return account;
+}
+
 export async function resetClientPortalPassword(clientId: string) {
   await dbConnect();
   const admin = await requireAdmin();
 
   const lead = await Lead.findById(clientId).populate('accountId').lean() as any;
   if (!lead) throw new Error('Client not found');
-  if (!lead.accountId) throw new Error('This client has no portal account.');
-
-  const account = await Account.findById(lead.accountId._id ?? lead.accountId);
-  if (!account) throw new Error('Portal account not found');
+  const account = await ensureLeadPortalAccount(lead);
 
   const setupLink = await generatePortalSetupLink(account._id.toString(), account.email);
 
@@ -156,6 +184,7 @@ export async function resetClientPortalPassword(clientId: string) {
   });
 
   await ActivityLog.create({
+    caseId: lead._id,
     actorAccountId: admin._id,
     actionType: 'password_reset_by_admin',
     newValue: `Portal password reset link sent to client: ${account.email}`,
@@ -170,10 +199,7 @@ export async function resendClientPortalInvite(clientId: string) {
 
   const lead = await Lead.findById(clientId).populate('accountId').lean() as any;
   if (!lead) throw new Error('Client not found');
-  if (!lead.accountId) throw new Error('This client has no portal account.');
-
-  const account = await Account.findById(lead.accountId._id ?? lead.accountId);
-  if (!account) throw new Error('Portal account not found');
+  const account = await ensureLeadPortalAccount(lead);
 
   const setupLink = await generatePortalSetupLink(account._id.toString(), account.email);
 
@@ -184,6 +210,7 @@ export async function resendClientPortalInvite(clientId: string) {
   });
 
   await ActivityLog.create({
+    caseId: lead._id,
     actorAccountId: admin._id,
     actionType: 'client_updated',
     newValue: `Portal invite resent to: ${account.email}`,
@@ -198,28 +225,16 @@ export async function createPortalAccountForClient(clientId: string) {
 
   const lead = await Lead.findById(clientId).lean() as any;
   if (!lead) throw new Error('Client not found');
-  if (lead.accountId) throw new Error('This client already has a portal account.');
-
-  const email = lead.clientEmail || lead.email;
-  if (!email) throw new Error('Client has no email address on record.');
-
-  const result = await createClientAccount({
-    fullName: lead.contactName || lead.clientName || lead.businessName || 'Client',
-    email,
-    phone: lead.phone || lead.clientPhone,
-    companyName: lead.businessName,
-  });
-
-  // Link the new account back to the lead
-  await Lead.findByIdAndUpdate(clientId, { $set: { accountId: result.accountId } });
+  const account = await ensureLeadPortalAccount(lead);
 
   await ActivityLog.create({
+    caseId: lead._id,
     actorAccountId: admin._id,
     actionType: 'client_created',
-    newValue: `Portal account created for client: ${email}`,
+    newValue: `Portal account ensured for client: ${account.email}`,
   });
 
-  return { success: true, accountId: result.accountId };
+  return { success: true, accountId: account._id.toString() };
 }
 
 export async function toggleClientPortalStatus(clientId: string) {
@@ -228,22 +243,88 @@ export async function toggleClientPortalStatus(clientId: string) {
 
   const lead = await Lead.findById(clientId).populate('accountId').lean() as any;
   if (!lead) throw new Error('Client not found');
-  if (!lead.accountId) throw new Error('This client has no portal account.');
+  const account = await ensureLeadPortalAccount(lead);
 
-  const accountId = lead.accountId._id ?? lead.accountId;
-  const account = await Account.findById(accountId);
-  if (!account) throw new Error('Portal account not found');
+  const accountId = account._id;
 
   const newStatus = !account.isActive;
   await Account.findByIdAndUpdate(accountId, { $set: { isActive: newStatus } });
 
   await ActivityLog.create({
+    caseId: lead._id,
     actorAccountId: admin._id,
     actionType: 'user_updated',
     newValue: `Client portal ${newStatus ? 'activated' : 'suspended'}: ${account.email}`,
   });
 
   return { success: true, isActive: newStatus };
+}
+
+export async function addClientPortalUser(clientId: string, data: { fullName: string; email: string }) {
+  await dbConnect();
+  const admin = await requireAdmin();
+
+  const lead = await Lead.findById(clientId).populate('accountId').lean() as any;
+  if (!lead) throw new Error('Client not found');
+  const baseAccount = await ensureLeadPortalAccount(lead);
+  const baseAccountId = baseAccount._id.toString();
+
+  const result = await createLinkedClientAccountUser({
+    baseClientAccountId: baseAccountId,
+    fullName: data.fullName?.trim(),
+    email: data.email?.trim().toLowerCase(),
+    phone: lead.phone || lead.clientPhone,
+    companyName: lead.businessName,
+  });
+
+  await ActivityLog.create({
+    caseId: lead._id,
+    actorAccountId: admin._id,
+    actionType: 'client_updated',
+    newValue: `Additional portal user invited for client ${lead.businessName || lead.contactName}: ${result.email}`,
+  });
+
+  return {
+    success: true,
+    baseAccount: {
+      _id: baseAccount._id.toString(),
+      email: baseAccount.email,
+      isActive: baseAccount.isActive,
+    },
+    user: { _id: result.accountId, email: result.email, fullName: data.fullName },
+  };
+}
+
+export async function getClientPortalUsers(clientId: string) {
+  await dbConnect();
+  await requireAdmin();
+
+  const lead = await Lead.findById(clientId).populate('accountId').lean() as any;
+  if (!lead) throw new Error('Client not found');
+
+  const baseAccount = await ensureLeadPortalAccount(lead);
+
+  const accounts = await Account.find({
+    $or: [
+      { _id: baseAccount._id },
+      { linkedClientAccountId: baseAccount._id },
+    ],
+  })
+    .sort({ createdAt: 1 })
+    .lean();
+
+  return {
+    success: true,
+    users: JSON.parse(JSON.stringify(accounts.map((account: any) => ({
+      _id: account._id.toString(),
+      fullName: account.fullName,
+      email: account.email,
+      isActive: account.isActive,
+      isPrimary: account._id.toString() === baseAccount._id.toString(),
+      linkedClientAccountId: account.linkedClientAccountId?.toString() || null,
+      createdAt: account.createdAt,
+    })))),
+  };
 }
 
 // ── Smart client duplicate check ──────────────────────────────────────────────

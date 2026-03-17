@@ -133,6 +133,7 @@ export const authConfig = {
       if (user) {
         token.role = user.role;
         token.id = user.id;
+        token.accountId = user.accountId;
         token.tier = user.tier;
         // Propagate our custom boolean verification field
         token.isEmailVerified = user.isEmailVerified;
@@ -143,6 +144,7 @@ export const authConfig = {
       if (token && session.user) {
         session.user.role = token.role;
         session.user.id = token.id as string;
+        session.user.accountId = token.accountId as string;
         session.user.tier = token.tier;
         session.user.isEmailVerified = token.isEmailVerified;
       }

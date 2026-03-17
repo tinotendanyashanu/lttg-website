@@ -69,7 +69,19 @@ export default async function AdminInvoicesPage() {
         icon="receipt_long"
         title="Client Invoices"
         description="Create, send, and manage all client invoices. Invoices appear instantly in the client portal."
-        action={<CreateInvoiceModal clients={clients} />}
+        action={
+          <div className="flex items-center gap-2">
+            <a
+              href="/api/admin/export/invoices"
+              download
+              className="flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+            >
+              <span className="material-icons-outlined text-[18px]">download</span>
+              Export CSV
+            </a>
+            <CreateInvoiceModal clients={clients} />
+          </div>
+        }
       />
 
       {/* Summary cards */}

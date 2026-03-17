@@ -6,6 +6,23 @@ import { useRouter } from 'next/navigation';
 import CaseActivityTimeline from '@/components/admin/CaseActivityTimeline';
 import InternalNotesPanel from '@/components/admin/InternalNotesPanel';
 
+// SLA: days since last update — drives the staleness badge
+function getSLAStatus(updatedAt: string, status: string): { label: string; color: string } | null {
+  if (status === 'closed') return null;
+  const days = (Date.now() - new Date(updatedAt).getTime()) / (1000 * 60 * 60 * 24);
+  if (days >= 7) return { label: `${Math.floor(days)}d inactive`, color: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' };
+  if (days >= 3) return { label: `${Math.floor(days)}d no update`, color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' };
+  return null;
+}
+
+const URGENCY_COLORS: Record<string, string> = {
+  low:      'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400',
+  medium:   'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+  high:     'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+  urgent:   'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+  critical: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+};
+
 export default function CaseClientView({ initialCases, users }: { initialCases: any[], users: any[] }) {
   const router = useRouter();
   const [cases, setCases] = useState(initialCases);
@@ -14,6 +31,7 @@ export default function CaseClientView({ initialCases, users }: { initialCases: 
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterOwner, setFilterOwner] = useState('all');
   const [filterParticipant, setFilterParticipant] = useState('all');
+  const [filterSLA, setFilterSLA] = useState('all');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   
@@ -49,17 +67,23 @@ export default function CaseClientView({ initialCases, users }: { initialCases: 
       if (filterStatus !== 'all' && c.status !== filterStatus) return false;
       if (filterOwner !== 'all' && c.ownerId?._id !== filterOwner) return false;
       if (filterParticipant !== 'all' && !c.participants?.some((p: any) => p._id === filterParticipant)) return false;
-      
+
+      if (filterSLA !== 'all') {
+        const days = (Date.now() - new Date(c.updatedAt).getTime()) / (1000 * 60 * 60 * 24);
+        if (filterSLA === 'stale' && (days < 3 || c.status === 'closed')) return false;
+        if (filterSLA === 'inactive' && (days < 7 || c.status === 'closed')) return false;
+      }
+
       if (startDate && new Date(c.createdAt) < new Date(startDate)) return false;
       if (endDate) {
          const end = new Date(endDate);
          end.setHours(23, 59, 59, 999);
          if (new Date(c.createdAt) > end) return false;
       }
-      
+
       return true;
     });
-  }, [cases, filterStatus, filterOwner, filterParticipant, startDate, endDate]);
+  }, [cases, filterStatus, filterOwner, filterParticipant, filterSLA, startDate, endDate]);
 
   const uniqueOwners = useMemo(() => {
      const owners = new Map();
@@ -178,8 +202,8 @@ export default function CaseClientView({ initialCases, users }: { initialCases: 
                 <option key={id} value={id}>{name}</option>
              ))}
           </select>
-          <select 
-            value={filterParticipant} 
+          <select
+            value={filterParticipant}
             onChange={e => setFilterParticipant(e.target.value)}
             className="px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
           >
@@ -187,6 +211,15 @@ export default function CaseClientView({ initialCases, users }: { initialCases: 
              {users.map((u: any) => (
                 <option key={u._id} value={u._id}>{u.fullName || u.email}</option>
              ))}
+          </select>
+          <select
+            value={filterSLA}
+            onChange={e => setFilterSLA(e.target.value)}
+            className="px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
+          >
+            <option value="all">All Activity</option>
+            <option value="stale">Stale (3+ days)</option>
+            <option value="inactive">Inactive (7+ days)</option>
           </select>
           <div className="flex items-center gap-2">
              <span className="text-xs text-gray-500 font-medium">From:</span>
@@ -226,9 +259,25 @@ export default function CaseClientView({ initialCases, users }: { initialCases: 
                             <h3 className="font-semibold text-lg text-gray-900 dark:text-white">{c.businessName || 'Unnamed Business'}</h3>
                             <p className="text-sm text-gray-500 dark:text-gray-400">{c.contactName} • {c.email} • {c.serviceInterest}</p>
                          </div>
-                         <span className={`px-2.5 py-1 rounded-full text-xs font-medium capitalize ${c.status === 'closed' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : c.status === 'needs_assistance' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'}`}>
-                            {c.status.replace('_', ' ')}
-                         </span>
+                         <div className="flex items-center gap-1.5 flex-wrap justify-end">
+                           {c.urgencyLevel && (
+                             <span className={`px-2 py-0.5 rounded-full text-[11px] font-medium capitalize ${URGENCY_COLORS[c.urgencyLevel.toLowerCase()] || URGENCY_COLORS.medium}`}>
+                               {c.urgencyLevel}
+                             </span>
+                           )}
+                           {(() => {
+                             const sla = getSLAStatus(c.updatedAt, c.status);
+                             return sla ? (
+                               <span className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium ${sla.color}`}>
+                                 <span className="material-icons-outlined text-[11px]">schedule</span>
+                                 {sla.label}
+                               </span>
+                             ) : null;
+                           })()}
+                           <span className={`px-2.5 py-1 rounded-full text-xs font-medium capitalize ${c.status === 'closed' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : c.status === 'needs_assistance' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'}`}>
+                             {c.status.replace('_', ' ')}
+                           </span>
+                         </div>
                       </div>
                       <div className="flex flex-wrap gap-4 text-sm mt-4">
                          <div className="flex items-center gap-1.5 text-gray-600 dark:text-gray-300">
