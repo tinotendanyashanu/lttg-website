@@ -37,7 +37,7 @@ async function getInvoices() {
 async function getClients() {
   await dbConnect();
   const clients = await Account.find(
-    { roles: 'client', isActive: true },
+    { roles: 'client', isActive: true, linkedClientAccountId: { $exists: false } },
     'fullName email'
   ).sort({ fullName: 1 }).lean();
   return clients.map((c: any) => ({ _id: String(c._id), fullName: c.fullName, email: c.email }));

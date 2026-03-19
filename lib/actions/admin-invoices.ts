@@ -22,7 +22,7 @@ export async function getClientsForInvoice() {
   await checkAdmin();
   await dbConnect();
   const { Account } = await import('@/models/Account');
-  const clients = await Account.find({ roles: 'client', isActive: true }, 'fullName email').sort({ fullName: 1 }).lean();
+  const clients = await Account.find({ roles: 'client', isActive: true, linkedClientAccountId: { $exists: false } }, 'fullName email').sort({ fullName: 1 }).lean();
   return JSON.parse(JSON.stringify(clients));
 }
 
@@ -87,9 +87,12 @@ export async function createAdminInvoice(data: {
   const { ClientNotification } = await import('@/models/ClientNotification');
   const AuditLog = (await import('@/models/AuditLog')).default;
 
-  // Verify client exists
+  // Verify client exists and resolve to primary account
   const client = await Account.findOne({ _id: data.clientId, roles: 'client' });
   if (!client) throw new Error('Client not found');
+  const resolvedClientId = client.linkedClientAccountId
+    ? client.linkedClientAccountId.toString()
+    : data.clientId;
 
   // Generate invoice number
   const count = await ClientInvoice.countDocuments();
@@ -113,7 +116,7 @@ export async function createAdminInvoice(data: {
 
   const invoice = await ClientInvoice.create({
     invoiceNumber,
-    clientId: data.clientId,
+    clientId: resolvedClientId,
     caseId: data.caseId || undefined,
     amount,
     currency,
@@ -150,7 +153,7 @@ export async function createAdminInvoice(data: {
     entityId: invoice._id,
     action: 'invoice_created',
     performedBy: admin.id,
-    details: { invoiceNumber, clientId: data.clientId, amount, status: data.status },
+    details: { invoiceNumber, clientId: resolvedClientId, amount, status: data.status },
     metadata: { invoiceNumber, amount, currency, status: data.status },
   });
 
@@ -162,7 +165,7 @@ export async function createAdminInvoice(data: {
 
     // In-app notification
     await ClientNotification.create({
-      clientId: data.clientId,
+      clientId: resolvedClientId,
       type: 'invoice_alert',
       title: `New Invoice: ${invoiceNumber}`,
       message: `A new invoice for ${currency} ${amount.toFixed(2)} has been issued to your account.${dueLabel ? ` Due: ${dueLabel}.` : ''}`,

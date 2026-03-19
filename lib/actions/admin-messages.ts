@@ -149,11 +149,14 @@ export async function adminCreateThread(
 
   const client = await Account.findOne({ _id: clientId, roles: 'client' });
   if (!client) throw new Error('Client not found');
+  const resolvedClientId = client.linkedClientAccountId
+    ? client.linkedClientAccountId.toString()
+    : clientId;
 
   const thread = await MessageThread.create({
-    clientId,
+    clientId: resolvedClientId,
     subject: subject.trim(),
-    participants: [admin.id as string, clientId],
+    participants: [admin.id as string, resolvedClientId],
     lastMessageAt: new Date(),
     lastMessagePreview: firstMessage.substring(0, 80),
     unreadByClient: 1,
@@ -172,7 +175,7 @@ export async function adminCreateThread(
   });
 
   await ClientNotification.create({
-    clientId,
+    clientId: resolvedClientId,
     type: 'new_message',
     title: subject,
     message: firstMessage.substring(0, 100),

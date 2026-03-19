@@ -174,13 +174,16 @@ export async function adminCreateTicket(data: {
 
   const client = await Account.findOne({ _id: data.clientId, roles: 'client' }).lean();
   if (!client) throw new Error('Client not found');
+  const resolvedClientId = (client as any).linkedClientAccountId
+    ? (client as any).linkedClientAccountId.toString()
+    : data.clientId;
 
   const count = await SupportTicket.countDocuments();
   const ticketId = `TKT-${String(count + 1).padStart(5, '0')}`;
 
   const ticket = await SupportTicket.create({
     ticketId,
-    clientId: data.clientId,
+    clientId: resolvedClientId,
     subject: data.subject,
     description: data.description,
     priority: data.priority || 'medium',
@@ -189,7 +192,7 @@ export async function adminCreateTicket(data: {
   });
 
   await ClientNotification.create({
-    clientId: data.clientId,
+    clientId: resolvedClientId,
     type: 'ticket_response',
     title: `New Support Ticket: ${ticketId}`,
     message: `A support ticket has been created for you: "${data.subject}". You can view it in your portal.`,
@@ -201,7 +204,7 @@ export async function adminCreateTicket(data: {
     entityId: ticket._id,
     action: 'admin_created_ticket',
     performedBy: admin.id,
-    details: { ticketId, clientId: data.clientId, subject: data.subject },
+    details: { ticketId, clientId: resolvedClientId, subject: data.subject },
     metadata: { ticketId, subject: data.subject },
   });
 

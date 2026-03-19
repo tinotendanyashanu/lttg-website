@@ -20,7 +20,7 @@ async function getThreadsData() {
   }
 
   const totalUnread = threads.reduce((s: number, t: any) => s + (t.unreadByTeam || 0), 0);
-  const clients = await Account.find({ roles: 'client', isActive: true }, 'fullName email').sort({ fullName: 1 }).lean();
+  const clients = await Account.find({ roles: 'client', isActive: true, linkedClientAccountId: { $exists: false } }, 'fullName email').sort({ fullName: 1 }).lean();
 
   return { threads, accountMap, totalUnread, clients };
 }

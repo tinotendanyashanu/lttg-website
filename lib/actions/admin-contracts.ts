@@ -22,7 +22,7 @@ export async function getClientsForContract() {
   await checkAdmin();
   await dbConnect();
   const { Account } = await import('@/models/Account');
-  const clients = await Account.find({ roles: 'client', isActive: true }, 'fullName email').sort({ fullName: 1 }).lean();
+  const clients = await Account.find({ roles: 'client', isActive: true, linkedClientAccountId: { $exists: false } }, 'fullName email').sort({ fullName: 1 }).lean();
   return JSON.parse(JSON.stringify(clients));
 }
 
@@ -89,6 +89,9 @@ export async function createAdminContract(data: {
 
   const client = await Account.findOne({ _id: data.clientId, roles: 'client' });
   if (!client) throw new Error('Client not found');
+  const resolvedClientId = client.linkedClientAccountId
+    ? client.linkedClientAccountId.toString()
+    : data.clientId;
 
   const count = await ClientContract.countDocuments();
   const year = new Date().getFullYear();
@@ -96,7 +99,7 @@ export async function createAdminContract(data: {
 
   const contract = await ClientContract.create({
     contractNumber,
-    clientId: data.clientId,
+    clientId: resolvedClientId,
     caseId: data.caseId || undefined,
     title: data.title.trim(),
     type: data.type?.trim() || 'Service Agreement',
@@ -114,7 +117,7 @@ export async function createAdminContract(data: {
     entityId: contract._id,
     action: 'contract_created',
     performedBy: admin.id,
-    details: { contractNumber, clientId: data.clientId, status: data.status },
+    details: { contractNumber, clientId: resolvedClientId, status: data.status },
     metadata: { contractNumber, title: data.title, status: data.status },
   });
 
@@ -122,7 +125,7 @@ export async function createAdminContract(data: {
 
   if (data.status === 'sent') {
     await ClientNotification.create({
-      clientId: data.clientId,
+      clientId: resolvedClientId,
       type: 'contract_alert',
       title: `New Contract Ready: ${contractNumber}`,
       message: `A new contract "${data.title}" has been sent to you for review and signature.`,

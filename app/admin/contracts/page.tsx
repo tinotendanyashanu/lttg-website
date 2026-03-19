@@ -41,7 +41,7 @@ async function getContracts() {
 async function getClients() {
   await dbConnect();
   const { Account } = await import('@/models/Account');
-  const clients = await Account.find({ roles: 'client', isActive: true }, 'fullName email').sort({ fullName: 1 }).lean();
+  const clients = await Account.find({ roles: 'client', isActive: true, linkedClientAccountId: { $exists: false } }, 'fullName email').sort({ fullName: 1 }).lean();
   return clients.map((c: any) => ({ _id: String(c._id), fullName: c.fullName, email: c.email }));
 }
 
