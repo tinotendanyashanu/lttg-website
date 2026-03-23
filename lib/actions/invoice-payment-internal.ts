@@ -73,7 +73,6 @@ export async function recordPaymentFromWebhook(
       const { ActivityLog } = await import('@/models/ActivityLog');
       await ActivityLog.create({
         caseId: invoice.caseId,
-        actorAccountId: null,
         actionType: 'payment_received',
         newValue: `${invoice.currency} ${payload.amount.toFixed(2)} via ${payload.method}`,
       });
