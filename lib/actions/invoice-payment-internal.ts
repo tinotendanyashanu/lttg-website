@@ -67,6 +67,38 @@ export async function recordPaymentFromWebhook(
 
   await invoice.save();
 
+  // Send receipt email to client
+  if (isFullyPaid) {
+    try {
+      const { Account } = await import('@/models/Account');
+      const { sendEmail, EmailTemplates } = await import('@/lib/email');
+      const account = await Account.findById(invoice.clientId, 'fullName email').lean();
+      if (account?.email) {
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://leothetechguy.com';
+        const portalLink = `${appUrl}/portal/client/invoices/${invoiceId}`;
+        const paidDateLabel = new Date(invoice.paidAt!).toLocaleDateString('en-US', {
+          year: 'numeric', month: 'long', day: 'numeric',
+        });
+        const serviceFee = Math.round(invoice.amount * 0.015 * 100) / 100;
+        await sendEmail({
+          to: account.email,
+          subject: `Receipt — ${invoice.invoiceNumber} (Paid)`,
+          html: EmailTemplates.paymentReceived(
+            account.fullName || 'Valued Client',
+            invoice.invoiceNumber,
+            invoice.amount,
+            serviceFee,
+            invoice.currency || 'USD',
+            paidDateLabel,
+            invoice.lineItems || [],
+            payload.method,
+            portalLink,
+          ),
+        });
+      }
+    } catch (_) {}
+  }
+
   // Log to case activity timeline if linked
   if (invoice.caseId) {
     try {

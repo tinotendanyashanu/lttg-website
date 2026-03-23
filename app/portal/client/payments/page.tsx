@@ -52,7 +52,7 @@ export default async function PaymentsPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100 dark:border-gray-800">
-                  {['Invoice #', 'Description', 'Amount', 'Date', ''].map((h) => (
+                  {['Invoice #', 'Description', 'Amount', 'Date', 'Documents'].map((h) => (
                     <th
                       key={h}
                       className="px-6 py-3.5 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider"
@@ -78,12 +78,22 @@ export default async function PaymentsPage() {
                       {p.paidAt ? new Date(p.paidAt).toLocaleDateString() : '—'}
                     </td>
                     <td className="px-6 py-4">
-                      <Link
-                        href={`/portal/client/invoices/${p._id}`}
-                        className="text-blue-600 dark:text-blue-400 hover:underline text-xs font-medium"
-                      >
-                        Invoice
-                      </Link>
+                      <div className="flex items-center gap-3">
+                        <Link
+                          href={`/portal/client/invoices/${p._id}`}
+                          className="text-emerald-600 dark:text-emerald-400 hover:underline text-xs font-medium"
+                        >
+                          Receipt
+                        </Link>
+                        <Link
+                          href={`/portal/client/invoices/${p._id}/print`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-gray-400 hover:underline text-xs"
+                        >
+                          Print
+                        </Link>
+                      </div>
                     </td>
                   </tr>
                 ))}

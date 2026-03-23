@@ -8,6 +8,7 @@ import StripePaymentForm from '@/components/stripe/StripePaymentForm';
 export const dynamic = 'force-dynamic';
 
 const PAYABLE_STATUSES = ['issued', 'sent', 'partially_paid', 'overdue'];
+const SERVICE_FEE_RATE = 0.015;
 
 async function getInvoiceForPayment(clientId: string, invoiceId: string) {
   try {
@@ -43,10 +44,12 @@ export default async function PayInvoicePage({
   }
 
   const amountToCharge = invoice.remainingBalance ?? invoice.amount;
+  const serviceFee = Math.round(amountToCharge * SERVICE_FEE_RATE * 100) / 100;
+  const totalCharged = Math.round((amountToCharge + serviceFee) * 100) / 100;
   const currency = (invoice.currency || 'USD').toLowerCase();
 
   const paymentIntent = await getStripe().paymentIntents.create({
-    amount: toStripeAmount(amountToCharge),
+    amount: toStripeAmount(totalCharged),
     currency,
     automatic_payment_methods: { enabled: true },
     metadata: {
@@ -54,6 +57,7 @@ export default async function PayInvoicePage({
       clientId: String(invoice.clientId),
       currency: invoice.currency || 'USD',
       amount: String(amountToCharge),
+      serviceFee: String(serviceFee),
     },
   });
 
@@ -99,9 +103,20 @@ export default async function PayInvoicePage({
             <span className="text-emerald-600 dark:text-emerald-400">−{fmt(invoice.amountPaid)}</span>
           </div>
         )}
+        <div className="flex justify-between text-sm">
+          <span className="text-gray-500 dark:text-gray-400">Invoice amount</span>
+          <span className="text-gray-700 dark:text-gray-300">{fmt(amountToCharge)}</span>
+        </div>
+        <div className="flex justify-between text-sm">
+          <span className="text-gray-500 dark:text-gray-400">
+            Service fee (1.5%)
+            <span className="block text-xs text-gray-400 dark:text-gray-500">Applied to all online payments</span>
+          </span>
+          <span className="text-gray-700 dark:text-gray-300">{fmt(serviceFee)}</span>
+        </div>
         <div className="border-t border-gray-100 dark:border-gray-800 pt-2 flex justify-between text-sm font-semibold">
-          <span className="text-gray-900 dark:text-white">Amount due</span>
-          <span className="text-gray-900 dark:text-white">{fmt(amountToCharge)}</span>
+          <span className="text-gray-900 dark:text-white">Total charged</span>
+          <span className="text-gray-900 dark:text-white">{fmt(totalCharged)}</span>
         </div>
       </div>
 
@@ -111,7 +126,7 @@ export default async function PayInvoicePage({
           clientSecret={paymentIntent.client_secret}
           publishableKey={publishableKey}
           returnUrl={returnUrl}
-          amount={amountToCharge}
+          amount={totalCharged}
           currency={invoice.currency || 'USD'}
         />
       </div>

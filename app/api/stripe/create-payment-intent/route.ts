@@ -53,10 +53,13 @@ export async function POST(req: NextRequest) {
 
   // Amount always comes from the database — never from client input
   const amountToCharge = invoice.remainingBalance ?? invoice.amount;
+  const SERVICE_FEE_RATE = 0.015;
+  const serviceFee = Math.round(amountToCharge * SERVICE_FEE_RATE * 100) / 100;
+  const totalCharged = Math.round((amountToCharge + serviceFee) * 100) / 100;
   const currency = (invoice.currency || 'USD').toLowerCase();
 
   const paymentIntent = await getStripe().paymentIntents.create({
-    amount: toStripeAmount(amountToCharge, currency),
+    amount: toStripeAmount(totalCharged, currency),
     currency,
     automatic_payment_methods: { enabled: true },
     metadata: {
@@ -64,6 +67,7 @@ export async function POST(req: NextRequest) {
       clientId: String(invoice.clientId),
       currency: invoice.currency || 'USD',
       amount: String(amountToCharge),
+      serviceFee: String(serviceFee),
     },
   });
 
