@@ -173,6 +173,7 @@ export default function CreateInvoiceModal({ clients }: Props) {
                     <option value="EUR">EUR</option>
                     <option value="GBP">GBP</option>
                     <option value="ZAR">ZAR</option>
+                    <option value="PLN">PLN</option>
                   </select>
                 </div>
                 <div>
