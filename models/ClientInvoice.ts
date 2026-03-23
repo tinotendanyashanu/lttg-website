@@ -40,6 +40,7 @@ export interface IClientInvoice extends Document {
   // Partial payment tracking
   amountPaid: number;
   remainingBalance: number;
+  depositPaid: number;
   paymentHistory: IPaymentHistoryEntry[];
   // Multi-currency: USD equivalent at time of creation/payment
   usdAmount?: number;
@@ -76,6 +77,7 @@ const ClientInvoiceSchema: Schema<IClientInvoice> = new Schema<IClientInvoice>(
     notes: { type: String },
     // Partial payment tracking (backward-compatible: existing docs default to 0 / full amount)
     amountPaid: { type: Number, default: 0 },
+    depositPaid: { type: Number, default: 0 },
     remainingBalance: { type: Number },
     paymentHistory: [
       {
@@ -100,7 +102,7 @@ ClientInvoiceSchema.index({ status: 1 });
 // Keep remainingBalance in sync whenever the document is saved
 ClientInvoiceSchema.pre('save', function (this: IClientInvoice) {
   if (this.remainingBalance === undefined || this.remainingBalance === null) {
-    this.remainingBalance = this.amount - (this.amountPaid ?? 0);
+    this.remainingBalance = this.amount - ((this.depositPaid ?? 0) + (this.amountPaid ?? 0));
   }
 });
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { updateAdminInvoiceStatus, sendInvoiceReminder, deleteAdminInvoice, recordInvoicePayment } from '@/lib/actions/admin-invoices';
+import { updateAdminInvoiceStatus, sendInvoiceReminder, deleteAdminInvoice, recordInvoicePayment, recordInvoiceDeposit } from '@/lib/actions/admin-invoices';
 import { useRouter } from 'next/navigation';
 
 const STATUS_OPTIONS = [
@@ -24,9 +24,10 @@ interface Props {
   invoiceNumber: string;
   currency?: string;
   remainingBalance?: number;
+  depositPaid?: number;
 }
 
-export default function InvoiceActionPanel({ invoiceId, currentStatus, invoiceNumber, currency = 'USD', remainingBalance }: Props) {
+export default function InvoiceActionPanel({ invoiceId, currentStatus, invoiceNumber, currency = 'USD', remainingBalance, depositPaid }: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -37,6 +38,10 @@ export default function InvoiceActionPanel({ invoiceId, currentStatus, invoiceNu
   const [payAmount, setPayAmount] = useState('');
   const [payMethod, setPayMethod] = useState('Bank Transfer');
   const [payNotes, setPayNotes] = useState('');
+
+  // Record Deposit state
+  const [depositAmount, setDepositAmount] = useState('');
+  const [depositNotes, setDepositNotes] = useState('');
 
   function showMsg(type: 'success' | 'error', text: string) {
     setMessage({ type, text });
@@ -79,6 +84,22 @@ export default function InvoiceActionPanel({ invoiceId, currentStatus, invoiceNu
         router.refresh();
       } catch (err: any) {
         showMsg('error', err?.message || 'Failed to record payment.');
+      }
+    });
+  }
+
+  function handleRecordDeposit() {
+    const amount = parseFloat(depositAmount);
+    if (isNaN(amount) || amount <= 0) return showMsg('error', 'Enter a valid deposit amount.');
+    startTransition(async () => {
+      try {
+        const result = await recordInvoiceDeposit(invoiceId, { amount, notes: depositNotes });
+        showMsg('success', `Deposit of ${currency} ${amount.toFixed(2)} recorded. Remaining balance: ${currency} ${result.remainingBalance.toFixed(2)}.`);
+        setDepositAmount('');
+        setDepositNotes('');
+        router.refresh();
+      } catch (err: any) {
+        showMsg('error', err?.message || 'Failed to record deposit.');
       }
     });
   }
@@ -137,6 +158,44 @@ export default function InvoiceActionPanel({ invoiceId, currentStatus, invoiceNu
           </button>
         </div>
       </div>
+
+      {/* Record Deposit */}
+      {currentStatus !== 'paid' && currentStatus !== 'cancelled' && (
+        <div className="bg-white dark:bg-[#27272a] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-soft p-5">
+          <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-1">Record Deposit</h3>
+          {depositPaid !== undefined && (
+            <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">
+              Deposit Paid: <span className="font-semibold text-gray-700 dark:text-gray-300">{currency} {depositPaid.toFixed(2)}</span>
+            </p>
+          )}
+          <div className="space-y-3">
+            <input
+              type="number"
+              min="0.01"
+              step="0.01"
+              placeholder="Deposit amount"
+              value={depositAmount}
+              onChange={(e) => setDepositAmount(e.target.value)}
+              className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1c1c1e] text-gray-900 dark:text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/30"
+            />
+            <input
+              type="text"
+              placeholder="Notes (optional)"
+              value={depositNotes}
+              onChange={(e) => setDepositNotes(e.target.value)}
+              className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1c1c1e] text-gray-900 dark:text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/30"
+            />
+            <button
+              onClick={handleRecordDeposit}
+              disabled={isPending || !depositAmount}
+              className="w-full inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors"
+            >
+              <span className="material-icons-outlined text-[16px]">call_received</span>
+              Record Deposit
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Record Payment */}
       {currentStatus !== 'paid' && currentStatus !== 'cancelled' && (

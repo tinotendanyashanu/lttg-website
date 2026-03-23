@@ -181,14 +181,20 @@ export default async function AdminInvoiceDetailPage({ params }: { params: Promi
           </div>
 
           {/* Payment Progress */}
-          {(invoice.amountPaid > 0 || invoice.status === 'partially_paid') && (
+          {(invoice.amountPaid > 0 || invoice.depositPaid > 0 || invoice.status === 'partially_paid') && (
             <div className="bg-white dark:bg-[#27272a] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-soft p-6">
               <h3 className="text-xs font-bold text-gray-400 dark:text-gray-600 uppercase tracking-wider mb-4">Payment Progress</h3>
-              <div className="grid grid-cols-3 gap-4 mb-4">
+              <div className="grid grid-cols-4 gap-3 mb-4">
                 <div>
                   <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total</p>
                   <p className="text-sm font-bold text-gray-900 dark:text-white tabular-nums">{fmt(invoice.amount)}</p>
                 </div>
+                {invoice.depositPaid > 0 && (
+                  <div>
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Deposit</p>
+                    <p className="text-sm font-bold text-blue-600 tabular-nums">{fmt(invoice.depositPaid)}</p>
+                  </div>
+                )}
                 <div>
                   <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Paid</p>
                   <p className="text-sm font-bold text-emerald-600 tabular-nums">{fmt(invoice.amountPaid ?? 0)}</p>
@@ -202,7 +208,7 @@ export default async function AdminInvoiceDetailPage({ params }: { params: Promi
               <div className="w-full h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-emerald-500 rounded-full transition-all"
-                  style={{ width: `${Math.min(100, ((invoice.amountPaid ?? 0) / invoice.amount) * 100).toFixed(1)}%` }}
+                  style={{ width: `${Math.min(100, (((invoice.depositPaid ?? 0) + (invoice.amountPaid ?? 0)) / invoice.amount) * 100).toFixed(1)}%` }}
                 />
               </div>
             </div>
@@ -273,6 +279,7 @@ export default async function AdminInvoiceDetailPage({ params }: { params: Promi
             invoiceNumber={invoice.invoiceNumber}
             currency={currency}
             remainingBalance={invoice.remainingBalance ?? invoice.amount - (invoice.amountPaid ?? 0)}
+            depositPaid={invoice.depositPaid}
           />
 
           {/* Client Info Card */}

@@ -127,6 +127,7 @@ export async function createAdminInvoice(data: {
     dueAt: data.dueAt ? new Date(data.dueAt) : undefined,
     notes: data.notes?.trim() || undefined,
     amountPaid: 0,
+    depositPaid: 0,
     remainingBalance: amount,
     usdAmount,
     exchangeRateUsed,
@@ -477,3 +478,84 @@ export async function markOverdueInvoices(): Promise<number> {
   return result.modifiedCount;
 }
 
+// ── Record a deposit against an invoice ────────────────────────────────────────
+
+export async function recordInvoiceDeposit(
+  invoiceId: string,
+  payload: { amount: number; notes?: string },
+) {
+  const admin = await checkAdmin();
+  await dbConnect();
+
+  const { ClientInvoice } = await import('@/models/ClientInvoice');
+  const { ClientNotification } = await import('@/models/ClientNotification');
+  const AuditLog = (await import('@/models/AuditLog')).default;
+
+  const invoice = await ClientInvoice.findById(invoiceId);
+  if (!invoice) throw new Error('Invoice not found');
+  if (invoice.status === 'paid' || invoice.status === 'cancelled') {
+    throw new Error('Cannot record deposit for a paid or cancelled invoice.');
+  }
+
+  if (payload.amount <= 0) throw new Error('Deposit amount must be greater than zero.');
+  if (payload.amount > invoice.amount) {
+    throw new Error(`Deposit amount (${payload.amount}) cannot exceed invoice total (${invoice.amount.toFixed(2)}).`);
+  }
+
+  const newDepositPaid = (invoice.depositPaid ?? 0) + payload.amount;
+  const newRemainingBalance = invoice.amount - ((invoice.amountPaid ?? 0) + newDepositPaid);
+
+  invoice.depositPaid = newDepositPaid;
+  invoice.remainingBalance = Math.max(0, newRemainingBalance);
+
+  // Add entry to payment history with deposit notation
+  invoice.paymentHistory.push({
+    amount: payload.amount,
+    currency: invoice.currency || 'USD',
+    method: 'Deposit',
+    notes: (payload.notes?.trim() || 'Deposit paid') + (payload.notes ? '' : ''),
+    ...(admin.id && Types.ObjectId.isValid(admin.id)
+      ? { recordedBy: new Types.ObjectId(admin.id) }
+      : {}),
+    recordedAt: new Date(),
+  });
+
+  await invoice.save();
+
+  // Log to case activity timeline
+  if (invoice.caseId) {
+    try {
+      const { ActivityLog } = await import('@/models/ActivityLog');
+      await ActivityLog.create({
+        caseId: invoice.caseId,
+        actorAccountId: admin.id,
+        actionType: 'deposit_received',
+        newValue: `${invoice.currency} ${payload.amount.toFixed(2)} deposit`,
+      });
+    } catch (_) {}
+  }
+
+  // Client notification
+  await ClientNotification.create({
+    clientId: invoice.clientId,
+    type: 'payment_received',
+    title: `Deposit Recorded — ${invoice.invoiceNumber}`,
+    message: `A deposit of ${invoice.currency} ${payload.amount.toFixed(2)} has been recorded on invoice ${invoice.invoiceNumber}. Remaining balance: ${invoice.currency} ${invoice.remainingBalance.toFixed(2)}.`,
+    actionUrl: `/portal/client/invoices/${invoiceId}`,
+  });
+
+  await AuditLog.create({
+    entityType: 'invoice',
+    entityId: invoiceId,
+    action: 'deposit_recorded',
+    performedBy: admin.id,
+    details: { invoiceNumber: invoice.invoiceNumber, amount: payload.amount },
+    metadata: { invoiceNumber: invoice.invoiceNumber, newDepositPaid, remainingBalance: invoice.remainingBalance },
+  });
+
+  revalidatePath('/admin/invoices');
+  revalidatePath(`/admin/invoices/${invoiceId}`);
+  revalidatePath('/portal/client/invoices');
+  revalidatePath(`/portal/client/invoices/${invoiceId}`);
+  return { success: true, newDepositPaid, remainingBalance: invoice.remainingBalance };
+}

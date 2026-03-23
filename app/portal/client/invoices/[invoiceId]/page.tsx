@@ -67,7 +67,8 @@ export default async function InvoiceDetailPage({
 
   const isPending = ['issued', 'sent', 'overdue', 'partially_paid'].includes(inv.status);
   const amountPaid = inv.amountPaid ?? 0;
-  const remainingBalance = inv.remainingBalance ?? (inv.amount - amountPaid);
+  const depositPaid = inv.depositPaid ?? 0;
+  const remainingBalance = inv.remainingBalance ?? (inv.amount - amountPaid - depositPaid);
   const status = STATUS_STYLES[inv.status] ?? STATUS_STYLES['issued'];
 
   const issuedLabel = inv.issuedAt
@@ -229,14 +230,20 @@ export default async function InvoiceDetailPage({
             </div>
 
             {/* Payment Progress (partially paid) */}
-            {inv.status === 'partially_paid' && amountPaid > 0 && (
+            {inv.status === 'partially_paid' && (amountPaid > 0 || depositPaid > 0) && (
               <div className="bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/30 rounded-xl p-4 print:hidden">
                 <p className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-widest mb-3">Payment Progress</p>
-                <div className="grid grid-cols-3 gap-4 mb-3 text-center">
+                <div className="grid grid-cols-4 gap-4 mb-3 text-center">
                   <div>
                     <p className="text-[10px] text-gray-400 uppercase tracking-widest mb-0.5">Total</p>
                     <p className="text-sm font-bold text-gray-900 dark:text-white tabular-nums">{fmt(inv.amount)}</p>
                   </div>
+                  {depositPaid > 0 && (
+                    <div>
+                      <p className="text-[10px] text-gray-400 uppercase tracking-widest mb-0.5">Deposit</p>
+                      <p className="text-sm font-bold text-blue-600 tabular-nums">{fmt(depositPaid)}</p>
+                    </div>
+                  )}
                   <div>
                     <p className="text-[10px] text-gray-400 uppercase tracking-widest mb-0.5">Paid</p>
                     <p className="text-sm font-bold text-emerald-600 tabular-nums">{fmt(amountPaid)}</p>
@@ -249,7 +256,7 @@ export default async function InvoiceDetailPage({
                 <div className="w-full h-2 bg-amber-100 dark:bg-amber-900/30 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-emerald-500 rounded-full"
-                    style={{ width: `${Math.min(100, (amountPaid / inv.amount) * 100).toFixed(1)}%` }}
+                    style={{ width: `${Math.min(100, ((depositPaid + amountPaid) / inv.amount) * 100).toFixed(1)}%` }}
                   />
                 </div>
               </div>
