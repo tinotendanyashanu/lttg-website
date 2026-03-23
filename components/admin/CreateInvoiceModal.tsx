@@ -28,6 +28,7 @@ export default function CreateInvoiceModal({ clients }: Props) {
   const [currency, setCurrency] = useState('USD');
   const [issuedAt, setIssuedAt] = useState(new Date().toISOString().slice(0, 10));
   const [dueAt, setDueAt] = useState('');
+  const [depositPaid, setDepositPaid] = useState('');
   const [lineItems, setLineItems] = useState<LineItem[]>([{ ...EMPTY_LINE_ITEM }]);
 
   const total = lineItems.reduce((s, i) => s + i.total, 0);
@@ -63,6 +64,7 @@ export default function CreateInvoiceModal({ clients }: Props) {
     setCurrency('USD');
     setIssuedAt(new Date().toISOString().slice(0, 10));
     setDueAt('');
+    setDepositPaid('');
     setLineItems([{ ...EMPTY_LINE_ITEM }]);
   }
 
@@ -90,6 +92,7 @@ export default function CreateInvoiceModal({ clients }: Props) {
           issuedAt: issuedAt || undefined,
           dueAt: dueAt || undefined,
           notes: notes || undefined,
+          depositPaid: depositPaid ? parseFloat(depositPaid) : undefined,
         });
         if (result.success) {
           setSuccess(`Invoice ${result.invoiceNumber} created successfully.${status !== 'draft' ? ' Email sent to client.' : ''}`);
@@ -278,6 +281,23 @@ export default function CreateInvoiceModal({ clients }: Props) {
                     </div>
                     <div className="col-span-1" />
                   </div>
+                </div>
+              </div>
+
+              {/* Deposit Paid (optional) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">Deposit Paid (optional)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={depositPaid}
+                    onChange={(e) => setDepositPaid(e.target.value)}
+                    placeholder="0.00"
+                    className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#27272a] text-gray-900 dark:text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/30"
+                  />
+                  <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-1">Deposit already paid by client. Will be deducted from amount due.</p>
                 </div>
               </div>
 

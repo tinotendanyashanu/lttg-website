@@ -1,5 +1,4 @@
 import dbConnect from '@/lib/mongodb';
-import AdminPageBanner from '@/components/admin/AdminPageBanner';
 import CreateContractModal from '@/components/admin/CreateContractModal';
 import Link from 'next/link';
 
@@ -22,7 +21,6 @@ async function getContracts() {
   const { Account } = await import('@/models/Account');
 
   const contracts = await ClientContract.find().sort({ createdAt: -1 }).limit(200).lean();
-
   const clientIds = [...new Set(contracts.map((c: any) => String(c.clientId)))];
   const accounts = await Account.find({ _id: { $in: clientIds } }, 'fullName email').lean();
   const accountMap: Record<string, { fullName?: string; email: string }> = {};
@@ -30,18 +28,23 @@ async function getContracts() {
     accountMap[String(acc._id)] = { fullName: (acc as any).fullName, email: (acc as any).email };
   }
 
-  const totalActive   = contracts.filter((c: any) => c.status === 'active').length;
-  const pendingSign   = contracts.filter((c: any) => ['sent', 'under_review'].includes(c.status)).length;
-  const signedCount   = contracts.filter((c: any) => c.status === 'signed').length;
-  const draftCount    = contracts.filter((c: any) => c.status === 'draft').length;
-
-  return { contracts, accountMap, totalActive, pendingSign, signedCount, draftCount };
+  return {
+    contracts,
+    accountMap,
+    totalActive: contracts.filter((c: any) => c.status === 'active').length,
+    pendingSign: contracts.filter((c: any) => ['sent', 'under_review'].includes(c.status)).length,
+    signedCount: contracts.filter((c: any) => c.status === 'signed').length,
+    draftCount:  contracts.filter((c: any) => c.status === 'draft').length,
+  };
 }
 
 async function getClients() {
   await dbConnect();
   const { Account } = await import('@/models/Account');
-  const clients = await Account.find({ roles: 'client', isActive: true, linkedClientAccountId: { $exists: false } }, 'fullName email').sort({ fullName: 1 }).lean();
+  const clients = await Account.find(
+    { roles: 'client', isActive: true, linkedClientAccountId: { $exists: false } },
+    'fullName email',
+  ).sort({ fullName: 1 }).lean();
   return clients.map((c: any) => ({ _id: String(c._id), fullName: c.fullName, email: c.email }));
 }
 
@@ -50,118 +53,115 @@ export default async function AdminContractsPage() {
     await Promise.all([getContracts(), getClients()]);
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-10">
-      {/* Sub-navigation */}
-      <div className="flex items-center gap-1 text-sm -mb-4">
-        <Link href="/admin/contracts" className="px-3 py-1.5 rounded-lg bg-brand-primary/10 text-brand-primary font-semibold">
-          Contracts
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-10">
+
+      {/* Page header */}
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white">Contracts</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+            Create, send, and track all client contracts.
+          </p>
+        </div>
+        <CreateContractModal clients={clients} />
+      </div>
+
+      {/* Tab navigation */}
+      <div className="flex items-center gap-0.5 border-b border-gray-200 dark:border-gray-800 -mt-2">
+        <Link
+          href="/admin/contracts"
+          className="px-4 py-2.5 text-sm font-semibold text-brand-primary border-b-2 border-brand-primary -mb-px"
+        >
+          All Contracts
         </Link>
-        <Link href="/admin/contracts/templates" className="px-3 py-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 font-medium transition-colors">
+        <Link
+          href="/admin/contracts/templates"
+          className="px-4 py-2.5 text-sm font-medium text-gray-500 dark:text-gray-400 border-b-2 border-transparent hover:text-gray-800 dark:hover:text-gray-200 -mb-px transition-colors"
+        >
           Templates
         </Link>
       </div>
 
-      <AdminPageBanner
-        icon="description"
-        title="Client Contracts"
-        description="Create, send, and manage all client contracts. Clients can review and sign directly in the portal."
-        action={<CreateContractModal clients={clients} />}
-      />
-
-      {/* Summary cards */}
+      {/* Stats row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-[#27272a] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-soft p-5">
-          <p className="text-[10px] font-bold text-gray-400 dark:text-gray-600 uppercase tracking-widest mb-1">Active</p>
-          <p className="text-2xl font-extrabold text-green-600 dark:text-green-400">{totalActive}</p>
-        </div>
-        <div className="bg-white dark:bg-[#27272a] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-soft p-5">
-          <p className="text-[10px] font-bold text-gray-400 dark:text-gray-600 uppercase tracking-widest mb-1">Pending Signature</p>
-          <p className="text-2xl font-extrabold text-blue-500 dark:text-blue-400">{pendingSign}</p>
-        </div>
-        <div className="bg-white dark:bg-[#27272a] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-soft p-5">
-          <p className="text-[10px] font-bold text-gray-400 dark:text-gray-600 uppercase tracking-widest mb-1">Signed</p>
-          <p className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400">{signedCount}</p>
-        </div>
-        <div className="bg-white dark:bg-[#27272a] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-soft p-5">
-          <p className="text-[10px] font-bold text-gray-400 dark:text-gray-600 uppercase tracking-widest mb-1">Drafts</p>
-          <p className="text-2xl font-extrabold text-gray-500 dark:text-gray-400">{draftCount}</p>
-        </div>
+        {[
+          { label: 'Active',            value: totalActive, color: 'text-green-600 dark:text-green-400' },
+          { label: 'Pending Signature', value: pendingSign, color: 'text-blue-600 dark:text-blue-400' },
+          { label: 'Signed',            value: signedCount, color: 'text-emerald-600 dark:text-emerald-400' },
+          { label: 'Drafts',            value: draftCount,  color: 'text-gray-500 dark:text-gray-400' },
+        ].map(({ label, value, color }) => (
+          <div key={label} className="bg-white dark:bg-[#27272a] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-soft px-5 py-4">
+            <p className="text-[10px] font-bold text-gray-400 dark:text-gray-600 uppercase tracking-widest mb-1">{label}</p>
+            <p className={`text-2xl font-extrabold ${color}`}>{value}</p>
+          </div>
+        ))}
       </div>
 
-      {/* Contracts table */}
+      {/* Table */}
       <div className="bg-white dark:bg-[#27272a] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-soft overflow-hidden">
-        <div className="px-6 py-5 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
-          <div>
-            <h3 className="text-sm font-bold text-gray-900 dark:text-white">All Contracts</h3>
-            <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
-              {contracts.length} contract{contracts.length !== 1 ? 's' : ''} total
-            </p>
-          </div>
+        <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800">
+          <p className="text-sm font-bold text-gray-900 dark:text-white">All Contracts</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+            {contracts.length} contract{contracts.length !== 1 ? 's' : ''}
+          </p>
         </div>
+
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-gray-50/50 dark:bg-gray-800/20 text-gray-400 dark:text-gray-600 font-semibold text-xs tracking-wider uppercase border-b border-gray-100 dark:border-gray-800">
+            <thead className="bg-gray-50/60 dark:bg-gray-800/20 border-b border-gray-100 dark:border-gray-800">
               <tr>
-                <th className="px-6 py-3">Contract #</th>
-                <th className="px-6 py-3">Client</th>
-                <th className="px-6 py-3">Title</th>
-                <th className="px-6 py-3">Type</th>
-                <th className="px-6 py-3">Status</th>
-                <th className="px-6 py-3">Signed</th>
-                <th className="px-6 py-3">Expiry</th>
-                <th className="px-6 py-3 text-right">Action</th>
+                {['Contract #', 'Client', 'Title', 'Type', 'Status', 'Signed', 'Expiry', ''].map((h) => (
+                  <th key={h} className="px-6 py-3 text-[10px] font-bold text-gray-400 dark:text-gray-600 uppercase tracking-widest">
+                    {h}
+                  </th>
+                ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
+            <tbody className="divide-y divide-gray-50 dark:divide-gray-800/60">
               {contracts.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-12 text-center text-gray-400 dark:text-gray-600 text-sm">
-                    No contracts yet. Click &ldquo;New Contract&rdquo; to create one.
+                  <td colSpan={8} className="px-6 py-16 text-center">
+                    <span className="material-icons-outlined text-gray-300 dark:text-gray-700 text-[40px] block mb-3">description</span>
+                    <p className="text-sm text-gray-400 dark:text-gray-600">No contracts yet.</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-600 mt-1">Click &ldquo;New Contract&rdquo; to get started.</p>
                   </td>
                 </tr>
               ) : (
                 contracts.map((c: any) => {
                   const client = accountMap[String(c.clientId)];
                   return (
-                    <tr key={String(c._id)} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors">
-                      <td className="px-6 py-4 font-mono text-xs text-gray-700 dark:text-gray-300 font-semibold">
+                    <tr key={String(c._id)} className="hover:bg-gray-50/60 dark:hover:bg-gray-800/20 transition-colors group">
+                      <td className="px-6 py-3.5 font-mono text-xs text-gray-500 dark:text-gray-400 font-semibold whitespace-nowrap">
                         {c.contractNumber}
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="font-medium text-gray-900 dark:text-white text-xs">
-                          {client?.fullName || 'Unknown'}
-                        </div>
-                        <div className="text-[11px] text-gray-400">{client?.email || ''}</div>
+                      <td className="px-6 py-3.5 min-w-[140px]">
+                        <p className="text-xs font-semibold text-gray-900 dark:text-white">{client?.fullName || 'Unknown'}</p>
+                        <p className="text-[11px] text-gray-400 mt-0.5">{client?.email || ''}</p>
                       </td>
-                      <td className="px-6 py-4 text-xs text-gray-700 dark:text-gray-300 max-w-[200px] truncate">
-                        {c.title}
+                      <td className="px-6 py-3.5 text-xs text-gray-700 dark:text-gray-300 max-w-[180px]">
+                        <span className="line-clamp-1">{c.title}</span>
                       </td>
-                      <td className="px-6 py-4 text-xs text-gray-500 dark:text-gray-400">
+                      <td className="px-6 py-3.5 text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap">
                         {c.type || '—'}
                       </td>
-                      <td className="px-6 py-4">
-                        <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold capitalize border ${STATUS_STYLES[c.status] ?? STATUS_STYLES['draft']}`}
-                        >
+                      <td className="px-6 py-3.5">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wide border ${STATUS_STYLES[c.status] ?? STATUS_STYLES['draft']}`}>
                           {c.status.replace(/_/g, ' ')}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-xs text-gray-500 dark:text-gray-400">
-                        {c.signedAt
-                          ? new Date(c.signedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
-                          : '—'}
+                      <td className="px-6 py-3.5 text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap">
+                        {c.signedAt ? new Date(c.signedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}
                       </td>
-                      <td className="px-6 py-4 text-xs text-gray-500 dark:text-gray-400">
-                        {c.endDate
-                          ? new Date(c.endDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
-                          : '—'}
+                      <td className="px-6 py-3.5 text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap">
+                        {c.endDate ? new Date(c.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}
                       </td>
-                      <td className="px-6 py-4 text-right">
+                      <td className="px-6 py-3.5 text-right">
                         <Link
                           href={`/admin/contracts/${String(c._id)}`}
-                          className="text-xs font-semibold text-brand-primary hover:underline"
+                          className="inline-flex items-center gap-1 text-xs font-semibold text-brand-primary hover:opacity-70 transition-opacity"
                         >
                           View
+                          <span className="material-icons-outlined text-[13px]">arrow_forward</span>
                         </Link>
                       </td>
                     </tr>

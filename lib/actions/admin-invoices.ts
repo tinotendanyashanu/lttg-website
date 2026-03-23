@@ -78,6 +78,7 @@ export async function createAdminInvoice(data: {
   issuedAt?: string;
   dueAt?: string;
   notes?: string;
+  depositPaid?: number;
 }) {
   const admin = await checkAdmin();
   await dbConnect();
@@ -101,6 +102,7 @@ export async function createAdminInvoice(data: {
 
   const amount = data.lineItems.reduce((sum, item) => sum + item.total, 0);
   const currency = data.currency || 'USD';
+  const depositPaid = Math.max(0, data.depositPaid ?? 0);
 
   // Compute USD equivalent (non-blocking — failure doesn't block creation)
   let usdAmount: number | undefined;
@@ -127,8 +129,8 @@ export async function createAdminInvoice(data: {
     dueAt: data.dueAt ? new Date(data.dueAt) : undefined,
     notes: data.notes?.trim() || undefined,
     amountPaid: 0,
-    depositPaid: 0,
-    remainingBalance: amount,
+    depositPaid,
+    remainingBalance: amount - depositPaid,
     usdAmount,
     exchangeRateUsed,
   });
