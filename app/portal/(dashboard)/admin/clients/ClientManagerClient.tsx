@@ -433,13 +433,11 @@ export default function ClientManagerClient({ initialClients }: { initialClients
                 <div>
                   <label className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1 block">Source</label>
                   <select name="source" className="w-full px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20">
-                    <option value="">Select source</option>
-                    <option value="Website">Website</option>
-                    <option value="Referral">Referral</option>
-                    <option value="Partner">Partner</option>
-                    <option value="Social Media">Social Media</option>
-                    <option value="Direct">Direct</option>
-                    <option value="Other">Other</option>
+                    <option value="manual">Manual</option>
+                    <option value="referral_link">Referral</option>
+                    <option value="contact_form">Contact Form</option>
+                    <option value="consultation_form">Consultation Form</option>
+                    <option value="project_inquiry">Project Inquiry</option>
                   </select>
                 </div>
                 {/* Duplicate warnings */}
