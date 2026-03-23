@@ -658,6 +658,30 @@ export const EmailTemplates = {
       <p style="margin-top: 32px;">Regards,<br /><strong style="color: #1e293b;">The LeoTheTechGuy Team</strong></p>
     `),
 
+  contractResent: (clientName: string, contractNumber: string, title: string, portalLink: string) =>
+    BaseTemplate(`
+      <h2 style="color: #0f172a; font-size: 20px; margin-top: 0; margin-bottom: 24px;">Contract Resent for Signature</h2>
+      <p>Hello ${clientName},</p>
+      <p>A refreshed signing link has been issued for the following contract. This link is valid for <strong>72 hours</strong>.</p>
+      <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin: 24px 0;">
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr>
+            <td style="padding: 8px 0; color: #64748b; font-size: 13px; width: 140px;">Contract Number</td>
+            <td style="padding: 8px 0; color: #0f172a; font-weight: 600; font-size: 13px; font-family: monospace;">${contractNumber}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; color: #64748b; font-size: 13px;">Title</td>
+            <td style="padding: 8px 0; color: #0f172a; font-weight: 600; font-size: 13px;">${title}</td>
+          </tr>
+        </table>
+      </div>
+      <p>Please log in to your client portal to review and sign the contract before the link expires.</p>
+      <div style="margin: 32px 0;">
+        <a href="${portalLink}" style="background-color: #0f172a; color: #ffffff; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block;">Review &amp; Sign Contract</a>
+      </div>
+      <p style="margin-top: 32px;">Regards,<br /><strong style="color: #1e293b;">The LeoTheTechGuy Team</strong></p>
+    `),
+
   contractSigned: (adminName: string, clientName: string, contractNumber: string, title: string, signedAt: string, adminLink: string) =>
     BaseTemplate(`
       <h2 style="color: #059669; font-size: 20px; margin-top: 0; margin-bottom: 24px;">Contract Signed</h2>

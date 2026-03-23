@@ -17,11 +17,16 @@ export interface IClientContract extends Document {
   type: string;
   status: ContractStatus;
   content?: string;
+  isHtml?: boolean;
+  templateId?: mongoose.Types.ObjectId;
   startDate?: Date;
   endDate?: Date;
   signedAt?: Date;
   signerName?: string;
   signerIp?: string;
+  signatureDataUrl?: string;
+  signingToken?: string;
+  signingTokenExpiresAt?: Date;
   documentUrl?: string;
   value?: number;
   currency?: string;
@@ -51,11 +56,16 @@ const ClientContractSchema: Schema = new Schema(
       default: 'draft',
     },
     content: { type: String },
+    isHtml: { type: Boolean, default: false },
+    templateId: { type: Schema.Types.ObjectId, ref: 'ContractTemplate' },
     startDate: { type: Date },
     endDate: { type: Date },
     signedAt: { type: Date },
     signerName: { type: String },
     signerIp: { type: String },
+    signatureDataUrl: { type: String },
+    signingToken: { type: String },
+    signingTokenExpiresAt: { type: Date },
     documentUrl: { type: String },
     value: { type: Number },
     currency: { type: String, default: 'USD' },
@@ -65,6 +75,7 @@ const ClientContractSchema: Schema = new Schema(
 );
 
 ClientContractSchema.index({ clientId: 1, createdAt: -1 });
+ClientContractSchema.index({ signingToken: 1 });
 
 export const ClientContract: Model<IClientContract> =
   mongoose.models.ClientContract ||

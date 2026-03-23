@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { headers } from 'next/headers';
 import dbConnect from '@/lib/mongodb';
 import { sendEmail, EmailTemplates } from '@/lib/email';
+import { generateSigningToken, interpolateTemplate, type TemplateVars } from '@/lib/contract-utils';
 
 async function checkAdmin() {
   const session = await auth();
@@ -56,7 +57,7 @@ export async function getAdminContract(contractId: string) {
   const contract = await ClientContract.findById(contractId).lean();
   if (!contract) return null;
 
-  const client = await Account.findById((contract as any).clientId, 'fullName email').lean();
+  const client = await Account.findById((contract as any).clientId, 'fullName email clientProfile').lean();
 
   return {
     contract: JSON.parse(JSON.stringify(contract)),
@@ -72,6 +73,8 @@ export async function createAdminContract(data: {
   title: string;
   type?: string;
   content?: string;
+  isHtml?: boolean;
+  templateId?: string;
   status: 'draft' | 'sent';
   startDate?: string;
   endDate?: string;
@@ -97,19 +100,52 @@ export async function createAdminContract(data: {
   const year = new Date().getFullYear();
   const contractNumber = `CON-${year}-${String(count + 1).padStart(4, '0')}`;
 
+  // Perform final variable interpolation server-side using client data
+  let finalContent = data.content?.trim() || undefined;
+  if (finalContent && data.isHtml) {
+    const vars: TemplateVars = {
+      client_name: client.fullName || '',
+      business_name: (client as any).clientProfile?.companyName || '',
+      company_name: 'LeoTheTechGuy',
+      date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+      start_date: data.startDate
+        ? new Date(data.startDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+        : '',
+      end_date: data.endDate
+        ? new Date(data.endDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+        : '',
+      amount: data.value ? String(data.value) : '',
+      currency: data.currency || 'USD',
+    };
+    finalContent = interpolateTemplate(finalContent, vars);
+  }
+
+  // Generate signing token if sending immediately
+  let signingToken: string | undefined;
+  let signingTokenExpiresAt: Date | undefined;
+  if (data.status === 'sent') {
+    const tokenData = generateSigningToken();
+    signingToken = tokenData.token;
+    signingTokenExpiresAt = tokenData.expiresAt;
+  }
+
   const contract = await ClientContract.create({
     contractNumber,
     clientId: resolvedClientId,
     caseId: data.caseId || undefined,
     title: data.title.trim(),
     type: data.type?.trim() || 'Service Agreement',
-    content: data.content?.trim() || undefined,
+    content: finalContent,
+    isHtml: data.isHtml || false,
+    templateId: data.templateId || undefined,
     status: data.status,
     startDate: data.startDate ? new Date(data.startDate) : undefined,
     endDate: data.endDate ? new Date(data.endDate) : undefined,
     value: data.value || undefined,
     currency: data.currency || 'USD',
     notes: data.notes?.trim() || undefined,
+    signingToken,
+    signingTokenExpiresAt,
   });
 
   await AuditLog.create({
@@ -165,7 +201,15 @@ export async function updateAdminContractStatus(
   const contract = await ClientContract.findById(contractId);
   if (!contract) throw new Error('Contract not found');
 
-  await ClientContract.findByIdAndUpdate(contractId, { $set: { status: newStatus } });
+  // Generate fresh signing token when transitioning to 'sent'
+  const updateFields: Record<string, any> = { status: newStatus };
+  if (newStatus === 'sent') {
+    const { token, expiresAt } = generateSigningToken();
+    updateFields.signingToken = token;
+    updateFields.signingTokenExpiresAt = expiresAt;
+  }
+
+  await ClientContract.findByIdAndUpdate(contractId, { $set: updateFields });
 
   await AuditLog.create({
     entityType: 'contract',
@@ -208,12 +252,85 @@ export async function updateAdminContractStatus(
   return { success: true };
 }
 
+// ── Resend contract to client (admin) ─────────────────────────────────────────
+
+export async function resendContract(contractId: string) {
+  const admin = await checkAdmin();
+  await dbConnect();
+
+  const { ClientContract } = await import('@/models/ClientContract');
+  const { Account } = await import('@/models/Account');
+  const { ClientNotification } = await import('@/models/ClientNotification');
+  const AuditLog = (await import('@/models/AuditLog')).default;
+
+  const contract = await ClientContract.findById(contractId);
+  if (!contract) throw new Error('Contract not found');
+
+  const { token, expiresAt } = generateSigningToken();
+
+  await ClientContract.findByIdAndUpdate(contractId, {
+    $set: {
+      status: 'sent',
+      signingToken: token,
+      signingTokenExpiresAt: expiresAt,
+    },
+  });
+
+  await AuditLog.create({
+    entityType: 'contract',
+    entityId: contractId,
+    action: 'contract_resent',
+    performedBy: admin.id,
+    details: { contractId, contractNumber: contract.contractNumber },
+    metadata: { contractNumber: contract.contractNumber },
+  });
+
+  const client = await Account.findById(contract.clientId, 'fullName email').lean();
+  if (!client) throw new Error('Client not found');
+
+  const portalLink = `${getBaseUrl()}/portal/client/contracts/${contractId}`;
+
+  await ClientNotification.create({
+    clientId: contract.clientId,
+    type: 'contract_alert',
+    title: `Contract Resent for Signature: ${contract.contractNumber}`,
+    message: `Contract "${contract.title}" has been resent to you for review and signature.`,
+    actionUrl: `/portal/client/contracts/${contractId}`,
+  });
+
+  try {
+    await sendEmail({
+      to: (client as any).email,
+      subject: `Contract Resent for Signature: ${contract.contractNumber}`,
+      html: EmailTemplates.contractResent(
+        (client as any).fullName,
+        contract.contractNumber,
+        contract.title,
+        portalLink,
+      ),
+    });
+  } catch (_) {}
+
+  revalidatePath('/admin/contracts');
+  revalidatePath(`/admin/contracts/${contractId}`);
+  revalidatePath('/portal/client/contracts');
+  return { success: true };
+}
+
 // ── Client signs the contract ──────────────────────────────────────────────────
 
-export async function signContract(contractId: string) {
+export async function signContract(contractId: string, signerName: string, signatureDataUrl?: string) {
   const session = await auth();
   if (!session?.user?.id) throw new Error('Unauthorized');
   if (session.user.role !== 'client') throw new Error('Only clients can sign contracts');
+
+  if (!signerName || signerName.trim().length < 2) {
+    throw new Error('A valid signer name is required');
+  }
+
+  if (signatureDataUrl && !signatureDataUrl.startsWith('data:image/png;base64,')) {
+    throw new Error('Invalid signature image format');
+  }
 
   await dbConnect();
 
@@ -232,10 +349,14 @@ export async function signContract(contractId: string) {
     throw new Error('This contract is not available for signing');
   }
 
+  // Check signing token expiry (only for contracts that have a token)
+  if (contract.signingTokenExpiresAt && new Date(contract.signingTokenExpiresAt) < new Date()) {
+    throw new Error('This signing link has expired. Please contact support to receive a new contract link.');
+  }
+
   const client = await Account.findById(session.user.id, 'fullName email').lean();
   if (!client) throw new Error('Client not found');
 
-  // Get signer IP from request headers
   const hdrs = await headers();
   const signerIp =
     hdrs.get('x-forwarded-for')?.split(',')[0]?.trim() ||
@@ -248,8 +369,13 @@ export async function signContract(contractId: string) {
     $set: {
       status: 'signed',
       signedAt,
-      signerName: (client as any).fullName,
+      signerName: signerName.trim(),
       signerIp,
+      ...(signatureDataUrl ? { signatureDataUrl } : {}),
+    },
+    $unset: {
+      signingToken: 1,
+      signingTokenExpiresAt: 1,
     },
   });
 
@@ -261,10 +387,10 @@ export async function signContract(contractId: string) {
     details: {
       contractId,
       contractNumber: contract.contractNumber,
-      signerName: (client as any).fullName,
+      signerName: signerName.trim(),
       signerIp,
     },
-    metadata: { contractNumber: contract.contractNumber, signerName: (client as any).fullName },
+    metadata: { contractNumber: contract.contractNumber, signerName: signerName.trim() },
   });
 
   const adminLink = `${getBaseUrl()}/admin/contracts/${contractId}`;
@@ -277,14 +403,13 @@ export async function signContract(contractId: string) {
     timeZoneName: 'short',
   });
 
-  // Notify admin via email
   try {
     await sendEmail({
       to: process.env.ADMIN_EMAIL || 'contact@leothetechguy.com',
       subject: `Contract Signed: ${contract.contractNumber}`,
       html: EmailTemplates.contractSigned(
         'Leo',
-        (client as any).fullName,
+        signerName.trim(),
         contract.contractNumber,
         contract.title,
         signedAtLabel,
@@ -293,7 +418,6 @@ export async function signContract(contractId: string) {
     });
   } catch (_) {}
 
-  // In-app notification (self-confirmation for client)
   await ClientNotification.create({
     clientId: session.user.id,
     type: 'contract_alert',

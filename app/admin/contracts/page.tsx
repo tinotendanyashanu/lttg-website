@@ -51,6 +51,16 @@ export default async function AdminContractsPage() {
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-10">
+      {/* Sub-navigation */}
+      <div className="flex items-center gap-1 text-sm -mb-4">
+        <Link href="/admin/contracts" className="px-3 py-1.5 rounded-lg bg-brand-primary/10 text-brand-primary font-semibold">
+          Contracts
+        </Link>
+        <Link href="/admin/contracts/templates" className="px-3 py-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 font-medium transition-colors">
+          Templates
+        </Link>
+      </div>
+
       <AdminPageBanner
         icon="description"
         title="Client Contracts"

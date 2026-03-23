@@ -2,6 +2,7 @@ import { auth } from '@/auth';
 import { redirect, notFound } from 'next/navigation';
 import dbConnect from '@/lib/mongodb';
 import SignContractButton from '@/components/portal/client/SignContractButton';
+import { isHtmlContent } from '@/lib/contract-utils';
 
 const STATUS_STYLES: Record<string, string> = {
   draft:        'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400',
@@ -13,13 +14,18 @@ const STATUS_STYLES: Record<string, string> = {
   terminated:   'bg-red-50 text-red-500 dark:bg-red-900/20 dark:text-red-400',
 };
 
-async function getContract(contractId: string, clientId: string) {
+async function getContractData(contractId: string, clientId: string) {
   try {
     await dbConnect();
     const { ClientContract } = await import('@/models/ClientContract');
+    const { Account } = await import('@/models/Account');
     const contract = await ClientContract.findOne({ _id: contractId, clientId }).lean();
     if (!contract) return null;
-    return JSON.parse(JSON.stringify(contract));
+    const account = await Account.findById(clientId, 'fullName').lean();
+    return {
+      contract: JSON.parse(JSON.stringify(contract)),
+      accountName: (account as any)?.fullName || '',
+    };
   } catch (_) {
     return null;
   }
@@ -34,11 +40,20 @@ export default async function ContractDetailPage({
   if (!session?.user?.id) redirect('/portal/login');
 
   const { contractId } = await params;
-  const contract = await getContract(contractId, session.user.id);
-  if (!contract) notFound();
+  const data = await getContractData(contractId, session.user.id);
+  if (!data) notFound();
 
-  const canSign = ['sent', 'under_review'].includes(contract.status);
+  const { contract, accountName } = data;
+
+  const tokenExpired =
+    contract.signingTokenExpiresAt
+      ? new Date(contract.signingTokenExpiresAt) < new Date()
+      : false;
+
+  const canSign = ['sent', 'under_review'].includes(contract.status) && !tokenExpired;
   const isSigned = contract.status === 'signed';
+  const isHtml = contract.isHtml || isHtmlContent(contract.content || '');
+  const hasContent = !!contract.content;
 
   return (
     <div className="space-y-6 max-w-3xl animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -52,13 +67,26 @@ export default async function ContractDetailPage({
             <h1 className="text-xl font-bold text-gray-900 dark:text-white">{contract.title}</h1>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{contract.type}</p>
           </div>
-          <span
-            className={`px-3 py-1 rounded-full text-[11px] font-bold uppercase ${
-              STATUS_STYLES[contract.status] || STATUS_STYLES.draft
-            }`}
-          >
-            {contract.status.replace(/_/g, ' ')}
-          </span>
+          <div className="flex items-center gap-3 flex-wrap">
+            {hasContent && (
+              <a
+                href={`/portal/client/contracts/${contract._id}/print`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl text-xs font-semibold hover:bg-gray-700 dark:hover:bg-gray-100 transition-colors"
+              >
+                <span className="material-icons-outlined text-[15px]">download</span>
+                Download PDF
+              </a>
+            )}
+            <span
+              className={`px-3 py-1 rounded-full text-[11px] font-bold uppercase ${
+                STATUS_STYLES[contract.status] || STATUS_STYLES.draft
+              }`}
+            >
+              {contract.status.replace(/_/g, ' ')}
+            </span>
+          </div>
         </div>
 
         {/* Meta */}
@@ -108,14 +136,21 @@ export default async function ContractDetailPage({
       </div>
 
       {/* Contract content */}
-      {contract.content && (
+      {hasContent && (
         <div className="bg-white dark:bg-[#27272a] rounded-2xl shadow-soft border border-gray-100 dark:border-gray-800 p-6">
           <h2 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-4">
             Contract Terms &amp; Conditions
           </h2>
-          <div className="prose prose-sm dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap font-mono text-[13px] bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border border-gray-100 dark:border-gray-700">
-            {contract.content}
-          </div>
+          {isHtml ? (
+            <div
+              className="contract-body prose prose-sm dark:prose-invert max-w-none"
+              dangerouslySetInnerHTML={{ __html: contract.content }}
+            />
+          ) : (
+            <div className="whitespace-pre-wrap font-mono text-[13px] bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border border-gray-100 dark:border-gray-700 text-gray-700 dark:text-gray-300 leading-relaxed">
+              {contract.content}
+            </div>
+          )}
         </div>
       )}
 
@@ -142,16 +177,37 @@ export default async function ContractDetailPage({
               </p>
             </div>
           </div>
+        ) : tokenExpired ? (
+          <div className="flex items-start gap-3 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30 rounded-2xl px-6 py-5">
+            <span className="material-icons-outlined text-red-500 text-[24px] mt-0.5">timer_off</span>
+            <div>
+              <p className="font-bold text-red-700 dark:text-red-400 text-sm">Signing Link Expired</p>
+              <p className="text-xs text-red-600/80 dark:text-red-500 mt-1 leading-relaxed">
+                This signing link was valid for 72 hours and has now expired. Please contact us and we will issue a
+                fresh signing link for you.
+              </p>
+            </div>
+          </div>
         ) : canSign ? (
           <div className="space-y-3">
             <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
               Please read the contract terms above carefully before signing. By signing, you
               confirm that you have read, understood, and agreed to all terms and conditions.
             </p>
+            {contract.signingTokenExpiresAt && (
+              <p className="text-xs text-amber-600 dark:text-amber-400">
+                <span className="material-icons-outlined text-[13px] align-text-bottom mr-1">schedule</span>
+                Signing link expires{' '}
+                {new Date(contract.signingTokenExpiresAt).toLocaleString('en-US', {
+                  month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
+                })}
+              </p>
+            )}
             <SignContractButton
               contractId={contract._id}
               contractNumber={contract.contractNumber}
               title={contract.title}
+              accountName={accountName}
             />
           </div>
         ) : (
