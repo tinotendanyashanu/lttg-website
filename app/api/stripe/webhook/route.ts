@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import type Stripe from 'stripe';
-import stripeClient from '@/lib/stripe';
+import { getStripe } from '@/lib/stripe';
 import { recordPaymentFromWebhook } from '@/lib/actions/invoice-payment-internal';
 
 export const dynamic = 'force-dynamic';
@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
 
   let event: Stripe.Event;
   try {
-    event = stripeClient.webhooks.constructEvent(rawBody, sig, process.env.STRIPE_WEBHOOK_SECRET);
+    event = getStripe().webhooks.constructEvent(rawBody, sig, process.env.STRIPE_WEBHOOK_SECRET);
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unknown error';
     console.error('[Stripe Webhook] Signature verification failed:', message);

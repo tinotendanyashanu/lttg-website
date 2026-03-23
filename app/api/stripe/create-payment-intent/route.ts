@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import dbConnect from '@/lib/mongodb';
-import stripe from '@/lib/stripe';
+import { getStripe } from '@/lib/stripe';
+
+export const dynamic = 'force-dynamic';
 
 const PAYABLE_STATUSES = ['issued', 'sent', 'partially_paid', 'overdue'];
 
@@ -53,7 +55,7 @@ export async function POST(req: NextRequest) {
   const amountToCharge = invoice.remainingBalance ?? invoice.amount;
   const currency = (invoice.currency || 'USD').toLowerCase();
 
-  const paymentIntent = await stripe.paymentIntents.create({
+  const paymentIntent = await getStripe().paymentIntents.create({
     amount: toStripeAmount(amountToCharge, currency),
     currency,
     automatic_payment_methods: { enabled: true },

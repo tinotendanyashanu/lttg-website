@@ -2,8 +2,10 @@ import { auth } from '@/auth';
 import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
 import dbConnect from '@/lib/mongodb';
-import stripe from '@/lib/stripe';
+import { getStripe } from '@/lib/stripe';
 import StripePaymentForm from '@/components/stripe/StripePaymentForm';
+
+export const dynamic = 'force-dynamic';
 
 const PAYABLE_STATUSES = ['issued', 'sent', 'partially_paid', 'overdue'];
 
@@ -43,7 +45,7 @@ export default async function PayInvoicePage({
   const amountToCharge = invoice.remainingBalance ?? invoice.amount;
   const currency = (invoice.currency || 'USD').toLowerCase();
 
-  const paymentIntent = await stripe.paymentIntents.create({
+  const paymentIntent = await getStripe().paymentIntents.create({
     amount: toStripeAmount(amountToCharge),
     currency,
     automatic_payment_methods: { enabled: true },
