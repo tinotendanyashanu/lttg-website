@@ -46,10 +46,14 @@ async function getInvoiceWithClient(clientId: string, invoiceId: string) {
 
 export default async function InvoiceDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ invoiceId: string }>;
+  searchParams: Promise<{ payment?: string }>;
 }) {
   const { invoiceId } = await params;
+  const { payment } = await searchParams;
+  const paymentJustCompleted = payment === 'success';
   const session = await auth();
   if (!session?.user?.id) redirect('/portal/login');
 
@@ -306,22 +310,47 @@ export default async function InvoiceDetailPage({
           </div>
         </div>
 
+        {/* Payment success banner */}
+        {paymentJustCompleted && (
+          <div className="mt-5 bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-200 dark:border-emerald-800 rounded-2xl p-4 flex items-center gap-3 print:hidden">
+            <span className="material-icons-outlined text-emerald-500 text-[20px]">check_circle</span>
+            <div>
+              <p className="text-sm text-emerald-800 dark:text-emerald-400 font-medium">Payment received — thank you!</p>
+              <p className="text-xs text-emerald-600 dark:text-emerald-500 mt-0.5">Your invoice will be updated shortly once the payment is confirmed.</p>
+            </div>
+          </div>
+        )}
+
         {/* Payment required alert — outside document for print hiding */}
-        {isPending && (
+        {isPending && !paymentJustCompleted && (
           <div className="mt-5 bg-orange-50 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-900/30 rounded-2xl p-4 flex items-center justify-between gap-4 print:hidden">
             <div className="flex items-center gap-3">
               <span className="material-icons-outlined text-orange-500 text-[20px]">payment</span>
-              <p className="text-sm text-orange-800 dark:text-orange-400 font-medium">
-                Payment required. Contact our team to arrange payment.
-              </p>
+              <div>
+                <p className="text-sm text-orange-800 dark:text-orange-400 font-medium">
+                  {inv.status === 'partially_paid'
+                    ? `Remaining balance: ${fmt(remainingBalance)}`
+                    : 'Payment required for this invoice.'}
+                </p>
+                <p className="text-xs text-orange-600 dark:text-orange-500 mt-0.5">Pay securely online or contact our team.</p>
+              </div>
             </div>
-            <Link
-              href="/portal/client/messages"
-              className="inline-flex items-center gap-1.5 bg-orange-600 hover:bg-orange-700 text-white rounded-full px-4 py-2 text-sm font-medium transition-colors shrink-0"
-            >
-              <span className="material-icons-outlined text-[14px]">chat</span>
-              Contact Team
-            </Link>
+            <div className="flex items-center gap-2 shrink-0">
+              <Link
+                href="/portal/client/messages"
+                className="inline-flex items-center gap-1.5 border border-orange-300 dark:border-orange-700 text-orange-700 dark:text-orange-400 rounded-full px-4 py-2 text-sm font-medium transition-colors hover:bg-orange-50 dark:hover:bg-orange-900/20"
+              >
+                <span className="material-icons-outlined text-[14px]">chat</span>
+                Contact Team
+              </Link>
+              <Link
+                href={`/portal/client/invoices/${inv._id}/pay`}
+                className="inline-flex items-center gap-1.5 bg-orange-600 hover:bg-orange-700 text-white rounded-full px-4 py-2 text-sm font-medium transition-colors"
+              >
+                <span className="material-icons-outlined text-[14px]">credit_card</span>
+                Pay Now
+              </Link>
+            </div>
           </div>
         )}
       </div>
