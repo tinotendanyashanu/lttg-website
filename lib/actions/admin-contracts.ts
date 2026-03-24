@@ -17,6 +17,28 @@ function getBaseUrl() {
   return process.env.NEXT_PUBLIC_APP_URL?.replace(/\/+$/, '') || 'http://localhost:3000';
 }
 
+async function sendContractEmailOrThrow(params: {
+  to: string;
+  subject: string;
+  html: string;
+  context: 'create' | 'status_update' | 'resend';
+}) {
+  const result = await sendEmail({
+    to: params.to,
+    subject: params.subject,
+    html: params.html,
+  });
+
+  if (!result?.success) {
+    const errorMessage =
+      (result as any)?.error?.message ||
+      (result as any)?.error?.name ||
+      JSON.stringify((result as any)?.error || 'unknown email error');
+
+    throw new Error(`Failed to send contract email during ${params.context}: ${errorMessage}`);
+  }
+}
+
 // ── Get clients for contract dropdown ─────────────────────────────────────────
 
 export async function getClientsForContract() {
@@ -168,15 +190,12 @@ export async function createAdminContract(data: {
       actionUrl: `/portal/client/contracts/${contract._id}`,
     });
 
-    try {
-      await sendEmail({
-        to: client.email,
-        subject: `Contract Ready for Signature: ${contractNumber}`,
-        html: EmailTemplates.contractSent(client.fullName, contractNumber, data.title, portalLink),
-      });
-    } catch (_) {
-      // Email failure is non-blocking
-    }
+    await sendContractEmailOrThrow({
+      to: client.email,
+      subject: `Contract Ready for Signature: ${contractNumber}`,
+      html: EmailTemplates.contractSent(client.fullName, contractNumber, data.title, portalLink),
+      context: 'create',
+    });
   }
 
   revalidatePath('/admin/contracts');
@@ -232,18 +251,17 @@ export async function updateAdminContractStatus(
       actionUrl: `/portal/client/contracts/${contractId}`,
     });
 
-    try {
-      await sendEmail({
-        to: (client as any).email,
-        subject: `Contract Ready for Signature: ${contract.contractNumber}`,
-        html: EmailTemplates.contractSent(
-          (client as any).fullName,
-          contract.contractNumber,
-          contract.title,
-          portalLink,
-        ),
-      });
-    } catch (_) {}
+    await sendContractEmailOrThrow({
+      to: (client as any).email,
+      subject: `Contract Ready for Signature: ${contract.contractNumber}`,
+      html: EmailTemplates.contractSent(
+        (client as any).fullName,
+        contract.contractNumber,
+        contract.title,
+        portalLink,
+      ),
+      context: 'status_update',
+    });
   }
 
   revalidatePath('/admin/contracts');
@@ -298,18 +316,17 @@ export async function resendContract(contractId: string) {
     actionUrl: `/portal/client/contracts/${contractId}`,
   });
 
-  try {
-    await sendEmail({
-      to: (client as any).email,
-      subject: `Contract Resent for Signature: ${contract.contractNumber}`,
-      html: EmailTemplates.contractResent(
-        (client as any).fullName,
-        contract.contractNumber,
-        contract.title,
-        portalLink,
-      ),
-    });
-  } catch (_) {}
+  await sendContractEmailOrThrow({
+    to: (client as any).email,
+    subject: `Contract Resent for Signature: ${contract.contractNumber}`,
+    html: EmailTemplates.contractResent(
+      (client as any).fullName,
+      contract.contractNumber,
+      contract.title,
+      portalLink,
+    ),
+    context: 'resend',
+  });
 
   revalidatePath('/admin/contracts');
   revalidatePath(`/admin/contracts/${contractId}`);
