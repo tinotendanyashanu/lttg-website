@@ -56,57 +56,99 @@ export default async function InvoicesPage() {
             <p className="text-gray-500 dark:text-gray-400">No invoices yet</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-gray-100 dark:border-gray-800">
-                  {['Invoice #', 'Description', 'Amount', 'Status', 'Due Date', ''].map((h) => (
-                    <th
-                      key={h}
-                      className="px-6 py-3.5 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider"
-                    >
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
-                {invoices.map((inv: any) => (
-                  <tr key={inv._id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                    <td className="px-6 py-4 font-mono text-xs text-gray-500">
-                      {inv.invoiceNumber || inv._id.slice(-6).toUpperCase()}
-                    </td>
-                    <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">
-                      {inv.title || inv.description || 'Services'}
-                    </td>
-                    <td className="px-6 py-4 font-semibold text-gray-900 dark:text-white">
-                      {inv.currency || '$'}{(inv.amount || 0).toLocaleString()}
-                    </td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={`px-2.5 py-1 rounded-full text-[11px] font-bold uppercase ${
-                          STATUS_STYLES[inv.status] || STATUS_STYLES.issued
-                        }`}
-                      >
+          <>
+            {/* Mobile card list */}
+            <div className="sm:hidden divide-y divide-gray-100 dark:divide-gray-800">
+              {invoices.map((inv: any) => (
+                <Link
+                  key={inv._id}
+                  href={`/portal/client/invoices/${inv._id}`}
+                  className="flex items-center gap-3 px-4 py-4 hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors"
+                >
+                  <div className="w-9 h-9 rounded-xl bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center shrink-0">
+                    <span className="material-icons-outlined text-orange-500 dark:text-orange-400 text-[18px]">receipt_long</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2 mb-0.5">
+                      <span className="font-medium text-gray-900 dark:text-white text-sm truncate">
+                        {inv.title || inv.description || 'Services'}
+                      </span>
+                      <span className={`shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${STATUS_STYLES[inv.status] || STATUS_STYLES.issued}`}>
                         {inv.status}
                       </span>
-                    </td>
-                    <td className="px-6 py-4 text-gray-400 text-xs">
-                      {inv.dueAt ? new Date(inv.dueAt).toLocaleDateString() : '—'}
-                    </td>
-                    <td className="px-6 py-4">
-                      <Link
-                        href={`/portal/client/invoices/${inv._id}`}
-                        className="text-blue-600 dark:text-blue-400 hover:underline text-xs font-medium"
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-gray-400">
+                      <span className="font-mono">{inv.invoiceNumber || inv._id.slice(-6).toUpperCase()}</span>
+                      <span>·</span>
+                      <span className="font-semibold text-gray-700 dark:text-gray-300">
+                        {inv.currency || '$'}{(inv.amount || 0).toLocaleString()}
+                      </span>
+                      {inv.dueAt && (
+                        <>
+                          <span>·</span>
+                          <span>Due {new Date(inv.dueAt).toLocaleDateString()}</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  <span className="material-icons-outlined text-gray-300 dark:text-gray-700 text-[18px] shrink-0">chevron_right</span>
+                </Link>
+              ))}
+            </div>
+
+            {/* Desktop table */}
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-gray-100 dark:border-gray-800">
+                    {['Invoice #', 'Description', 'Amount', 'Status', 'Due Date', ''].map((h) => (
+                      <th
+                        key={h}
+                        className="px-6 py-3.5 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider"
                       >
-                        View
-                      </Link>
-                    </td>
+                        {h}
+                      </th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
+                  {invoices.map((inv: any) => (
+                    <tr key={inv._id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                      <td className="px-6 py-4 font-mono text-xs text-gray-500">
+                        {inv.invoiceNumber || inv._id.slice(-6).toUpperCase()}
+                      </td>
+                      <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">
+                        {inv.title || inv.description || 'Services'}
+                      </td>
+                      <td className="px-6 py-4 font-semibold text-gray-900 dark:text-white">
+                        {inv.currency || '$'}{(inv.amount || 0).toLocaleString()}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span
+                          className={`px-2.5 py-1 rounded-full text-[11px] font-bold uppercase ${
+                            STATUS_STYLES[inv.status] || STATUS_STYLES.issued
+                          }`}
+                        >
+                          {inv.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-gray-400 text-xs">
+                        {inv.dueAt ? new Date(inv.dueAt).toLocaleDateString() : '—'}
+                      </td>
+                      <td className="px-6 py-4">
+                        <Link
+                          href={`/portal/client/invoices/${inv._id}`}
+                          className="text-blue-600 dark:text-blue-400 hover:underline text-xs font-medium"
+                        >
+                          View
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
     </div>

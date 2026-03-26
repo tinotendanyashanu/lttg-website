@@ -69,7 +69,7 @@ export async function GET(request: Request) {
             }).select('_id invoiceNumber amount currency status clientId').limit(5).lean(),
         ]);
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
         const combinedResults = [
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             ...clients.map((c: any) => ({

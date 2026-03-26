@@ -264,8 +264,8 @@ export default async function ClientDashboardPage() {
 
       {/* Unpaid Invoices Alert */}
       {data.unpaidInvoices.length > 0 && (
-        <div className="bg-orange-50 dark:bg-orange-900/10 border border-orange-200 dark:border-orange-800/30 rounded-2xl p-5 flex items-center gap-4">
-          <div className="w-10 h-10 rounded-xl bg-orange-100 dark:bg-orange-900/20 flex items-center justify-center shrink-0">
+        <div className="bg-orange-50 dark:bg-orange-900/10 border border-orange-200 dark:border-orange-800/30 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-orange-100 dark:bg-orange-900/20 flex items-center justify-center shrink-0">
             <span className="material-icons-outlined text-orange-600 dark:text-orange-400">
               receipt_long
             </span>
@@ -284,7 +284,7 @@ export default async function ClientDashboardPage() {
           </div>
           <Link
             href="/portal/client/invoices"
-            className="shrink-0 bg-orange-600 hover:bg-orange-700 text-white text-sm font-medium px-4 py-2 rounded-full transition-colors"
+            className="shrink-0 self-start sm:self-auto bg-orange-600 hover:bg-orange-700 text-white text-sm font-medium px-4 py-2 rounded-full transition-colors"
           >
             View Invoices
           </Link>

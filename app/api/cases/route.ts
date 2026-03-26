@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
     const filter = searchParams.get('filter') || 'all'; // 'my_cases', 'participating', 'closed'
     const status = searchParams.get('status');
 
-    let query: any = {};
+    const query: any = {};
 
     if (session.user.role !== 'admin') {
       if (filter === 'my_cases') {

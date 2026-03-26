@@ -27,7 +27,7 @@ export default async function CaseManagementPage() {
 
   await dbConnect();
 
-  let query: any = {};
+  const query: any = {};
   if (!isAdmin) {
     query.$or = [{ ownerId: account._id }, { participants: account._id }];
   }

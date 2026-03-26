@@ -33,6 +33,7 @@ export default function InvoiceActionPanel({ invoiceId, currentStatus, invoiceNu
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<InvoiceStatus>(currentStatus);
   const [notify, setNotify] = useState(true);
+  const [copied, setCopied] = useState(false);
 
   // Record Payment state
   const [payAmount, setPayAmount] = useState('');
@@ -101,6 +102,14 @@ export default function InvoiceActionPanel({ invoiceId, currentStatus, invoiceNu
       } catch (err: any) {
         showMsg('error', err?.message || 'Failed to record deposit.');
       }
+    });
+  }
+
+  function handleCopyPaymentLink() {
+    const link = `${window.location.origin}/portal/client/invoices/${invoiceId}/pay`;
+    navigator.clipboard.writeText(link).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
     });
   }
 
@@ -246,6 +255,17 @@ export default function InvoiceActionPanel({ invoiceId, currentStatus, invoiceNu
       <div className="bg-white dark:bg-[#27272a] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-soft p-5">
         <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-4">Quick Actions</h3>
         <div className="space-y-2">
+          <button
+            onClick={handleCopyPaymentLink}
+            disabled={currentStatus === 'paid' || currentStatus === 'cancelled'}
+            className="w-full inline-flex items-center gap-2 text-left px-3 py-2.5 rounded-xl text-sm font-medium text-indigo-700 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/10 hover:bg-indigo-100 dark:hover:bg-indigo-900/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          >
+            <span className="material-icons-outlined text-[16px]">
+              {copied ? 'check_circle' : 'link'}
+            </span>
+            {copied ? 'Payment Link Copied!' : 'Copy Payment Link'}
+          </button>
+
           <button
             onClick={handleReminder}
             disabled={isPending || currentStatus === 'paid' || currentStatus === 'cancelled'}

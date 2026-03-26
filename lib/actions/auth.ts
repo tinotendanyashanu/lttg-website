@@ -117,7 +117,7 @@ export async function registerPartner(prevState: unknown, formData: FormData) {
 
     let referralCode = undefined;
     // Influencers start on creator tier; regular partners start on referral tier
-    let tier = partnerType === 'influencer' ? 'creator' : 'referral';
+    const tier = partnerType === 'influencer' ? 'creator' : 'referral';
 
     if (partnerType === 'influencer') {
         const slugBase = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');

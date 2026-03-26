@@ -12,24 +12,21 @@ if (!MONGODB_URI) {
 
 // Modern minimal branded template wrapper
 const createBrandedHeader = () => `
-<header style="background: linear-gradient(135deg, #F4F5F7 0%, #FFFFFF 100%); padding: 40px 50px; border-bottom: 1px solid #E5E7EB; margin-bottom: 50px;">
-  <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 30px;">
-    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="16" cy="16" r="14" stroke="#2D2D2D" stroke-width="2" fill="none"/>
-      <path d="M16 8V24M8 16H24" stroke="#2D2D2D" stroke-width="2" stroke-linecap="round"/>
-    </svg>
-    <span style="font-size: 20px; font-weight: 600; color: #2D2D2D; font-family: 'Inter', sans-serif;">LeoTheTechGuy</span>
+<header style="background: linear-gradient(135deg, #EAF1FB 0%, #DCE8F8 100%); padding: 34px 50px; border-bottom: 3px solid #2D2D2D; margin-bottom: 50px;">
+  <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 18px;">
+    <img src="https://leothetechguy.com/images/logo_symbo.png" alt="LeoTheTechGuy Logo" style="width: 34px; height: 34px; object-fit: contain;" />
+    <span style="font-size: 22px; font-weight: 700; color: #111827; font-family: 'Inter', sans-serif; letter-spacing: 0.2px;">LeoTheTechGuy</span>
   </div>
-  <p style="margin: 0; color: #666; font-size: 14px; font-family: 'Inter', sans-serif;">Professional Services Agreement</p>
+  <p style="margin: 0; color: #1F2937; font-size: 14px; font-weight: 600; font-family: 'Inter', sans-serif; text-transform: uppercase; letter-spacing: 0.8px;">Professional Services Agreement</p>
 </header>
 `;
 
 const createSection = (title: string, content: string) => `
 <section style="margin: 40px 0; font-family: 'Inter', sans-serif;">
-  <h2 style="font-size: 18px; font-weight: 600; color: #2D2D2D; margin: 0 0 16px 0; padding-bottom: 10px; border-bottom: 2px solid #E5E7EB;">
+  <h2 style="font-size: 18px; font-weight: 700; color: #111827; margin: 0 0 16px 0; padding-bottom: 10px; border-bottom: 2px solid #D1D5DB;">
     ${title}
   </h2>
-  <div style="color: #444; line-height: 1.7; font-size: 14px;">
+  <div style="color: #111827; line-height: 1.75; font-size: 14px; font-weight: 500;">
     ${content}
   </div>
 </section>
@@ -37,21 +34,21 @@ const createSection = (title: string, content: string) => `
 
 const createSignatureBlock = () => `
 <section style="margin-top: 80px; margin-bottom: 40px; font-family: 'Inter', sans-serif;">
-  <h2 style="font-size: 18px; font-weight: 600; color: #2D2D2D; margin: 0 0 40px 0;">Signature</h2>
+  <h2 style="font-size: 18px; font-weight: 700; color: #111827; margin: 0 0 40px 0;">Signature</h2>
   
   <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 60px;">
     <div>
-      <p style="margin: 0 0 60px 0; font-weight: 600; color: #2D2D2D;">Client Signature</p>
+      <p style="margin: 0 0 60px 0; font-weight: 700; color: #111827;">Client Signature</p>
       <div style="border-top: 2px solid #2D2D2D; width: 100%; margin-bottom: 12px;"></div>
-      <p style="margin: 0; font-size: 14px; color: #666;">{{client_name}}</p>
-      <p style="margin: 10px 0 0 0; font-size: 14px; color: #666;">Date: {{date}}</p>
+      <p style="margin: 0; font-size: 14px; color: #1F2937;">{{client_name}}</p>
+      <p style="margin: 10px 0 0 0; font-size: 14px; color: #1F2937;">Date: {{date}}</p>
     </div>
     
     <div>
-      <p style="margin: 0 0 60px 0; font-weight: 600; color: #2D2D2D;">LeoTheTechGuy</p>
+      <p style="margin: 0 0 60px 0; font-weight: 700; color: #111827;">LeoTheTechGuy</p>
       <div style="border-top: 2px solid #2D2D2D; width: 100%; margin-bottom: 12px;"></div>
-      <p style="margin: 0; font-size: 14px; color: #666;">Authorized Representative</p>
-      <p style="margin: 10px 0 0 0; font-size: 14px; color: #666;">Date: {{date}}</p>
+      <p style="margin: 0; font-size: 14px; color: #1F2937;">Authorized Representative</p>
+      <p style="margin: 10px 0 0 0; font-size: 14px; color: #1F2937;">Date: {{date}}</p>
     </div>
   </div>
 </section>
@@ -81,7 +78,7 @@ const templates: ContractTemplate[] = [
       margin: 0;
       padding: 0;
       background: #F4F5F7;
-      color: #2D2D2D;
+      color: #111827;
     }
     .container {
       max-width: 900px;
@@ -100,7 +97,7 @@ const templates: ContractTemplate[] = [
     
     <div class="content">
       ${createSection('1. Parties', `
-        <p>This Service Agreement ("Agreement") is entered into between <strong>LeoTheTechGuy</strong> ("Company") and <strong>{{client_name}}</strong> {{business_name ? '(' + business_name + ')' : ''}} ("Client").</p>
+        <p>This Service Agreement ("Agreement") is entered into between <strong>LeoTheTechGuy</strong> ("Company") and <strong>{{client_name}}</strong> {{business_name}} ("Client").</p>
       `)}
       
       ${createSection('2. Scope of Services', `
@@ -170,7 +167,7 @@ const templates: ContractTemplate[] = [
       margin: 0;
       padding: 0;
       background: #F4F5F7;
-      color: #2D2D2D;
+      color: #111827;
     }
     .container {
       max-width: 900px;
@@ -260,7 +257,7 @@ const templates: ContractTemplate[] = [
       margin: 0;
       padding: 0;
       background: #F4F5F7;
-      color: #2D2D2D;
+      color: #111827;
     }
     .container {
       max-width: 900px;
@@ -349,7 +346,7 @@ const templates: ContractTemplate[] = [
       margin: 0;
       padding: 0;
       background: #F4F5F7;
-      color: #2D2D2D;
+      color: #111827;
     }
     .container {
       max-width: 900px;
@@ -440,7 +437,7 @@ const templates: ContractTemplate[] = [
       margin: 0;
       padding: 0;
       background: #F4F5F7;
-      color: #2D2D2D;
+      color: #111827;
     }
     .container {
       max-width: 900px;

@@ -331,3 +331,8 @@
   .contract-body .cover, .contract-body .signature { border-color: #374151; }
   .contract-body .section h2 { border-bottom-color: #374151; }
 }
+
+/* Mobile safe area support (iPhone home indicator) */
+.safe-area-inset-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}

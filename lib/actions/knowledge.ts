@@ -90,7 +90,7 @@ export async function searchKnowledgeBase(query: string, category: string, role:
     try {
         await dbConnect();
 
-        let matchStage: any = {
+        const matchStage: any = {
             isPublished: true,
             $or: [
                 { roleVisibility: 'all' as any },
@@ -108,7 +108,7 @@ export async function searchKnowledgeBase(query: string, category: string, role:
             matchStage.category = category;
         }
 
-        let pipeline: any[] = [];
+        const pipeline: any[] = [];
 
         if (query) {
             // Text search requires $text operator

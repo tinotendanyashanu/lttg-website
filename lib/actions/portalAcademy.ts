@@ -224,7 +224,7 @@ export async function submitQuiz(courseId: string, answers: number[]) {
     });
 
     if (passed) {
-      let progress = await PortalCourseProgress.findOne({ accountId: account._id, courseId });
+      const progress = await PortalCourseProgress.findOne({ accountId: account._id, courseId });
       if (progress && !progress.isCompleted) {
         // Also ensure lessons are essentially marked 100% or just set course to complete
         progress.isCompleted = true;

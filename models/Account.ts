@@ -16,6 +16,7 @@ export interface IAccount extends Document {
   bio?: string;
   lastLoginAt?: Date;
   createdAt: Date;
+  trustedIps: string[];
   commissionStats: {
     pendingCommission: number;
     approvedBalance: number;
@@ -66,6 +67,7 @@ const AccountSchema: Schema = new Schema({
     notes: { type: String },
   },
   passwordSetupRequired: { type: Boolean, default: false },
+  trustedIps: { type: [String], default: [] },
 });
 
 AccountSchema.index({ linkedClientAccountId: 1 });

@@ -6,6 +6,7 @@ export interface IAdminLoginToken extends Document {
   expiresAt: Date;
   used: boolean;
   createdAt: Date;
+  requestIp?: string;
 }
 
 const AdminLoginTokenSchema: Schema = new Schema({
@@ -14,6 +15,7 @@ const AdminLoginTokenSchema: Schema = new Schema({
   expiresAt: { type: Date, required: true },
   used:      { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
+  requestIp: { type: String },
 });
 
 // Auto-delete expired tokens

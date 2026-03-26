@@ -70,81 +70,94 @@ export default async function TicketsPage() {
             </Link>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-gray-100 dark:border-gray-800">
-                  <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                    Ticket
-                  </th>
-                  <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                    Subject
-                  </th>
-                  <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                    Category
-                  </th>
-                  <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                    Priority
-                  </th>
-                  <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                    Updated
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
-                {tickets.map((ticket: any) => (
-                  <tr
-                    key={ticket._id}
-                    className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group"
-                  >
-                    <td className="px-6 py-4">
-                      <Link
-                        href={`/portal/client/tickets/${ticket._id}`}
-                        className="font-mono text-xs text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors"
-                      >
+          <>
+            {/* Mobile card list */}
+            <div className="sm:hidden divide-y divide-gray-100 dark:divide-gray-800">
+              {tickets.map((ticket: any) => (
+                <Link
+                  key={ticket._id}
+                  href={`/portal/client/tickets/${ticket._id}`}
+                  className="flex items-start gap-3 px-4 py-4 hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors"
+                >
+                  <div className="w-9 h-9 rounded-xl bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center shrink-0 mt-0.5">
+                    <span className="material-icons-outlined text-purple-600 dark:text-purple-400 text-[18px]">support_agent</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                      <span className="font-mono text-[11px] text-gray-400">
                         {ticket.ticketId || ticket._id.slice(-6).toUpperCase()}
-                      </Link>
-                    </td>
-                    <td className="px-6 py-4">
-                      <Link
-                        href={`/portal/client/tickets/${ticket._id}`}
-                        className="font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors line-clamp-1"
-                      >
-                        {ticket.subject}
-                      </Link>
-                    </td>
-                    <td className="px-6 py-4 text-gray-500 dark:text-gray-400 capitalize">
-                      {ticket.category?.replace(/_/g, ' ') || '—'}
-                    </td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={`px-2.5 py-1 rounded-full text-[11px] font-bold uppercase ${
-                          PRIORITY_STYLES[ticket.priority] || PRIORITY_STYLES.medium
-                        }`}
-                      >
-                        {ticket.priority}
                       </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={`px-2.5 py-1 rounded-full text-[11px] font-bold uppercase ${
-                          STATUS_STYLES[ticket.status] || STATUS_STYLES.open
-                        }`}
-                      >
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${STATUS_STYLES[ticket.status] || STATUS_STYLES.open}`}>
                         {ticket.status.replace(/_/g, ' ')}
                       </span>
-                    </td>
-                    <td className="px-6 py-4 text-gray-400 text-xs">
-                      {new Date(ticket.updatedAt).toLocaleDateString()}
-                    </td>
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${PRIORITY_STYLES[ticket.priority] || PRIORITY_STYLES.medium}`}>
+                        {ticket.priority}
+                      </span>
+                    </div>
+                    <p className="font-medium text-gray-900 dark:text-white text-sm truncate">{ticket.subject}</p>
+                    <p className="text-xs text-gray-400 mt-0.5">
+                      {ticket.category?.replace(/_/g, ' ') || 'General'} · {new Date(ticket.updatedAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <span className="material-icons-outlined text-gray-300 dark:text-gray-700 text-[18px] shrink-0 mt-1">chevron_right</span>
+                </Link>
+              ))}
+            </div>
+
+            {/* Desktop table */}
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-gray-100 dark:border-gray-800">
+                    <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Ticket</th>
+                    <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Subject</th>
+                    <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Category</th>
+                    <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Priority</th>
+                    <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Updated</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
+                  {tickets.map((ticket: any) => (
+                    <tr key={ticket._id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group">
+                      <td className="px-6 py-4">
+                        <Link
+                          href={`/portal/client/tickets/${ticket._id}`}
+                          className="font-mono text-xs text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors"
+                        >
+                          {ticket.ticketId || ticket._id.slice(-6).toUpperCase()}
+                        </Link>
+                      </td>
+                      <td className="px-6 py-4">
+                        <Link
+                          href={`/portal/client/tickets/${ticket._id}`}
+                          className="font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors line-clamp-1"
+                        >
+                          {ticket.subject}
+                        </Link>
+                      </td>
+                      <td className="px-6 py-4 text-gray-500 dark:text-gray-400 capitalize">
+                        {ticket.category?.replace(/_/g, ' ') || '—'}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold uppercase ${PRIORITY_STYLES[ticket.priority] || PRIORITY_STYLES.medium}`}>
+                          {ticket.priority}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold uppercase ${STATUS_STYLES[ticket.status] || STATUS_STYLES.open}`}>
+                          {ticket.status.replace(/_/g, ' ')}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-gray-400 text-xs">
+                        {new Date(ticket.updatedAt).toLocaleDateString()}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
     </div>

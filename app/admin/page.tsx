@@ -853,7 +853,7 @@ export default async function AdminDashboard() {
             </Link>
           </div>
           <div className="flex-1 overflow-y-auto p-3 space-y-1">
-            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+            { }
             {portalStats?.recentActivity && portalStats.recentActivity.length > 0 ? (
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               portalStats.recentActivity.slice(0, 8).map((log: any) => (

@@ -52,6 +52,19 @@ export async function initiateAdminLogin(
     return { error: 'Invalid password.' };
   }
 
+  // Attempt to get request IP
+  let ip: string | undefined;
+  try {
+    const headersList = await headers();
+    ip = headersList.get('x-forwarded-for')?.split(',')[0].trim() ?? headersList.get('x-real-ip') ?? undefined;
+  } catch {
+    // headers() not available in this context, skip IP
+  }
+
+  // Check if this IP has been verified before for this account
+  const matchedAccount = adminAccounts.find(a => a._id.toString() === matchedAccountId);
+  const ipIsTrusted = ip && matchedAccount?.trustedIps?.includes(ip);
+
   // Generate 6-digit OTP
   const otp = String(Math.floor(100000 + Math.random() * 900000));
   const otpHash = await bcrypt.hash(otp, 10);
@@ -63,18 +76,17 @@ export async function initiateAdminLogin(
     otpHash,
     expiresAt,
     used: false,
+    requestIp: ip,
   });
 
-  // Attempt to get request IP for security notice
-  let ip: string | undefined;
-  try {
-    const headersList = await headers();
-    ip = headersList.get('x-forwarded-for')?.split(',')[0] ?? headersList.get('x-real-ip') ?? undefined;
-  } catch {
-    // headers() not available in this context, skip IP
+  if (ipIsTrusted) {
+    // Known IP — skip email verification, sign in directly
+    await signIn('adminOtp', { tokenId: token._id.toString(), otp, redirectTo: '/admin' });
+    // signIn throws NEXT_REDIRECT on success; this line is unreachable
+    return { error: '' };
   }
 
-  // Send OTP to the admin's email address stored in the database
+  // Unknown IP — send OTP to email and redirect to verify page
   await sendEmail({
     to: matchedEmail,
     subject: '🔐 Admin Panel Login Code',

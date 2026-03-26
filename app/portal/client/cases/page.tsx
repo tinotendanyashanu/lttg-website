@@ -57,71 +57,106 @@ export default async function CasesPage() {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr>
-                  {['Case ID', 'Title', 'Type', 'Status', 'Priority', 'Last Update', 'Assigned Team', ''].map(
-                    (h) => (
-                      <th
-                        key={h}
-                        className="text-left py-3 px-5 font-semibold text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 uppercase tracking-wider"
-                      >
-                        {h}
-                      </th>
-                    )
-                  )}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                {cases.map((c: any) => (
-                  <tr
-                    key={c._id}
-                    className="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors"
-                  >
-                    <td className="py-4 px-5 font-mono text-xs text-gray-500">{c.caseNumber}</td>
-                    <td className="py-4 px-5 font-medium text-gray-900 dark:text-white max-w-[200px] truncate">
-                      {c.title}
-                    </td>
-                    <td className="py-4 px-5 text-gray-500 dark:text-gray-400">{c.caseType}</td>
-                    <td className="py-4 px-5">
-                      <span
-                        className={`px-2.5 py-1 rounded-full text-[11px] font-bold uppercase ${
-                          STATUS_STYLES[c.status] || STATUS_STYLES.submitted
-                        }`}
-                      >
+          <>
+            {/* Mobile card list */}
+            <div className="sm:hidden divide-y divide-gray-100 dark:divide-gray-800">
+              {cases.map((c: any) => (
+                <Link
+                  key={c._id}
+                  href={`/portal/client/cases/${c._id}`}
+                  className="flex items-start gap-3 px-4 py-4 hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors"
+                >
+                  <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center shrink-0 mt-0.5">
+                    <span className="material-icons-outlined text-blue-600 dark:text-blue-400 text-[18px]">folder_shared</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                      <span className="font-mono text-[11px] text-gray-400">{c.caseNumber}</span>
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${STATUS_STYLES[c.status] || STATUS_STYLES.submitted}`}>
                         {c.status.replace(/_/g, ' ')}
                       </span>
-                    </td>
-                    <td className="py-4 px-5">
-                      <span
-                        className={`px-2.5 py-1 rounded-full text-[11px] font-bold uppercase ${
-                          PRIORITY_STYLES[c.priority] || PRIORITY_STYLES.medium
-                        }`}
-                      >
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${PRIORITY_STYLES[c.priority] || PRIORITY_STYLES.medium}`}>
                         {c.priority}
                       </span>
-                    </td>
-                    <td className="py-4 px-5 text-gray-500 dark:text-gray-400 whitespace-nowrap">
-                      {new Date(c.updatedAt).toLocaleDateString()}
-                    </td>
-                    <td className="py-4 px-5 text-gray-500 dark:text-gray-400">
-                      {c.assignedTeam || '—'}
-                    </td>
-                    <td className="py-4 px-5">
-                      <Link
-                        href={`/portal/client/cases/${c._id}`}
-                        className="inline-flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:underline text-sm font-medium"
-                      >
-                        View{' '}
-                        <span className="material-icons-outlined text-[14px]">arrow_forward</span>
-                      </Link>
-                    </td>
+                    </div>
+                    <p className="font-medium text-gray-900 dark:text-white text-sm truncate">{c.title}</p>
+                    <p className="text-xs text-gray-400 mt-0.5">
+                      {c.caseType} · Updated {new Date(c.updatedAt).toLocaleDateString()}
+                      {c.assignedTeam && ` · ${c.assignedTeam}`}
+                    </p>
+                  </div>
+                  <span className="material-icons-outlined text-gray-300 dark:text-gray-700 text-[18px] shrink-0 mt-1">chevron_right</span>
+                </Link>
+              ))}
+            </div>
+
+            {/* Desktop table */}
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr>
+                    {['Case ID', 'Title', 'Type', 'Status', 'Priority', 'Last Update', 'Assigned Team', ''].map(
+                      (h) => (
+                        <th
+                          key={h}
+                          className="text-left py-3 px-5 font-semibold text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 uppercase tracking-wider"
+                        >
+                          {h}
+                        </th>
+                      )
+                    )}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                  {cases.map((c: any) => (
+                    <tr
+                      key={c._id}
+                      className="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors"
+                    >
+                      <td className="py-4 px-5 font-mono text-xs text-gray-500">{c.caseNumber}</td>
+                      <td className="py-4 px-5 font-medium text-gray-900 dark:text-white max-w-[200px] truncate">
+                        {c.title}
+                      </td>
+                      <td className="py-4 px-5 text-gray-500 dark:text-gray-400">{c.caseType}</td>
+                      <td className="py-4 px-5">
+                        <span
+                          className={`px-2.5 py-1 rounded-full text-[11px] font-bold uppercase ${
+                            STATUS_STYLES[c.status] || STATUS_STYLES.submitted
+                          }`}
+                        >
+                          {c.status.replace(/_/g, ' ')}
+                        </span>
+                      </td>
+                      <td className="py-4 px-5">
+                        <span
+                          className={`px-2.5 py-1 rounded-full text-[11px] font-bold uppercase ${
+                            PRIORITY_STYLES[c.priority] || PRIORITY_STYLES.medium
+                          }`}
+                        >
+                          {c.priority}
+                        </span>
+                      </td>
+                      <td className="py-4 px-5 text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                        {new Date(c.updatedAt).toLocaleDateString()}
+                      </td>
+                      <td className="py-4 px-5 text-gray-500 dark:text-gray-400">
+                        {c.assignedTeam || '—'}
+                      </td>
+                      <td className="py-4 px-5">
+                        <Link
+                          href={`/portal/client/cases/${c._id}`}
+                          className="inline-flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:underline text-sm font-medium"
+                        >
+                          View{' '}
+                          <span className="material-icons-outlined text-[14px]">arrow_forward</span>
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
     </div>

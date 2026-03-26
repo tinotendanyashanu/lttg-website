@@ -32,6 +32,14 @@ const NAV_ITEMS: NavItem[] = [
   { href: '/portal/client/settings', icon: 'settings', label: 'Settings' },
 ];
 
+// Bottom nav shows 4 primary items + "More" to open drawer
+const BOTTOM_NAV: NavItem[] = [
+  { href: '/portal/client/dashboard', icon: 'dashboard', label: 'Home', exact: true },
+  { href: '/portal/client/cases', icon: 'folder_shared', label: 'Cases' },
+  { href: '/portal/client/messages', icon: 'chat', label: 'Messages' },
+  { href: '/portal/client/invoices', icon: 'receipt_long', label: 'Invoices' },
+];
+
 export default function ClientPortalShell({
   children,
   user,
@@ -45,12 +53,30 @@ export default function ClientPortalShell({
 }) {
   const pathname = usePathname();
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   useEffect(() => {
     if (document.documentElement.classList.contains('dark')) {
       setIsDarkMode(true);
     }
   }, []);
+
+  // Close drawer on route change
+  useEffect(() => {
+    setDrawerOpen(false);
+  }, [pathname]);
+
+  // Prevent body scroll when drawer is open
+  useEffect(() => {
+    if (drawerOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [drawerOpen]);
 
   const toggleDarkMode = () => {
     if (document.documentElement.classList.contains('dark')) {
@@ -105,8 +131,8 @@ export default function ClientPortalShell({
     <div className="bg-background-light dark:bg-background-dark text-gray-800 dark:text-gray-200 font-sans transition-colors duration-300 min-h-screen flex justify-center items-center w-full">
       <div className="w-full h-screen bg-surface-light dark:bg-surface-dark overflow-hidden flex flex-col md:flex-row relative transition-colors duration-300">
 
-        {/* Sidebar */}
-        <aside className="w-20 lg:w-64 bg-surface-light dark:bg-surface-dark border-r border-gray-100 dark:border-gray-800 flex flex-col py-8 px-4 shrink-0 transition-all duration-300 relative z-20">
+        {/* ── Desktop Sidebar (md and up) ─────────────────────────────── */}
+        <aside className="hidden md:flex md:flex-col w-64 bg-surface-light dark:bg-surface-dark border-r border-gray-100 dark:border-gray-800 py-8 px-4 shrink-0 transition-all duration-300 relative z-20">
           <div className="flex items-center gap-3 mb-8 pl-2">
             <div className="w-10 h-10 relative flex items-center justify-center">
               <Image
@@ -117,7 +143,7 @@ export default function ClientPortalShell({
                 className="object-contain"
               />
             </div>
-            <div className="hidden lg:block">
+            <div>
               <span className="text-base font-bold tracking-tight text-gray-900 dark:text-white">
                 LeoTech
               </span>
@@ -139,7 +165,7 @@ export default function ClientPortalShell({
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`relative flex items-center justify-center lg:justify-start gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
+                  className={`relative flex items-center gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
                     active
                       ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm'
                       : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'
@@ -148,9 +174,9 @@ export default function ClientPortalShell({
                   <span className="material-icons-outlined text-[20px] group-hover:scale-110 transition-transform shrink-0">
                     {item.icon}
                   </span>
-                  <span className="hidden lg:block text-sm">{item.label}</span>
+                  <span className="text-sm">{item.label}</span>
                   {(hasMessagesCount || hasNotifCount) && (
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 hidden lg:flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-blue-600 text-white text-[10px] font-bold">
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-blue-600 text-white text-[10px] font-bold">
                       {hasMessagesCount ? unreadMessages : unreadNotifications}
                     </span>
                   )}
@@ -160,19 +186,19 @@ export default function ClientPortalShell({
 
             <button
               onClick={() => signOut({ callbackUrl: '/' })}
-              className="w-full flex items-center justify-center lg:justify-start gap-3 px-4 py-2.5 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-red-50 dark:hover:bg-red-900/10 hover:text-red-600 dark:hover:text-red-400 transition-colors group"
+              className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-red-50 dark:hover:bg-red-900/10 hover:text-red-600 dark:hover:text-red-400 transition-colors group"
             >
               <span className="material-icons-outlined text-[20px] group-hover:scale-110 transition-transform">
                 exit_to_app
               </span>
-              <span className="hidden lg:block text-sm">Logout</span>
+              <span className="text-sm">Logout</span>
             </button>
           </nav>
 
           <div className="space-y-2 mt-auto">
             <button
               onClick={toggleDarkMode}
-              className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors mx-auto lg:mx-0"
+              className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
               aria-label="Toggle dark mode"
             >
               <span className="material-icons-outlined text-[18px]">
@@ -182,13 +208,136 @@ export default function ClientPortalShell({
           </div>
         </aside>
 
-        {/* Main Area */}
+        {/* ── Mobile Drawer Overlay ────────────────────────────────────── */}
+        {drawerOpen && (
+          <div
+            className="fixed inset-0 z-40 md:hidden"
+            onClick={() => setDrawerOpen(false)}
+          >
+            {/* Backdrop */}
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+
+            {/* Drawer panel */}
+            <div
+              className="absolute left-0 top-0 bottom-0 w-72 bg-white dark:bg-[#18181b] flex flex-col shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Drawer header */}
+              <div className="flex items-center justify-between px-5 py-5 border-b border-gray-100 dark:border-gray-800">
+                <div className="flex items-center gap-3">
+                  <Image
+                    src="/logo_transparent.png"
+                    alt="LeoTech Logo"
+                    width={36}
+                    height={36}
+                    className="object-contain"
+                  />
+                  <div>
+                    <span className="text-base font-bold text-gray-900 dark:text-white">LeoTech</span>
+                    <p className="text-[10px] text-gray-400 font-medium uppercase tracking-widest">
+                      Client Portal
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setDrawerOpen(false)}
+                  className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400"
+                  aria-label="Close menu"
+                >
+                  <span className="material-icons-outlined text-[18px]">close</span>
+                </button>
+              </div>
+
+              {/* User identity */}
+              <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-800">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
+                    {user?.name?.[0] || user?.email?.[0]?.toUpperCase() || 'C'}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                      {user?.name || user?.email?.split('@')[0]}
+                    </p>
+                    <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">Client</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Nav items */}
+              <nav className="flex-1 overflow-y-auto px-3 py-3 space-y-0.5">
+                {NAV_ITEMS.map((item) => {
+                  const active = isActive(item);
+                  const hasMessagesCount =
+                    item.href === '/portal/client/messages' && unreadMessages > 0;
+                  const hasNotifCount =
+                    item.href === '/portal/client/notifications' && unreadNotifications > 0;
+
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={`relative flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${
+                        active
+                          ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white'
+                          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'
+                      }`}
+                    >
+                      <span className="material-icons-outlined text-[20px] shrink-0">
+                        {item.icon}
+                      </span>
+                      <span className="text-sm">{item.label}</span>
+                      {(hasMessagesCount || hasNotifCount) && (
+                        <span className="ml-auto flex items-center justify-center min-w-[20px] h-5 px-1 rounded-full bg-blue-600 text-white text-[10px] font-bold">
+                          {hasMessagesCount ? unreadMessages : unreadNotifications}
+                        </span>
+                      )}
+                    </Link>
+                  );
+                })}
+              </nav>
+
+              {/* Drawer footer */}
+              <div className="px-3 py-4 border-t border-gray-100 dark:border-gray-800 space-y-1">
+                <button
+                  onClick={toggleDarkMode}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                >
+                  <span className="material-icons-outlined text-[20px]">
+                    {isDarkMode ? 'light_mode' : 'dark_mode'}
+                  </span>
+                  <span className="text-sm">{isDarkMode ? 'Light Mode' : 'Dark Mode'}</span>
+                </button>
+                <button
+                  onClick={() => signOut({ callbackUrl: '/' })}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
+                >
+                  <span className="material-icons-outlined text-[20px]">exit_to_app</span>
+                  <span className="text-sm">Logout</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Main Area ────────────────────────────────────────────────── */}
         <main className="flex-1 flex flex-col min-w-0 bg-[#FAFAFA] dark:bg-[#18181b] overflow-hidden relative z-10">
-          <header className="h-16 px-6 md:px-8 flex items-center justify-between shrink-0 bg-[#FAFAFA] dark:bg-[#18181b] border-b border-gray-100 dark:border-gray-800">
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white capitalize truncate pr-4">
-              {getPageTitle()}
-            </h1>
+
+          {/* Header */}
+          <header className="h-14 md:h-16 px-4 md:px-8 flex items-center justify-between shrink-0 bg-[#FAFAFA] dark:bg-[#18181b] border-b border-gray-100 dark:border-gray-800">
             <div className="flex items-center gap-3">
+              {/* Hamburger — mobile only */}
+              <button
+                onClick={() => setDrawerOpen(true)}
+                className="md:hidden w-9 h-9 flex items-center justify-center rounded-full bg-white dark:bg-[#27272a] border border-gray-100 dark:border-gray-800 text-gray-500 dark:text-gray-400 shadow-sm"
+                aria-label="Open menu"
+              >
+                <span className="material-icons-outlined text-[20px]">menu</span>
+              </button>
+              <h1 className="text-base md:text-xl font-bold text-gray-900 dark:text-white capitalize truncate pr-2">
+                {getPageTitle()}
+              </h1>
+            </div>
+            <div className="flex items-center gap-2 md:gap-3">
               <Link
                 href="/portal/client/notifications"
                 className="relative w-9 h-9 flex items-center justify-center rounded-full bg-white dark:bg-[#27272a] border border-gray-100 dark:border-gray-800 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors shadow-sm"
@@ -200,7 +349,7 @@ export default function ClientPortalShell({
                   </span>
                 )}
               </Link>
-              <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-2">
                 <div className="text-right hidden sm:block">
                   <div className="text-sm font-semibold text-gray-900 dark:text-white leading-tight">
                     {user?.name || user?.email?.split('@')[0]}
@@ -219,10 +368,56 @@ export default function ClientPortalShell({
             </div>
           </header>
 
-          <div className="flex-1 overflow-y-auto p-4 md:p-8 pt-4 md:pt-6">
+          {/* Page content — adds bottom padding on mobile so content clears the bottom nav */}
+          <div className="flex-1 overflow-y-auto p-4 md:p-8 pt-4 md:pt-6 pb-20 md:pb-8">
             {children}
           </div>
         </main>
+
+        {/* ── Mobile Bottom Navigation Bar ────────────────────────────── */}
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white dark:bg-[#18181b] border-t border-gray-100 dark:border-gray-800 flex items-stretch safe-area-inset-bottom">
+          {BOTTOM_NAV.map((item) => {
+            const active = isActive(item);
+            const isMessages = item.href === '/portal/client/messages';
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2 transition-colors relative ${
+                  active
+                    ? 'text-blue-600 dark:text-blue-400'
+                    : 'text-gray-400 dark:text-gray-500'
+                }`}
+              >
+                <span className="relative">
+                  <span className={`material-icons-outlined text-[22px] ${active ? 'font-black' : ''}`}>
+                    {item.icon}
+                  </span>
+                  {isMessages && unreadMessages > 0 && (
+                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-blue-600 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                      {unreadMessages > 9 ? '9+' : unreadMessages}
+                    </span>
+                  )}
+                </span>
+                <span className={`text-[10px] font-medium leading-none ${active ? 'text-blue-600 dark:text-blue-400' : ''}`}>
+                  {item.label}
+                </span>
+                {active && (
+                  <span className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-0.5 rounded-full bg-blue-600 dark:bg-blue-400" />
+                )}
+              </Link>
+            );
+          })}
+          {/* "More" button opens the full drawer */}
+          <button
+            onClick={() => setDrawerOpen(true)}
+            className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 text-gray-400 dark:text-gray-500 transition-colors"
+          >
+            <span className="material-icons-outlined text-[22px]">menu</span>
+            <span className="text-[10px] font-medium leading-none">More</span>
+          </button>
+        </nav>
+
       </div>
     </div>
   );

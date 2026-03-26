@@ -204,9 +204,9 @@ async function main() {
 
   await simulateSubmitExam(testPartner2._id.toString(), true);
   
-  let dealsT3 = await Deal.countDocuments({ partnerId: testPartner2._id, commissionSource: 'ACADEMY_BONUS' });
-  let pStatsT3 = await Partner.findById(testPartner2._id);
-  let balancesT3 = await getPartnerBalances(testPartner2._id);
+  const dealsT3 = await Deal.countDocuments({ partnerId: testPartner2._id, commissionSource: 'ACADEMY_BONUS' });
+  const pStatsT3 = await Partner.findById(testPartner2._id);
+  const balancesT3 = await getPartnerBalances(testPartner2._id);
   console.log(`After setup run: Bonus Deal Count: ${dealsT3}, hasReceived: ${pStatsT3?.hasReceivedAcademyBonus}, approvedBalance: ${balancesT3.approvedBalance}`);
 
   if (dealsT3 === 0 && balancesT3.approvedBalance === 0) {

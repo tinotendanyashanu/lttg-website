@@ -25,6 +25,43 @@ function toStripeAmount(amount: number): number {
   return Math.round(amount * 100);
 }
 
+function PaymentError({
+  invoiceId,
+  message,
+}: {
+  invoiceId: string;
+  message: string;
+}) {
+  return (
+    <div className="max-w-lg mx-auto space-y-6 py-8 px-4">
+      <div>
+        <Link
+          href={`/portal/client/invoices/${invoiceId}`}
+          className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors mb-4"
+        >
+          <span className="material-icons-outlined text-[16px]">arrow_back</span>
+          Back to Invoice
+        </Link>
+      </div>
+      <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30 rounded-2xl p-6 text-center space-y-3">
+        <span className="material-icons-outlined text-red-500 text-4xl block">error_outline</span>
+        <p className="text-sm font-semibold text-red-800 dark:text-red-300">Payment Unavailable</p>
+        <p className="text-sm text-red-600 dark:text-red-400">{message}</p>
+        <p className="text-xs text-red-500 dark:text-red-500 mt-2">
+          Please contact our team to complete your payment.
+        </p>
+        <Link
+          href="/portal/client/messages"
+          className="inline-flex items-center gap-1.5 mt-2 bg-red-600 hover:bg-red-700 text-white rounded-full px-5 py-2 text-sm font-medium transition-colors"
+        >
+          <span className="material-icons-outlined text-[14px]">chat</span>
+          Contact Team
+        </Link>
+      </div>
+    </div>
+  );
+}
+
 export default async function PayInvoicePage({
   params,
   searchParams,
@@ -39,6 +76,17 @@ export default async function PayInvoicePage({
     redirect('/portal/client/login');
   }
 
+  // Check Stripe is configured before doing any DB work
+  const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+  if (!publishableKey || !process.env.STRIPE_SECRET_KEY) {
+    return (
+      <PaymentError
+        invoiceId={invoiceId}
+        message="Online payments are not configured. Please contact our team to arrange payment."
+      />
+    );
+  }
+
   const invoice = await getInvoiceForPayment(session.user.id, invoiceId);
   if (!invoice) notFound();
 
@@ -51,8 +99,18 @@ export default async function PayInvoicePage({
   const hasNoDeposit = (invoice.depositPaid ?? 0) === 0;
   const canDoInstallments = isFirstPayment && hasNoDeposit;
 
-  // Determine amount to charge
+  // Determine amount to charge — fall back gracefully for old invoices missing remainingBalance
   let amountToCharge = invoice.remainingBalance ?? invoice.amount;
+
+  // Guard against corrupted/missing amount on very old invoices
+  if (!amountToCharge || isNaN(amountToCharge) || amountToCharge <= 0) {
+    return (
+      <PaymentError
+        invoiceId={invoiceId}
+        message="This invoice has an invalid amount. Please contact our team to resolve this before paying."
+      />
+    );
+  }
 
   // If custom amount provided and eligible for installments, validate and use it
   if (customAmount && canDoInstallments) {
@@ -61,27 +119,44 @@ export default async function PayInvoicePage({
       amountToCharge = customAmountNum;
     }
   }
+
   const serviceFee = Math.round(amountToCharge * SERVICE_FEE_RATE * 100) / 100;
   const totalCharged = Math.round((amountToCharge + serviceFee) * 100) / 100;
+  // Old invoices without currency default to USD
   const currency = (invoice.currency || 'USD').toLowerCase();
 
-  const paymentIntent = await getStripe().paymentIntents.create({
-    amount: toStripeAmount(totalCharged),
-    currency,
-    automatic_payment_methods: { enabled: true },
-    metadata: {
-      invoiceId: String(invoice._id),
-      clientId: String(invoice.clientId),
-      currency: invoice.currency || 'USD',
-      amount: String(amountToCharge),
-      serviceFee: String(serviceFee),
-      isInstallment: String(amountToCharge < (invoice.remainingBalance ?? invoice.amount) && canDoInstallments),
-    },
-  });
+  let clientSecret: string;
+  try {
+    const paymentIntent = await getStripe().paymentIntents.create({
+      amount: toStripeAmount(totalCharged),
+      currency,
+      automatic_payment_methods: { enabled: true },
+      metadata: {
+        invoiceId: String(invoice._id),
+        clientId: String(invoice.clientId),
+        currency: invoice.currency || 'USD',
+        amount: String(amountToCharge),
+        serviceFee: String(serviceFee),
+        isInstallment: String(
+          amountToCharge < (invoice.remainingBalance ?? invoice.amount) && canDoInstallments,
+        ),
+      },
+    });
 
-  const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
-  if (!publishableKey || !paymentIntent.client_secret) {
-    throw new Error('Stripe is not configured. Please contact support.');
+    if (!paymentIntent.client_secret) {
+      throw new Error('No client secret returned from Stripe.');
+    }
+    clientSecret = paymentIntent.client_secret;
+  } catch (err) {
+    const msg =
+      err instanceof Error ? err.message : 'An unexpected error occurred while setting up payment.';
+    console.error('[pay page] Stripe PaymentIntent error:', msg, { invoiceId, currency, totalCharged });
+    return (
+      <PaymentError
+        invoiceId={invoiceId}
+        message={`We were unable to initialise payment for this invoice (${msg}). Please contact our team.`}
+      />
+    );
   }
 
   const returnUrl = `${process.env.NEXT_PUBLIC_APP_URL}/portal/client/invoices/${invoiceId}?payment=success`;
@@ -197,7 +272,7 @@ export default async function PayInvoicePage({
       {/* Stripe Payment Element */}
       <div className="bg-white dark:bg-[#1c1c1f] border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
         <StripePaymentForm
-          clientSecret={paymentIntent.client_secret}
+          clientSecret={clientSecret}
           publishableKey={publishableKey}
           returnUrl={returnUrl}
           amount={totalCharged}

@@ -159,6 +159,13 @@ const nextAuthResult = NextAuth({
         const account = await Account.findById(token.accountId);
         if (!account || !account.isActive || !account.roles.includes('admin')) return null;
 
+        // If OTP was verified from an unrecognised IP, trust it going forward
+        if (token.requestIp && !account.trustedIps?.includes(token.requestIp)) {
+          const MAX_TRUSTED_IPS = 10;
+          const updatedIps = [...(account.trustedIps ?? []), token.requestIp].slice(-MAX_TRUSTED_IPS);
+          await Account.findByIdAndUpdate(token.accountId, { trustedIps: updatedIps });
+        }
+
         return {
           id: account._id.toString(),
           accountId: account._id.toString(),
