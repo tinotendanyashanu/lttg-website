@@ -27,7 +27,7 @@ const nextConfig: NextConfig = {
       { key: 'X-XSS-Protection', value: '0' },
       {
         key: 'Content-Security-Policy',
-        value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com https://js.stripe.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' blob: data: https://images.unsplash.com https://api.dicebear.com https://pub-01b9a208b3354278b07d052222dd1f6a.r2.dev; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://*.r2.dev https://api.stripe.com; frame-src 'self' https://js.stripe.com https://hooks.stripe.com; object-src 'none';"
+        value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com https://vercel.live https://js.stripe.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' blob: data: https://images.unsplash.com https://api.dicebear.com https://pub-01b9a208b3354278b07d052222dd1f6a.r2.dev; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://*.r2.dev https://api.stripe.com; frame-src 'self' https://js.stripe.com https://hooks.stripe.com; object-src 'none';"
       },
     ];
 
