@@ -115,8 +115,8 @@ export default function CreateInvoiceModal({ clients }: Props) {
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/60 backdrop-blur-md p-2 sm:p-4">
-          <div className="bg-white dark:bg-[#1c1c1e] rounded-2xl shadow-2xl w-full max-w-3xl my-4 sm:my-8 border border-gray-100 dark:border-gray-800">
+        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/70 backdrop-blur-md p-0 sm:p-4 md:p-8">
+          <div className="bg-white dark:bg-[#1c1c1e] rounded-b-2xl sm:rounded-3xl shadow-2xl w-full max-w-5xl my-0 sm:my-8 border border-gray-100 dark:border-gray-800 transition-all duration-300">
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 dark:border-gray-800">
               <div className="flex items-center gap-3">
@@ -130,9 +130,9 @@ export default function CreateInvoiceModal({ clients }: Props) {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="px-6 py-5 space-y-5">
-              {/* Client + Currency */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <form onSubmit={handleSubmit} className="px-6 py-6 md:px-10 md:py-8 space-y-8 md:space-y-10">
+              {/* Client + Status */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
                 <div>
                   <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">Client *</label>
                   <select
@@ -164,7 +164,7 @@ export default function CreateInvoiceModal({ clients }: Props) {
               </div>
 
               {/* Dates + Currency */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 md:gap-8">
                 <div>
                   <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">Currency</label>
                   <select
@@ -202,14 +202,14 @@ export default function CreateInvoiceModal({ clients }: Props) {
               {/* Description */}
               <div>
                 <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">Description (optional)</label>
-                <input
-                  type="text"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Brief description of the invoice…"
-                  className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#27272a] text-gray-900 dark:text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/30"
-                />
-              </div>
+                  <input
+                    type="text"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Brief description of the invoice…"
+                    className="w-full rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#27272a] text-gray-900 dark:text-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/30"
+                  />
+                </div>
 
               {/* Line Items */}
               <div>
