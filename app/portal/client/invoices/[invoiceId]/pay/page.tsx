@@ -69,12 +69,13 @@ export default async function PayInvoicePage({
   params: Promise<{ invoiceId: string }>;
   searchParams: Promise<{ amount?: string }>;
 }) {
-  const { invoiceId } = await params;
-  const { amount: customAmount } = await searchParams;
-  const session = await auth();
-  if (!session?.user?.id || session.user.role !== 'client') {
-    redirect('/portal/client/login');
-  }
+  try {
+    const { invoiceId } = await params;
+    const { amount: customAmount } = await searchParams;
+    const session = await auth();
+    if (!session?.user?.id || session.user.role !== 'client') {
+      redirect('/portal/client/login');
+    }
 
   // Check Stripe is configured before doing any DB work
   const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
@@ -150,7 +151,14 @@ export default async function PayInvoicePage({
   } catch (err) {
     const msg =
       err instanceof Error ? err.message : 'An unexpected error occurred while setting up payment.';
-    console.error('[pay page] Stripe PaymentIntent error:', msg, { invoiceId, currency, totalCharged });
+    const errorStack = err instanceof Error ? err.stack : undefined;
+    console.error('[pay page] Stripe PaymentIntent error:', msg, {
+      invoiceId,
+      currency,
+      totalCharged,
+      errorStack,
+      errorDetails: err
+    });
     return (
       <PaymentError
         invoiceId={invoiceId}
@@ -286,4 +294,15 @@ export default async function PayInvoicePage({
       </p>
     </div>
   );
+  } catch (error) {
+    console.error('[pay page] Unexpected error rendering page:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    const invoiceIdFallback = 'unknown';
+    return (
+      <PaymentError
+        invoiceId={invoiceIdFallback}
+        message={`An unexpected error occurred: ${errorMessage}`}
+      />
+    );
+  }
 }
