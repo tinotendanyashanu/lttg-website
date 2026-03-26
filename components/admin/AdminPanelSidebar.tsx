@@ -169,7 +169,7 @@ export default function AdminPanelSidebar({
     <>
       {/* Desktop sidebar */}
       <aside
-        className={`hidden lg:flex flex-col shrink-0 h-screen sticky top-0 transition-all duration-300 ease-in-out overflow-hidden ${
+        className={`hidden md:flex flex-col shrink-0 h-screen sticky top-0 transition-all duration-300 ease-in-out overflow-hidden ${
           isCollapsed ? 'w-[72px]' : 'w-64'
         }`}
       >
@@ -178,7 +178,7 @@ export default function AdminPanelSidebar({
 
       {/* Mobile overlay */}
       {isMobileOpen && (
-        <div className="fixed inset-y-0 left-0 z-50 w-72 flex flex-col lg:hidden shadow-xl">
+        <div className="fixed inset-y-0 left-0 z-50 w-72 flex flex-col md:hidden shadow-xl">
           {sidebarContent}
         </div>
       )}

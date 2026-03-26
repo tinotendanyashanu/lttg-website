@@ -753,7 +753,7 @@ export default async function AdminDashboard() {
           </div>
           <h2 className="text-base font-bold text-gray-900 dark:text-white">Financial Performance</h2>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div className="bg-white dark:bg-[#27272a] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-soft p-6">
             <SimpleBarChart title="Revenue Overview" data={stats?.revenueData ?? []} color="bg-emerald-500" />
           </div>
@@ -764,7 +764,7 @@ export default async function AdminDashboard() {
 
         {/* 12-month revenue + case volume trends */}
         {trends && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
             <div className="bg-white dark:bg-[#27272a] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-soft p-6">
               <SimpleBarChart title="Monthly Revenue (USD, 12mo)" data={trends.revenueChart} color="bg-emerald-500" />
             </div>

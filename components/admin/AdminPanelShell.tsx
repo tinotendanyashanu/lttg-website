@@ -56,14 +56,26 @@ export default function AdminPanelShell({ children, user }: AdminPanelShellProps
     return () => document.removeEventListener('keydown', handler);
   }, []);
 
-  // Close mobile sidebar on resize to desktop
+  // Close mobile sidebar on resize to desktop (md breakpoint now for sidebar)
   useEffect(() => {
-    const mq = window.matchMedia('(min-width: 1024px)');
+    const mq = window.matchMedia('(min-width: 768px)');
     const handler = (e: MediaQueryListEvent) => {
       if (e.matches) setIsMobileSidebarOpen(false);
     };
     mq.addEventListener('change', handler);
     return () => mq.removeEventListener('change', handler);
+  }, []);
+
+  // Auto-collapse sidebar on smaller screens (between md and lg)
+  useEffect(() => {
+    const checkCollapse = () => {
+      if (window.innerWidth >= 768 && window.innerWidth < 1024) {
+        setIsSidebarCollapsed(true);
+      }
+    };
+    checkCollapse();
+    window.addEventListener('resize', checkCollapse);
+    return () => window.removeEventListener('resize', checkCollapse);
   }, []);
 
   const toggleDarkMode = useCallback(() => {
@@ -97,7 +109,7 @@ export default function AdminPanelShell({ children, user }: AdminPanelShellProps
       {/* Mobile backdrop */}
       {isMobileSidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden"
           onClick={() => setIsMobileSidebarOpen(false)}
           aria-hidden="true"
         />
