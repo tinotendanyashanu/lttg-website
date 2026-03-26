@@ -80,10 +80,8 @@ export async function initiateAdminLogin(
   });
 
   if (ipIsTrusted) {
-    // Known IP — skip email verification, sign in directly
-    await signIn('adminOtp', { tokenId: token._id.toString(), otp, redirectTo: '/admin' });
-    // signIn throws NEXT_REDIRECT on success; this line is unreachable
-    return { error: '' };
+    // Known IP — skip email verification, redirect directly to verify with auto-submit
+    redirect(`/admin/login/verify?t=${token._id.toString()}&otp=${otp}&trusted=1`);
   }
 
   // Unknown IP — send OTP to email and redirect to verify page

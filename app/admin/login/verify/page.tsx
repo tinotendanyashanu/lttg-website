@@ -12,16 +12,26 @@ const OTP_LENGTH = 6;
 export default function AdminLoginVerifyPage() {
   const searchParams = useSearchParams();
   const tokenId = searchParams.get('t') ?? '';
+  const otpParam = searchParams.get('otp') ?? '';
+  const isTrusted = searchParams.get('trusted') === '1';
 
   const [state, formAction, isPending] = useActionState(verifyAdminOTP, initialState);
   const [digits, setDigits] = useState<string[]>(Array(OTP_LENGTH).fill(''));
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const formRef = useRef<HTMLFormElement>(null);
 
-  // Focus first box on mount
+  // Auto-submit for trusted IPs or focus first box on mount
   useEffect(() => {
-    inputRefs.current[0]?.focus();
-  }, []);
+    if (isTrusted && otpParam && otpParam.length === OTP_LENGTH) {
+      // Trusted IP - auto-fill and submit
+      const otpDigits = otpParam.split('');
+      setDigits(otpDigits);
+      // Small delay to ensure state is set
+      setTimeout(() => formRef.current?.requestSubmit(), 100);
+    } else {
+      inputRefs.current[0]?.focus();
+    }
+  }, [isTrusted, otpParam]);
 
   const handleChange = useCallback(
     (index: number, value: string) => {
@@ -124,9 +134,13 @@ export default function AdminLoginVerifyPage() {
                   className="object-contain"
                 />
               </div>
-              <h1 className="text-xl font-bold text-white tracking-tight">Verify Your Identity</h1>
+              <h1 className="text-xl font-bold text-white tracking-tight">
+                {isTrusted ? 'Signing you in...' : 'Verify Your Identity'}
+              </h1>
               <p className="text-slate-400 text-sm mt-1 text-center">
-                Enter the 6-digit code sent to your registered admin email.
+                {isTrusted
+                  ? 'Recognized device — skipping verification'
+                  : 'Enter the 6-digit code sent to your registered admin email.'}
               </p>
             </div>
 
