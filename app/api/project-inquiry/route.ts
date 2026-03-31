@@ -11,7 +11,7 @@ export async function POST(request: Request) {
     await dbConnect();
     
     const body = await request.json();
-    const { name, email, project, initiative, timeline, message } = body;
+    const { name, email, whatsapp, project, initiative, timeline, message } = body;
 
     if (!name || !email || !project) {
       return NextResponse.json(
@@ -27,8 +27,9 @@ export async function POST(request: Request) {
     const projectInquiry = await ProjectInquiry.create({
       name,
       email,
-      projectDescription: message || project, // Fallback
-      budget: initiative, // Mapping initiative to budget field for now to avoid DB schema migration if possible, or we can add a new field
+      whatsapp: whatsapp || undefined,
+      projectDescription: message || project,
+      budget: initiative,
       timeline,
       status: 'new'
     });
@@ -71,7 +72,7 @@ export async function POST(request: Request) {
     // Email to Admin
     await sendAdminNotification({
       subject: 'Project Inquiry (New Engagement Model)',
-      text: `Name: ${name}\nEmail: ${email}\nProject: ${project}\nInitiative Type: ${initiative}\nTimeline: ${timeline}\nDescription: ${message}`,
+      text: `Name: ${name}\nEmail: ${email}\nWhatsApp: ${whatsapp || 'Not provided'}\nProject: ${project}\nInitiative Type: ${initiative}\nTimeline: ${timeline}\nDescription: ${message}`,
       replyTo: email
     });
 

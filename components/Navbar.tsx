@@ -75,26 +75,26 @@ const Navbar = () => {
       {isMobileMenuOpen && (
         <div className="md:hidden glass border-t border-slate-100 absolute w-full bg-white/95">
           <div className="px-6 pt-4 pb-6 space-y-2">
-            <Link href="/" className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50/50">Home</Link>
-            
+            <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50/50">Home</Link>
+
             {/* Mobile Services Submenu */}
             <div className="px-3 py-2">
               <div className="font-medium text-slate-900 mb-2">Services</div>
               <div className="pl-4 space-y-2 border-l-2 border-slate-100">
-                 <Link href="/services/sme" className="block text-sm text-slate-600 hover:text-slate-900">SMEs</Link>
-                 <Link href="/services/startups" className="block text-sm text-slate-600 hover:text-slate-900">Startups</Link>
-                 <Link href="/services/enterprise" className="block text-sm text-slate-600 hover:text-slate-900">Enterprise</Link>
-                 <Link href="/services/individuals" className="block text-sm text-slate-600 hover:text-slate-900">Individuals</Link>
-                 <Link href="/services" className="block text-sm font-medium text-blue-600 mt-2">View Overview</Link>
+                 <Link href="/services/sme" onClick={() => setIsMobileMenuOpen(false)} className="block text-sm text-slate-600 hover:text-slate-900">SMEs</Link>
+                 <Link href="/services/startups" onClick={() => setIsMobileMenuOpen(false)} className="block text-sm text-slate-600 hover:text-slate-900">Startups</Link>
+                 <Link href="/services/enterprise" onClick={() => setIsMobileMenuOpen(false)} className="block text-sm text-slate-600 hover:text-slate-900">Enterprise</Link>
+                 <Link href="/services/individuals" onClick={() => setIsMobileMenuOpen(false)} className="block text-sm text-slate-600 hover:text-slate-900">Individuals</Link>
+                 <Link href="/services" onClick={() => setIsMobileMenuOpen(false)} className="block text-sm font-medium text-blue-600 mt-2">View Overview</Link>
               </div>
             </div>
 
-            {/* <Link href="/media" className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50/50">Media</Link> */}
-            <Link href="/partner" className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50/50">Partner</Link>
-            <Link href="/tech-stack" className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50/50">Resources</Link>
-            <Link href="/contact" className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50/50">Contact</Link>
+            {/* <Link href="/media" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50/50">Media</Link> */}
+            <Link href="/partner" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50/50">Partner</Link>
+            <Link href="/tech-stack" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50/50">Resources</Link>
+            <Link href="/contact" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50/50">Contact</Link>
             <div className="pt-4 space-y-2">
-              <Link href="/contact" className="block w-full text-center px-5 py-3 text-base font-medium text-[#4C8BFF] border border-[#4C8BFF] rounded-lg bg-white shadow-sm">
+              <Link href="/contact" onClick={() => setIsMobileMenuOpen(false)} className="block w-full text-center px-5 py-3 text-base font-medium text-[#4C8BFF] border border-[#4C8BFF] rounded-lg bg-white shadow-sm">
                 Work With Me
               </Link>
             </div>

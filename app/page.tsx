@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import StrategySessionModal from '@/components/StrategySessionModal';
 import { ArrowRight, Code2, BrainCircuit, ShieldCheck, Lightbulb, Volume2, VolumeX, Terminal, Layout, Database } from 'lucide-react';
 import Link from 'next/link';
 
@@ -14,6 +15,7 @@ const HERO_VIDEOS = [
 ];
 
 export default function Home() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const [isMuted, setIsMuted] = useState(true);
   const [loadedVideos, setLoadedVideos] = useState<Set<number>>(new Set());
@@ -130,10 +132,10 @@ export default function Home() {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 mb-12">
-              <Link href="/book" className="inline-flex justify-center items-center px-8 py-4 text-base font-medium text-white bg-[#0071e3] rounded-full hover:bg-[#0077ED] transition-all duration-300 shadow-lg shadow-blue-500/20">
+              <button onClick={() => setIsModalOpen(true)} className="inline-flex justify-center items-center px-8 py-4 text-base font-medium text-white bg-[#0071e3] rounded-full hover:bg-[#0077ED] transition-all duration-300 shadow-lg shadow-blue-500/20">
                 Book a Strategy Session
                 <ArrowRight className="ml-2 w-5 h-5" />
-              </Link>
+              </button>
               <Link href="/partner" className="inline-flex justify-center items-center px-8 py-4 text-base font-medium text-white bg-white/10 border border-white/20 rounded-full hover:bg-white/20 backdrop-blur-md transition-all duration-300">
                 Partner With Leo
               </Link>
@@ -236,9 +238,9 @@ export default function Home() {
             ))}
           </div>
           <div className="mt-16 text-center flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/book" className="inline-flex justify-center items-center px-8 py-4 text-base font-medium text-white bg-slate-900 rounded-lg hover:bg-slate-800 transition-all duration-200">
+            <button onClick={() => setIsModalOpen(true)} className="inline-flex justify-center items-center px-8 py-4 text-base font-medium text-white bg-slate-900 rounded-lg hover:bg-slate-800 transition-all duration-200">
               Book a Strategy Session
-            </Link>
+            </button>
             <Link href="/how-i-work" className="inline-flex justify-center items-center px-8 py-4 text-base font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-all duration-200">
               Read Full Process <ArrowRight className="ml-2 w-4 h-4" />
             </Link>
@@ -509,9 +511,9 @@ export default function Home() {
         <div className="max-w-4xl mx-auto px-6 lg:px-8">
           <h2 className="text-5xl md:text-7xl font-semibold tracking-tighter mb-8">Ready to scale?</h2>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-             <Link href="/contact" className="px-10 py-5 bg-white text-black text-lg font-bold rounded-full hover:bg-neutral-200 transition-colors">
-                Book a Strategy Call
-             </Link>
+             <button onClick={() => setIsModalOpen(true)} className="px-10 py-5 bg-white text-black text-lg font-bold rounded-full hover:bg-neutral-200 transition-colors">
+                Book a Strategy Session
+             </button>
              <Link href="/services" className="px-10 py-5 text-lg font-medium text-white border border-white/20 rounded-full hover:bg-white/10 transition-colors">
                 Explore Services
              </Link>
@@ -520,6 +522,8 @@ export default function Home() {
       </section>
 
       <Footer />
+
+      <StrategySessionModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </main>
   );
 }
