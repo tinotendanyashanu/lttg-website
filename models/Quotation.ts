@@ -4,7 +4,10 @@ export type QuotationStatus = 'draft' | 'sent' | 'accepted' | 'rejected' | 'expi
 
 export interface IQuotation extends Document {
   quotationNumber: string;
-  clientId: mongoose.Types.ObjectId;
+  clientId?: mongoose.Types.ObjectId;
+  prospectName?: string;
+  prospectEmail?: string;
+  prospectPhone?: string;
   status: QuotationStatus;
   amount: number;
   currency: string;
@@ -29,7 +32,10 @@ export interface IQuotation extends Document {
 const QuotationSchema: Schema<IQuotation> = new Schema<IQuotation>(
   {
     quotationNumber: { type: String, required: true, unique: true },
-    clientId: { type: Schema.Types.ObjectId, ref: 'Account', required: true },
+    clientId: { type: Schema.Types.ObjectId, ref: 'Account', required: false },
+    prospectName: { type: String },
+    prospectEmail: { type: String },
+    prospectPhone: { type: String },
     status: {
       type: String,
       enum: ['draft', 'sent', 'accepted', 'rejected', 'expired'],

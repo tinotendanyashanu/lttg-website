@@ -20,8 +20,21 @@ export default function CreateQuotationModal({ clients }: Props) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [whatsappLink, setWhatsappLink] = useState<string | null>(null);
 
+  // Recipient type
+  const [recipientType, setRecipientType] = useState<'client' | 'prospect'>('client');
+
+  // Client fields
   const [clientId, setClientId] = useState('');
+
+  // Prospect fields
+  const [prospectName, setProspectName] = useState('');
+  const [prospectEmail, setProspectEmail] = useState('');
+  const [prospectPhone, setProspectPhone] = useState('');
+  const [deliveryMethod, setDeliveryMethod] = useState<'email' | 'whatsapp' | 'both'>('email');
+
+  // Shared fields
   const [status, setStatus] = useState<'draft' | 'sent'>('sent');
   const [description, setDescription] = useState('');
   const [message, setMessage] = useState('');
@@ -56,7 +69,13 @@ export default function CreateQuotationModal({ clients }: Props) {
     setOpen(false);
     setError(null);
     setSuccess(null);
+    setWhatsappLink(null);
+    setRecipientType('client');
     setClientId('');
+    setProspectName('');
+    setProspectEmail('');
+    setProspectPhone('');
+    setDeliveryMethod('email');
     setStatus('sent');
     setDescription('');
     setMessage('');
@@ -70,8 +89,18 @@ export default function CreateQuotationModal({ clients }: Props) {
     e.preventDefault();
     setError(null);
     setSuccess(null);
+    setWhatsappLink(null);
 
-    if (!clientId) return setError('Please select a client.');
+    if (recipientType === 'client' && !clientId) return setError('Please select a client.');
+    if (recipientType === 'prospect') {
+      if (!prospectName.trim()) return setError('Prospect name is required.');
+      if (!prospectEmail.trim() && !prospectPhone.trim())
+        return setError('Provide at least an email or phone number for the prospect.');
+      if ((deliveryMethod === 'email' || deliveryMethod === 'both') && !prospectEmail.trim())
+        return setError('An email address is required for email delivery.');
+      if ((deliveryMethod === 'whatsapp' || deliveryMethod === 'both') && !prospectPhone.trim())
+        return setError('A phone number is required for WhatsApp delivery.');
+    }
     if (lineItems.length === 0) return setError('Add at least one line item.');
     for (const item of lineItems) {
       if (!item.description.trim()) return setError('All line items must have a description.');
@@ -82,7 +111,11 @@ export default function CreateQuotationModal({ clients }: Props) {
     startTransition(async () => {
       try {
         const result = await createAdminQuotation({
-          clientId,
+          clientId: recipientType === 'client' ? clientId : undefined,
+          prospectName: recipientType === 'prospect' ? prospectName : undefined,
+          prospectEmail: recipientType === 'prospect' ? prospectEmail || undefined : undefined,
+          prospectPhone: recipientType === 'prospect' ? prospectPhone || undefined : undefined,
+          deliveryMethod: recipientType === 'prospect' ? deliveryMethod : 'email',
           status,
           description: description || undefined,
           lineItems,
@@ -92,16 +125,27 @@ export default function CreateQuotationModal({ clients }: Props) {
           validUntil: validUntil || undefined,
         });
         if (result.success) {
-          setSuccess(
-            `Quotation ${result.quotationNumber} created.${status === 'sent' ? ' Email sent to client.' : ' Saved as draft.'}`,
-          );
-          setTimeout(handleClose, 2000);
+          const sentLabel =
+            status === 'sent'
+              ? recipientType === 'prospect'
+                ? deliveryMethod === 'both'
+                  ? ' Email sent.'
+                  : deliveryMethod === 'email'
+                    ? ' Email sent.'
+                    : ''
+                : ' Email sent to client.'
+              : '';
+          setSuccess(`Quotation ${result.quotationNumber} created.${sentLabel}${status === 'draft' ? ' Saved as draft.' : ''}`);
+          if (result.whatsappLink) setWhatsappLink(result.whatsappLink);
+          if (!result.whatsappLink) setTimeout(handleClose, 2500);
         }
       } catch (err: any) {
         setError(err?.message || 'Failed to create quotation.');
       }
     });
   }
+
+  const showDeliveryMethod = recipientType === 'prospect' && status === 'sent';
 
   return (
     <>
@@ -133,38 +177,130 @@ export default function CreateQuotationModal({ clients }: Props) {
             </div>
 
             <form onSubmit={handleSubmit} className="px-6 py-6 md:px-10 md:py-8 space-y-8 md:space-y-10">
-              {/* Client + Status */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
-                <div>
-                  <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">
-                    Client *
-                  </label>
-                  <select
-                    value={clientId}
-                    onChange={(e) => setClientId(e.target.value)}
-                    required
-                    className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#27272a] text-gray-900 dark:text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30"
+
+              {/* Recipient type toggle */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wider">
+                  Send to
+                </label>
+                <div className="inline-flex rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={() => setRecipientType('client')}
+                    className={`px-4 py-2 text-sm font-semibold transition-colors ${
+                      recipientType === 'client'
+                        ? 'bg-violet-600 text-white'
+                        : 'bg-white dark:bg-[#27272a] text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+                    }`}
                   >
-                    <option value="">Select a client…</option>
-                    {clients.map((c) => (
-                      <option key={c._id} value={c._id}>
-                        {c.fullName} ({c.email})
-                      </option>
-                    ))}
-                  </select>
+                    Existing Client
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setRecipientType('prospect')}
+                    className={`px-4 py-2 text-sm font-semibold transition-colors ${
+                      recipientType === 'prospect'
+                        ? 'bg-violet-600 text-white'
+                        : 'bg-white dark:bg-[#27272a] text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+                    }`}
+                  >
+                    New Prospect
+                  </button>
                 </div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">
-                    Status
-                  </label>
-                  <select
-                    value={status}
-                    onChange={(e) => setStatus(e.target.value as any)}
-                    className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#27272a] text-gray-900 dark:text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30"
-                  >
-                    <option value="sent">Send now (email client)</option>
-                    <option value="draft">Save as draft</option>
-                  </select>
+              </div>
+
+              {/* Recipient fields + Status */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
+                {recipientType === 'client' ? (
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">
+                      Client *
+                    </label>
+                    <select
+                      value={clientId}
+                      onChange={(e) => setClientId(e.target.value)}
+                      className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#27272a] text-gray-900 dark:text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30"
+                    >
+                      <option value="">Select a client…</option>
+                      {clients.map((c) => (
+                        <option key={c._id} value={c._id}>
+                          {c.fullName} ({c.email})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">
+                        Prospect Name *
+                      </label>
+                      <input
+                        type="text"
+                        value={prospectName}
+                        onChange={(e) => setProspectName(e.target.value)}
+                        placeholder="Full name or company…"
+                        className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#27272a] text-gray-900 dark:text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">
+                        Email Address
+                      </label>
+                      <input
+                        type="email"
+                        value={prospectEmail}
+                        onChange={(e) => setProspectEmail(e.target.value)}
+                        placeholder="prospect@example.com"
+                        className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#27272a] text-gray-900 dark:text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">
+                        WhatsApp Number
+                      </label>
+                      <input
+                        type="tel"
+                        value={prospectPhone}
+                        onChange={(e) => setProspectPhone(e.target.value)}
+                        placeholder="+27 71 234 5678"
+                        className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#27272a] text-gray-900 dark:text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">
+                      Status
+                    </label>
+                    <select
+                      value={status}
+                      onChange={(e) => setStatus(e.target.value as any)}
+                      className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#27272a] text-gray-900 dark:text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30"
+                    >
+                      <option value="sent">Send now</option>
+                      <option value="draft">Save as draft</option>
+                    </select>
+                  </div>
+
+                  {showDeliveryMethod && (
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">
+                        Delivery Method
+                      </label>
+                      <select
+                        value={deliveryMethod}
+                        onChange={(e) => setDeliveryMethod(e.target.value as any)}
+                        className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#27272a] text-gray-900 dark:text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30"
+                      >
+                        <option value="email">Email only</option>
+                        <option value="whatsapp">WhatsApp only</option>
+                        <option value="both">Email + WhatsApp</option>
+                      </select>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -213,16 +349,16 @@ export default function CreateQuotationModal({ clients }: Props) {
                 />
               </div>
 
-              {/* Message to client */}
+              {/* Message to recipient */}
               <div>
                 <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">
-                  Personal Message to Client (optional)
+                  Personal Message (optional)
                 </label>
                 <textarea
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   rows={3}
-                  placeholder="Add a personalised message that will appear in the quotation email…"
+                  placeholder="Add a personalised message that will appear in the quotation…"
                   className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#27272a] text-gray-900 dark:text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30 resize-none"
                 />
               </div>
@@ -379,8 +515,14 @@ export default function CreateQuotationModal({ clients }: Props) {
 
               <p className="text-[11px] text-gray-400 dark:text-gray-500">
                 {status === 'draft'
-                  ? 'Draft: Quotation saved but NOT emailed to client.'
-                  : 'Quotation will be emailed to the client. They can accept or reject it from their portal, and accepting will auto-generate an invoice.'}
+                  ? 'Draft: Quotation saved but NOT sent.'
+                  : recipientType === 'prospect'
+                    ? deliveryMethod === 'both'
+                      ? 'Quotation will be emailed. A WhatsApp link will open for you to send manually.'
+                      : deliveryMethod === 'whatsapp'
+                        ? 'A WhatsApp link will open for you to send the quotation manually.'
+                        : 'Quotation will be emailed to the prospect.'
+                    : 'Quotation will be emailed to the client. Accepting it will auto-generate an invoice.'}
               </p>
 
               {error && (
@@ -388,10 +530,27 @@ export default function CreateQuotationModal({ clients }: Props) {
                   {error}
                 </div>
               )}
+
               {success && (
-                <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-900/40 rounded-xl px-4 py-3 text-xs text-emerald-700 dark:text-emerald-400 flex items-center gap-2">
-                  <span className="material-icons-outlined text-[16px]">check_circle</span>
-                  {success}
+                <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-900/40 rounded-xl px-4 py-3 text-xs text-emerald-700 dark:text-emerald-400 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <span className="material-icons-outlined text-[16px]">check_circle</span>
+                    {success}
+                  </div>
+                  {whatsappLink && (
+                    <a
+                      href={whatsappLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setTimeout(handleClose, 1000)}
+                      className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#1ebe57] text-white font-semibold rounded-xl px-4 py-2 text-xs transition-colors"
+                    >
+                      <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                      </svg>
+                      Send via WhatsApp
+                    </a>
+                  )}
                 </div>
               )}
 

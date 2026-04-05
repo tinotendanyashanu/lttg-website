@@ -13,7 +13,10 @@ interface Quotation {
   createdAt?: string;
   sentAt?: string;
   validUntil?: string;
-  clientId: string;
+  clientId?: string;
+  prospectName?: string;
+  prospectEmail?: string;
+  prospectPhone?: string;
   acceptedAt?: string;
   rejectedAt?: string;
 }
@@ -42,7 +45,10 @@ export default function QuotationsTable({ quotations, accountMap }: Props) {
     setActionError(null);
     startTransition(async () => {
       try {
-        await sendAdminQuotation(quotationId);
+        const result = await sendAdminQuotation(quotationId);
+        if (result.whatsappLink) {
+          window.open(result.whatsappLink, '_blank', 'noopener,noreferrer');
+        }
       } catch (err: any) {
         setActionError(err?.message || 'Failed to send quotation.');
       }
@@ -111,17 +117,30 @@ export default function QuotationsTable({ quotations, accountMap }: Props) {
               </thead>
               <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
                 {filtered.map((q) => {
-                  const client = accountMap[q.clientId];
+                  const client = q.clientId ? accountMap[q.clientId] : null;
+                  const displayName = client?.fullName || q.prospectName || '—';
+                  const displayEmail = client?.email || q.prospectEmail || '';
+                  const isProspect = !q.clientId;
                   return (
                     <tr key={q._id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                       <td className="px-5 py-4 font-mono text-xs text-gray-500 whitespace-nowrap">
                         {q.quotationNumber}
                       </td>
                       <td className="px-5 py-4">
-                        <div className="font-medium text-gray-900 dark:text-white text-sm">
-                          {client?.fullName || '—'}
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-medium text-gray-900 dark:text-white text-sm">{displayName}</span>
+                          {isProspect && (
+                            <span className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400">
+                              prospect
+                            </span>
+                          )}
                         </div>
-                        <div className="text-xs text-gray-400">{client?.email || ''}</div>
+                        <div className="text-xs text-gray-400">
+                          {displayEmail}
+                          {q.prospectPhone && (
+                            <span className="ml-2 text-gray-300">· {q.prospectPhone}</span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-5 py-4 font-semibold text-gray-900 dark:text-white whitespace-nowrap">
                         {q.currency} {q.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
