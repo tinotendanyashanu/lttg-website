@@ -1,11 +1,11 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface IAuditLog extends Document {
-  entityType: 'deal' | 'partner' | 'payout' | 'contract' | 'invoice' | 'ticket' | 'client';
+  entityType: 'deal' | 'partner' | 'payout' | 'payout_batch' | 'contract' | 'invoice' | 'ticket' | 'client' | 'quotation' | 'risk_flag';
   entityId: mongoose.Types.ObjectId;
   action: string;
   details: Record<string, unknown> | string;
-  performedBy: mongoose.Types.ObjectId; // User ID of admin or partner
+  performedBy: mongoose.Types.ObjectId | string; // User ID of admin or partner or 'system'
   metadata?: Record<string, unknown>; // Flexible JSON for details
   createdAt: Date;
 }
@@ -13,13 +13,13 @@ export interface IAuditLog extends Document {
 const AuditLogSchema: Schema = new Schema({
   entityType: {
     type: String,
-    enum: ['deal', 'partner', 'payout', 'contract', 'invoice', 'ticket', 'client'],
+    enum: ['deal', 'partner', 'payout', 'payout_batch', 'contract', 'invoice', 'ticket', 'client', 'quotation', 'risk_flag'],
     required: true
   },
   entityId: { type: Schema.Types.ObjectId, required: true },
   action: { type: String, required: true },
   details: { type: Schema.Types.Mixed, required: true },
-  performedBy: { type: Schema.Types.ObjectId, ref: 'Partner', required: true },
+  performedBy: { type: Schema.Types.Mixed, required: true },
   metadata: { type: Schema.Types.Mixed },
 }, { timestamps: { createdAt: true, updatedAt: false } }); // Only createdAt needed for logs
 

@@ -115,8 +115,8 @@ export default function CreateInvoiceModal({ clients }: Props) {
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/70 backdrop-blur-md p-0 sm:p-4 md:p-8">
-          <div className="bg-white dark:bg-[#1c1c1e] rounded-b-2xl sm:rounded-3xl shadow-2xl w-full max-w-5xl my-0 sm:my-8 border border-gray-100 dark:border-gray-800 transition-all duration-300">
+        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white dark:bg-[#1c1c1e] rounded-2xl shadow-2xl w-full max-w-2xl my-8 border border-gray-100 dark:border-gray-800">
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 dark:border-gray-800">
               <div className="flex items-center gap-3">
@@ -130,9 +130,9 @@ export default function CreateInvoiceModal({ clients }: Props) {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="px-6 py-6 md:px-10 md:py-8 space-y-8 md:space-y-10">
-              {/* Client + Status */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
+            <form onSubmit={handleSubmit} className="px-6 py-5 space-y-5">
+              {/* Client + Currency */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">Client *</label>
                   <select
@@ -164,7 +164,7 @@ export default function CreateInvoiceModal({ clients }: Props) {
               </div>
 
               {/* Dates + Currency */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 md:gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">Currency</label>
                   <select
@@ -202,14 +202,14 @@ export default function CreateInvoiceModal({ clients }: Props) {
               {/* Description */}
               <div>
                 <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">Description (optional)</label>
-                  <input
-                    type="text"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Brief description of the invoice…"
-                    className="w-full rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#27272a] text-gray-900 dark:text-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/30"
-                  />
-                </div>
+                <input
+                  type="text"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Brief description of the invoice…"
+                  className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#27272a] text-gray-900 dark:text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/30"
+                />
+              </div>
 
               {/* Line Items */}
               <div>
@@ -220,129 +220,66 @@ export default function CreateInvoiceModal({ clients }: Props) {
                   </button>
                 </div>
 
-                <div className="space-y-3">
-                  {/* Grid Header - Hidden on mobile/tablet */}
-                  <div className="hidden md:grid grid-cols-12 gap-3 bg-gray-50/50 dark:bg-gray-800/20 px-4 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest border border-gray-100 dark:border-gray-800 rounded-xl">
-                    <div className="col-span-6">Description</div>
+                <div className="rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                  {/* Header */}
+                  <div className="grid grid-cols-12 gap-2 bg-gray-50 dark:bg-gray-800/30 px-3 py-2 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
+                    <div className="col-span-5">Description</div>
                     <div className="col-span-2 text-center">Qty</div>
                     <div className="col-span-2 text-right">Unit Price</div>
-                    <div className="col-span-2 text-right px-2">Total</div>
+                    <div className="col-span-2 text-right">Total</div>
+                    <div className="col-span-1" />
                   </div>
 
-                  {/* Line Items List */}
-                  <div className="space-y-3">
-                    {lineItems.map((item, index) => (
-                      <div key={index} className="relative group">
-                        {/* Desktop Grid Layout (md and up) */}
-                        <div className="hidden md:grid grid-cols-12 gap-3 items-center px-4 py-3 bg-white dark:bg-[#27272a] border border-gray-100 dark:border-gray-800 rounded-2xl shadow-sm">
-                          <div className="col-span-6">
-                            <input
-                              type="text"
-                              value={item.description}
-                              onChange={(e) => updateLineItem(index, 'description', e.target.value)}
-                              placeholder="Service / item description"
-                              className="w-full bg-transparent text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none"
-                            />
-                          </div>
-                          <div className="col-span-2">
-                            <input
-                              type="number"
-                              min="1"
-                              value={item.quantity}
-                              onChange={(e) => updateLineItem(index, 'quantity', parseFloat(e.target.value) || 0)}
-                              className="w-full bg-gray-50 dark:bg-gray-800/50 rounded-lg px-2 py-1.5 text-sm text-center text-gray-900 dark:text-white focus:ring-1 focus:ring-brand-primary"
-                            />
-                          </div>
-                          <div className="col-span-2 font-mono">
-                            <input
-                              type="number"
-                              min="0"
-                              step="0.01"
-                              value={item.unitPrice}
-                              onChange={(e) => updateLineItem(index, 'unitPrice', parseFloat(e.target.value) || 0)}
-                              className="w-full bg-gray-50 dark:bg-gray-800/50 rounded-lg px-2 py-1.5 text-sm text-right text-gray-900 dark:text-white focus:ring-1 focus:ring-brand-primary"
-                            />
-                          </div>
-                          <div className="col-span-2 text-right text-sm font-bold text-gray-900 dark:text-white tabular-nums px-2">
-                            {item.total.toFixed(2)}
-                          </div>
-
-                          {/* Delete button (positioned absolutely in grid row) */}
-                          {lineItems.length > 1 && (
-                            <button
-                              type="button"
-                              onClick={() => removeLineItem(index)}
-                              className="absolute -right-2 -top-2 md:opacity-0 md:group-hover:opacity-100 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center transition-all shadow-lg hover:scale-110"
-                            >
-                              <span className="material-icons-outlined text-[14px]">close</span>
-                            </button>
-                          )}
-                        </div>
-
-                        {/* Mobile/Tablet Card Layout (below md) */}
-                        <div className="md:hidden space-y-3 p-4 bg-gray-50/50 dark:bg-gray-800/30 border border-gray-100 dark:border-gray-800 rounded-2xl">
-                          <div className="flex justify-between items-start gap-2">
-                            <div className="flex-1">
-                              <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Description</label>
-                              <input
-                                type="text"
-                                value={item.description}
-                                onChange={(e) => updateLineItem(index, 'description', e.target.value)}
-                                placeholder="Service description"
-                                className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#27272a] text-gray-900 dark:text-white px-3 py-2 text-sm focus:ring-2 focus:ring-brand-primary/30"
-                              />
-                            </div>
-                            {lineItems.length > 1 && (
-                              <button
-                                type="button"
-                                onClick={() => removeLineItem(index)}
-                                className="mt-6 p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl"
-                              >
-                                <span className="material-icons-outlined text-[20px]">delete</span>
-                              </button>
-                            )}
-                          </div>
-                          <div className="grid grid-cols-3 gap-3">
-                            <div>
-                              <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Qty</label>
-                              <input
-                                type="number"
-                                min="1"
-                                value={item.quantity}
-                                onChange={(e) => updateLineItem(index, 'quantity', parseFloat(e.target.value) || 0)}
-                                className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#27272a] text-gray-900 dark:text-white px-3 py-2 text-sm text-center"
-                              />
-                            </div>
-                            <div>
-                              <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Price</label>
-                              <input
-                                type="number"
-                                min="0"
-                                step="0.01"
-                                value={item.unitPrice}
-                                onChange={(e) => updateLineItem(index, 'unitPrice', parseFloat(e.target.value) || 0)}
-                                className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#27272a] text-gray-900 dark:text-white px-3 py-2 text-sm text-right"
-                              />
-                            </div>
-                            <div className="text-right flex flex-col justify-end pb-2">
-                              <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Total</label>
-                              <span className="text-sm font-bold text-gray-900 dark:text-white tabular-nums">
-                                {item.total.toFixed(2)}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
+                  {lineItems.map((item, index) => (
+                    <div key={index} className="grid grid-cols-12 gap-2 px-3 py-2 border-t border-gray-100 dark:border-gray-800 items-center">
+                      <div className="col-span-5">
+                        <input
+                          type="text"
+                          value={item.description}
+                          onChange={(e) => updateLineItem(index, 'description', e.target.value)}
+                          placeholder="Service / item"
+                          className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-transparent text-gray-900 dark:text-white px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-brand-primary/40"
+                        />
                       </div>
-                    ))}
-                  </div>
+                      <div className="col-span-2">
+                        <input
+                          type="number"
+                          min="1"
+                          value={item.quantity}
+                          onChange={(e) => updateLineItem(index, 'quantity', parseFloat(e.target.value) || 0)}
+                          className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-transparent text-gray-900 dark:text-white px-2 py-1.5 text-xs text-center focus:outline-none focus:ring-1 focus:ring-brand-primary/40"
+                        />
+                      </div>
+                      <div className="col-span-2">
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={item.unitPrice}
+                          onChange={(e) => updateLineItem(index, 'unitPrice', parseFloat(e.target.value) || 0)}
+                          className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-transparent text-gray-900 dark:text-white px-2 py-1.5 text-xs text-right focus:outline-none focus:ring-1 focus:ring-brand-primary/40"
+                        />
+                      </div>
+                      <div className="col-span-2 text-right text-xs font-semibold text-gray-700 dark:text-gray-200 tabular-nums">
+                        {item.total.toFixed(2)}
+                      </div>
+                      <div className="col-span-1 flex justify-end">
+                        {lineItems.length > 1 && (
+                          <button type="button" onClick={() => removeLineItem(index)} className="text-gray-300 hover:text-red-500 dark:text-gray-600 dark:hover:text-red-400 transition-colors p-0.5">
+                            <span className="material-icons-outlined text-[16px]">delete</span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
 
-                  {/* Summary row */}
-                  <div className="flex items-center justify-between px-5 py-4 bg-gray-900 dark:bg-black rounded-2xl text-white shadow-lg">
-                    <span className="text-xs font-bold uppercase tracking-widest text-gray-400">Total Amount</span>
-                    <span className="text-xl font-black tabular-nums">
-                      <span className="text-xs font-medium text-gray-500 mr-2">{currency}</span>
-                      {total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </span>
+                  {/* Total */}
+                  <div className="grid grid-cols-12 gap-2 px-3 py-3 border-t-2 border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/20">
+                    <div className="col-span-9 text-right text-xs font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Total</div>
+                    <div className="col-span-2 text-right text-sm font-extrabold text-gray-900 dark:text-white tabular-nums">
+                      {currency} {total.toFixed(2)}
+                    </div>
+                    <div className="col-span-1" />
                   </div>
                 </div>
               </div>

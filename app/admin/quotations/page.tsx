@@ -13,7 +13,7 @@ async function getQuotations() {
 
   const quotations = await Quotation.find().sort({ createdAt: -1 }).limit(200).lean();
 
-  const clientIds = [...new Set(quotations.map((q: any) => String(q.clientId)))];
+  const clientIds = [...new Set(quotations.filter((q: any) => q.clientId).map((q: any) => String(q.clientId)))];
   const accounts = await Account.find({ _id: { $in: clientIds } }, 'fullName email').lean();
   const accountMap: Record<string, { fullName?: string; email: string }> = {};
   for (const acc of accounts as any[]) {
@@ -32,7 +32,10 @@ async function getQuotations() {
       amount: q.amount,
       currency: q.currency,
       status: q.status,
-      clientId: String(q.clientId),
+      clientId: q.clientId ? String(q.clientId) : undefined,
+      prospectName: q.prospectName,
+      prospectEmail: q.prospectEmail,
+      prospectPhone: q.prospectPhone,
       validUntil: q.validUntil?.toISOString?.() ?? undefined,
       sentAt: q.sentAt?.toISOString?.() ?? undefined,
       acceptedAt: q.acceptedAt?.toISOString?.() ?? undefined,
