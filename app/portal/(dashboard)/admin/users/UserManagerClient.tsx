@@ -4,9 +4,10 @@ import React, { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { updateAdminUser, createAdminUser, resetAdminUserPassword } from '@/lib/actions/portal-admin-users';
 
-export default function UserManagerClient({ initialUsers }: { initialUsers: any[] }) {
+export default function UserManagerClient({ initialUsers, initialTeams = [] }: { initialUsers: any[], initialTeams?: any[] }) {
   const router = useRouter();
   const [users, setUsers] = useState(initialUsers);
+  const [teams] = useState(initialTeams);
   
   // Filters
   const [filterRole, setFilterRole] = useState('all');
@@ -15,7 +16,9 @@ export default function UserManagerClient({ initialUsers }: { initialUsers: any[
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isCreatingUser, setIsCreatingUser] = useState(false);
-  const [tempPassword, setTempPassword] = useState<string | null>(null);
+  const [inviteLink, setInviteLink] = useState<string | null>(null);
+
+  const AVAILABLE_ROLES = ['admin', 'employee', 'intern', 'partner', 'client'];
 
   const filteredUsers = useMemo(() => {
     return users.filter(u => {
@@ -35,25 +38,21 @@ export default function UserManagerClient({ initialUsers }: { initialUsers: any[
   const handleCreateUser = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsUpdating(true);
-    setTempPassword(null);
+    setInviteLink(null);
     const formData = new FormData(e.currentTarget);
-    
-    const roleInput = formData.get('roles') as string;
-    const roles = roleInput.split(',').map(r => r.trim()).filter(Boolean);
+    const roles = Array.from(formData.getAll('roles')) as string[];
     
     const data = {
       fullName: formData.get('fullName') as string,
       email: formData.get('email') as string,
       roles,
-      password: formData.get('password') as string || undefined,
     };
     
     try {
       const res = await createAdminUser(data);
-      if (res.tempPassword) setTempPassword(res.tempPassword);
-      // For local UI update, we could re-fetch or just alert. 
-      // Re-fetching via router refresh is safer.
-      alert(`User created successfully! Temp password: ${res.tempPassword}`);
+      if (res.inviteLink) {
+        setInviteLink(res.inviteLink);
+      }
       setIsCreatingUser(false);
       router.refresh();
     } catch (err) {
@@ -65,12 +64,13 @@ export default function UserManagerClient({ initialUsers }: { initialUsers: any[
   };
 
   const handleResetPassword = async (userId: string) => {
-    if (!confirm("Are you sure you want to reset this user's password?")) return;
+    if (!confirm("Are you sure you want to initiate a password reset? This will invalidate the current password and generate a new onboarding link.")) return;
     setIsUpdating(true);
     try {
       const res = await resetAdminUserPassword(userId);
-      alert(`Password has been reset. New temp password: ${res.tempPassword}`);
-      setTempPassword(res.tempPassword);
+      if (res.resetLink) {
+        setInviteLink(res.resetLink);
+      }
     } catch (err) {
       console.error("Reset password failed", err);
     } finally {
@@ -78,19 +78,24 @@ export default function UserManagerClient({ initialUsers }: { initialUsers: any[
     }
   };
 
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    alert("Link copied to clipboard!");
+  };
+
   const handleUpdateUser = async (e: React.FormEvent<HTMLFormElement>) => {
      e.preventDefault();
      if (!selectedUser) return;
      setIsUpdating(true);
-     setTempPassword(null);
+     setInviteLink(null);
      const formData = new FormData(e.currentTarget);
      
-     const roleInput = formData.get('roles') as string;
-     const roles = roleInput.split(',').map(r => r.trim()).filter(Boolean);
+     // Collect all checked roles
+     const roles = Array.from(formData.getAll('roles')) as string[];
      
      const data = {
        roles,
-       teamId: formData.get('teamId') as string,
+       teamId: formData.get('teamId') as string || null,
        commissionRate: parseFloat(formData.get('commissionRate') as string) || 0,
        isActive: formData.get('isActive') === 'true',
        jobTitle: formData.get('jobTitle') as string,
@@ -104,6 +109,7 @@ export default function UserManagerClient({ initialUsers }: { initialUsers: any[
        router.refresh();
      } catch (err) {
        console.error("Failed to update user", err);
+       alert("Failed to update user. Please check your inputs.");
      } finally {
        setIsUpdating(false);
      }
@@ -215,15 +221,24 @@ export default function UserManagerClient({ initialUsers }: { initialUsers: any[
                         <input type="email" name="email" required className="w-full px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm focus:outline-none" />
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold mb-1">Roles (comma sep)</p>
-                        <input name="roles" defaultValue="employee" className="w-full px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm focus:outline-none" />
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold mb-1">Password (optional)</p>
-                        <input type="password" name="password" placeholder="Autogenerated if empty" className="w-full px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm focus:outline-none" />
+                        <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold mb-2">Assign Roles</p>
+                        <div className="flex flex-wrap gap-2">
+                          {AVAILABLE_ROLES.filter(r => r !== 'client').map(role => (
+                            <label key={role} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-all has-[:checked]:bg-blue-600 has-[:checked]:border-blue-600 has-[:checked]:text-white">
+                               <input 
+                                 type="checkbox" 
+                                 name="roles" 
+                                 value={role} 
+                                 defaultChecked={role === 'employee'}
+                                 className="hidden" 
+                               />
+                               <span className="text-[10px] font-bold uppercase">{role}</span>
+                            </label>
+                          ))}
+                        </div>
                       </div>
                       <button disabled={isUpdating} type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white px-3 py-3 rounded-xl text-sm font-medium transition-colors mt-4">
-                         {isUpdating ? 'Creating...' : 'Create Account'}
+                         {isUpdating ? 'Creating Invitation...' : 'Send Invitation'}
                       </button>
                    </form>
                 </div>
@@ -243,25 +258,48 @@ export default function UserManagerClient({ initialUsers }: { initialUsers: any[
                             <input name="department" defaultValue={selectedUser.department || ''} className="w-full px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm focus:outline-none" />
                           </div>
                         </div>
+
                         <div>
-                          <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold mb-1">Roles (comma separated)</p>
-                          <input
-                            type="text"
-                            name="roles"
-                            defaultValue={selectedUser.roles.join(', ')}
+                          <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold mb-2">Team Assignment</p>
+                          <select 
+                            name="teamId" 
+                            defaultValue={selectedUser.teamId || ''} 
                             className="w-full px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm focus:outline-none"
-                          />
+                          >
+                            <option value="">No Team Assigned</option>
+                            {teams.map((team: any) => (
+                              <option key={team._id} value={team._id}>{team.name}</option>
+                            ))}
+                          </select>
                         </div>
+
                         <div>
-                          <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold mb-1">Team ID</p>
-                          <input
-                            type="text"
-                            name="teamId"
-                            defaultValue={selectedUser.teamId || ''}
-                            placeholder="Optional team ObjectId"
-                            className="w-full px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm focus:outline-none"
-                          />
+                          <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold mb-2">System Roles</p>
+                          <div className="flex flex-wrap gap-2">
+                             {AVAILABLE_ROLES.map(role => {
+                               const isActive = selectedUser.roles.includes(role);
+                               return (
+                                 <label key={role} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border cursor-pointer transition-all ${isActive ? 'bg-blue-600 border-blue-600 text-white' : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400'}`}>
+                                   <input 
+                                     type="checkbox" 
+                                     name="roles" 
+                                     value={role} 
+                                     defaultChecked={isActive}
+                                     className="hidden" 
+                                     onChange={(e) => {
+                                       const newRoles = e.target.checked 
+                                         ? [...selectedUser.roles, role]
+                                         : selectedUser.roles.filter((r: string) => r !== role);
+                                       setSelectedUser({ ...selectedUser, roles: newRoles });
+                                     }}
+                                   />
+                                   <span className="text-[10px] font-bold uppercase">{role}</span>
+                                 </label>
+                               );
+                             })}
+                          </div>
                         </div>
+
                         <div>
                           <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold mb-1">Commission Rate (%)</p>
                           <input
@@ -309,6 +347,41 @@ export default function UserManagerClient({ initialUsers }: { initialUsers: any[
              )}
           </div>
        </div>
+
+       {/* Invitation / Reset Link Modal */}
+       {inviteLink && (
+         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+           <div className="bg-white dark:bg-[#18181b] w-full max-w-lg rounded-[32px] p-8 shadow-2xl border border-gray-100 dark:border-gray-800 animate-in zoom-in-95 duration-300">
+             <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="material-icons-outlined text-3xl">mark_email_read</span>
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Invitation Link Ready</h3>
+                <p className="text-gray-500 dark:text-gray-400 mt-2">Share this secure onboarding link with the employee. It will expire in 48 hours.</p>
+             </div>
+
+             <div className="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 mb-6 break-all">
+                <p className="text-sm font-mono text-blue-600 dark:text-blue-400">{inviteLink}</p>
+             </div>
+
+             <div className="flex flex-col gap-3">
+                <button 
+                  onClick={() => copyToClipboard(inviteLink)}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-500/20"
+                >
+                  <span className="material-icons-outlined">content_copy</span>
+                  Copy to Clipboard
+                </button>
+                <button 
+                  onClick={() => setInviteLink(null)}
+                  className="w-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 py-4 rounded-2xl font-bold transition-all hover:bg-gray-200 dark:hover:bg-gray-700"
+                >
+                  Close
+                </button>
+             </div>
+           </div>
+         </div>
+       )}
     </div>
   );
 }

@@ -13,192 +13,219 @@ interface CaseManagementClientProps {
 export default function CaseManagementClient({ cases: initialCases, isAdminOrEmployee, isAdmin, currentUserId }: CaseManagementClientProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list');
 
-  const totalCases = initialCases.length;
-  const newCases = initialCases.filter((c) => c.status === 'new').length;
-  const activeCases = initialCases.filter((c) => c.status === 'active').length;
-  const needsAssistanceCases = initialCases.filter((c) => c.status === 'needs_assistance').length;
-  const closedCases = initialCases.filter((c) => c.status === 'closed').length;
+  const CASE_STATUSES = ['new', 'active', 'needs_assistance', 'closed'];
 
   const filteredCases = initialCases.filter((c) => {
-    if (statusFilter && c.status !== statusFilter) {
-      return false;
-    }
-
+    if (statusFilter && c.status !== statusFilter) return false;
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
-      const matchName = c.businessName?.toLowerCase().includes(q);
-      const matchContact = c.contactName?.toLowerCase().includes(q);
-      const matchService = c.serviceInterest?.toLowerCase().includes(q);
-      
-      if (!matchName && !matchContact && !matchService) {
-        return false;
-      }
+      return (
+        c.businessName?.toLowerCase().includes(q) ||
+        c.contactName?.toLowerCase().includes(q) ||
+        c.serviceInterest?.toLowerCase().includes(q)
+      );
     }
-
     return true;
   });
 
+  const totalCases = initialCases.length;
+  const stats = CASE_STATUSES.reduce((acc, status) => {
+    acc[status] = initialCases.filter(c => c.status === status).length;
+    return acc;
+  }, {} as Record<string, number>);
+
   return (
-    <div className="flex flex-col gap-6 w-full max-w-full overflow-hidden">
-      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Cases</h2>
-        <div className="flex items-center gap-4 flex-1 justify-end">
-          <div className="relative w-full max-w-md hidden md:block">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 material-icons-outlined text-xl!">search</span>
+    <div className="flex flex-col gap-6 w-full max-w-full">
+      <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <div>
+          <h2 className="text-4xl font-black text-gray-900 dark:text-white tracking-tight">Case Management</h2>
+          <p className="text-gray-500 dark:text-gray-400 font-medium">Manage and track your active pipeline.</p>
+        </div>
+        
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="relative min-w-[300px]">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 material-icons-outlined text-xl!">search</span>
             <input 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-white dark:bg-[#27272a] border-none rounded-full py-3 pl-12 pr-4 text-sm focus:ring-2 focus:ring-gray-800 dark:focus:ring-white transition-shadow shadow-sm dark:text-white placeholder-gray-400" 
-              placeholder="Search cases, contacts..." 
+              className="w-full bg-white dark:bg-[#18181b] border border-gray-100 dark:border-gray-800 rounded-2xl py-3 pl-12 pr-4 text-sm focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all shadow-sm dark:text-white placeholder-gray-400" 
+              placeholder="Search by name, business, or service..." 
               type="text"
             />
           </div>
+
+          <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-2xl border border-gray-200 dark:border-gray-700">
+             <button 
+               onClick={() => setViewMode('list')}
+               className={`px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all ${viewMode === 'list' ? 'bg-white dark:bg-[#18181b] text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+             >
+               <span className="material-icons-outlined text-lg">view_list</span>
+               List
+             </button>
+             <button 
+               onClick={() => setViewMode('kanban')}
+               className={`px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all ${viewMode === 'kanban' ? 'bg-white dark:bg-[#18181b] text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+             >
+               <span className="material-icons-outlined text-lg">view_kanban</span>
+               Pipeline
+             </button>
+          </div>
+
           <Link 
             href="/portal/intern/submit-lead"
-            className="bg-[#2F2F2F] hover:bg-[#4a4a4a] text-white px-6 py-3 rounded-full font-medium flex items-center gap-2 transition-transform active:scale-95 shadow-lg whitespace-nowrap"
+            className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-6 py-3 rounded-2xl font-bold flex items-center gap-2 transition hover:opacity-90 active:scale-95 shadow-xl shadow-gray-900/10 whitespace-nowrap"
           >
-            <span className="material-icons-outlined text-lg">add</span>
-            Create Case
+            <span className="material-icons-outlined text-lg">add_circle</span>
+            New Case
           </Link>
         </div>
       </header>
       
-      <div className="flex sm:grid sm:grid-cols-2 lg:grid-cols-5 gap-4 overflow-x-auto pb-2 snap-x">
+      {/* Stats Summary */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <button 
           onClick={() => setStatusFilter(null)}
-          className={`min-w-[140px] shrink-0 bg-white dark:bg-[#27272a] p-4 rounded-xl text-left transition-all border-2 group snap-start ${statusFilter === null ? 'border-gray-800 dark:border-white shadow-md' : 'border-transparent shadow-soft hover:shadow-md'}`}
+          className={`p-4 rounded-2xl text-left transition-all border group ${statusFilter === null ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-500/20' : 'bg-white dark:bg-[#18181b] border-gray-100 dark:border-gray-800 hover:border-gray-300'}`}
         >
-          <span className="text-gray-500 dark:text-gray-400 text-sm font-medium">All Cases</span>
-          <div className="text-2xl font-bold mt-1 group-hover:text-gray-900 dark:group-hover:text-white">{totalCases}</div>
+          <span className={`text-xs font-bold uppercase tracking-widest ${statusFilter === null ? 'text-blue-100' : 'text-gray-500'}`}>Total</span>
+          <div className="text-2xl font-black mt-1">{totalCases}</div>
         </button>
-        <button 
-          onClick={() => setStatusFilter('new')}
-          className={`min-w-[140px] shrink-0 bg-white dark:bg-[#27272a] p-4 rounded-xl text-left transition-all border-2 group relative overflow-hidden snap-start ${statusFilter === 'new' ? 'border-blue-500 shadow-md' : 'border-transparent shadow-soft hover:shadow-md'}`}
-        >
-          <span className="text-blue-600 dark:text-blue-400 text-sm font-bold flex items-center gap-1">
-            <div className="w-2 h-2 rounded-full bg-blue-500"></div> New
-          </span>
-          <div className="text-2xl font-bold mt-1">{newCases}</div>
-        </button>
-        <button 
-          onClick={() => setStatusFilter('active')}
-          className={`min-w-[140px] shrink-0 bg-white dark:bg-[#27272a] p-4 rounded-xl text-left transition-all border-2 group relative overflow-hidden snap-start ${statusFilter === 'active' ? 'border-green-500 shadow-md' : 'border-transparent shadow-soft hover:shadow-md'}`}
-        >
-          <span className="text-green-600 dark:text-green-400 text-sm font-bold flex items-center gap-1">
-            <div className="w-2 h-2 rounded-full bg-green-500"></div> Active
-          </span>
-          <div className="text-2xl font-bold mt-1">{activeCases}</div>
-        </button>
-        <button 
-          onClick={() => setStatusFilter('needs_assistance')}
-          className={`min-w-[140px] shrink-0 bg-white dark:bg-[#27272a] p-4 rounded-xl text-left transition-all border-2 group relative overflow-hidden snap-start ${statusFilter === 'needs_assistance' ? 'border-yellow-500 shadow-md' : 'border-transparent shadow-soft hover:shadow-md'}`}
-        >
-          <span className="text-yellow-600 dark:text-yellow-400 text-sm font-bold flex items-center gap-1">
-            <div className="w-2 h-2 rounded-full bg-yellow-500"></div> Assistance Needed
-          </span>
-          <div className="text-2xl font-bold mt-1">{needsAssistanceCases}</div>
-        </button>
-        <button 
-          onClick={() => setStatusFilter('closed')}
-          className={`min-w-[140px] shrink-0 bg-white dark:bg-[#27272a] p-4 rounded-xl text-left transition-all border-2 group relative overflow-hidden snap-start ${statusFilter === 'closed' ? 'border-gray-500 shadow-md' : 'border-transparent shadow-soft hover:shadow-md'}`}
-        >
-          <span className="text-gray-600 dark:text-gray-400 text-sm font-bold flex items-center gap-1">
-            <div className="w-2 h-2 rounded-full bg-gray-500"></div> Closed
-          </span>
-          <div className="text-2xl font-bold mt-1">{closedCases}</div>
-        </button>
+        {CASE_STATUSES.map(status => (
+          <button 
+            key={status}
+            onClick={() => setStatusFilter(status)}
+            className={`p-4 rounded-2xl text-left transition-all border group ${statusFilter === status ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-500/20' : 'bg-white dark:bg-[#18181b] border-gray-100 dark:border-gray-800 hover:border-gray-300'}`}
+          >
+            <span className={`text-xs font-bold uppercase tracking-widest flex items-center gap-1.5 ${statusFilter === status ? 'text-blue-100' : 'text-gray-500'}`}>
+              <div className={`w-2 h-2 rounded-full ${
+                status === 'new' ? 'bg-blue-400' : 
+                status === 'active' ? 'bg-green-400' : 
+                status === 'needs_assistance' ? 'bg-amber-400' : 'bg-gray-400'
+              }`}></div>
+              {status.replace('_', ' ')}
+            </span>
+            <div className="text-2xl font-black mt-1">{stats[status] || 0}</div>
+          </button>
+        ))}
       </div>
 
-      <div className="flex flex-col xl:flex-row gap-6 h-full min-h-0">
-        <div className="flex-1 flex flex-col gap-4 overflow-y-auto pr-2 pb-4">
+      {viewMode === 'list' ? (
+        <div className="space-y-4 pb-10">
           {filteredCases.length === 0 ? (
-            <div className="bg-white dark:bg-[#27272a] p-8 rounded-2xl text-center text-gray-500">
-              No cases match your filters.
+            <div className="bg-white dark:bg-[#18181b] p-20 rounded-[40px] border border-dashed border-gray-200 dark:border-gray-800 text-center text-gray-500">
+              <span className="material-icons-outlined text-6xl text-gray-200 dark:text-gray-700 mb-4">inventory_2</span>
+              <p className="text-xl font-bold text-gray-900 dark:text-white">No cases match your filters.</p>
+              <p className="mt-2">Try adjusting your search or status filter.</p>
             </div>
           ) : (
-            filteredCases.map((c: any) => {
-              const nameParts = (c.businessName || 'U M').split(' ');
-              const initials = nameParts.length > 1 
-                ? `${nameParts[0][0]}${nameParts[nameParts.length - 1][0]}`.toUpperCase()
-                : nameParts[0].substring(0, 2).toUpperCase();
-
-              let statusProps = {
-                badgeText: 'New',
-                badgeStyle: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',
-                avatarStyle: 'from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800 text-blue-600 dark:text-blue-300'
-              };
-
-              switch (c.status) {
-                case 'new':
-                  break;
-                case 'active':
-                  statusProps = { badgeText: 'Active', badgeStyle: 'bg-green-100 text-green-700', avatarStyle: 'from-green-100 text-green-600' };
-                  break;
-                case 'needs_assistance':
-                  statusProps = { badgeText: 'Needs Assist', badgeStyle: 'bg-yellow-100 text-yellow-700', avatarStyle: 'from-yellow-100 text-yellow-600' };
-                  break;
-                case 'closed':
-                  statusProps = { badgeText: 'Closed', badgeStyle: 'bg-gray-100 text-gray-700', avatarStyle: 'from-gray-100 text-gray-600' };
-                  break;
-              }
-
-              return (
-                <div key={c._id.toString()} className="bg-white dark:bg-[#27272a] p-5 rounded-2xl shadow-soft hover:shadow-lg transition-all group cursor-pointer border border-transparent hover:border-gray-200 dark:hover:border-gray-700">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="flex gap-4 items-center">
-                      <div className={`w-12 h-12 rounded-xl bg-linear-to-br flex items-center justify-center font-bold text-xl ${statusProps.avatarStyle}`}>
-                        {initials}
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-lg text-gray-900 dark:text-white">{c.businessName || c.contactName || 'Unnamed Case'}</h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          {c.businessName ? `${c.contactName} • ` : ''}
-                          {c.email ? `${c.email} • ` : ''}
-                          {c.phone || 'No Phone'}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex flex-col items-end">
-                      <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide mb-1 ${statusProps.badgeStyle}`}>
-                        {statusProps.badgeText}
-                      </span>
-                      <span className="text-gray-500 dark:text-gray-400 text-xs text-right">
-                        Created: {new Date(c.createdAt).toLocaleDateString()}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-                    <div className="bg-[#F4F4F4] dark:bg-[#18181b] p-3 rounded-xl">
-                      <span className="text-xs text-gray-500 dark:text-gray-400 block mb-1">Service</span>
-                      <span className="font-semibold text-sm block capitalize">{(c.serviceInterest || 'N/A').replace('_', ' ')}</span>
-                    </div>
-                    <div className="bg-[#F4F4F4] dark:bg-[#18181b] p-3 rounded-xl">
-                      <span className="text-xs text-gray-500 dark:text-gray-400 block mb-1">Deal Value</span>
-                      <span className="font-semibold text-sm block">{c.dealValue ? `$${c.dealValue.toLocaleString()}` : 'TBD'}</span>
-                    </div>
-                    <div className="bg-[#F4F4F4] dark:bg-[#18181b] p-3 rounded-xl">
-                      <span className="text-xs text-gray-500 dark:text-gray-400 block mb-1">Owner</span>
-                      <span className="font-semibold text-sm block">{c.ownerId?.fullName || 'Unknown'}</span>
-                    </div>
-                    <div className="bg-[#F4F4F4] dark:bg-[#18181b] p-3 rounded-xl">
-                      <span className="text-xs text-gray-500 dark:text-gray-400 block mb-1">Participants</span>
-                      <span className="font-semibold text-sm block">{c.participants?.length || 1} Mbrs</span>
-                    </div>
-                  </div>
-                  
-                  <div className="flex flex-wrap gap-2 justify-end opacity-80 group-hover:opacity-100 transition-opacity pt-2 border-t border-gray-100 dark:border-gray-800">
-                    <Link href={`/portal/case-management/${c._id}`} className="px-4 py-2 rounded-lg text-sm font-medium bg-[#2F2F2F] text-white hover:bg-[#4a4a4a] transition shadow-sm flex items-center gap-2">
-                      <span className="material-icons-outlined text-base">visibility</span> View Case Workspace
-                    </Link>
-                  </div>
-                </div>
-              );
-            })
+            filteredCases.map((c: any) => (
+              <CaseRow key={c._id} c={c} />
+            ))
           )}
         </div>
+      ) : (
+        <div className="flex gap-6 overflow-x-auto pb-10 min-h-[60vh] scrollbar-hide">
+          {CASE_STATUSES.map(status => (
+            <div key={status} className="flex-1 min-w-[320px] max-w-[400px] flex flex-col gap-4">
+              <div className="flex items-center justify-between px-2 mb-2">
+                <h3 className="font-black text-gray-900 dark:text-white uppercase tracking-tighter text-lg flex items-center gap-2">
+                  {status.replace('_', ' ')}
+                  <span className="text-sm font-bold text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-lg">{filteredCases.filter(fc => fc.status === status).length}</span>
+                </h3>
+              </div>
+              <div className="flex flex-col gap-4 bg-gray-50/50 dark:bg-[#111113] p-4 rounded-[32px] border border-gray-100 dark:border-gray-800 flex-1">
+                {filteredCases.filter(fc => fc.status === status).map(c => (
+                  <CaseCard key={c._id} c={c} />
+                ))}
+                {filteredCases.filter(fc => fc.status === status).length === 0 && (
+                  <div className="text-center py-10 opacity-30 italic text-sm">No cases in this stage</div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CaseRow({ c }: { c: any }) {
+  return (
+    <div className="bg-white dark:bg-[#18181b] p-6 rounded-3xl shadow-sm hover:shadow-xl hover:shadow-blue-500/5 transition-all group border border-gray-100 dark:border-gray-800 flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="flex items-center gap-5">
+        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-black text-xl shadow-inner ${
+          c.status === 'new' ? 'bg-blue-50 text-blue-600' : 
+          c.status === 'active' ? 'bg-green-50 text-green-600' :
+          c.status === 'needs_assistance' ? 'bg-amber-50 text-amber-600' :
+          'bg-gray-50 text-gray-600'
+        }`}>
+          {(c.businessName?.[0] || c.contactName?.[0] || 'C').toUpperCase()}
+        </div>
+        <div>
+          <h3 className="font-bold text-xl text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors">{c.businessName || c.contactName}</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+            {c.contactName} · {c.serviceInterest}
+          </p>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-4 lg:gap-8">
+        <div className="text-right">
+          <span className="text-[10px] font-black uppercase text-gray-400 block tracking-widest mb-1">Deal Value</span>
+          <span className="font-bold text-gray-900 dark:text-white">{c.dealValue ? `$${c.dealValue.toLocaleString()}` : '—'}</span>
+        </div>
+        <div className="text-right">
+          <span className="text-[10px] font-black uppercase text-gray-400 block tracking-widest mb-1">Assigned To</span>
+          <span className="font-bold text-gray-900 dark:text-white">{c.ownerId?.fullName || 'Unassigned'}</span>
+        </div>
+        <Link 
+          href={`/portal/case-management/${c._id}`} 
+          className="h-12 px-6 rounded-2xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white font-bold text-sm flex items-center gap-2 hover:bg-blue-600 hover:text-white transition-all shadow-sm"
+        >
+          Workspace
+          <span className="material-icons-outlined text-lg">arrow_forward</span>
+        </Link>
       </div>
     </div>
+  );
+}
+
+function CaseCard({ c }: { c: any }) {
+  return (
+    <Link 
+      href={`/portal/case-management/${c._id}`}
+      className="bg-white dark:bg-[#18181b] p-5 rounded-2xl shadow-sm hover:shadow-xl transition-all border border-gray-100 dark:border-gray-800 group"
+    >
+      <div className="flex justify-between items-start mb-4">
+        <div className="h-2 w-12 rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden">
+          <div className={`h-full ${
+             c.urgencyLevel === 'high' ? 'bg-red-500 w-full' : 
+             c.urgencyLevel === 'medium' ? 'bg-amber-500 w-2/3' : 'bg-blue-500 w-1/3'
+          }`} />
+        </div>
+        {c.urgencyLevel === 'high' && <span className="material-icons-outlined text-red-500 text-lg animate-pulse">priority_high</span>}
+      </div>
+      
+      <h4 className="font-bold text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors truncate">{c.businessName || c.contactName}</h4>
+      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 font-medium truncate">{c.serviceInterest}</p>
+      
+      <div className="mt-6 pt-4 border-t border-gray-50 dark:border-gray-800 flex justify-between items-center">
+        <div className="flex -space-x-2">
+           <div className="w-7 h-7 rounded-full bg-blue-100 dark:bg-blue-900 border-2 border-white dark:border-[#18181b] flex items-center justify-center text-[10px] font-bold">
+             {c.ownerId?.fullName?.[0] || 'U'}
+           </div>
+           {c.participants?.length > 0 && (
+             <div className="w-7 h-7 rounded-full bg-gray-100 dark:bg-gray-800 border-2 border-white dark:border-[#18181b] flex items-center justify-center text-[10px] font-bold">
+               +{c.participants.length}
+             </div>
+           )}
+        </div>
+        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">
+          {new Date(c.createdAt).toLocaleDateString()}
+        </span>
+      </div>
+    </Link>
   );
 }

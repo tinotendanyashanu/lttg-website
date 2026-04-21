@@ -18,7 +18,7 @@ export const authConfig = {
     },
   },
   pages: {
-    signIn: '/partner/login',
+    signIn: '/login',
     newUser: '/partner/signup',
   },
   callbacks: {
@@ -28,21 +28,19 @@ export const authConfig = {
       const isOnAdmin = nextUrl.pathname.startsWith('/admin');
       const isOnPortal = nextUrl.pathname.startsWith('/portal');
 
-      // If they are on the actual portal login page, do not gate it
-      if (nextUrl.pathname === '/portal/login') {
-         // Do not auto-redirect to /portal here. If the user's DB account was deleted or their
-         // portal roles were removed, but their NextAuth cookie is still active, redirecting
-         // them to /portal will bounce them back to /portal/login, causing an infinite loop.
-         // Let the portal login page simply render. If they login again, it overwrites the session.
-         return true;
-      }
-
-      // Client portal login — public, but redirect already-signed-in clients to their dashboard
-      if (nextUrl.pathname === '/portal/client/login') {
+      // Unified login page for all roles.
+      if (nextUrl.pathname === '/login') {
+        if (!isLoggedIn) return true;
+        if (auth?.user?.role === 'admin') {
+          return Response.redirect(new URL('/admin', nextUrl.origin));
+        }
+        if (auth?.user?.role === 'employee' || auth?.user?.role === 'intern') {
+          return Response.redirect(new URL('/portal', nextUrl.origin));
+        }
         if (auth?.user?.role === 'client') {
           return Response.redirect(new URL('/portal/client/dashboard', nextUrl.origin));
         }
-        return true;
+        return Response.redirect(new URL('/partner/dashboard', nextUrl.origin));
       }
 
       if (isOnPortal) {
@@ -58,7 +56,7 @@ export const authConfig = {
         const isOnClientPortal = nextUrl.pathname.startsWith('/portal/client');
         if (isOnClientPortal) {
           if (!isLoggedIn) {
-            return Response.redirect(new URL('/portal/client/login', nextUrl.origin));
+            return Response.redirect(new URL('/login', nextUrl.origin));
           }
           if (auth?.user?.role === 'client') return true;
           // Internal staff trying to access client portal → redirect to their portal
@@ -69,11 +67,11 @@ export const authConfig = {
           ) {
             return Response.redirect(new URL('/portal', nextUrl.origin));
           }
-          return Response.redirect(new URL('/portal/client/login', nextUrl.origin));
+          return Response.redirect(new URL('/login', nextUrl.origin));
         }
 
         if (!isLoggedIn) {
-          const loginUrl = new URL('/portal/login', nextUrl.origin);
+          const loginUrl = new URL('/login', nextUrl.origin);
           return Response.redirect(loginUrl);
         }
 
@@ -94,7 +92,9 @@ export const authConfig = {
 
       // Gate: if logged in but email not verified, redirect away from dashboard
       if (isOnDashboard) {
-        if (!isLoggedIn) return false;
+        if (!isLoggedIn) {
+          return Response.redirect(new URL('/login', nextUrl.origin));
+        }
 
         // Ensure only partners access the partner dashboard
         if (auth?.user?.role !== 'partner') {
@@ -124,7 +124,7 @@ export const authConfig = {
         }
 
         if (isLoggedIn && auth?.user?.role === 'admin') return true;
-        return Response.redirect(new URL('/admin/login', nextUrl.origin));
+        return Response.redirect(new URL('/login', nextUrl.origin));
       }
 
       return true;

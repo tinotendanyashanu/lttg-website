@@ -5,8 +5,35 @@ import { getAccountByEmail } from '@/lib/data/account';
 import dbConnect from '@/lib/mongodb';
 import { Account } from '@/models/Account';
 import { ActivityLog } from '@/models/ActivityLog';
+import { InvitationToken } from '@/models/InvitationToken';
+import { Team } from '@/models/Team';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
+import { z } from 'zod';
+
+const UserUpdateSchema = z.object({
+  roles: z.array(z.string()).optional(),
+  teamId: z.string().optional().nullable(),
+  commissionRate: z.number().min(0).max(100).optional(),
+  isActive: z.boolean().optional(),
+  jobTitle: z.string().optional(),
+  department: z.string().optional(),
+});
+
+const UserCreateSchema = z.object({
+  fullName: z.string().min(2, 'Full name is required'),
+  email: z.string().email('Invalid email address'),
+  roles: z.array(z.string()).min(1, 'At least one role is required'),
+});
+
+export async function getAdminTeams() {
+  await dbConnect();
+  const session = await getSessionWithDevBypass();
+  if (!session?.user?.email) throw new Error('Not authenticated');
+
+  const teams = await Team.find({ isActive: true }).sort({ name: 1 }).lean();
+  return { success: true, teams: JSON.parse(JSON.stringify(teams)) };
+}
 
 export async function getAdminUsers() {
   await dbConnect();
@@ -21,7 +48,7 @@ export async function getAdminUsers() {
   return { success: true, users: JSON.parse(JSON.stringify(users)) };
 }
 
-export async function updateAdminUser(userId: string, data: { roles?: string[], teamId?: string, commissionRate?: number, isActive?: boolean }) {
+export async function updateAdminUser(userId: string, rawData: z.infer<typeof UserUpdateSchema>) {
   await dbConnect();
   const session = await getSessionWithDevBypass();
   if (!session?.user?.email) throw new Error('Not authenticated');
@@ -29,44 +56,86 @@ export async function updateAdminUser(userId: string, data: { roles?: string[], 
   const adminAccount = await getAccountByEmail(session.user.email);
   if (!adminAccount || !adminAccount.roles.includes('admin')) throw new Error('Unauthorized');
 
-  const user = await Account.findByIdAndUpdate(userId, { $set: data }, { new: true });
+  const validatedData = UserUpdateSchema.parse(rawData);
+
+  const user = await Account.findByIdAndUpdate(userId, { $set: validatedData }, { new: true });
   if (!user) throw new Error('User not found');
 
   await ActivityLog.create({
     actorAccountId: adminAccount._id,
+    targetEntityId: user._id,
+    targetEntityType: 'user',
     actionType: 'user_updated',
-    newValue: `User ${user.email} updated with new settings`,
+    newValue: `User settings updated for ${user.email}`,
+    metadata: validatedData,
   });
 
   return { success: true };
 }
 
-export async function createAdminUser(data: { fullName: string; email: string; roles: string[]; password?: string }) {
+/**
+ * Professional Invitation Flow:
+ * Creates an invitation token and a "pending" account.
+ * Real password setup happens via the invitation link.
+ */
+export async function createAdminUser(rawData: z.infer<typeof UserCreateSchema>) {
   await dbConnect();
   const session = await getSessionWithDevBypass();
   if (!session?.user?.email) throw new Error('Not authenticated');
 
-  const account = await getAccountByEmail(session.user.email);
-  if (!account || !account.roles.includes('admin')) throw new Error('Unauthorized');
+  const adminAccount = await getAccountByEmail(session.user.email);
+  if (!adminAccount || !adminAccount.roles.includes('admin')) throw new Error('Unauthorized');
 
-  const tempPassword = data.password || crypto.randomBytes(8).toString('hex');
-  const passwordHash = await bcrypt.hash(tempPassword, 10);
+  const data = UserCreateSchema.parse(rawData);
 
+  // Check if user already exists
+  const existing = await Account.findOne({ email: data.email.toLowerCase() });
+  if (existing) throw new Error('Account with this email already exists');
+
+  // Generate secure token
+  const token = crypto.randomBytes(32).toString('hex');
+  const expiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000); // 48 hours
+
+  // Create invitation
+  await InvitationToken.create({
+    email: data.email.toLowerCase(),
+    fullName: data.fullName,
+    roles: data.roles,
+    token,
+    expiresAt,
+    invitedBy: adminAccount._id,
+  });
+
+  // Create placeholder account with random password (to be reset during onboarding)
+  // This ensures the account exists for team/commission assignments immediately.
+  const tempPassHash = await bcrypt.hash(crypto.randomBytes(20).toString('hex'), 10);
+  
   const newUser = await Account.create({
     fullName: data.fullName,
     email: data.email.toLowerCase(),
     roles: data.roles,
-    passwordHash,
+    passwordHash: tempPassHash,
     isActive: true,
+    passwordSetupRequired: true,
   });
 
   await ActivityLog.create({
-    actorAccountId: account._id,
-    actionType: 'user_created',
-    newValue: `User created: ${newUser.email}. Temp password: ${tempPassword}`,
+    actorAccountId: adminAccount._id,
+    targetEntityId: newUser._id,
+    targetEntityType: 'user',
+    actionType: 'user_invited',
+    newValue: `Invitation sent to ${newUser.email}`,
   });
 
-  return { success: true, tempPassword };
+  // In a real production system, you would send an email here via Resend/Postmark
+  // For this environment, we return the link for the admin to share or for us to test.
+  const inviteLink = `${process.env.NEXT_PUBLIC_APP_URL || ''}/portal/onboarding/${token}`;
+
+  return { 
+    success: true, 
+    inviteLink,
+    message: 'User invited successfully. Share the onboarding link with them.'
+  };
 }
 
 export async function resetAdminUserPassword(userId: string) {
@@ -74,19 +143,35 @@ export async function resetAdminUserPassword(userId: string) {
   const session = await getSessionWithDevBypass();
   if (!session?.user?.email) throw new Error('Not authenticated');
 
-  const account = await getAccountByEmail(session.user.email);
-  if (!account || !account.roles.includes('admin')) throw new Error('Unauthorized');
+  const adminAccount = await getAccountByEmail(session.user.email);
+  if (!adminAccount || !adminAccount.roles.includes('admin')) throw new Error('Unauthorized');
 
-  const tempPassword = crypto.randomBytes(8).toString('hex');
-  const passwordHash = await bcrypt.hash(tempPassword, 10);
+  const user = await Account.findById(userId);
+  if (!user) throw new Error('User not found');
 
-  await Account.findByIdAndUpdate(userId, { $set: { passwordHash } });
+  // Instead of a temp password, we generate a Password Reset Link flow
+  const token = crypto.randomBytes(32).toString('hex');
+  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
-  await ActivityLog.create({
-    actorAccountId: account._id,
-    actionType: 'password_reset_by_admin',
-    newValue: `Password reset for user ID: ${userId}`,
+  // Reuse InvitationToken or a separate ResetToken? Let's use Invitation logic for simplicity in this MVP
+  await InvitationToken.create({
+    email: user.email,
+    fullName: user.fullName,
+    roles: user.roles,
+    token,
+    expiresAt,
+    invitedBy: adminAccount._id,
   });
 
-  return { success: true, tempPassword };
+  await ActivityLog.create({
+    actorAccountId: adminAccount._id,
+    targetEntityId: user._id,
+    targetEntityType: 'user',
+    actionType: 'password_reset_initiated',
+    newValue: `Password reset link generated for ${user.email}`,
+  });
+
+  const resetLink = `${process.env.NEXT_PUBLIC_APP_URL || ''}/portal/onboarding/${token}`;
+
+  return { success: true, resetLink };
 }

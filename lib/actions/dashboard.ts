@@ -278,6 +278,63 @@ export async function getPersonalRecentActivity(accountId: string, roles: string
   }
 }
 
+export async function getPriorityQueue(accountId: string) {
+  try {
+    await dbConnect();
+    const { Case } = await import('@/models/Case');
+    const accountObjectId = new Types.ObjectId(accountId);
+
+    // Fetch active cases
+    const activeCases = await Case.find({
+      status: { $in: ['new', 'active', 'needs_assistance'] },
+      $or: [
+        { ownerId: accountObjectId },
+        { participants: accountObjectId },
+        { assistingMembers: accountObjectId },
+      ]
+    }).lean();
+
+    // Scoring Algorithm
+    const scoredTasks = activeCases.map((c: any) => {
+      let score = 0;
+
+      // Status weight
+      if (c.status === 'needs_assistance') score += 50;
+      if (c.status === 'new') score += 30;
+      if (c.status === 'active') score += 10;
+
+      // UrgencyLevel weight
+      if (c.urgencyLevel === 'high') score += 40;
+      if (c.urgencyLevel === 'medium') score += 20;
+
+      // Age weight (max 30 points for 30 days+)
+      const ageInDays = Math.floor((Date.now() - new Date(c.createdAt).getTime()) / (1000 * 60 * 60 * 24));
+      score += Math.min(ageInDays, 30);
+
+      // Activity weight (no update in 3 days = +20)
+      const daysSinceUpdate = Math.floor((Date.now() - new Date(c.updatedAt).getTime()) / (1000 * 60 * 60 * 24));
+      if (daysSinceUpdate > 3) score += 20;
+
+      return {
+        id: c._id.toString(),
+        type: 'case',
+        title: c.businessName || c.contactName,
+        subtitle: c.serviceInterest,
+        status: c.status,
+        urgency: c.urgencyLevel || 'low',
+        score,
+        updatedAt: c.updatedAt,
+      };
+    });
+
+    // Sort by score descending
+    return scoredTasks.sort((a, b) => b.score - a.score).slice(0, 10);
+  } catch (error) {
+    console.error('Error fetching priority queue:', error);
+    return [];
+  }
+}
+
 // --- Shared Queries ---
 export async function getKnowledgeShortcuts() {
   try {

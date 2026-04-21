@@ -48,8 +48,8 @@ const nextAuthResult = NextAuth({
         const parsedCredentials = LoginSchema.safeParse(credentials);
 
         if (parsedCredentials.success) {
-          let { email, password, loginSource } = parsedCredentials.data;
-          email = email.toLowerCase();
+          const { password, loginSource } = parsedCredentials.data;
+          const email = parsedCredentials.data.email.toLowerCase();
 
           await dbConnect();
 
