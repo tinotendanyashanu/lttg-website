@@ -18,36 +18,35 @@ export default function BlockEditor({
   onChange, 
   editable = true 
 }: BlockEditorProps) {
-  const [initialBlocks, setInitialBlocks] = useState<PartialBlock[] | undefined>(undefined);
-  const [isReady, setIsReady] = useState(false);
-
-  useEffect(() => {
-    if (initialContent) {
-      try {
-        // Try to parse as JSON first (BlockNote format)
-        const parsed = JSON.parse(initialContent);
-        setInitialBlocks(parsed);
-      } catch (e) {
-        // If it's not JSON, it's probably existing Markdown
-        // BlockNote doesn't natively parse Markdown in the constructor easily,
-        // but for migration we might just show it as a single text block 
-        // or use a converter. For now, we'll treat it as empty or single block.
-        setInitialBlocks([
-          {
-            type: "paragraph",
-            content: initialContent
-          }
-        ]);
-      }
+  const initialBlocks = useMemo(() => {
+    if (!initialContent || initialContent === '[]') return undefined;
+    try {
+      return JSON.parse(initialContent) as PartialBlock[];
+    } catch (e) {
+      return [
+        {
+          type: "paragraph",
+          content: initialContent
+        }
+      ] as PartialBlock[];
     }
-    setIsReady(true);
   }, [initialContent]);
 
   const editor: BlockNoteEditor = useCreateBlockNote({
     initialContent: initialBlocks,
   });
 
-  if (!isReady) return <div className="h-64 flex items-center justify-center bg-gray-50 dark:bg-neutral-900 rounded-2xl border border-dashed border-gray-300 dark:border-neutral-700 text-gray-400">Loading editor...</div>;
+  // Effect to update content if initialContent changes after mounting
+  // but only if it's a significant change (e.g. switching articles)
+  useEffect(() => {
+    if (editor && initialBlocks && initialBlocks.length > 0) {
+        // If we want to force update when switching articles, we rely on the parent's key.
+        // But as a fallback, we can check if the editor is empty and blocks are not.
+        if (editor.document.length <= 1 && editor.document[0].content.length === 0) {
+            editor.replaceBlocks(editor.document, initialBlocks);
+        }
+    }
+  }, [editor, initialBlocks]);
 
   return (
     <div className="min-h-[400px] border border-gray-200 dark:border-neutral-800 rounded-2xl overflow-hidden bg-white dark:bg-[#1c1c1e]">

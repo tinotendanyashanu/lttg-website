@@ -138,7 +138,7 @@ export default function AdminPanelSidebar({
         <button
           onClick={onToggleCollapse}
           title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          className={`hidden lg:flex items-center gap-3 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#27272a] hover:text-gray-900 dark:hover:text-white transition-all duration-150 ${
+          className={`flex items-center gap-3 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#27272a] hover:text-gray-900 dark:hover:text-white transition-all duration-150 ${
             isCollapsed ? 'px-0 py-2.5 justify-center w-full' : 'px-3 py-2.5 w-full'
           }`}
         >

@@ -138,7 +138,16 @@ export default function KnowledgeManagerClient({ initialArticles }: { initialArt
                         />
                     </div>
                     <button 
-                        onClick={() => { setIsCreating(true); setSelectedArticle({ title: '', content: '[]', status: 'draft', type: 'article' }); }}
+                        onClick={() => { 
+                          setIsCreating(true); 
+                          setSelectedArticle({ 
+                            _id: 'temp-' + Date.now(), 
+                            title: '', 
+                            content: '[]', 
+                            status: 'draft', 
+                            type: 'article' 
+                          }); 
+                        }}
                         className="w-full py-2.5 bg-blue-600 text-white rounded-xl text-xs font-bold shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2"
                     >
                         <span className="material-icons-outlined text-sm">add</span>
@@ -254,8 +263,9 @@ export default function KnowledgeManagerClient({ initialArticles }: { initialArt
                             <div className="pt-4 border-t border-gray-50 dark:border-neutral-900">
                                 <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1 block mb-4">Content</label>
                                 <BlockEditor 
+                                    key={selectedArticle?._id || 'new'}
                                     initialContent={selectedArticle?.content}
-                                    onChange={(content) => setSelectedArticle({ ...selectedArticle, content })}
+                                    onChange={(content) => setSelectedArticle((prev: any) => ({ ...prev, content }))}
                                 />
                             </div>
 

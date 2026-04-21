@@ -19,6 +19,21 @@ export default function PortalShell({
 }) {
   const pathname = usePathname();
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
+  // Restore sidebar preference
+  useEffect(() => {
+    const saved = localStorage.getItem('portal-sidebar-collapsed');
+    if (saved === 'true') setIsCollapsed(true);
+  }, []);
+
+  const toggleSidebar = () => {
+    setIsCollapsed(prev => {
+      const next = !prev;
+      localStorage.setItem('portal-sidebar-collapsed', String(next));
+      return next;
+    });
+  };
 
   // Search State
   const [searchQuery, setSearchQuery] = useState('');
@@ -81,8 +96,8 @@ export default function PortalShell({
       <div className="w-full h-screen bg-surface-light dark:bg-surface-dark overflow-hidden flex flex-col md:flex-row relative transition-colors duration-300">
         
         {/* Sidebar */}
-        <aside className="w-20 lg:w-64 bg-surface-light dark:bg-surface-dark border-r border-gray-100 dark:border-gray-800 flex flex-col py-8 px-4 shrink-0 transition-all duration-300 relative z-20">
-          <div className="flex items-center gap-3 mb-8 pl-2">
+        <aside className={`${isCollapsed ? 'w-20' : 'w-20 lg:w-64'} bg-surface-light dark:bg-surface-dark border-r border-gray-100 dark:border-gray-800 flex flex-col py-8 px-4 shrink-0 transition-all duration-300 relative z-20`}>
+          <div className={`flex items-center gap-3 mb-8 ${isCollapsed ? 'justify-center pl-0' : 'pl-2'}`}>
             <div className="w-10 h-10 relative flex items-center justify-center">
               <Image 
                 src="/logo_transparent.png" 
@@ -92,196 +107,219 @@ export default function PortalShell({
                 className="object-contain"
               />
             </div>
-            <div className="hidden lg:block">
-              <span className="text-base font-bold tracking-tight text-gray-900 dark:text-white">
-                LeoTech
-              </span>
-              <p className="text-[10px] text-gray-400 font-medium uppercase tracking-widest">
-                Employee Portal
-              </p>
-            </div>
+            {!isCollapsed && (
+              <div className="hidden lg:block">
+                <span className="text-base font-bold tracking-tight text-gray-900 dark:text-white">
+                  LeoTech
+                </span>
+                <p className="text-[10px] text-gray-400 font-medium uppercase tracking-widest">
+                  Employee Portal
+                </p>
+              </div>
+            )}
           </div>
 
           <nav className="flex-1 space-y-2 overflow-y-auto pr-2 pb-4">
             <Link
               href="/portal"
-              className={`flex items-center justify-center lg:justify-start gap-3 px-4 py-3 rounded-xl font-medium transition-colors group ${
+              className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-center lg:justify-start'} gap-3 px-4 py-3 rounded-xl font-medium transition-colors group ${
                 pathname === "/portal"
                   ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
                   : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
               }`}
+              title={isCollapsed ? "Dashboard" : undefined}
             >
               <span className="material-icons-outlined text-[20px] group-hover:scale-110 transition-transform">dashboard</span>
-              <span className="hidden lg:block text-sm">Dashboard</span>
+              {!isCollapsed && <span className="hidden lg:block text-sm">Dashboard</span>}
             </Link>
 
             {isAdmin && (
               <Link
                 href="/portal/admin"
-                className={`flex items-center justify-center lg:justify-start gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
+                className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-center lg:justify-start'} gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
                   pathname === "/portal/admin"
                     ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
                     : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
                 }`}
+                title={isCollapsed ? "Admin Panel" : undefined}
               >
                 <span className="material-icons-outlined text-[20px] group-hover:scale-110 transition-transform">admin_panel_settings</span>
-                <span className="hidden lg:block text-sm">Admin Panel</span>
+                {!isCollapsed && <span className="hidden lg:block text-sm">Admin Panel</span>}
               </Link>
             )}
 
             <Link
               href="/portal/case-management"
-              className={`flex items-center justify-center lg:justify-start gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
+              className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-center lg:justify-start'} gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
                 pathname === "/portal/case-management"
                   ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
                   : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
               }`}
+              title={isCollapsed ? "Case Management" : undefined}
             >
               <span className="material-icons-outlined text-[20px] group-hover:scale-110 transition-transform">folder_shared</span>
-              <span className="hidden lg:block text-sm">Case Management</span>
+              {!isCollapsed && <span className="hidden lg:block text-sm">Case Management</span>}
             </Link>
 
             <Link
               href="/portal/knowledge-base"
-              className={`flex items-center justify-center lg:justify-start gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
+              className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-center lg:justify-start'} gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
                 pathname.startsWith("/portal/knowledge-base")
                   ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
                   : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
               }`}
+              title={isCollapsed ? "Knowledge Base" : undefined}
             >
               <span className="material-icons-outlined text-[20px] group-hover:scale-110 transition-transform">menu_book</span>
-              <span className="hidden lg:block text-sm">Knowledge Base</span>
+              {!isCollapsed && <span className="hidden lg:block text-sm">Knowledge Base</span>}
             </Link>
 
             <Link
               href="/portal/team"
-              className={`flex items-center justify-center lg:justify-start gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
+              className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-center lg:justify-start'} gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
                 pathname.startsWith("/portal/team")
                   ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
                   : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
               }`}
+              title={isCollapsed ? "Team" : undefined}
             >
               <span className="material-icons-outlined text-[20px] group-hover:scale-110 transition-transform">group</span>
-              <span className="hidden lg:block text-sm">Team</span>
+              {!isCollapsed && <span className="hidden lg:block text-sm">Team</span>}
             </Link>
 
             <Link
               href="/portal/resources"
-              className={`flex items-center justify-center lg:justify-start gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
+              className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-center lg:justify-start'} gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
                 pathname.startsWith("/portal/resources")
                   ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
                   : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
               }`}
+              title={isCollapsed ? "Resources" : undefined}
             >
               <span className="material-icons-outlined text-[20px] group-hover:scale-110 transition-transform">folder_zip</span>
-              <span className="hidden lg:block text-sm">Resources</span>
+              {!isCollapsed && <span className="hidden lg:block text-sm">Resources</span>}
             </Link>
 
             <Link
               href="/portal/profile"
-              className={`flex items-center justify-center lg:justify-start gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
+              className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-center lg:justify-start'} gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
                 pathname.startsWith("/portal/profile")
                   ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
                   : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
               }`}
+              title={isCollapsed ? "Profile" : undefined}
             >
               <span className="material-icons-outlined text-[20px] group-hover:scale-110 transition-transform">person</span>
-              <span className="hidden lg:block text-sm">Profile</span>
+              {!isCollapsed && <span className="hidden lg:block text-sm">Profile</span>}
             </Link>
 
             {(isAdmin || isIntern || roles.includes("employee")) && (
               <Link
                 href={isAdmin ? "/portal/admin/manage-commissions" : "/portal/earnings"}
-                className={`flex items-center justify-center lg:justify-start gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
+                className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-center lg:justify-start'} gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
                   pathname === "/portal/admin/manage-commissions" || pathname === "/portal/earnings"
                     ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
                     : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
                 }`}
+                title={isCollapsed ? "Commission Tracking" : undefined}
               >
                 <span className="material-icons-outlined text-[20px] group-hover:scale-110 transition-transform">monetization_on</span>
-                <span className="hidden lg:block text-sm">Commission Tracking</span>
+                {!isCollapsed && <span className="hidden lg:block text-sm">Commission Tracking</span>}
               </Link>
             )}
 
             <Link
               href="/portal/announcements"
-              className={`flex items-center justify-center lg:justify-start gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
+              className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-center lg:justify-start'} gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
                 pathname.startsWith("/portal/announcements") && pathname !== "/portal/admin/announcements"
                   ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
                   : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
               }`}
+              title={isCollapsed ? "Announcements" : undefined}
             >
               <span className="material-icons-outlined text-[20px] group-hover:scale-110 transition-transform">campaign</span>
-              <span className="hidden lg:block text-sm">Announcements</span>
+              {!isCollapsed && <span className="hidden lg:block text-sm">Announcements</span>}
             </Link>
 
             {isAdmin && (
               <Link
                 href="/portal/admin/announcements"
-                className={`flex items-center justify-center lg:justify-start gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
+                className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-center lg:justify-start'} gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
                   pathname === "/portal/admin/announcements"
                     ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
                     : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
                 }`}
+                title={isCollapsed ? "Manage Announcements" : undefined}
               >
                 <span className="material-icons-outlined text-[20px] group-hover:scale-110 transition-transform">edit_notifications</span>
-                <span className="hidden lg:block text-sm">Manage Announcements</span>
+                {!isCollapsed && <span className="hidden lg:block text-sm">Manage Announcements</span>}
               </Link>
             )}
 
             {isAdmin && (
               <Link
                 href="/portal/admin/tasks"
-                className={`flex items-center justify-center lg:justify-start gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
+                className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-center lg:justify-start'} gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
                   pathname.startsWith("/portal/admin/tasks")
                     ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
                     : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
                 }`}
+                title={isCollapsed ? "Tasks" : undefined}
               >
                 <span className="material-icons-outlined text-[20px] group-hover:scale-110 transition-transform">task_alt</span>
-                <span className="hidden lg:block text-sm">Tasks</span>
+                {!isCollapsed && <span className="hidden lg:block text-sm">Tasks</span>}
               </Link>
             )}
 
             {isAdmin && (
               <Link
                 href="/portal/admin/teams"
-                className={`flex items-center justify-center lg:justify-start gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
+                className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-center lg:justify-start'} gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
                   pathname === "/portal/admin/teams"
                     ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
-                    : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
+                    : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:text-white"
                 }`}
+                title={isCollapsed ? "Team Management" : undefined}
               >
                 <span className="material-icons-outlined text-[20px] group-hover:scale-110 transition-transform">groups</span>
-                <span className="hidden lg:block text-sm">Team Management</span>
+                {!isCollapsed && <span className="hidden lg:block text-sm">Team Management</span>}
               </Link>
             )}
 
             <Link
               href="/portal/academy"
-              className={`flex items-center justify-center lg:justify-start gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
+              className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-center lg:justify-start'} gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
                 pathname.startsWith("/portal/academy")
                   ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
                   : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
               }`}
+              title={isCollapsed ? "Academy" : undefined}
             >
               <span className="material-icons-outlined text-[20px] group-hover:scale-110 transition-transform">school</span>
-              <span className="hidden lg:block text-sm">Academy</span>
+              {!isCollapsed && <span className="hidden lg:block text-sm">Academy</span>}
             </Link>
 
             <button
               onClick={() => signOut({ callbackUrl: '/' })}
-              className="w-full flex items-center justify-center lg:justify-start gap-3 px-4 py-2.5 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white transition-colors group"
+              className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'justify-center lg:justify-start'} gap-3 px-4 py-2.5 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white transition-colors group`}
+              title={isCollapsed ? "Exit Portal" : undefined}
             >
               <span className="material-icons-outlined text-[20px] group-hover:scale-110 transition-transform">exit_to_app</span>
-              <span className="hidden lg:block text-sm">Exit Portal</span>
+              {!isCollapsed && <span className="hidden lg:block text-sm">Exit Portal</span>}
             </button>
           </nav>
 
-          <div className="space-y-4 mt-auto">
+          <div className={`space-y-4 mt-auto flex flex-col ${isCollapsed ? 'items-center' : 'items-center lg:items-start'}`}>
+            <button
+              onClick={toggleSidebar}
+              title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+              className="w-10 h-10 flex items-center justify-center rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            >
+              <span className="material-icons-outlined">{isCollapsed ? 'chevron_right' : 'chevron_left'}</span>
+            </button>
             <button
               onClick={toggleDarkMode}
-              className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors mx-auto lg:mx-0"
+              className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
             >
               {isDarkMode ? (
                 <span className="material-icons-outlined block">light_mode</span>
