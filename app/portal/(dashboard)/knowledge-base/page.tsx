@@ -10,7 +10,8 @@ export const metadata = {
   description: 'Access company resources, guidelines, and documentation.',
 };
 
-export default async function KnowledgeBasePage({ searchParams }: { searchParams: { category?: string } }) {
+export default async function KnowledgeBasePage({ searchParams }: { searchParams: Promise<{ category?: string }> }) {
+  const resolvedSearchParams = await searchParams;
   const session = await getSession();
   if (!session?.user?.email) {
     redirect('/auth/login');
@@ -29,7 +30,7 @@ export default async function KnowledgeBasePage({ searchParams }: { searchParams
       userRole = 'intern';
   }
 
-  const activeCategoryId = searchParams.category || 'All';
+  const activeCategoryId = resolvedSearchParams.category || 'All';
 
   // Fetch initial articles and categories in parallel
   const [initialDataResult, categoriesResult] = await Promise.all([

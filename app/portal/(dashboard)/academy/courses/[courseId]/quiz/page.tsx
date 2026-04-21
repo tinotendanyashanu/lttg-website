@@ -2,15 +2,16 @@ import Link from 'next/link';
 import { getCourseQuizView } from '@/lib/actions/portalAcademy';
 import PortalQuizPlayer from '@/components/academy/PortalQuizPlayer';
 
-export default async function CourseQuizPage({ params }: { params: { courseId: string } }) {
-  const result = await getCourseQuizView(params.courseId);
+export default async function CourseQuizPage({ params }: { params: Promise<{ courseId: string }> }) {
+  const resolvedParams = await params;
+  const result = await getCourseQuizView(resolvedParams.courseId);
 
   if (!result.success) {
     return (
       <div className="rounded-3xl border border-rose-200 bg-rose-50 p-8 text-center text-rose-700 dark:border-rose-900/40 dark:bg-rose-950/20 dark:text-rose-300">
         <h1 className="text-2xl font-bold">Unable to load final assessment</h1>
         <p className="mt-2">{result.error}</p>
-        <Link href={`/portal/academy/courses/${params.courseId}`} className="mt-4 inline-flex rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white">
+        <Link href={`/portal/academy/courses/${resolvedParams.courseId}`} className="mt-4 inline-flex rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white">
           Return to course
         </Link>
       </div>

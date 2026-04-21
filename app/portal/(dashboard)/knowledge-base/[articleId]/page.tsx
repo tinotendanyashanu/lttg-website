@@ -8,7 +8,10 @@ import BlockRenderer from '@/components/portal/knowledge-base/editor/BlockRender
 import TableOfContents from '@/components/portal/knowledge-base/TableOfContents';
 import FeedbackWidget from '@/components/portal/knowledge-base/FeedbackWidget';
 
-export default async function ArticleDetailedView({ params }: { params: { articleId: string } }) {
+export default async function ArticleDetailedView({ params }: { params: Promise<{ articleId: string }> }) {
+  const resolvedParams = await params;
+  const articleId = resolvedParams.articleId;
+
   const session = await getSession();
   
   if (!session?.user?.email) {
@@ -25,13 +28,13 @@ export default async function ArticleDetailedView({ params }: { params: { articl
   }
 
   // Fetch article
-  const articleResponse = await getArticleBySlug(params.articleId, userRole);
+  const articleResponse = await getArticleBySlug(articleId, userRole);
   
   // Special case: if 404 but user might be the author trying to view a draft, 
   // we could potentially try to fetch it by slug without role restriction then check authorship.
   // But for now, we'll follow the standard response.
   if (!articleResponse.success || !articleResponse.article) {
-    console.log(`Article fetch failed for ${params.articleId}: ${articleResponse.error}`);
+    console.log(`Article fetch failed for ${articleId}: ${articleResponse.error}`);
     notFound();
   }
 

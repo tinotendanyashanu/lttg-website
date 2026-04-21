@@ -1,8 +1,9 @@
 import { getCourseWithDetails } from '@/lib/actions/portalAcademy';
 import Link from 'next/link';
 
-export default async function CourseOverviewPage({ params }: { params: { courseId: string } }) {
-  const result = await getCourseWithDetails(params.courseId);
+export default async function CourseOverviewPage({ params }: { params: Promise<{ courseId: string }> }) {
+  const resolvedParams = await params;
+  const result = await getCourseWithDetails(resolvedParams.courseId);
 
   if (!result.success) {
     return (
