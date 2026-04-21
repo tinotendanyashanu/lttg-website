@@ -26,12 +26,12 @@ export default async function CourseQuizPage({ params }: { params: Promise<{ cou
 
   return (
     <div className="space-y-6">
-      <Link href={`/portal/academy/courses/${params.courseId}`} className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 transition-colors hover:text-brand-primary">
+      <Link href={`/portal/academy/courses/${resolvedParams.courseId}`} className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 transition-colors hover:text-brand-primary">
         <span className="material-icons-outlined text-base">arrow_back</span>
         Back to course
       </Link>
       <PortalQuizPlayer
-        courseId={params.courseId}
+        courseId={resolvedParams.courseId}
         title={course.quiz?.title || `${course.title} final assessment`}
         subtitle={`Complete the final assessment to certify the course. ${result.canTakeQuiz ? '' : 'Finish all lessons first.'}`}
         questions={course.quiz?.questions || []}
