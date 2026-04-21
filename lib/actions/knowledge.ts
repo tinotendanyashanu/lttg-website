@@ -161,31 +161,35 @@ export async function getArticleBySlug(slug: string, role: string) {
     try {
         await dbConnect();
         
-        // Use case-insensitive exact match
+        // Escape slug for regex to avoid issues with special characters
+        const escapedSlug = slug.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
         const article = await KnowledgeArticle.findOne({ 
-            slug: { $regex: new RegExp(`^${slug.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&')}$`, 'i') } 
+            slug: { $regex: new RegExp(`^${escapedSlug}$`, 'i') } 
         })
             .populate('categoryId')
             .populate('relatedArticles', 'title slug categoryId type')
             .populate('backlinks', 'title slug categoryId type');
 
-        if (!article) return { success: false, error: 'Article not found' };
+        if (!article) {
+            console.log(`Article not found in DB for slug: ${slug}`);
+            return { success: false, error: 'Article not found' };
+        }
 
-        // Normalize roles to handle potentially missing roles gracefully
+        // Normalize roles
         const currentRole = role || 'employee';
 
         const isAuthorized = 
-            role === 'admin' || 
+            currentRole === 'admin' || 
             article.roleVisibility.includes('all' as any) || 
             (article.roleVisibility as string[]).some(rv => rv.toLowerCase() === currentRole.toLowerCase());
         
         if (!isAuthorized) {
-            console.warn(`Unauthorized view attempt for article: ${slug} by role: ${role}`);
+            console.warn(`Unauthorized view attempt for article: ${slug} by role: ${currentRole}. Article visibility: ${article.roleVisibility}`);
             return { success: false, error: 'Unauthorized view attempt' };
         }
 
         // Only count views for published articles or if user is not admin
-        if (article.status === 'published' && role !== 'admin') {
+        if (article.status === 'published' && currentRole !== 'admin') {
             article.viewCount += 1;
             await article.save();
         }
