@@ -25,46 +25,97 @@ export async function getAdminKnowledgeArticles() {
 }
 
 export async function createAdminKnowledgeArticle(data: any) {
-  await dbConnect();
-  const account = await validateAdmin();
+  try {
+    await dbConnect();
+    const account = await validateAdmin();
 
-  // Handle migration fields
-  if (data.isPublished !== undefined && !data.status) {
-    data.status = data.isPublished ? 'published' : 'draft';
+    // Handle migration/compatibility fields
+    if (data.isPublished !== undefined && !data.status) {
+      data.status = data.isPublished ? 'published' : 'draft';
+    } else if (data.status) {
+      data.isPublished = data.status === 'published';
+    }
+
+    // Ensure category (string) is set for compatibility
+    if (!data.category && data.categoryId && mongoose.Types.ObjectId.isValid(data.categoryId)) {
+      const category = await KnowledgeCategory.findById(data.categoryId);
+      if (category) {
+        data.category = category.name;
+      } else {
+        data.category = 'General';
+      }
+    } else if (!data.category) {
+      data.category = 'General';
+    }
+    
+    // Clean up categoryId if it's not a valid ObjectId (e.g. empty string)
+    if (data.categoryId && !mongoose.Types.ObjectId.isValid(data.categoryId)) {
+        delete data.categoryId;
+    }
+
+    const article = await KnowledgeArticle.create({ ...data, createdBy: account.email });
+
+    await ActivityLog.create({
+      actorAccountId: account._id,
+      actionType: 'knowledge_article_created',
+      newValue: `Article created: ${article.title}`,
+    });
+
+    revalidatePath('/portal/knowledge-base');
+    return { success: true, articleId: article._id.toString() };
+  } catch (error: any) {
+    console.error('Error creating knowledge article:', error);
+    if (error.code === 11000) {
+      return { success: false, error: 'An article with this slug already exists.' };
+    }
+    return { success: false, error: error.message || 'Failed to create article' };
   }
-
-  const article = await KnowledgeArticle.create({ ...data, createdBy: account.email });
-
-  await ActivityLog.create({
-    actorAccountId: account._id,
-    actionType: 'knowledge_article_created',
-    newValue: `Article created: ${article.title}`,
-  });
-
-  revalidatePath('/portal/knowledge-base');
-  return { success: true, articleId: article._id.toString() };
 }
 
 export async function updateAdminKnowledgeArticle(articleId: string, data: any) {
-  await dbConnect();
-  const account = await validateAdmin();
+  try {
+    await dbConnect();
+    const account = await validateAdmin();
 
-  if (data.isPublished !== undefined && !data.status) {
-    data.status = data.isPublished ? 'published' : 'draft';
+    // Handle migration/compatibility fields
+    if (data.isPublished !== undefined && !data.status) {
+      data.status = data.isPublished ? 'published' : 'draft';
+    } else if (data.status) {
+      data.isPublished = data.status === 'published';
+    }
+
+    // Ensure category (string) is set for compatibility if categoryId changed
+    if (data.categoryId && mongoose.Types.ObjectId.isValid(data.categoryId)) {
+      const category = await KnowledgeCategory.findById(data.categoryId);
+      if (category) {
+        data.category = category.name;
+      }
+    }
+    
+    // Clean up categoryId if it's not a valid ObjectId
+    if (data.categoryId && !mongoose.Types.ObjectId.isValid(data.categoryId)) {
+        delete data.categoryId;
+    }
+
+    const article = await KnowledgeArticle.findByIdAndUpdate(articleId, { $set: data }, { new: true });
+    if (!article) return { success: false, error: 'Article not found' };
+
+    await ActivityLog.create({
+      actorAccountId: account._id,
+      actionType: 'knowledge_article_updated',
+      newValue: `Article updated: ${article.title}`,
+    });
+
+    revalidatePath('/portal/knowledge-base');
+    revalidatePath(`/portal/knowledge-base/${article.slug}`);
+    return { success: true };
+  } catch (error: any) {
+    console.error('Error updating knowledge article:', error);
+    if (error.code === 11000) {
+      return { success: false, error: 'An article with this slug already exists.' };
+    }
+    return { success: false, error: error.message || 'Failed to update article' };
   }
-
-  const article = await KnowledgeArticle.findByIdAndUpdate(articleId, { $set: data }, { new: true });
-  if (!article) throw new Error('Article not found');
-
-  await ActivityLog.create({
-    actorAccountId: account._id,
-    actionType: 'knowledge_article_updated',
-    newValue: `Article updated: ${article.title}`,
-  });
-
-  revalidatePath('/portal/knowledge-base');
-  revalidatePath(`/portal/knowledge-base/${article.slug}`);
-  return { success: true };
 }
 
 export async function deleteAdminKnowledgeArticle(articleId: string) {

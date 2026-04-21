@@ -65,15 +65,23 @@ export default function KnowledgeManagerClient({ initialArticles }: { initialArt
      try {
        if (isCreating) {
           const res = await createAdminKnowledgeArticle(data);
-          router.refresh();
-          window.location.reload(); // Simplest way to resync
+          if (res.success) {
+            router.refresh();
+            window.location.reload(); // Simplest way to resync
+          } else {
+            alert(res.error || "Failed to create article.");
+          }
        } else if (selectedArticle) {
-          await updateAdminKnowledgeArticle(selectedArticle._id, data);
-          setArticles(articles.map(a => a._id === selectedArticle._id ? { ...a, ...data } : a));
-          setSelectedArticle({ ...selectedArticle, ...data });
+          const res = await updateAdminKnowledgeArticle(selectedArticle._id, data);
+          if (res.success) {
+            setArticles(articles.map(a => a._id === selectedArticle._id ? { ...a, ...data } : a));
+            setSelectedArticle({ ...selectedArticle, ...data });
+          } else {
+            alert(res.error || "Failed to update article.");
+          }
        }
      } catch (err) {
-       alert("Failed to save article.");
+       alert("An unexpected error occurred while saving.");
      } finally {
        setIsUpdating(false);
      }
