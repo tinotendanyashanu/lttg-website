@@ -42,7 +42,11 @@ export default function BlockEditor({
     if (editor && initialBlocks && initialBlocks.length > 0) {
         // If we want to force update when switching articles, we rely on the parent's key.
         // But as a fallback, we can check if the editor is empty and blocks are not.
-        if (editor.document.length <= 1 && editor.document[0].content.length === 0) {
+        const firstBlock = editor.document[0];
+        const isEmpty = editor.document.length <= 1 && 
+                       (!firstBlock || (Array.isArray(firstBlock.content) && firstBlock.content.length === 0));
+
+        if (isEmpty) {
             editor.replaceBlocks(editor.document, initialBlocks);
         }
     }
