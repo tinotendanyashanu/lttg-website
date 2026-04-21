@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { getLessonContent, markLessonComplete } from '@/lib/actions/portalAcademy';
+import MarkdownRenderer from '@/components/portal/knowledge-base/MarkdownRenderer';
 
 export default function LessonViewPage() {
   const params = useParams();
@@ -32,9 +33,15 @@ export default function LessonViewPage() {
     setCompleting(true);
     const res = await markLessonComplete(courseId, lessonId);
     if (res.success) {
-      // In a real app we'd determine the next lesson and navigate there
-      // For MVP just go back to course overview
-      router.push(`/portal/academy/courses/${courseId}`);
+      if (res.needsModuleQuiz && learningData?.module?._id) {
+        router.push(`/portal/academy/courses/${courseId}/modules/${learningData.module._id}/quiz`);
+      } else if (res.needsCourseQuiz) {
+        router.push(`/portal/academy/courses/${courseId}/quiz`);
+      } else if (res.nextLessonId) {
+        router.push(`/portal/academy/courses/${courseId}/lessons/${res.nextLessonId}`);
+      } else {
+        router.push(`/portal/academy/courses/${courseId}`);
+      }
       router.refresh(); // Refresh the course page to show updated progress
     } else {
       alert("Failed to mark complete: " + res.error);
@@ -61,24 +68,24 @@ export default function LessonViewPage() {
     );
   }
 
-  const { lesson, moduleTitle, courseTitle, progress } = learningData;
-  const isCompleted = progress?.completedLessonIds?.includes(lesson._id);
+  const { lesson, module, course, progress, lessonState, moduleStates, navigation, isLocked, unlockReason } = learningData;
+  const isCompleted = lessonState?.isCompleted;
+  const currentModuleState = moduleStates?.find((state: any) => state.moduleId === module?._id);
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="space-y-6">
       <nav className="flex items-center text-sm font-medium text-gray-500 dark:text-gray-400 space-x-2">
         <Link href="/portal/academy" className="hover:text-brand-primary transition-colors">Academy</Link>
         <span className="material-icons-outlined text-[16px]">chevron_right</span>
-        <Link href={`/portal/academy/courses/${courseId}`} className="hover:text-brand-primary transition-colors truncate max-w-[150px]">{courseTitle}</Link>
+        <Link href={`/portal/academy/courses/${courseId}`} className="hover:text-brand-primary transition-colors truncate max-w-[150px]">{course?.title}</Link>
         <span className="material-icons-outlined text-[16px]">chevron_right</span>
-        <span className="truncate max-w-[200px] text-gray-900 dark:text-gray-200">{moduleTitle}</span>
+        <span className="truncate max-w-[200px] text-gray-900 dark:text-gray-200">{module?.title}</span>
       </nav>
 
       <div className="bg-white dark:bg-[#1f1f22] rounded-3xl overflow-hidden border border-gray-100 dark:border-gray-800 shadow-sm">
         {lesson.videoUrl ? (
           <div className="w-full aspect-video bg-black flex items-center justify-center relative">
-             {/* If it's a youtube/vimeo link, an iframe would go here. 
-                 For MVP, assuming standard html video or just a placeholder if URL is arbitrary */}
             <video 
               src={lesson.videoUrl} 
               controls 
@@ -102,9 +109,28 @@ export default function LessonViewPage() {
             </h1>
           )}
 
-          <div className="prose prose-lg dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 font-serif leading-relaxed"
-               dangerouslySetInnerHTML={{ __html: lesson.content || '<p>No content provided.</p>' }} 
-          />
+          {lesson.summary && (
+            <p className="mb-6 rounded-2xl border border-gray-100 bg-gray-50 px-5 py-4 text-sm text-gray-600 dark:border-gray-800 dark:bg-[#18181b] dark:text-gray-300">
+              {lesson.summary}
+            </p>
+          )}
+
+          {isLocked ? (
+            <div className="rounded-3xl border border-amber-200 bg-amber-50 p-6 text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/20 dark:text-amber-200">
+              <div className="flex items-center gap-3">
+                <span className="material-icons-outlined">lock</span>
+                <div>
+                  <h2 className="font-bold">Lesson locked</h2>
+                  <p className="mt-1 text-sm">{unlockReason}</p>
+                </div>
+              </div>
+              <Link href={`/portal/academy/courses/${courseId}`} className="mt-4 inline-flex rounded-xl bg-amber-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-amber-700">
+                Return to course
+              </Link>
+            </div>
+          ) : (
+            <MarkdownRenderer content={lesson.content || 'No content provided.'} />
+          )}
           
           {lesson.attachments && lesson.attachments.length > 0 && (
             <div className="mt-12 pt-8 border-t border-gray-100 dark:border-gray-800">
@@ -124,7 +150,7 @@ export default function LessonViewPage() {
             </div>
           )}
 
-          <div className="mt-12 flex justify-between items-center bg-gray-50 dark:bg-gray-800/30 p-6 rounded-2xl border border-gray-100 dark:border-gray-800">
+          <div className="mt-12 flex flex-col gap-4 bg-gray-50 dark:bg-gray-800/30 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 sm:flex-row sm:items-center sm:justify-between">
              <div className="flex items-center gap-3">
                {isCompleted && (
                  <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-semibold bg-green-50 dark:bg-green-900/20 px-4 py-2 rounded-xl">
@@ -136,9 +162,9 @@ export default function LessonViewPage() {
              
              <button
                onClick={handleComplete}
-               disabled={completing || isCompleted}
+               disabled={completing || isCompleted || isLocked}
                className={`px-8 py-3.5 rounded-xl font-bold flex items-center gap-2 transition-all shadow-sm ${
-                 isCompleted
+                 isCompleted || isLocked
                    ? 'bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400 cursor-not-allowed'
                    : 'bg-brand-primary hover:bg-brand-secondary text-white hover:shadow-md'
                }`}
@@ -155,6 +181,55 @@ export default function LessonViewPage() {
           </div>
         </div>
       </div>
+      </div>
+
+      <aside className="space-y-4 lg:sticky lg:top-6 lg:self-start">
+        <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-[#27272a]">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">Current module</p>
+          <h2 className="mt-2 text-xl font-bold text-gray-900 dark:text-white">{module?.title}</h2>
+          {module?.description && (
+            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">{module.description}</p>
+          )}
+          <div className="mt-5 h-2 rounded-full bg-gray-100 dark:bg-gray-800">
+            <div className="h-2 rounded-full bg-brand-primary" style={{ width: `${currentModuleState?.completionPercentage || 0}%` }} />
+          </div>
+          <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+            {currentModuleState?.completedLessons || 0}/{currentModuleState?.totalLessons || 0} lessons complete
+          </p>
+        </div>
+
+        <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-[#27272a]">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">Navigation</p>
+          <div className="mt-4 space-y-3">
+            {navigation?.previousLessonId ? (
+              <Link href={`/portal/academy/courses/${courseId}/lessons/${navigation.previousLessonId}`} className="flex items-center justify-between rounded-2xl border border-gray-100 px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:border-brand-primary hover:text-brand-primary dark:border-gray-800 dark:text-gray-300">
+                <span>Previous lesson</span>
+                <span className="material-icons-outlined text-base">arrow_back</span>
+              </Link>
+            ) : (
+              <div className="rounded-2xl border border-dashed border-gray-200 px-4 py-3 text-sm text-gray-400 dark:border-gray-800">This is the first lesson.</div>
+            )}
+
+            {navigation?.nextLessonId ? (
+              <Link href={`/portal/academy/courses/${courseId}/lessons/${navigation.nextLessonId}`} className="flex items-center justify-between rounded-2xl border border-gray-100 px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:border-brand-primary hover:text-brand-primary dark:border-gray-800 dark:text-gray-300">
+                <span>Next lesson</span>
+                <span className="material-icons-outlined text-base">arrow_forward</span>
+              </Link>
+            ) : (
+              <Link href={`/portal/academy/courses/${courseId}`} className="flex items-center justify-between rounded-2xl border border-gray-100 px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:border-brand-primary hover:text-brand-primary dark:border-gray-800 dark:text-gray-300">
+                <span>Back to course</span>
+                <span className="material-icons-outlined text-base">menu_book</span>
+              </Link>
+            )}
+          </div>
+
+          <div className="mt-6 rounded-2xl bg-gray-50 p-4 dark:bg-[#18181b]">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">Course progress</p>
+            <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{progress?.progressPercentage || 0}%</p>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Completion stays sequential. Lessons and module quizzes unlock the next stage.</p>
+          </div>
+        </div>
+      </aside>
     </div>
   );
 }
