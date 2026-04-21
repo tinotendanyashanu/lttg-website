@@ -11,20 +11,27 @@ import FeedbackWidget from '@/components/portal/knowledge-base/FeedbackWidget';
 export default async function ArticleDetailedView({ params }: { params: { articleId: string } }) {
   const session = await getSession();
   
+  if (!session?.user?.email) {
+    notFound();
+  }
+
+  const userEmail = session.user.email;
+  const account = await getAccountByEmail(userEmail);
+  
+  // Default to employee if account not found but session exists
   let userRole = 'employee';
-  let userEmail = '';
-  if (session?.user?.email) {
-    userEmail = session.user.email;
-    const account = await getAccountByEmail(session.user.email);
-    if (account && account.roles && account.roles.length > 0) {
-      userRole = account.roles.includes('admin') ? 'admin' : (account.roles.includes('intern') ? 'intern' : 'employee');
-    }
+  if (account && account.roles && account.roles.length > 0) {
+    userRole = account.roles.includes('admin') ? 'admin' : (account.roles.includes('intern') ? 'intern' : 'employee');
   }
 
   // Fetch article
   const articleResponse = await getArticleBySlug(params.articleId, userRole);
   
+  // Special case: if 404 but user might be the author trying to view a draft, 
+  // we could potentially try to fetch it by slug without role restriction then check authorship.
+  // But for now, we'll follow the standard response.
   if (!articleResponse.success || !articleResponse.article) {
+    console.log(`Article fetch failed for ${params.articleId}: ${articleResponse.error}`);
     notFound();
   }
 

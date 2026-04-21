@@ -161,9 +161,9 @@ export async function getArticleBySlug(slug: string, role: string) {
     try {
         await dbConnect();
         
-        // Use case-insensitive regex for slug lookup
+        // Use case-insensitive exact match
         const article = await KnowledgeArticle.findOne({ 
-            slug: { $regex: new RegExp(`^${slug}$`, 'i') } 
+            slug: { $regex: new RegExp(`^${slug.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&')}$`, 'i') } 
         })
             .populate('categoryId')
             .populate('relatedArticles', 'title slug categoryId type')
@@ -171,9 +171,13 @@ export async function getArticleBySlug(slug: string, role: string) {
 
         if (!article) return { success: false, error: 'Article not found' };
 
-        const isAuthorized = article.roleVisibility.includes('all' as any) || 
-                           article.roleVisibility.includes(role as any) || 
-                           role === 'admin';
+        // Normalize roles to handle potentially missing roles gracefully
+        const currentRole = role || 'employee';
+
+        const isAuthorized = 
+            role === 'admin' || 
+            article.roleVisibility.includes('all' as any) || 
+            (article.roleVisibility as string[]).some(rv => rv.toLowerCase() === currentRole.toLowerCase());
         
         if (!isAuthorized) {
             console.warn(`Unauthorized view attempt for article: ${slug} by role: ${role}`);
