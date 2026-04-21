@@ -28,8 +28,12 @@ export const authConfig = {
       const isOnAdmin = nextUrl.pathname.startsWith('/admin');
       const isOnPortal = nextUrl.pathname.startsWith('/portal');
 
-      // Unified login page for all roles.
-      if (nextUrl.pathname === '/login') {
+      // Specialized login pages
+      const isPartnerLogin = nextUrl.pathname === '/partner/login';
+      const isStaffLogin = nextUrl.pathname === '/portal/login';
+      const isClientLogin = nextUrl.pathname === '/portal/client/login';
+
+      if (isPartnerLogin || isStaffLogin || isClientLogin || nextUrl.pathname === '/login') {
         if (!isLoggedIn) return true;
         if (auth?.user?.role === 'admin') {
           return Response.redirect(new URL('/admin', nextUrl.origin));
@@ -56,7 +60,9 @@ export const authConfig = {
         const isOnClientPortal = nextUrl.pathname.startsWith('/portal/client');
         if (isOnClientPortal) {
           if (!isLoggedIn) {
-            return Response.redirect(new URL('/login', nextUrl.origin));
+            const loginUrl = new URL('/login', nextUrl.origin);
+            loginUrl.searchParams.set('loginSource', 'client_portal');
+            return Response.redirect(loginUrl);
           }
           if (auth?.user?.role === 'client') return true;
           // Internal staff trying to access client portal → redirect to their portal
@@ -72,6 +78,7 @@ export const authConfig = {
 
         if (!isLoggedIn) {
           const loginUrl = new URL('/login', nextUrl.origin);
+          loginUrl.searchParams.set('loginSource', 'portal');
           return Response.redirect(loginUrl);
         }
 
@@ -93,7 +100,9 @@ export const authConfig = {
       // Gate: if logged in but email not verified, redirect away from dashboard
       if (isOnDashboard) {
         if (!isLoggedIn) {
-          return Response.redirect(new URL('/login', nextUrl.origin));
+          const loginUrl = new URL('/login', nextUrl.origin);
+          loginUrl.searchParams.set('loginSource', 'partner');
+          return Response.redirect(loginUrl);
         }
 
         // Ensure only partners access the partner dashboard
@@ -124,7 +133,9 @@ export const authConfig = {
         }
 
         if (isLoggedIn && auth?.user?.role === 'admin') return true;
-        return Response.redirect(new URL('/login', nextUrl.origin));
+        
+        // Redirect to specialized admin login instead of unified login for 2-step verification
+        return Response.redirect(new URL('/admin/login', nextUrl.origin));
       }
 
       return true;

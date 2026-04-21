@@ -32,6 +32,7 @@ export async function authenticate(
 
     // Determine target redirect based on user's resolved role
     let redirectTo = '/partner/dashboard';
+    let effectiveLoginSource = loginSource;
     
     if (loginSource === 'client_portal') {
          // Client portal login — only allow clients
@@ -46,23 +47,32 @@ export async function authenticate(
              } else if (accountUser.roles.includes('employee') || accountUser.roles.includes('intern')) {
                  redirectTo = '/portal';
              }
-             // Client-only accounts are blocked in the credentials provider, no redirect needed
          }
     } else {
-         if (partner && partner.role === 'partner') {
+         // Unified login — identify most probable destination
+         if (partner && partner.role === 'partner' && !(accountUser && accountUser.roles.includes('admin'))) {
               redirectTo = '/partner/dashboard';
+              effectiveLoginSource = 'partner';
          } else if (accountUser) {
               if (accountUser.roles.includes('admin')) {
                   redirectTo = '/admin';
+                  effectiveLoginSource = 'portal';
               } else if (accountUser.roles.includes('employee') || accountUser.roles.includes('intern')) {
                   redirectTo = '/portal';
+                  effectiveLoginSource = 'portal';
               } else if (accountUser.roles.includes('client')) {
                   redirectTo = '/portal/client/dashboard';
+                  effectiveLoginSource = 'client_portal';
               }
          }
     }
 
-    await signIn('credentials', { ...Object.fromEntries(formData), redirectTo });
+    await signIn('credentials', { 
+      email,
+      password: formData.get('password') as string,
+      loginSource: effectiveLoginSource,
+      redirectTo 
+    });
   } catch (error) {
     // Surface a clear message when email verification is required
     if (error instanceof Error && error.message === 'EMAIL_NOT_VERIFIED') {
