@@ -47,15 +47,14 @@ export default async function UnifiedDashboard({ title, accountId, email, roles 
 
   return (
     <div className="flex flex-col gap-8 h-full w-full pb-10">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl md:text-4xl font-black text-gray-900 dark:text-white tracking-tight">{title}</h1>
-          <p className="text-gray-500 dark:text-gray-400 font-medium">Welcome back, {identityData.fullName.split(' ')[0]}! Here&apos;s your focus for today.</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white leading-tight">{title}</h1>
+          <p className="text-gray-500 dark:text-gray-400 mt-0.5 text-sm">Welcome back, {identityData.fullName.split(' ')[0]}! Here&apos;s your focus for today.</p>
         </div>
         <div className="flex items-center gap-3">
-           <Link href="/portal/intern/submit-lead" className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-6 py-3 rounded-2xl font-bold flex items-center gap-2 transition hover:opacity-90 shadow-xl shadow-gray-900/10">
-              <span className="material-icons-outlined text-[20px]">add_circle</span>
+           <Link href="/portal/intern/submit-lead" className="inline-flex items-center gap-2 bg-[#2F2F2F] hover:bg-[#4a4a4a] text-white rounded-full px-5 py-2.5 text-sm font-medium transition-colors">
+              <span className="material-icons-outlined text-[16px]">add_circle</span>
               New Case
            </Link>
         </div>

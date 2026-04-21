@@ -17,14 +17,14 @@ export default function InternCommissionSnapshot({ metrics, title = "Commission 
   if (!metrics) return null;
 
   return (
-    <div className="bg-white dark:bg-[#27272a] p-6 rounded-2xl shadow-soft dark:shadow-none border border-gray-100 dark:border-gray-800 h-full flex flex-col">
+    <div className="bg-white dark:bg-[#27272a] p-6 rounded-2xl shadow-soft border border-gray-100 dark:border-gray-800 h-full flex flex-col">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
           <span className="material-icons-outlined text-brand-primary">account_balance_wallet</span>
           {title}
         </h2>
-        <Link href="/portal/earnings" className="text-brand-primary text-sm font-medium hover:underline">
-          Details
+        <Link href="/portal/earnings" className="text-brand-primary text-sm font-semibold hover:underline">
+          View all
         </Link>
       </div>
 

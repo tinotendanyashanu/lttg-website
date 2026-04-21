@@ -39,17 +39,17 @@ export default function IdentitySnapshot({
       </div>
       
       <div className="flex-1">
-        <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white leading-tight">
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white leading-tight">
           Welcome back, {fullName.split(' ')[0]}
         </h2>
-        <div className="mt-1 flex flex-wrap items-center gap-2 text-sm">
-          <span className="font-medium text-brand-primary bg-brand-primary/10 px-2 py-0.5 rounded">
+        <div className="mt-1 flex flex-wrap items-center gap-2 text-[13px]">
+          <span className="font-semibold text-brand-primary bg-brand-primary/10 px-2 py-0.5 rounded-md">
             {displayRole}
           </span>
           {teamId && (
             <>
               <span className="text-gray-300 dark:text-gray-600">•</span>
-              <span className="text-gray-600 dark:text-gray-400 flex items-center gap-1">
+              <span className="text-gray-500 dark:text-gray-400 flex items-center gap-1 font-medium">
                 <span className="material-icons-outlined text-[16px]">groups</span>
                 Team Member
               </span>
@@ -58,8 +58,8 @@ export default function IdentitySnapshot({
           {roles.includes('intern') && (
             <>
               <span className="text-gray-300 dark:text-gray-600">•</span>
-              <span className="text-green-600 bg-green-50 dark:bg-green-900/20 px-2 py-0.5 rounded font-medium">
-                10% Commission Rate
+              <span className="text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded-md font-semibold">
+                10% Rate
               </span>
             </>
           )}
