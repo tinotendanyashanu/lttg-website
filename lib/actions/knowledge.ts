@@ -161,21 +161,30 @@ export async function getArticleBySlug(slug: string, role: string) {
     try {
         await dbConnect();
         
-        const article = await KnowledgeArticle.findOne({ slug })
+        // Use case-insensitive regex for slug lookup
+        const article = await KnowledgeArticle.findOne({ 
+            slug: { $regex: new RegExp(`^${slug}$`, 'i') } 
+        })
             .populate('categoryId')
             .populate('relatedArticles', 'title slug categoryId type')
             .populate('backlinks', 'title slug categoryId type');
 
         if (!article) return { success: false, error: 'Article not found' };
 
-        const isAuthorized = article.roleVisibility.includes('all' as any) || article.roleVisibility.includes(role as any) || role === 'admin';
+        const isAuthorized = article.roleVisibility.includes('all' as any) || 
+                           article.roleVisibility.includes(role as any) || 
+                           role === 'admin';
         
         if (!isAuthorized) {
+            console.warn(`Unauthorized view attempt for article: ${slug} by role: ${role}`);
             return { success: false, error: 'Unauthorized view attempt' };
         }
 
-        article.viewCount += 1;
-        await article.save();
+        // Only count views for published articles or if user is not admin
+        if (article.status === 'published' && role !== 'admin') {
+            article.viewCount += 1;
+            await article.save();
+        }
 
         return { success: true, article: JSON.parse(JSON.stringify(article)) };
     } catch (error: any) {

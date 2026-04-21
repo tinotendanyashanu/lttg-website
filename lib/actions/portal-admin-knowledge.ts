@@ -35,6 +35,9 @@ export async function createAdminKnowledgeArticle(data: any) {
       data.status = data.isPublished ? 'published' : 'draft';
     } else if (data.status) {
       data.isPublished = data.status === 'published';
+    } else {
+      data.status = 'published';
+      data.isPublished = true;
     }
 
     // Ensure category (string) is set for compatibility
