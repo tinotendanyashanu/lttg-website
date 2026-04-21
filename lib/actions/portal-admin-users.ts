@@ -10,6 +10,7 @@ import { Team } from '@/models/Team';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { z } from 'zod';
+import { headers } from 'next/headers';
 
 const UserUpdateSchema = z.object({
   roles: z.array(z.string()).optional(),
@@ -129,7 +130,13 @@ export async function createAdminUser(rawData: z.infer<typeof UserCreateSchema>)
 
   // In a real production system, you would send an email here via Resend/Postmark
   // For this environment, we return the link for the admin to share or for us to test.
-  const inviteLink = `${process.env.NEXT_PUBLIC_APP_URL || ''}/portal/onboarding/${token}`;
+  let baseUrl = process.env.NEXT_PUBLIC_APP_URL || '';
+  if (!baseUrl) {
+    const host = (await headers()).get('host');
+    const protocol = host?.includes('localhost') ? 'http' : 'https';
+    baseUrl = `${protocol}://${host}`;
+  }
+  const inviteLink = `${baseUrl}/portal/onboarding/${token}`;
 
   return { 
     success: true, 
@@ -171,7 +178,13 @@ export async function resetAdminUserPassword(userId: string) {
     newValue: `Password reset link generated for ${user.email}`,
   });
 
-  const resetLink = `${process.env.NEXT_PUBLIC_APP_URL || ''}/portal/onboarding/${token}`;
+  let baseUrl = process.env.NEXT_PUBLIC_APP_URL || '';
+  if (!baseUrl) {
+    const host = (await headers()).get('host');
+    const protocol = host?.includes('localhost') ? 'http' : 'https';
+    baseUrl = `${protocol}://${host}`;
+  }
+  const resetLink = `${baseUrl}/portal/onboarding/${token}`;
 
   return { success: true, resetLink };
 }

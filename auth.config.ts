@@ -51,7 +51,8 @@ export const authConfig = {
         // Allow unauthenticated access to password setup and reset routes
         if (
           nextUrl.pathname === '/portal/setup-password' ||
-          nextUrl.pathname === '/portal/reset-password'
+          nextUrl.pathname === '/portal/reset-password' ||
+          nextUrl.pathname.startsWith('/portal/onboarding/')
         ) {
           return true;
         }
