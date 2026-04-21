@@ -10,10 +10,18 @@ interface PersonalPerformanceProps {
   isIntern: boolean;
 }
 
+interface PerformanceCard {
+  label: string;
+  value: string | number;
+  icon: string;
+  iconClass: string;
+  bgClass: string;
+}
+
 export default function PersonalPerformance({ metrics, isIntern }: PersonalPerformanceProps) {
   if (!metrics) return null;
 
-  const cards = [
+  const cards: PerformanceCard[] = [
     {
       label: isIntern ? 'Total Leads' : 'Assigned Leads',
       value: metrics.totalLeads,
