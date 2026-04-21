@@ -7,6 +7,7 @@ import { KnowledgeArticle } from '@/models/KnowledgeArticle';
 import { KnowledgeCategory } from '@/models/KnowledgeCategory';
 import { ActivityLog } from '@/models/ActivityLog';
 import { revalidatePath } from 'next/cache';
+import mongoose from 'mongoose';
 
 async function validateAdmin() {
     const session = await getSessionWithDevBypass();
