@@ -80,7 +80,7 @@ export default function KnowledgeSidebar({ categories, activeCategoryId }: Knowl
   return (
     <div className="w-full flex flex-col gap-6">
       <div>
-        <h3 className="px-3 text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-3">Explore</h3>
+        <h2 className="px-3 text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400 mb-3">Explore</h2>
         <nav className="space-y-1">
           <Link 
             href="/portal/knowledge-base" 
@@ -105,22 +105,22 @@ export default function KnowledgeSidebar({ categories, activeCategoryId }: Knowl
 
       <div>
         <div className="flex items-center justify-between px-3 mb-3">
-          <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400">Categories</h3>
-          <button className="text-gray-400 hover:text-blue-500 transition-colors">
+          <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Categories</h2>
+          <button className="text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-500 transition-colors">
             <span className="material-icons-outlined text-sm">add</span>
           </button>
         </div>
         <nav className="space-y-1">
           {rootCategories.map(cat => renderCategory(cat))}
           {rootCategories.length === 0 && (
-            <p className="px-3 text-xs text-gray-400 italic">No categories found</p>
+            <p className="px-3 text-xs text-gray-500 dark:text-gray-400 italic">No categories found</p>
           )}
         </nav>
       </div>
 
       <div className="mt-auto pt-6 border-t border-gray-100 dark:border-gray-800">
          <div className="bg-gradient-to-br from-blue-600 to-indigo-700 p-4 rounded-2xl text-white shadow-lg shadow-blue-500/20">
-            <p className="text-xs font-bold opacity-80 mb-1 uppercase tracking-wider">Quick Tip</p>
+            <p className="text-xs font-bold text-blue-100 mb-1 uppercase tracking-wider">Quick Tip</p>
             <p className="text-[11px] leading-relaxed">
               Use <kbd className="bg-white/20 px-1 rounded font-sans font-bold">CMD + K</kbd> to search everything instantly.
             </p>

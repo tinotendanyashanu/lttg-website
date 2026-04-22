@@ -82,9 +82,9 @@ export default function KnowledgeBaseOverview({
         <div className="bg-white dark:bg-[#27272a] rounded-[2rem] border border-gray-100 dark:border-gray-800 shadow-sm p-4 flex items-center justify-between gap-4">
             <button 
                 onClick={() => setIsSearchOpen(true)}
-                className="flex-1 flex items-center gap-4 px-6 py-3 bg-gray-50 dark:bg-gray-800 rounded-2xl text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-all text-left group"
+                className="flex-1 flex items-center gap-4 px-6 py-3 bg-gray-50 dark:bg-gray-800 rounded-2xl text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-all text-left group"
             >
-                <span className="material-icons-outlined text-gray-400 group-hover:text-blue-500 transition-colors">search</span>
+                <span className="material-icons-outlined text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500 transition-colors">search</span>
                 <span className="text-sm font-medium flex-1">Quick find...</span>
                 <div className="hidden sm:flex items-center gap-1 opacity-50">
                     <kbd className="px-1.5 py-0.5 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded text-[10px] font-sans font-bold">⌘</kbd>
@@ -151,7 +151,7 @@ export default function KnowledgeBaseOverview({
                                             </span>
                                         </div>
                                         <div>
-                                            <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400">
+                                            <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 dark:text-gray-400">
                                                 {article.category}
                                             </span>
                                             <h2 className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors mt-0.5">
@@ -160,7 +160,7 @@ export default function KnowledgeBaseOverview({
                                         </div>
                                     </div>
                                     <div className="text-right">
-                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Last Updated</p>
+                                        <p className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Last Updated</p>
                                         <p className="text-xs font-semibold text-gray-900 dark:text-white">{new Date(article.updatedAt).toLocaleDateString()}</p>
                                     </div>
                                 </div>
@@ -183,12 +183,12 @@ export default function KnowledgeBaseOverview({
 
                                     <div className="flex items-center gap-4">
                                         {article.viewCount > 0 && (
-                                            <div className="flex items-center gap-1.5 text-gray-400">
+                                            <div className="flex items-center gap-1.5 text-gray-500 dark:text-gray-400">
                                                 <span className="material-icons-outlined text-sm">visibility</span>
                                                 <span className="text-xs font-bold">{article.viewCount}</span>
                                             </div>
                                         )}
-                                        <div className="flex items-center gap-1.5 text-blue-500 font-bold text-xs uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <div className="flex items-center gap-1.5 text-blue-600 dark:text-blue-500 font-bold text-xs uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
                                             Read More
                                             <span className="material-icons-outlined text-sm">arrow_forward</span>
                                         </div>

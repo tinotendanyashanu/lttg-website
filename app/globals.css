@@ -354,7 +354,9 @@
   color: #0f172a !important; /* slate-900 */
   font-weight: 800 !important;
 }
-.block-renderer p {
+.block-renderer p,
+.block-renderer li,
+.block-renderer .bn-block-content {
   color: #334155 !important; /* slate-700 */
 }
 
@@ -365,7 +367,9 @@
 .dark .block-renderer .bn-heading {
   color: #f8fafc !important; /* slate-50 */
 }
-.dark .block-renderer p {
+.dark .block-renderer p,
+.dark .block-renderer li,
+.dark .block-renderer .bn-block-content {
   color: #cbd5e1 !important; /* slate-300 */
 }
 
@@ -390,7 +394,9 @@
   color: #0f172a !important;
   font-weight: 800 !important;
 }
-.block-editor p {
+.block-editor p,
+.block-editor li,
+.block-editor .bn-block-content {
   color: #334155 !important;
 }
 
@@ -400,6 +406,8 @@
 .dark .block-editor .bn-heading {
   color: #f8fafc !important;
 }
-.dark .block-editor p {
+.dark .block-editor p,
+.dark .block-editor li,
+.dark .block-editor .bn-block-content {
   color: #cbd5e1 !important;
 }

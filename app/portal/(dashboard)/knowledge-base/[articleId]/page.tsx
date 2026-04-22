@@ -47,8 +47,8 @@ export default async function ArticleDetailedView({ params }: { params: Promise<
       
       {/* Top Breadcrumbs / Navigation */}
       <div className="max-w-[1400px] mx-auto px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-gray-400">
-            <Link href="/portal/knowledge-base" className="hover:text-blue-500 transition-colors">Knowledge Base</Link>
+        <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">
+            <Link href="/portal/knowledge-base" className="hover:text-blue-600 dark:hover:text-blue-500 transition-colors">Knowledge Base</Link>
             <span className="material-icons-outlined !text-[12px]">chevron_right</span>
             <span className="text-gray-900 dark:text-white">{article.categoryId?.name || article.category}</span>
         </div>
@@ -102,17 +102,17 @@ export default async function ArticleDetailedView({ params }: { params: Promise<
                             <span className="material-icons-outlined text-gray-500 text-sm">person</span>
                         </div>
                         <div>
-                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-1">Written by</p>
+                            <p className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest leading-none mb-1">Written by</p>
                             <p className="text-sm font-bold text-gray-900 dark:text-white">{article.createdBy.split('@')[0]}</p>
                         </div>
                     </div>
                     <div className="h-8 w-px bg-gray-100 dark:bg-neutral-900"></div>
                     <div>
-                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-1">Updated</p>
+                        <p className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest leading-none mb-1">Updated</p>
                         <p className="text-sm font-bold text-gray-900 dark:text-white">{new Date(article.updatedAt).toLocaleDateString()}</p>
                     </div>
                     <div className="h-8 w-px bg-gray-100 dark:bg-neutral-900"></div>
-                    <div className="flex items-center gap-1.5 text-gray-400">
+                    <div className="flex items-center gap-1.5 text-gray-500 dark:text-gray-400">
                         <span className="material-icons-outlined text-sm">visibility</span>
                         <span className="text-xs font-bold">{article.viewCount || 0}</span>
                     </div>
@@ -143,7 +143,7 @@ export default async function ArticleDetailedView({ params }: { params: Promise<
                                     </div>
                                     <div className="flex-1 truncate">
                                         <h4 className="font-bold text-sm text-gray-900 dark:text-white truncate group-hover:text-purple-600">{rel.title}</h4>
-                                        <p className="text-[10px] text-gray-400 mt-0.5 capitalize">{rel.type || 'Article'}</p>
+                                        <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5 capitalize">{rel.type || 'Article'}</p>
                                     </div>
                                 </div>
                             </Link>
@@ -173,9 +173,9 @@ export default async function ArticleDetailedView({ params }: { params: Promise<
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <h4 className="font-bold text-sm text-gray-900 dark:text-white truncate group-hover:text-blue-500">{file.name}</h4>
-                                    <p className="text-[10px] text-gray-400 mt-0.5">Google Drive Link</p>
+                                    <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Google Drive Link</p>
                                 </div>
-                                <span className="material-icons-outlined text-gray-300 group-hover:text-blue-500 transition-colors">open_in_new</span>
+                                <span className="material-icons-outlined text-gray-400 dark:text-gray-500 group-hover:text-blue-600 dark:group-hover:text-blue-500 transition-colors">open_in_new</span>
                             </a>
                         ))}
                     </div>
@@ -191,7 +191,7 @@ export default async function ArticleDetailedView({ params }: { params: Promise<
                 {/* Backlinks Widget */}
                 {article.backlinks && article.backlinks.length > 0 && (
                     <div className="space-y-4">
-                        <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400">Backlinks</h4>
+                        <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Backlinks</h4>
                         <div className="space-y-2">
                             {article.backlinks.map((link: any) => (
                                 <Link 
@@ -200,7 +200,7 @@ export default async function ArticleDetailedView({ params }: { params: Promise<
                                     className="block p-3 bg-white dark:bg-[#1c1c1e] border border-gray-100 dark:border-neutral-800 rounded-xl hover:border-blue-500 transition-all group"
                                 >
                                     <h5 className="text-[11px] font-bold text-gray-900 dark:text-white group-hover:text-blue-600 truncate">{link.title}</h5>
-                                    <p className="text-[9px] text-gray-400 mt-1 uppercase tracking-wider">{link.type || 'Reference'}</p>
+                                    <p className="text-[9px] text-gray-500 dark:text-gray-400 mt-1 uppercase tracking-wider">{link.type || 'Reference'}</p>
                                 </Link>
                             ))}
                         </div>
@@ -210,7 +210,7 @@ export default async function ArticleDetailedView({ params }: { params: Promise<
                 <FeedbackWidget articleId={article._id} userEmail={userEmail} />
 
                 <div className="px-6">
-                    <p className="text-[10px] text-gray-400 leading-relaxed">
+                    <p className="text-[10px] text-gray-500 dark:text-gray-400 leading-relaxed">
                         Last updated on {new Date(article.updatedAt).toLocaleDateString()} by {article.createdBy.split('@')[0]}. 
                         Version {article.version}.
                     </p>

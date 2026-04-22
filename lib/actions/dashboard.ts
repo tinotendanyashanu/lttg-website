@@ -131,7 +131,9 @@ export async function getAdminRecentActivity() {
   }
 }
 
-// --- Intern/Employee Queries ---
+import { calculatePerformanceMetrics } from '@/lib/services/performance';
+
+// --- Identity Snapshot ---
 export async function getPersonalPerformanceMetrics(accountId: string, roles: string[]) {
   try {
     await dbConnect();
@@ -151,18 +153,20 @@ export async function getPersonalPerformanceMetrics(accountId: string, roles: st
       // Employee metrics based on assignedTo
       totalLeads = await Lead.countDocuments({ assignedTo: accountId });
       closedLeads = await Lead.countDocuments({ assignedTo: accountId, status: 'converted' });
-      // Leaving out team conversion rate for MVP simplicity, just simple stats
     }
     
     if (totalLeads > 0) {
       conversionRate = Math.round((closedLeads / totalLeads) * 100);
     }
 
+    const performanceKPIs = await calculatePerformanceMetrics(accountId);
+
     return {
       totalLeads,
       closedLeads,
-      rejectedLeads, // Relevant for Intern mostly
+      rejectedLeads, 
       conversionRate,
+      ...performanceKPIs
     };
   } catch (error) {
     console.error('Error fetching personal performance metrics:', error);

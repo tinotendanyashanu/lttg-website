@@ -2,26 +2,41 @@ import dbConnect from '@/lib/mongodb';
 import Partner, { IPartner } from '@/models/Partner';
 import PartnersClient from '@/components/admin/PartnersClient';
 import AdminPageBanner from '@/components/admin/AdminPageBanner';
+import { Account } from '@/models/Account';
+import { calculatePerformanceMetrics } from '@/lib/services/performance';
 
 async function getPartners() {
   await dbConnect();
-  // Fetch all partners for client-side sorting/filtering for now (assuming < 1000)
-  // For larger datasets, we'd move this logic to the server with params.
   const raw = await Partner.find({ role: 'partner' }).sort({ createdAt: -1 }).lean();
-  // Serialize to strip all Mongoose-specific objects (ObjectIds, Buffers, etc.)
-  return JSON.parse(JSON.stringify(raw)) as IPartner[];
+  
+  // Enhance partners with performance data
+  const enhancedPartners = await Promise.all(raw.map(async (partner) => {
+    const account = await Account.findOne({ email: partner.email }).select('_id').lean();
+    let performance = null;
+    if (account) {
+      performance = await calculatePerformanceMetrics(account._id.toString());
+    }
+    return {
+      ...partner,
+      performance
+    };
+  }));
+
+  return JSON.parse(JSON.stringify(enhancedPartners));
 }
 
 export default async function AdminPartnersPage() {
   const partners = await getPartners();
   
   // Transform data for table to ensure serializable
-  const tableData = partners.map((partner: IPartner) => ({
+  const tableData = partners.map((partner: any) => ({
       ...partner,
       id: partner._id.toString(),
       _id: partner._id.toString(),
       createdAtString: new Date(partner.createdAt).toLocaleDateString(),
       revenueFormatted: new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(partner.stats.totalReferredRevenue),
+      performanceStatus: partner.performance?.status || 'N/A',
+      isTopPerformer: partner.performance?.isTopPerformer || false,
   }));
 
   return (

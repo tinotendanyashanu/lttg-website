@@ -15,8 +15,18 @@ export default function BlockRenderer({ content }: BlockRendererProps) {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
+    const checkCheckboxes = () => {
+      const checkboxes = document.querySelectorAll('.block-renderer input[type="checkbox"]');
+      checkboxes.forEach((cb) => {
+        if (!cb.hasAttribute('aria-label')) {
+          cb.setAttribute('aria-label', 'Task checkbox');
+        }
+      });
+    };
+
     // Initial check
     setIsDarkMode(document.documentElement.classList.contains('dark'));
+    checkCheckboxes();
 
     // Observe changes to the class list of the html element
     const observer = new MutationObserver((mutations) => {
@@ -25,11 +35,14 @@ export default function BlockRenderer({ content }: BlockRendererProps) {
           setIsDarkMode(document.documentElement.classList.contains('dark'));
         }
       });
+      checkCheckboxes();
     });
 
     observer.observe(document.documentElement, {
       attributes: true,
       attributeFilter: ['class'],
+      childList: true,
+      subtree: true,
     });
 
     return () => observer.disconnect();

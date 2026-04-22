@@ -14,6 +14,8 @@ interface PartnerRow {
   tier: string;
   revenueFormatted: string;
   createdAtString: string;
+  performanceStatus: string;
+  isTopPerformer: boolean;
 }
 
 function DeleteConfirm({ id, name }: { id: string; name: string }) {
@@ -98,6 +100,34 @@ export default function PartnersClient({ data }: { data: PartnerRow[] }) {
         <span className="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 px-2 py-1 rounded-lg text-xs border border-gray-200 dark:border-gray-700 capitalize font-medium">
           {item.tier}
         </span>
+      ),
+    },
+    {
+      header: 'Performance',
+      accessor: (item) => (
+        <div className="flex flex-col gap-1">
+          <span
+            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase border ${
+              item.performanceStatus === 'On Track'
+                ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400'
+                : item.performanceStatus === 'Watchlist'
+                ? 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400'
+                : item.performanceStatus === 'At Risk'
+                ? 'bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-900/20 dark:text-orange-400'
+                : item.performanceStatus === 'Contract Review'
+                ? 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400'
+                : 'bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400'
+            }`}
+          >
+            {item.performanceStatus}
+          </span>
+          {item.isTopPerformer && (
+            <span className="text-[9px] font-bold text-amber-600 dark:text-amber-400 flex items-center gap-0.5">
+              <span className="material-icons-outlined text-[10px]">military_tech</span>
+              TOP PERFORMER
+            </span>
+          )}
+        </div>
       ),
     },
     { header: 'Revenue', accessor: 'revenueFormatted' },
