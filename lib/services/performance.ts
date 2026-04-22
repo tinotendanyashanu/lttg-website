@@ -2,6 +2,7 @@ import dbConnect from '@/lib/mongodb';
 import Lead from '@/models/Lead';
 import { Task } from '@/models/Task';
 import { ActivityLog } from '@/models/ActivityLog';
+import { Case } from '@/models/Case';
 import { Types } from 'mongoose';
 
 export type PerformanceStatus = 'On Track' | 'Watchlist' | 'At Risk' | 'Contract Review';
@@ -31,23 +32,27 @@ export async function calculatePerformanceMetrics(accountId: string): Promise<Pe
       status: 'converted',
       updatedAt: { $gte: startOfMonth }
     }),
-    mongoose.models.Case ? mongoose.models.Case.countDocuments({
+    Case.countDocuments({
       ownerId: accountObjectId,
       status: 'closed',
       closedAt: { $gte: startOfMonth }
-    }) : 0
+    })
   ]);
 
   const monthlyClosedDeals = convertedLeads + (closedCases || 0);
 
   // 2. Qualified Opportunities (Target: 5/month)
   const monthlyQualifiedLeads = await Lead.countDocuments({
-    $or: [{ assignedTo: accountObjectId }, { accountId: accountObjectId }],
-    status: { $in: ['qualified', 'converted'] },
-    // If a lead was created this month OR moved to qualified status this month
-    $or: [
-      { createdAt: { $gte: startOfMonth } },
-      { status: { $in: ['qualified', 'converted'] }, updatedAt: { $gte: startOfMonth } }
+    $and: [
+      { $or: [{ assignedTo: accountObjectId }, { accountId: accountObjectId }] },
+      { status: { $in: ['qualified', 'converted'] } },
+      {
+        // If a lead was created this month OR moved to qualified status this month
+        $or: [
+          { createdAt: { $gte: startOfMonth } },
+          { status: { $in: ['qualified', 'converted'] }, updatedAt: { $gte: startOfMonth } }
+        ]
+      }
     ]
   });
 
