@@ -426,24 +426,24 @@ export default function UserManagerClient({ initialUsers, initialTeams = [] }: {
                            <div className="space-y-1">
                               <p className="text-[10px] text-gray-500 uppercase">Deals</p>
                               <p className="text-sm font-bold text-gray-900 dark:text-white">
-                                 {selectedUser.performance.monthlyClosedDeals} / 2
-                                 {selectedUser.performance.monthlyClosedDeals >= 2 && <span className="material-icons text-emerald-500 text-[14px] ml-1">check_circle</span>}
+                                 {selectedUser.performance.monthlyClosedDeals ?? 0} / 2
+                                 {(selectedUser.performance.monthlyClosedDeals ?? 0) >= 2 && <span className="material-icons text-emerald-500 text-[14px] ml-1">check_circle</span>}
                               </p>
                            </div>
                            <div className="space-y-1">
                               <p className="text-[10px] text-gray-500 uppercase">Leads</p>
                               <p className="text-sm font-bold text-gray-900 dark:text-white">
-                                 {selectedUser.performance.monthlyQualifiedLeads} / 5
-                                 {selectedUser.performance.monthlyQualifiedLeads >= 5 && <span className="material-icons text-emerald-500 text-[14px] ml-1">check_circle</span>}
+                                 {selectedUser.performance.monthlyQualifiedLeads ?? 0} / 5
+                                 {(selectedUser.performance.monthlyQualifiedLeads ?? 0) >= 5 && <span className="material-icons text-emerald-500 text-[14px] ml-1">check_circle</span>}
                               </p>
                            </div>
                            <div className="space-y-1">
                               <p className="text-[10px] text-gray-500 uppercase">Follow-up</p>
-                              <p className="text-sm font-bold text-gray-900 dark:text-white">{selectedUser.performance.followUpRate}%</p>
+                              <p className="text-sm font-bold text-gray-900 dark:text-white">{selectedUser.performance.followUpRate ?? 0}%</p>
                            </div>
                            <div className="space-y-1">
                               <p className="text-[10px] text-gray-500 uppercase">Compliance</p>
-                              <p className="text-sm font-bold text-gray-900 dark:text-white">{selectedUser.performance.crmUpdateCompliance}%</p>
+                              <p className="text-sm font-bold text-gray-900 dark:text-white">{selectedUser.performance.crmUpdateCompliance ?? 0}%</p>
                            </div>
                         </div>
                      </div>
