@@ -173,7 +173,19 @@ export default function UserManagerClient({ initialUsers, initialTeams = [] }: {
                                <div className={`absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border-2 border-white dark:border-[#27272a] ${u.isActive ? 'bg-green-500' : 'bg-red-500'}`} />
                             </div>
                             <div>
-                              <h3 className="font-semibold text-lg text-gray-900 dark:text-white">{u.fullName || 'Unnamed User'}</h3>
+                              <div className="flex items-center gap-2">
+                                <h3 className="font-semibold text-lg text-gray-900 dark:text-white">{u.fullName || 'Unnamed User'}</h3>
+                                {u.performance && (
+                                  <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase border ${
+                                    u.performance.status === 'On Track' ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400' :
+                                    u.performance.status === 'Watchlist' ? 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400' :
+                                    u.performance.status === 'At Risk' ? 'bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-900/20 dark:text-orange-400' :
+                                    'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400'
+                                  }`}>
+                                    {u.performance.status}
+                                  </span>
+                                )}
+                              </div>
                               <p className="text-sm text-gray-500 dark:text-gray-400">{u.email}</p>
                             </div>
                          </div>
@@ -246,6 +258,44 @@ export default function UserManagerClient({ initialUsers, initialTeams = [] }: {
                 <div className="bg-white dark:bg-[#27272a] p-6 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm sticky top-8">
                    <h3 className="font-bold text-gray-900 dark:text-white text-xl mb-6 border-b border-gray-100 dark:border-gray-800 pb-4">User Settings</h3>
                    
+                   {selectedUser.performance && (
+                     <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-800">
+                        <div className="flex justify-between items-center mb-4">
+                           <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-bold">Monthly Performance</p>
+                           {selectedUser.performance.isTopPerformer && (
+                             <span className="text-[10px] font-bold text-amber-600 flex items-center gap-0.5">
+                               <span className="material-icons-outlined text-[12px]">military_tech</span>
+                               TOP
+                             </span>
+                           )}
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                           <div className="space-y-1">
+                              <p className="text-[10px] text-gray-500 uppercase">Deals</p>
+                              <p className="text-sm font-bold text-gray-900 dark:text-white">
+                                 {selectedUser.performance.monthlyClosedDeals} / 2
+                                 {selectedUser.performance.monthlyClosedDeals >= 2 && <span className="material-icons text-emerald-500 text-[14px] ml-1">check_circle</span>}
+                              </p>
+                           </div>
+                           <div className="space-y-1">
+                              <p className="text-[10px] text-gray-500 uppercase">Leads</p>
+                              <p className="text-sm font-bold text-gray-900 dark:text-white">
+                                 {selectedUser.performance.monthlyQualifiedLeads} / 5
+                                 {selectedUser.performance.monthlyQualifiedLeads >= 5 && <span className="material-icons text-emerald-500 text-[14px] ml-1">check_circle</span>}
+                              </p>
+                           </div>
+                           <div className="space-y-1">
+                              <p className="text-[10px] text-gray-500 uppercase">Follow-up</p>
+                              <p className="text-sm font-bold text-gray-900 dark:text-white">{selectedUser.performance.followUpRate}%</p>
+                           </div>
+                           <div className="space-y-1">
+                              <p className="text-[10px] text-gray-500 uppercase">Compliance</p>
+                              <p className="text-sm font-bold text-gray-900 dark:text-white">{selectedUser.performance.crmUpdateCompliance}%</p>
+                           </div>
+                        </div>
+                     </div>
+                   )}
+
                    <div className="space-y-4">
                       <form onSubmit={handleUpdateUser} className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">

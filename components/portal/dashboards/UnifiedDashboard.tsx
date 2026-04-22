@@ -3,7 +3,6 @@ import Link from 'next/link';
 import { 
   getIdentitySnapshot,
   getPersonalPerformanceMetrics,
-  getPersonalActiveCases,
   getPersonalRecentActivity,
   getInternEmployeeCommissionSnapshot,
   getKnowledgeShortcuts,
@@ -15,6 +14,7 @@ import PriorityQueue from './widgets/PriorityQueue';
 import RecentActivityFeed from './widgets/RecentActivityFeed';
 import InternCommissionSnapshot from './widgets/InternCommissionSnapshot';
 import KnowledgeShortcuts from './widgets/KnowledgeShortcuts';
+import PerformanceTargets from './widgets/PerformanceTargets';
 
 interface UnifiedDashboardProps {
   title: string;
@@ -76,24 +76,29 @@ export default async function UnifiedDashboard({ title, accountId, email, roles 
         </div>
       </div>
 
-      {/* 2. Priority Queue & Recent Activity */}
+      {/* 2. Targets & Priority Queue */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+        <div className="lg:col-span-2">
+          <PerformanceTargets metrics={performanceData} />
+        </div>
         <div className="lg:col-span-3">
           <PriorityQueue tasks={priorityTasks} />
         </div>
-        <div className="lg:col-span-2">
-          <RecentActivityFeed activities={recentActivityData} />
-        </div>
       </div>
 
-      {/* 3. Commission & Knowledge */}
+      {/* 3. Commission & Recent Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
         <div className="lg:col-span-2">
           <InternCommissionSnapshot metrics={commissionData} title={isIntern ? "Intern Commission" : "Employee Commission"} />
         </div>
         <div className="lg:col-span-3">
-          <KnowledgeShortcuts articles={knowledgeData} />
+          <RecentActivityFeed activities={recentActivityData} />
         </div>
+      </div>
+
+      {/* 4. Knowledge */}
+      <div className="grid grid-cols-1">
+        <KnowledgeShortcuts articles={knowledgeData} />
       </div>
     </div>
   );

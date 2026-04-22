@@ -161,38 +161,31 @@ export async function getArticleBySlug(slug: string, role: string) {
     try {
         await dbConnect();
         
-        // Escape slug for regex to avoid issues with special characters
-        const escapedSlug = slug.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
-        const article = await KnowledgeArticle.findOne({ 
-            slug: { $regex: new RegExp(`^${escapedSlug}$`, 'i') } 
-        })
+        // Try exact match first
+        let article = await KnowledgeArticle.findOne({ slug })
             .populate('categoryId')
             .populate('relatedArticles', 'title slug categoryId type')
             .populate('backlinks', 'title slug categoryId type');
 
+        // If not found, try normalized slug (case-insensitive and clean)
         if (!article) {
-            console.log(`Article not found in DB for slug: ${slug}`);
-            return { success: false, error: 'Article not found' };
+            const normalizedSlug = slug.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+            article = await KnowledgeArticle.findOne({ slug: normalizedSlug })
+                .populate('categoryId')
+                .populate('relatedArticles', 'title slug categoryId type')
+                .populate('backlinks', 'title slug categoryId type');
         }
 
-        // Normalize roles
-        const currentRole = role || 'employee';
+        if (!article) return { success: false, error: 'Article not found' };
 
-        const isAuthorized = 
-            currentRole === 'admin' || 
-            article.roleVisibility.includes('all' as any) || 
-            (article.roleVisibility as string[]).some(rv => rv.toLowerCase() === currentRole.toLowerCase());
+        const isAuthorized = article.roleVisibility.includes('all' as any) || article.roleVisibility.includes(role as any) || role === 'admin';
         
         if (!isAuthorized) {
-            console.warn(`Unauthorized view attempt for article: ${slug} by role: ${currentRole}. Article visibility: ${article.roleVisibility}`);
             return { success: false, error: 'Unauthorized view attempt' };
         }
 
-        // Only count views for published articles or if user is not admin
-        if (article.status === 'published' && currentRole !== 'admin') {
-            article.viewCount += 1;
-            await article.save();
-        }
+        article.viewCount += 1;
+        await article.save();
 
         return { success: true, article: JSON.parse(JSON.stringify(article)) };
     } catch (error: any) {

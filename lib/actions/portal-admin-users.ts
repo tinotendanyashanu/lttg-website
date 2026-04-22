@@ -9,6 +9,7 @@ import { InvitationToken } from '@/models/InvitationToken';
 import { Team } from '@/models/Team';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
+import { calculatePerformanceMetrics } from '@/lib/services/performance';
 import { z } from 'zod';
 import { headers } from 'next/headers';
 
@@ -46,7 +47,27 @@ export async function getAdminUsers() {
 
   const users = await Account.find({ roles: { $nin: ['client'] } }).sort({ createdAt: -1 }).lean();
 
-  return { success: true, users: JSON.parse(JSON.stringify(users)) };
+  // Enhance users with performance data
+  const enhancedUsers = await Promise.all(users.map(async (user: any) => {
+    // Only calculate performance for roles that are expected to have targets (employee, intern)
+    const hasTargets = user.roles.some((r: string) => ['employee', 'intern'].includes(r));
+    let performance = null;
+    
+    if (hasTargets) {
+      try {
+        performance = await calculatePerformanceMetrics(user._id.toString());
+      } catch (err) {
+        console.error(`Error calculating performance for user ${user._id}:`, err);
+      }
+    }
+
+    return {
+      ...user,
+      performance
+    };
+  }));
+
+  return { success: true, users: JSON.parse(JSON.stringify(enhancedUsers)) };
 }
 
 export async function updateAdminUser(userId: string, rawData: z.infer<typeof UserUpdateSchema>) {
