@@ -208,7 +208,7 @@ export async function closeAdminCase(caseId: string) {
   // Calculate and create commissions for all participants.
   const dealValue = existingCase.dealValue || 0;
   if (dealValue > 0 && existingCase.participants?.length > 0) {
-    const COMMISSION_RATES: Record<string, number> = {
+    const DEFAULT_RATES: Record<string, number> = {
       intern: 0.10,   // 10%
       employee: 0.20, // 20%
     };
@@ -224,7 +224,11 @@ export async function closeAdminCase(caseId: string) {
       // Admins do not earn commission this way
       if (!commissionRole) continue;
 
-      const rate = COMMISSION_RATES[commissionRole];
+      // Use account-specific rate if available (stored as 0-100), otherwise fallback to role default
+      // We need to fetch the full account because participants might be partial
+      const accountForRate = await Account.findById(participant._id);
+      let rate = accountForRate?.commissionRate ? accountForRate.commissionRate / 100 : DEFAULT_RATES[commissionRole];
+      
       const commissionAmount = parseFloat((dealValue * rate).toFixed(2));
 
       // Create individual Commission record

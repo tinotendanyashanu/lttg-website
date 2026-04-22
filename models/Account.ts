@@ -17,6 +17,7 @@ export interface IAccount extends Document {
   lastLoginAt?: Date;
   createdAt: Date;
   trustedIps: string[];
+  commissionRate?: number;
   commissionStats: {
     pendingCommission: number;
     approvedBalance: number;
@@ -51,6 +52,7 @@ const AccountSchema: Schema = new Schema({
   bio: { type: String },
   lastLoginAt: { type: Date },
   createdAt: { type: Date, default: Date.now },
+  commissionRate: { type: Number, default: 0 },
   commissionStats: {
     pendingCommission: { type: Number, default: 0 },
     approvedBalance: { type: Number, default: 0 },

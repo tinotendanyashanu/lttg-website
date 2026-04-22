@@ -5,6 +5,7 @@ import dbConnect from '@/lib/mongodb';
 import Lead from '@/models/Lead';
 import Commission from '@/models/Commission';
 import InternProfile from '@/models/InternProfile';
+import { Account } from '@/models/Account';
 import { ActivityLog } from '@/models/ActivityLog';
 import { getAccountByEmail } from '@/lib/data/account';
 import { revalidatePath } from 'next/cache';
@@ -48,19 +49,36 @@ export async function updateAdminLeadStatus(leadId: string, newStatus: AllowedAd
     if (newStatus === 'closed' && lead.status !== 'closed') {
       const existingCommission = await Commission.findOne({ leadId: lead._id });
       if (!existingCommission) {
-        // Find InternProfile to get commission rate
-        const internProfile = await InternProfile.findOne({ accountId: lead.accountId });
+        // Find Account first for the new commissionRate field
+        const targetAccount = await Account.findById(lead.accountId);
+        let commissionRate = targetAccount?.commissionRate;
+
+        // Fallback to InternProfile if Account commissionRate is not set (is 0 or undefined)
+        if (!commissionRate) {
+          const internProfile = await InternProfile.findOne({ accountId: lead.accountId });
+          if (internProfile) {
+            // InternProfile stores as 0.10, Account stores as 10. Normalize to 10.
+            commissionRate = internProfile.commissionRate * 100;
+          }
+        }
+
+        // Final fallback to role-based defaults if still 0/undefined
+        if (!commissionRate && targetAccount) {
+          if (targetAccount.roles.includes('employee')) commissionRate = 20;
+          else if (targetAccount.roles.includes('intern')) commissionRate = 10;
+        }
         
-        // Only create commission if InternProfile exists
-        if (internProfile) {
+        // Only create commission if we found a rate
+        if (commissionRate !== undefined && commissionRate > 0) {
           const dealValue = lead.dealValue || 0;
-          const commissionAmount = dealValue * internProfile.commissionRate;
+          const commissionAmount = dealValue * (commissionRate / 100); // UI uses 0-100, but logic might expect 0-1
           
           await Commission.create({
             accountId: lead.accountId,
             leadId: lead._id,
             amount: commissionAmount,
-            status: 'pending'
+            status: 'pending',
+            commissionRate: commissionRate // Store the rate used
           });
         }
       }
