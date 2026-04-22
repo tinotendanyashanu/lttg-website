@@ -60,11 +60,8 @@ export default function BlockEditor({
   });
 
   // Effect to update content if initialContent changes after mounting
-  // but only if it's a significant change (e.g. switching articles)
   useEffect(() => {
     if (editor && initialBlocks && initialBlocks.length > 0) {
-        // If we want to force update when switching articles, we rely on the parent's key.
-        // But as a fallback, we can check if the editor is empty and blocks are not.
         const firstBlock = editor.document[0];
         const isEmpty = editor.document.length <= 1 && 
                        (!firstBlock || (Array.isArray(firstBlock.content) && firstBlock.content.length === 0));
@@ -76,7 +73,7 @@ export default function BlockEditor({
   }, [editor, initialBlocks]);
 
   return (
-    <div className="block-editor min-h-[400px] border border-gray-200 dark:border-neutral-800 rounded-2xl overflow-hidden bg-white dark:bg-[#1c1c1e]">
+    <div className="block-editor min-h-[400px] border border-gray-200 dark:border-neutral-800 rounded-2xl overflow-hidden bg-white dark:bg-[#1c1c1e] text-slate-900 dark:text-slate-200">
       <BlockNoteView 
         editor={editor} 
         editable={editable}

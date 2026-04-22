@@ -68,7 +68,7 @@ export default function BlockRenderer({ content }: BlockRendererProps) {
   });
 
   return (
-    <div className="block-renderer w-full">
+    <div className="block-renderer w-full text-slate-900 dark:text-slate-200">
       <BlockNoteView 
         editor={editor} 
         editable={false}

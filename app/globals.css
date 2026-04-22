@@ -338,76 +338,37 @@
 }
 
 /* BlockRenderer Content Visibility Overrides */
-.block-renderer .bn-container {
+.block-renderer .bn-container,
+.block-editor .bn-container {
   background: transparent !important;
 }
-.block-renderer .bn-editor {
+.block-renderer .bn-editor,
+.block-editor .bn-editor {
   padding: 0 !important;
   background: transparent !important;
 }
 
-/* Base Light Mode Styles */
-.block-renderer h1, 
-.block-renderer h2, 
-.block-renderer h3,
-.block-renderer .bn-heading {
-  color: #0f172a !important; /* slate-900 */
-  font-weight: 800 !important;
-}
-.block-renderer p,
-.block-renderer li,
-.block-renderer .bn-block-content {
-  color: #334155 !important; /* slate-700 */
-}
-
-/* Dark Mode Styles (Manual toggle via .dark class) */
-.dark .block-renderer h1, 
-.dark .block-renderer h2, 
-.dark .block-renderer h3, 
-.dark .block-renderer .bn-heading {
-  color: #f8fafc !important; /* slate-50 */
-}
-.dark .block-renderer p,
-.dark .block-renderer li,
-.dark .block-renderer .bn-block-content {
-  color: #cbd5e1 !important; /* slate-300 */
-}
-
-/* Dark Mode Styles (System preference fallback) */
-@media (prefers-color-scheme: dark) {
-  :root:not(.light) .block-renderer h1, 
-  :root:not(.light) .block-renderer h2, 
-  :root:not(.light) .block-renderer h3, 
-  :root:not(.light) .block-renderer .bn-heading {
-    color: #f8fafc !important;
-  }
-  :root:not(.light) .block-renderer p {
-    color: #cbd5e1 !important;
-  }
-}
-
-/* BlockEditor Content Visibility Overrides */
-.block-editor h1, 
-.block-editor h2, 
-.block-editor h3,
-.block-editor .bn-heading {
-  color: #0f172a !important;
-  font-weight: 800 !important;
-}
-.block-editor p,
-.block-editor li,
+/* Ensure text is visible and inherits correctly */
+.block-renderer .bn-block-content,
 .block-editor .bn-block-content {
-  color: #334155 !important;
+  color: inherit !important;
 }
 
-.dark .block-editor h1, 
-.dark .block-editor h2, 
-.dark .block-editor h3, 
-.dark .block-editor .bn-heading {
-  color: #f8fafc !important;
+.block-renderer h1, .block-renderer h2, .block-renderer h3,
+.block-editor h1, .block-editor h2, .block-editor h3 {
+  color: inherit !important;
+  font-weight: 800 !important;
 }
-.dark .block-editor p,
-.dark .block-editor li,
-.dark .block-editor .bn-block-content {
-  color: #cbd5e1 !important;
+
+/* Explicit colors if inheritance fails */
+.block-renderer, .block-editor {
+  color: #1e293b; /* slate-800 */
 }
+
+.dark .block-renderer, .dark .block-editor {
+  color: #f1f5f9; /* slate-100 */
+}
+
+/* Base Light Mode Styles (Deprecated/Fallback) */
+/* (We now rely on the color: inherit above + container classes) */
+
