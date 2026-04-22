@@ -1,4 +1,4 @@
-import { getAdminUsers } from '@/lib/actions/portal-admin-users';
+import { getAdminTeams, getAdminUsers } from '@/lib/actions/portal-admin-users';
 import UserManagerClient from './UserManagerClient';
 import { redirect } from 'next/navigation';
 
@@ -8,10 +8,12 @@ export const metadata = {
 
 export default async function AdminUsersPage() {
   let initialUsers = [];
+  let initialTeams = [];
 
   try {
-    const response = await getAdminUsers();
-    initialUsers = response.users;
+    const [usersResponse, teamsResponse] = await Promise.all([getAdminUsers(), getAdminTeams()]);
+    initialUsers = usersResponse.users;
+    initialTeams = teamsResponse.teams;
   } catch (error) {
     redirect('/portal');
   }
@@ -34,7 +36,7 @@ export default async function AdminUsersPage() {
         </div>
       </div>
 
-      <UserManagerClient initialUsers={initialUsers} />
+      <UserManagerClient initialUsers={initialUsers} initialTeams={initialTeams} />
     </div>
   );
 }

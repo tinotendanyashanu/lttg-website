@@ -20,6 +20,8 @@ const UserUpdateSchema = z.object({
   isActive: z.boolean().optional(),
   jobTitle: z.string().optional(),
   department: z.string().optional(),
+  phoneNumber: z.string().optional(),
+  location: z.string().optional(),
 });
 
 const UserCreateSchema = z.object({

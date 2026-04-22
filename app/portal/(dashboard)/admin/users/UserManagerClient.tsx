@@ -4,36 +4,116 @@ import React, { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { updateAdminUser, createAdminUser, resetAdminUserPassword } from '@/lib/actions/portal-admin-users';
 
-export default function UserManagerClient({ initialUsers, initialTeams = [] }: { initialUsers: any[], initialTeams?: any[] }) {
+type UserPerformance = {
+  status: string;
+  isTopPerformer?: boolean;
+  monthlyClosedDeals?: number;
+  monthlyQualifiedLeads?: number;
+  followUpRate?: number;
+  crmUpdateCompliance?: number;
+};
+
+type PortalUser = {
+  _id: string;
+  fullName?: string;
+  email: string;
+  roles: string[];
+  isActive: boolean;
+  commissionRate?: number;
+  teamId?: string | null;
+  jobTitle?: string;
+  department?: string;
+  phoneNumber?: string;
+  location?: string;
+  passwordSetupRequired?: boolean;
+  lastLoginAt?: string;
+  createdAt?: string;
+  performance?: UserPerformance | null;
+};
+
+type Team = {
+  _id: string;
+  name: string;
+};
+
+export default function UserManagerClient({ initialUsers, initialTeams = [] }: { initialUsers: PortalUser[], initialTeams?: Team[] }) {
   const router = useRouter();
   const [users, setUsers] = useState(initialUsers);
   const [teams] = useState(initialTeams);
   
   // Filters
   const [filterRole, setFilterRole] = useState('all');
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [filterDepartment, setFilterDepartment] = useState('all');
+  const [onboardingFilter, setOnboardingFilter] = useState('all');
+  const [sortBy, setSortBy] = useState('recentlyCreated');
   const [searchQuery, setSearchQuery] = useState('');
   
-  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [selectedUser, setSelectedUser] = useState<PortalUser | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isCreatingUser, setIsCreatingUser] = useState(false);
   const [inviteLink, setInviteLink] = useState<string | null>(null);
 
   const AVAILABLE_ROLES = ['admin', 'employee', 'intern', 'partner', 'client'];
+  const departments = useMemo(
+    () =>
+      Array.from(new Set(users.map((user) => (user.department || '').trim()).filter(Boolean))).sort((a, b) =>
+        a.localeCompare(b)
+      ),
+    [users]
+  );
+
+  const hrUsers = useMemo(
+    () => users.filter((u) => u.roles.some((r) => ['employee', 'intern', 'admin'].includes(r))),
+    [users]
+  );
+
+  const workforceStats = useMemo(() => {
+    const active = hrUsers.filter((u) => u.isActive).length;
+    const onboardingPending = hrUsers.filter((u) => u.passwordSetupRequired).length;
+    const watchlist = hrUsers.filter((u) => {
+      const status = u.performance?.status || '';
+      return status === 'Watchlist' || status === 'At Risk' || status === 'Critical';
+    }).length;
+
+    return {
+      total: hrUsers.length,
+      active,
+      inactive: hrUsers.length - active,
+      onboardingPending,
+      watchlist,
+    };
+  }, [hrUsers]);
 
   const filteredUsers = useMemo(() => {
-    return users.filter(u => {
+    const result = users.filter(u => {
       if (filterRole !== 'all' && !u.roles.includes(filterRole)) return false;
+      if (filterStatus !== 'all') {
+        const shouldBeActive = filterStatus === 'active';
+        if (u.isActive !== shouldBeActive) return false;
+      }
+      if (filterDepartment !== 'all' && (u.department || 'Unassigned') !== filterDepartment) return false;
+      if (onboardingFilter === 'pending' && !u.passwordSetupRequired) return false;
+      if (onboardingFilter === 'completed' && u.passwordSetupRequired) return false;
       
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
         return (
           (u.fullName || '').toLowerCase().includes(query) ||
-          (u.email || '').toLowerCase().includes(query)
+          (u.email || '').toLowerCase().includes(query) ||
+          (u.jobTitle || '').toLowerCase().includes(query) ||
+          (u.department || '').toLowerCase().includes(query)
         );
       }
       return true;
     });
-  }, [users, filterRole, searchQuery]);
+
+    return result.sort((a, b) => {
+      if (sortBy === 'name') return (a.fullName || '').localeCompare(b.fullName || '');
+      if (sortBy === 'lastLogin') return new Date(b.lastLoginAt || 0).getTime() - new Date(a.lastLoginAt || 0).getTime();
+      return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+    });
+  }, [users, filterRole, filterStatus, filterDepartment, onboardingFilter, searchQuery, sortBy]);
 
   const handleCreateUser = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -100,12 +180,14 @@ export default function UserManagerClient({ initialUsers, initialTeams = [] }: {
        isActive: formData.get('isActive') === 'true',
        jobTitle: formData.get('jobTitle') as string,
        department: formData.get('department') as string,
+       phoneNumber: formData.get('phoneNumber') as string,
+       location: formData.get('location') as string,
      };
      
      try {
        await updateAdminUser(selectedUser._id, data);
-       setUsers(users.map(u => u._id === selectedUser._id ? { ...u, ...data } : u));
-       setSelectedUser({ ...selectedUser, ...data });
+      setUsers(users.map(u => u._id === selectedUser._id ? { ...u, ...data } : u));
+      setSelectedUser({ ...selectedUser, ...data });
        router.refresh();
      } catch (err) {
        console.error("Failed to update user", err);
@@ -117,13 +199,36 @@ export default function UserManagerClient({ initialUsers, initialTeams = [] }: {
 
   return (
     <div className="space-y-6">
+       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-3">
+         <div className="bg-white dark:bg-[#27272a] rounded-2xl border border-gray-100 dark:border-gray-800 p-4">
+           <p className="text-xs uppercase tracking-wide text-gray-500">Total Workforce</p>
+           <p className="text-2xl font-bold text-gray-900 dark:text-white">{workforceStats.total}</p>
+         </div>
+         <div className="bg-white dark:bg-[#27272a] rounded-2xl border border-gray-100 dark:border-gray-800 p-4">
+           <p className="text-xs uppercase tracking-wide text-gray-500">Active</p>
+           <p className="text-2xl font-bold text-emerald-600">{workforceStats.active}</p>
+         </div>
+         <div className="bg-white dark:bg-[#27272a] rounded-2xl border border-gray-100 dark:border-gray-800 p-4">
+           <p className="text-xs uppercase tracking-wide text-gray-500">Inactive</p>
+           <p className="text-2xl font-bold text-rose-600">{workforceStats.inactive}</p>
+         </div>
+         <div className="bg-white dark:bg-[#27272a] rounded-2xl border border-gray-100 dark:border-gray-800 p-4">
+           <p className="text-xs uppercase tracking-wide text-gray-500">Onboarding Pending</p>
+           <p className="text-2xl font-bold text-amber-600">{workforceStats.onboardingPending}</p>
+         </div>
+         <div className="bg-white dark:bg-[#27272a] rounded-2xl border border-gray-100 dark:border-gray-800 p-4">
+           <p className="text-xs uppercase tracking-wide text-gray-500">Performance Watchlist</p>
+           <p className="text-2xl font-bold text-orange-600">{workforceStats.watchlist}</p>
+         </div>
+       </div>
+
        {/* Filters */}
-       <div className="bg-white dark:bg-[#27272a] p-4 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm flex flex-wrap gap-4 items-center">
+       <div className="bg-white dark:bg-[#27272a] p-4 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm flex flex-wrap gap-3 items-center">
          <div className="relative flex-1 max-w-md">
             <span className="material-icons-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
             <input 
               type="text"
-              placeholder="Search users..."
+              placeholder="Search by name, email, title, department..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-2 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
@@ -139,6 +244,45 @@ export default function UserManagerClient({ initialUsers, initialTeams = [] }: {
              <option value="employee">Employee</option>
              <option value="intern">Intern</option>
              <option value="partner">Partner</option>
+          </select>
+          <select
+            value={filterStatus}
+            onChange={e => setFilterStatus(e.target.value)}
+            className="px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
+          >
+            <option value="all">All Statuses</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+          <select
+            value={filterDepartment}
+            onChange={e => setFilterDepartment(e.target.value)}
+            className="px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
+          >
+            <option value="all">All Departments</option>
+            {departments.map((department) => (
+              <option key={department} value={department}>
+                {department}
+              </option>
+            ))}
+          </select>
+          <select
+            value={onboardingFilter}
+            onChange={e => setOnboardingFilter(e.target.value)}
+            className="px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
+          >
+            <option value="all">All Onboarding</option>
+            <option value="pending">Pending Setup</option>
+            <option value="completed">Setup Completed</option>
+          </select>
+          <select
+            value={sortBy}
+            onChange={e => setSortBy(e.target.value)}
+            className="px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
+          >
+            <option value="recentlyCreated">Newest First</option>
+            <option value="lastLogin">Last Login</option>
+            <option value="name">Name (A-Z)</option>
           </select>
           <button 
             onClick={() => { setIsCreatingUser(true); setSelectedUser(null); }}
@@ -187,6 +331,9 @@ export default function UserManagerClient({ initialUsers, initialTeams = [] }: {
                                 )}
                               </div>
                               <p className="text-sm text-gray-500 dark:text-gray-400">{u.email}</p>
+                              <p className="text-xs text-gray-400 dark:text-gray-500">
+                                {[u.jobTitle, u.department].filter(Boolean).join(' • ') || 'No title or department'}
+                              </p>
                             </div>
                          </div>
                       </div>
@@ -208,6 +355,12 @@ export default function UserManagerClient({ initialUsers, initialTeams = [] }: {
                             </div>
                          )}
                       </div>
+                      {u.passwordSetupRequired && (
+                        <div className="mt-3 inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
+                          <span className="material-icons-outlined text-[12px]">pending</span>
+                          Onboarding Pending
+                        </div>
+                      )}
                    </div>
                 ))
              )}
@@ -308,6 +461,16 @@ export default function UserManagerClient({ initialUsers, initialTeams = [] }: {
                             <input name="department" defaultValue={selectedUser.department || ''} className="w-full px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm focus:outline-none" />
                           </div>
                         </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold mb-1">Phone Number</p>
+                            <input name="phoneNumber" defaultValue={selectedUser.phoneNumber || ''} className="w-full px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm focus:outline-none" />
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold mb-1">Location</p>
+                            <input name="location" defaultValue={selectedUser.location || ''} className="w-full px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm focus:outline-none" />
+                          </div>
+                        </div>
 
                         <div>
                           <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold mb-2">Team Assignment</p>
@@ -317,7 +480,7 @@ export default function UserManagerClient({ initialUsers, initialTeams = [] }: {
                             className="w-full px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm focus:outline-none"
                           >
                             <option value="">No Team Assigned</option>
-                            {teams.map((team: any) => (
+                            {teams.map((team) => (
                               <option key={team._id} value={team._id}>{team.name}</option>
                             ))}
                           </select>
