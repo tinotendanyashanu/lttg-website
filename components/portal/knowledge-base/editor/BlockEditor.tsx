@@ -18,6 +18,29 @@ export default function BlockEditor({
   onChange, 
   editable = true 
 }: BlockEditorProps) {
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    // Initial check
+    setIsDarkMode(document.documentElement.classList.contains('dark'));
+
+    // Observe changes to the class list of the html element
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'class') {
+          setIsDarkMode(document.documentElement.classList.contains('dark'));
+        }
+      });
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
   const initialBlocks = useMemo(() => {
     if (!initialContent || initialContent === '[]') return undefined;
     try {
@@ -53,11 +76,11 @@ export default function BlockEditor({
   }, [editor, initialBlocks]);
 
   return (
-    <div className="min-h-[400px] border border-gray-200 dark:border-neutral-800 rounded-2xl overflow-hidden bg-white dark:bg-[#1c1c1e]">
+    <div className="block-editor min-h-[400px] border border-gray-200 dark:border-neutral-800 rounded-2xl overflow-hidden bg-white dark:bg-[#1c1c1e]">
       <BlockNoteView 
         editor={editor} 
         editable={editable}
-        theme={typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches ? "dark" : "light"}
+        theme={isDarkMode ? "dark" : "light"}
         onChange={() => {
           const json = JSON.stringify(editor.document);
           onChange(json);

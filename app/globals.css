@@ -336,3 +336,70 @@
 .safe-area-inset-bottom {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
+
+/* BlockRenderer Content Visibility Overrides */
+.block-renderer .bn-container {
+  background: transparent !important;
+}
+.block-renderer .bn-editor {
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+/* Base Light Mode Styles */
+.block-renderer h1, 
+.block-renderer h2, 
+.block-renderer h3,
+.block-renderer .bn-heading {
+  color: #0f172a !important; /* slate-900 */
+  font-weight: 800 !important;
+}
+.block-renderer p {
+  color: #334155 !important; /* slate-700 */
+}
+
+/* Dark Mode Styles (Manual toggle via .dark class) */
+.dark .block-renderer h1, 
+.dark .block-renderer h2, 
+.dark .block-renderer h3, 
+.dark .block-renderer .bn-heading {
+  color: #f8fafc !important; /* slate-50 */
+}
+.dark .block-renderer p {
+  color: #cbd5e1 !important; /* slate-300 */
+}
+
+/* Dark Mode Styles (System preference fallback) */
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) .block-renderer h1, 
+  :root:not(.light) .block-renderer h2, 
+  :root:not(.light) .block-renderer h3, 
+  :root:not(.light) .block-renderer .bn-heading {
+    color: #f8fafc !important;
+  }
+  :root:not(.light) .block-renderer p {
+    color: #cbd5e1 !important;
+  }
+}
+
+/* BlockEditor Content Visibility Overrides */
+.block-editor h1, 
+.block-editor h2, 
+.block-editor h3,
+.block-editor .bn-heading {
+  color: #0f172a !important;
+  font-weight: 800 !important;
+}
+.block-editor p {
+  color: #334155 !important;
+}
+
+.dark .block-editor h1, 
+.dark .block-editor h2, 
+.dark .block-editor h3, 
+.dark .block-editor .bn-heading {
+  color: #f8fafc !important;
+}
+.dark .block-editor p {
+  color: #cbd5e1 !important;
+}
