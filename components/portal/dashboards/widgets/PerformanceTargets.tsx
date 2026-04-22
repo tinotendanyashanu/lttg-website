@@ -20,34 +20,37 @@ interface PerformanceTargetsProps {
 export default function PerformanceTargets({ metrics }: PerformanceTargetsProps) {
   if (!metrics) return null;
 
+  const currentMonthName = new Date().toLocaleString('default', { month: 'long' });
+  const currentYear = new Date().getFullYear();
+
   const targets: Target[] = [
     {
       label: 'Closed Deals',
       current: metrics.monthlyClosedDeals,
       target: 2,
       unit: 'deals',
-      description: 'Minimum primary KPI for active status.'
+      description: 'Converted leads or closed cases this month.'
     },
     {
       label: 'Qualified Leads',
       current: metrics.monthlyQualifiedLeads,
       target: 5,
       unit: 'leads',
-      description: 'New opportunities added to the pipeline.'
+      description: 'Leads moved to qualified status this month.'
     },
     {
       label: 'Follow-up Rate',
       current: metrics.followUpRate,
       target: 90,
       unit: '%',
-      description: 'Completion of scheduled follow-ups.'
+      description: '% of due follow-up tasks completed.'
     },
     {
       label: 'CRM Compliance',
       current: metrics.crmUpdateCompliance,
       target: 100,
       unit: '%',
-      description: 'Leads updated within 24 hours of activity.'
+      description: 'Active leads updated in the last 48h.'
     }
   ];
 
@@ -56,10 +59,10 @@ export default function PerformanceTargets({ metrics }: PerformanceTargetsProps)
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <span className="material-icons-outlined text-brand-primary">track_changes</span>
-          <h2 className="text-lg font-bold text-gray-900 dark:text-white">Monthly Targets</h2>
+          <h2 className="text-lg font-bold text-gray-900 dark:text-white">{currentMonthName} Targets</h2>
         </div>
         <div className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
-          Performance Policy
+          {currentYear} Policy
         </div>
       </div>
 

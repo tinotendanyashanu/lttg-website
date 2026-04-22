@@ -20,12 +20,20 @@ export default function PortalShell({
   const pathname = usePathname();
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   // Restore sidebar preference
   useEffect(() => {
     const saved = localStorage.getItem('portal-sidebar-collapsed');
     if (saved === 'true') setIsCollapsed(true);
   }, []);
+
+  const toggleMobileSidebar = () => setIsMobileSidebarOpen(prev => !prev);
+
+  // Close mobile sidebar on route change
+  useEffect(() => {
+    setIsMobileSidebarOpen(false);
+  }, [pathname]);
 
   const toggleSidebar = () => {
     setIsCollapsed(prev => {
@@ -93,30 +101,46 @@ export default function PortalShell({
 
   return (
     <div className="bg-background-light dark:bg-background-dark text-gray-800 dark:text-gray-200 font-sans transition-colors duration-300 min-h-screen flex justify-center items-center w-full">
-      <div className="w-full h-screen bg-surface-light dark:bg-surface-dark overflow-hidden flex flex-col md:flex-row relative transition-colors duration-300">
+      <div className="w-full h-screen bg-surface-light dark:bg-surface-dark overflow-hidden flex relative transition-colors duration-300">
         
+        {/* Mobile Sidebar Overlay */}
+        {isMobileSidebarOpen && (
+          <div 
+            className="fixed inset-0 bg-black/50 z-40 md:hidden"
+            onClick={() => setIsMobileSidebarOpen(false)}
+          />
+        )}
+
         {/* Sidebar */}
-        <aside className={`${isCollapsed ? 'w-20' : 'w-20 lg:w-64'} bg-surface-light dark:bg-surface-dark border-r border-gray-100 dark:border-gray-800 flex flex-col py-8 px-4 shrink-0 transition-all duration-300 relative z-20`}>
-          <div className={`flex items-center gap-3 mb-8 ${isCollapsed ? 'justify-center pl-0' : 'pl-2'}`}>
-            <div className="w-10 h-10 relative flex items-center justify-center">
-              <Image 
-                src="/logo_transparent.png" 
-                alt="LeoTech Logo" 
-                width={40} 
-                height={40}
-                className="object-contain"
-              />
-            </div>
-            {!isCollapsed && (
-              <div className="hidden lg:block">
-                <span className="text-base font-bold tracking-tight text-gray-900 dark:text-white">
-                  LeoTech
-                </span>
-                <p className="text-[10px] text-gray-400 font-medium uppercase tracking-widest">
-                  Employee Portal
-                </p>
+        <aside className={`${isCollapsed ? 'w-64 md:w-20' : 'w-64'} ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'} fixed md:relative h-full bg-surface-light dark:bg-surface-dark border-r border-gray-100 dark:border-gray-800 flex flex-col py-8 px-4 shrink-0 transition-all duration-300 z-50`}>
+          <div className={`flex items-center justify-between mb-8 ${isCollapsed ? 'justify-center px-0' : 'px-2'}`}>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 relative flex items-center justify-center">
+                <Image 
+                  src="/logo_transparent.png" 
+                  alt="LeoTech Logo" 
+                  width={40} 
+                  height={40}
+                  className="object-contain"
+                />
               </div>
-            )}
+              {(!isCollapsed || isMobileSidebarOpen) && (
+                <div className={`${isMobileSidebarOpen ? 'block' : 'hidden lg:block'}`}>
+                  <span className="text-base font-bold tracking-tight text-gray-900 dark:text-white">
+                    LeoTech
+                  </span>
+                  <p className="text-[10px] text-gray-400 font-medium uppercase tracking-widest">
+                    Employee Portal
+                  </p>
+                </div>
+              )}
+            </div>
+            <button 
+              className="md:hidden text-gray-400 hover:text-gray-800 dark:hover:text-white"
+              onClick={() => setIsMobileSidebarOpen(false)}
+            >
+              <span className="material-icons-outlined">close</span>
+            </button>
           </div>
 
           <nav className="flex-1 space-y-2 overflow-y-auto pr-2 pb-4">
@@ -309,7 +333,7 @@ export default function PortalShell({
             </button>
           </nav>
 
-          <div className={`space-y-4 mt-auto flex flex-col ${isCollapsed ? 'items-center' : 'items-center lg:items-start'}`}>
+          <div className={`space-y-4 mt-auto flex flex-col ${isCollapsed ? 'items-center' : 'items-center lg:items-start'} hidden md:flex`}>
             <button
               onClick={toggleSidebar}
               title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
@@ -333,9 +357,17 @@ export default function PortalShell({
         {/* Main Area */}
         <main className="flex-1 flex flex-col min-w-0 bg-[#FAFAFA] dark:bg-[#18181b] overflow-hidden relative z-10">
           <header className="h-14 md:h-16 px-4 md:px-8 flex flex-wrap items-center justify-between shrink-0 bg-[#FAFAFA] dark:bg-[#18181b] border-b border-gray-100 dark:border-gray-800">
-            <h1 className="text-base md:text-xl font-bold text-gray-900 dark:text-white capitalize truncate pr-4">
-              {pathname === "/portal" ? "Dashboard" : pathname.split('/').pop()?.replace("-", " ")}
-            </h1>
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={toggleMobileSidebar} 
+                className="md:hidden w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300"
+              >
+                <span className="material-icons-outlined">menu</span>
+              </button>
+              <h1 className="text-base md:text-xl font-bold text-gray-900 dark:text-white capitalize truncate pr-4">
+                {pathname === "/portal" ? "Dashboard" : pathname.split('/').pop()?.replace("-", " ")}
+              </h1>
+            </div>
             <div className="flex items-center gap-4">
               <div className="hidden md:flex items-center bg-white dark:bg-[#27272a] rounded-full px-4 py-2.5 w-64 shadow-sm border border-gray-100 dark:border-gray-700 relative group">
                 <span className="material-icons-outlined text-gray-400 text-xl">

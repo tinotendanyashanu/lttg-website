@@ -20,7 +20,6 @@ const KnowledgeCategorySchema: Schema = new Schema({
   order: { type: Number, default: 0 },
 }, { timestamps: true });
 
-KnowledgeCategorySchema.index({ slug: 1 });
 KnowledgeCategorySchema.index({ parent: 1 });
 
 export const KnowledgeCategory: Model<IKnowledgeCategory> =

@@ -39,6 +39,13 @@ export async function createArticle(data: Partial<IKnowledgeArticle>) {
         data.status = data.isPublished ? 'published' : 'draft';
     }
 
+    // Ensure slug is normalized
+    if (data.slug) {
+      data.slug = data.slug.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+    } else if (data.title) {
+      data.slug = data.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+    }
+
     const article = new KnowledgeArticle(data);
     await article.save();
 
@@ -87,6 +94,10 @@ export async function updateArticle(id: string, data: Partial<IKnowledgeArticle>
     // 2. Perform Update
     if (data.isPublished !== undefined && !data.status) {
         data.status = data.isPublished ? 'published' : 'draft';
+    }
+
+    if (data.slug) {
+        data.slug = data.slug.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
     }
 
     const article = await KnowledgeArticle.findByIdAndUpdate(
@@ -161,16 +172,33 @@ export async function getArticleBySlug(slug: string, role: string) {
     try {
         await dbConnect();
         
-        // Try exact match first
+        // 1. Try exact match first
         let article = await KnowledgeArticle.findOne({ slug })
             .populate('categoryId')
             .populate('relatedArticles', 'title slug categoryId type')
             .populate('backlinks', 'title slug categoryId type');
 
-        // If not found, try normalized slug (case-insensitive and clean)
+        // 2. If not found, try normalized slug (handles case-insensitivity and weird characters)
         if (!article) {
-            const normalizedSlug = slug.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+            // Decode and normalize
+            let decodedSlug = slug;
+            try {
+                decodedSlug = decodeURIComponent(slug);
+            } catch (e) {
+                // Ignore decoding errors
+            }
+            
+            const normalizedSlug = decodedSlug.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+            
             article = await KnowledgeArticle.findOne({ slug: normalizedSlug })
+                .populate('categoryId')
+                .populate('relatedArticles', 'title slug categoryId type')
+                .populate('backlinks', 'title slug categoryId type');
+        }
+
+        // 3. Last ditch effort: search by slug with case-insensitive regex if still not found
+        if (!article) {
+             article = await KnowledgeArticle.findOne({ slug: { $regex: new RegExp(`^${slug}$`, 'i') } })
                 .populate('categoryId')
                 .populate('relatedArticles', 'title slug categoryId type')
                 .populate('backlinks', 'title slug categoryId type');
