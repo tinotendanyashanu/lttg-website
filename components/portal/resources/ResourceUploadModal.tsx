@@ -96,6 +96,7 @@ export default function ResourceUploadModal() {
                 className="w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#27272a] px-4 py-2.5 text-sm focus:border-brand-primary focus:ring-brand-primary outline-none"
               >
                 <option value="all">Everyone</option>
+                <option value="client">Clients Only</option>
                 <option value="admin">Admins Only</option>
                 <option value="employee">Employees & Admins</option>
                 <option value="intern">Interns Only</option>

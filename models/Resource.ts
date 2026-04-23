@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
-export type ResourceRoleVisibility = 'intern' | 'employee' | 'admin' | 'all';
+export type ResourceRoleVisibility = 'intern' | 'employee' | 'admin' | 'all' | 'client';
 
 export interface IResource extends Document {
   title: string;

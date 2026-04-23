@@ -40,6 +40,7 @@ export async function uploadResource(formData: FormData) {
     });
 
     revalidatePath('/portal/resources');
+    revalidatePath('/portal/client/resources');
     return { success: true, message: 'Resource uploaded successfully' };
   } catch (error) {
     console.error('Failed to upload resource:', error);

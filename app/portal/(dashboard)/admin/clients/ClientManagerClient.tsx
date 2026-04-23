@@ -13,6 +13,7 @@ import {
   checkClientDuplicates,
 } from '@/lib/actions/portal-admin-clients';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import InternalNotesPanel from '@/components/admin/InternalNotesPanel';
 import DocumentsPanel from '@/components/admin/DocumentsPanel';
 
@@ -785,9 +786,18 @@ export default function ClientManagerClient({ initialClients }: { initialClients
 
               {/* Documents */}
               <div className="mt-5 pt-5 border-t border-gray-100 dark:border-gray-800">
-                <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold mb-3">
-                  Documents
-                </p>
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold">
+                    Documents
+                  </p>
+                  <Link 
+                    href="/portal/resources" 
+                    className="text-[10px] text-brand-primary hover:underline font-bold flex items-center gap-0.5"
+                  >
+                    <span className="material-icons-outlined text-[12px]">folder_zip</span>
+                    Resource Center
+                  </Link>
+                </div>
                 <DocumentsPanel entityType="client" entityId={selectedClient._id} isAdmin={true} />
               </div>
 

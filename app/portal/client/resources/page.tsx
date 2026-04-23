@@ -1,47 +1,39 @@
-import { getSessionWithDevBypass } from '@/lib/auth-util';
-import { getAccountByEmail } from '@/lib/data/account';
+import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import dbConnect from '@/lib/mongodb';
 import { Resource } from '@/models/Resource';
 import Link from 'next/link';
-import ResourceUploadModal from '@/components/portal/resources/ResourceUploadModal';
 
-export default async function ResourcesPage() {
-  const session = await getSessionWithDevBypass();
-  if (!session?.user?.email) redirect('/');
-
-  const account = await getAccountByEmail(session.user.email);
-  if (!account) redirect('/');
+export default async function ClientResourcesPage() {
+  const session = await auth();
+  if (!session?.user?.email) redirect('/portal/client/login');
 
   await dbConnect();
 
-  // Fetch resources available to 'all' or specific roles of the user
-  // Admins can see everything
-  const orConditions = account.roles.includes('admin') 
-    ? [{}] 
-    : [{ roleVisibility: 'all' }, ...account.roles.map(r => ({ roleVisibility: r }))];
-  
-  const resources = await Resource.find({ $or: orConditions }).sort({ createdAt: -1 }).lean();
+  // Fetch resources available to 'all' or specifically to 'client' role
+  const resources = await Resource.find({ 
+    roleVisibility: { $in: ['all', 'client'] } 
+  }).sort({ createdAt: -1 }).lean();
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-[#27272a] p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Resource Center</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Access pitch decks, templates, branding material, and contracts.
-          </p>
-        </div>
-        {account.roles.includes('admin') && (
-          <ResourceUploadModal />
-        )}
+    <div className="max-w-6xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="bg-white dark:bg-[#27272a] p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Resource Center</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+          Access logos, contract templates, brand assets, and other helpful materials.
+        </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {resources.map((resource: any) => (
           <div key={resource._id.toString()} className="bg-white dark:bg-[#27272a] rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-800 flex flex-col transition-all hover:shadow-md hover:border-brand-primary/30 group">
             <div className="w-12 h-12 rounded-xl bg-brand-primary/10 text-brand-primary flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-              <span className="material-icons-outlined text-2xl">description</span>
+              <span className="material-icons-outlined text-2xl">
+                {resource.fileUrl.match(/\.(pdf)$/i) ? 'picture_as_pdf' : 
+                 resource.fileUrl.match(/\.(png|jpg|jpeg|svg)$/i) ? 'image' : 
+                 resource.fileUrl.match(/\.(zip|rar|7z)$/i) ? 'inventory_2' : 
+                 'description'}
+              </span>
             </div>
             <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">{resource.title}</h3>
             {resource.description && (
