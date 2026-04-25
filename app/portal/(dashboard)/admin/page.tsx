@@ -43,6 +43,7 @@ export default async function AdminDashboardOverviewPage() {
           { label: 'Knowledge Base', icon: 'menu_book', href: '/portal/admin/knowledge' },
           { label: 'Academy', icon: 'school', href: '/portal/admin/academy' },
           { label: 'Announcements', icon: 'campaign', href: '/portal/admin/announcements' },
+          { label: 'Sales Quests', icon: 'military_tech', href: '/portal/admin/quests' },
           { label: 'Teams', icon: 'groups', href: '/portal/admin/teams' },
           { label: 'Activity Logs', icon: 'history', href: '/portal/admin/activity' },
         ].map((item, idx) => (

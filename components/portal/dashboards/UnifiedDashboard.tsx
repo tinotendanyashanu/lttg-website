@@ -8,6 +8,8 @@ import {
   getKnowledgeShortcuts,
   getPriorityQueue
 } from '@/lib/actions/dashboard';
+import { getActiveQuestsWithProgress } from '@/lib/actions/quests';
+import SalesQuests from './widgets/SalesQuests';
 import IdentitySnapshot from './widgets/IdentitySnapshot';
 import PersonalPerformance from './widgets/PersonalPerformance';
 import PriorityQueue from './widgets/PriorityQueue';
@@ -33,14 +35,16 @@ export default async function UnifiedDashboard({ title, accountId, email, roles 
     priorityTasks,
     recentActivityData,
     knowledgeData,
-    commissionData
+    commissionData,
+    salesQuests
   ] = await Promise.all([
     getIdentitySnapshot(email),
     getPersonalPerformanceMetrics(accountId, roles),
     getPriorityQueue(accountId),
     getPersonalRecentActivity(accountId, roles),
     getKnowledgeShortcuts(),
-    getInternEmployeeCommissionSnapshot(accountId, roles)
+    getInternEmployeeCommissionSnapshot(accountId, roles),
+    getActiveQuestsWithProgress(accountId, roles)
   ]);
 
   if (!identityData) return <div>Failed to load profile.</div>;
@@ -59,7 +63,9 @@ export default async function UnifiedDashboard({ title, accountId, email, roles 
            </Link>
         </div>
       </div>
-      
+
+      {salesQuests.length > 0 && <SalesQuests quests={salesQuests} />}
+
       {/* 1. Identity Snapshot & Performance */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <div className="xl:col-span-1">

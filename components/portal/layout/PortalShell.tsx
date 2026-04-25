@@ -310,6 +310,36 @@ export default function PortalShell({
               </Link>
             )}
 
+            {isAdmin && (
+              <Link
+                href="/portal/admin/quests"
+                className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-center lg:justify-start'} gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
+                  pathname === "/portal/admin/quests"
+                    ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
+                    : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
+                }`}
+                title={isCollapsed ? "Sales Quests" : undefined}
+              >
+                <span className="material-icons-outlined text-[20px] group-hover:scale-110 transition-transform">military_tech</span>
+                {!isCollapsed && <span className="hidden lg:block text-sm">Sales Quests</span>}
+              </Link>
+            )}
+
+            {!isAdmin && (roles.includes("employee") || isIntern) && (
+              <Link
+                href="/portal/quests"
+                className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-center lg:justify-start'} gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
+                  pathname === "/portal/quests"
+                    ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
+                    : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
+                }`}
+                title={isCollapsed ? "Sales Quests" : undefined}
+              >
+                <span className="material-icons-outlined text-[20px] group-hover:scale-110 transition-transform">military_tech</span>
+                {!isCollapsed && <span className="hidden lg:block text-sm">Sales Quests</span>}
+              </Link>
+            )}
+
             <Link
               href="/portal/academy"
               className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-center lg:justify-start'} gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
