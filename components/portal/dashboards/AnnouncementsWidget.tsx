@@ -1,11 +1,50 @@
-import React from 'react';
-import { getActiveAnnouncements } from '@/lib/actions/announcements';
+'use client';
+
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 
-export default async function AnnouncementsWidget({ roles }: { roles: string[] }) {
-  const { success, announcements } = await getActiveAnnouncements(roles);
+interface Announcement {
+  _id: string;
+  title: string;
+  message: string;
+  priorityLevel: string;
+  isPinned: boolean;
+  link?: string;
+  attachments?: string[];
+  createdAt: string;
+  createdBy?: {
+    fullName: string;
+  };
+  category?: string;
+}
 
-  if (!success || !announcements || announcements.length === 0) {
+export default function AnnouncementsWidget({ initialAnnouncements }: { initialAnnouncements: Announcement[] }) {
+  const [dismissed, setDismissed] = useState<string[]>([]);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    const saved = localStorage.getItem('dismissedAnnouncements');
+    if (saved) {
+      try {
+        setDismissed(JSON.parse(saved));
+      } catch (e) {
+        console.error('Failed to parse dismissed announcements', e);
+      }
+    }
+  }, []);
+
+  const dismiss = (id: string) => {
+    const next = [...dismissed, id];
+    setDismissed(next);
+    localStorage.setItem('dismissedAnnouncements', JSON.stringify(next));
+  };
+
+  const visibleAnnouncements = initialAnnouncements.filter(
+    (a) => a.isPinned || !dismissed.includes(a._id.toString())
+  );
+
+  if (!mounted || visibleAnnouncements.length === 0) {
     return null;
   }
 
@@ -64,12 +103,23 @@ export default async function AnnouncementsWidget({ roles }: { roles: string[] }
         </Link>
       </div>
       
-      {announcements.map((announcement: any) => {
+      {visibleAnnouncements.map((announcement) => {
         const styles = getPriorityStyles(announcement.priorityLevel, announcement.isPinned);
         
         return (
           <div key={announcement._id.toString()} className={`${styles.bg} border ${styles.border} rounded-2xl p-4 flex gap-4 items-start shadow-sm relative overflow-hidden group transition-all hover:-translate-y-0.5 hover:shadow-md`}>
             <div className={`absolute top-0 left-0 w-1 h-full ${styles.stripe}`}></div>
+            
+            {!announcement.isPinned && (
+              <button 
+                onClick={() => dismiss(announcement._id.toString())}
+                className="absolute top-3 right-3 p-1 rounded-full hover:bg-black/5 dark:hover:bg-white/5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors z-10"
+                title="Dismiss announcement"
+              >
+                <span className="material-icons-outlined text-lg">close</span>
+              </button>
+            )}
+
             <div className={`w-10 h-10 rounded-full ${styles.iconBg} ${styles.text} flex items-center justify-center shrink-0`}>
               <span className="material-icons-outlined text-xl">{styles.icon}</span>
             </div>
@@ -81,13 +131,13 @@ export default async function AnnouncementsWidget({ roles }: { roles: string[] }
                 {announcement.priorityLevel === 'Critical' && !announcement.isPinned && (
                   <span className="text-[10px] font-bold uppercase tracking-wider bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400 px-2 py-0.5 rounded-full">Critical</span>
                 )}
-                <h3 className="text-base font-bold text-gray-900 dark:text-white pr-6 line-clamp-1">{announcement.title}</h3>
+                <h3 className="text-base font-bold text-gray-900 dark:text-white pr-8 line-clamp-1">{announcement.title}</h3>
               </div>
               <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
                 {announcement.message}
               </p>
               
-              {(announcement.attachments?.length > 0 || announcement.link) && (
+              {(announcement.attachments && announcement.attachments.length > 0 || announcement.link) && (
                 <div className="flex flex-wrap gap-2 mt-3">
                   {announcement.link && (
                     <a href={announcement.link} target="_blank" rel="noopener noreferrer" className={`inline-flex items-center gap-1 text-xs font-medium ${styles.text} hover:underline`}>
