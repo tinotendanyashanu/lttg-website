@@ -3,7 +3,10 @@ import { format } from 'date-fns';
 import Link from 'next/link';
 
 function QuestCard({ q }: { q: QuestWithProgress }) {
+  const now = new Date();
+  const start = new Date(q.startsAt);
   const end = new Date(q.endsAt);
+  const isUpcoming = start > now;
   const isCurrency = q.metric === 'revenue';
   const formatVal = (n: number) => (isCurrency ? `$${n.toLocaleString()}` : n.toLocaleString());
 
@@ -12,6 +15,8 @@ function QuestCard({ q }: { q: QuestWithProgress }) {
       className={`rounded-2xl border p-5 transition-shadow ${
         q.completed
           ? 'border-emerald-200 bg-emerald-50/80 dark:border-emerald-800/60 dark:bg-emerald-950/30'
+          : isUpcoming
+          ? 'border-blue-100 bg-blue-50/30 dark:border-blue-900/30 dark:bg-blue-950/10'
           : 'border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900/50'
       }`}
     >
@@ -19,17 +24,21 @@ function QuestCard({ q }: { q: QuestWithProgress }) {
         <div>
           <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
             {q.title}
-            {q.completed && (
+            {q.completed ? (
               <span className="text-[10px] uppercase tracking-wide font-bold text-emerald-700 dark:text-emerald-400">
                 Target hit
               </span>
-            )}
+            ) : isUpcoming ? (
+              <span className="text-[10px] uppercase tracking-wide font-bold text-blue-700 dark:text-blue-400">
+                Upcoming
+              </span>
+            ) : null}
           </h3>
           {q.description ? (
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{q.description}</p>
           ) : null}
           <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
-            {q.metricLabel} · Ends {format(end, 'MMM d, yyyy')}
+            {q.metricLabel} · {isUpcoming ? `Starts ${format(start, 'MMM d')}` : `Ends ${format(end, 'MMM d, yyyy')}`}
           </p>
         </div>
         {q.rewardLabel ? (
@@ -39,22 +48,32 @@ function QuestCard({ q }: { q: QuestWithProgress }) {
           </div>
         ) : null}
       </div>
-      <div className="mt-4">
-        <div className="flex justify-between text-sm mb-1.5">
-          <span className="text-gray-600 dark:text-gray-400">Your progress</span>
-          <span className="font-semibold text-gray-900 dark:text-white tabular-nums">
-            {formatVal(q.currentValue)} / {formatVal(q.targetValue)}
-          </span>
+      {!isUpcoming && (
+        <div className="mt-4">
+          <div className="flex justify-between text-sm mb-1.5">
+            <span className="text-gray-600 dark:text-gray-400">Your progress</span>
+            <span className="font-semibold text-gray-900 dark:text-white tabular-nums">
+              {formatVal(q.currentValue)} / {formatVal(q.targetValue)}
+            </span>
+          </div>
+          <div className="h-2.5 w-full rounded-full bg-gray-200 dark:bg-gray-800 overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all ${
+                q.completed ? 'bg-emerald-500' : 'bg-brand-primary'
+              }`}
+              style={{ width: `${q.percent}%` }}
+            />
+          </div>
         </div>
-        <div className="h-2.5 w-full rounded-full bg-gray-200 dark:bg-gray-800 overflow-hidden">
-          <div
-            className={`h-full rounded-full transition-all ${
-              q.completed ? 'bg-emerald-500' : 'bg-brand-primary'
-            }`}
-            style={{ width: `${q.percent}%` }}
-          />
+      )}
+      {isUpcoming && (
+        <div className="mt-4 py-2 px-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-900/30">
+          <p className="text-xs text-blue-700 dark:text-blue-400 flex items-center gap-1.5">
+            <span className="material-icons-outlined text-sm">schedule</span>
+            Quest begins in {Math.ceil((start.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))} days
+          </p>
         </div>
-      </div>
+      )}
     </div>
   );
 }

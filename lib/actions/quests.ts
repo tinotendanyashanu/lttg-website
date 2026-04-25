@@ -17,6 +17,7 @@ const METRIC_LABELS: Record<QuestMetric, string> = {
 };
 
 function questAppliesToUser(targetRoles: string[] | undefined, userRoles: string[]): boolean {
+  if (userRoles.includes('admin')) return true;
   const targets = !targetRoles?.length || targetRoles.includes('all') ? ['all'] : targetRoles;
   if (targets.includes('all')) return true;
   if (userRoles.includes('employee') && targets.includes('employee')) return true;
@@ -137,10 +138,9 @@ export async function getActiveQuestsWithProgress(
 
     const quests = await Quest.find({
       isActive: true,
-      startsAt: { $lte: now },
       endsAt: { $gte: now },
     })
-      .sort({ endsAt: 1 })
+      .sort({ startsAt: 1 })
       .lean();
 
     const forUser = quests.filter((q) => questAppliesToUser(q.targetRoles, userRoles));

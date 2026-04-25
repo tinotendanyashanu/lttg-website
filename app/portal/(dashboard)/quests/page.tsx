@@ -17,7 +17,7 @@ export default async function QuestsPage() {
   if (!account) redirect('/portal/login');
 
   const roles = account.roles || [];
-  if (!roles.includes('employee') && !roles.includes('intern')) {
+  if (!roles.includes('employee') && !roles.includes('intern') && !roles.includes('admin')) {
     redirect('/portal');
   }
 

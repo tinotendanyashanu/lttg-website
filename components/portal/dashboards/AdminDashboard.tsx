@@ -1,4 +1,3 @@
-import React from 'react';
 import { 
   getIdentitySnapshot,
   getAdminPerformanceMetrics,
@@ -6,6 +5,9 @@ import {
   getAdminRecentActivity,
   getKnowledgeShortcuts
 } from '@/lib/actions/dashboard';
+import { getAccountByEmail } from '@/lib/data/account';
+import { getActiveQuestsWithProgress } from '@/lib/actions/quests';
+import SalesQuests from './widgets/SalesQuests';
 import IdentitySnapshot from './widgets/IdentitySnapshot';
 import AdminPerformanceOverview from './widgets/AdminPerformanceOverview';
 import AdminActiveCases from './widgets/AdminActiveCases';
@@ -18,28 +20,41 @@ interface AdminDashboardProps {
 }
 
 export default async function AdminDashboard({ email }: AdminDashboardProps) {
+  // We need accountId and roles for quests
+  const account = await getAccountByEmail(email);
+  const accountId = account?._id?.toString() || '';
+  const roles = account?.roles || [];
+
   // Fetch all admin data in parallel
   const [
     identityData,
     performanceData,
     activeCasesData,
     recentActivityData,
-    knowledgeData
+    knowledgeData,
+    salesQuests
   ] = await Promise.all([
     getIdentitySnapshot(email),
     getAdminPerformanceMetrics(),
     getAdminActiveCases(),
     getAdminRecentActivity(),
-    getKnowledgeShortcuts()
+    getKnowledgeShortcuts(),
+    getActiveQuestsWithProgress(accountId, roles)
   ]);
 
   if (!identityData) return <div>Failed to load profile.</div>;
 
   return (
-    <div className="flex flex-col gap-6 h-full w-full">
+    <div className="flex flex-col gap-6 h-full w-full pb-10">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Admin Dashboard</h1>
       </div>
+
+      {salesQuests.length > 0 && (
+        <div className="mb-2">
+          <SalesQuests quests={salesQuests} />
+        </div>
+      )}
 
       {/* 1. Identity Snapshot */}
       <IdentitySnapshot 
