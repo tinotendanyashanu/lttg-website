@@ -13,10 +13,15 @@ interface LearningData {
   progress: any;
   lessonState: any;
   moduleStates: any[];
-  navigation: { previousLessonId?: string | null; nextLessonId?: string | null };
+  navigation: { 
+    previousLessonId: string | null; 
+    nextLessonId: string | null;
+    nextRecommendedLessonId?: string | null;
+  };
   isLocked: boolean;
-  unlockReason?: string;
+  unlockReason?: string | null;
   success: boolean;
+  error?: string;
 }
 
 export default function LessonViewPage() {

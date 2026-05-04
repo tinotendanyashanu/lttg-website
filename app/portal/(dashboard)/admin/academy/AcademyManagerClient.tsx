@@ -286,12 +286,19 @@ export default function AcademyManagerClient({ initialCourses }: { initialCourse
     try {
       if (isCreatingCourse) {
         const res = await createAdminCourse(payload);
-        const newC: Course = { ...payload, _id: res.courseId as string, updatedAt: new Date().toISOString() };
-        setCourses(c => [newC, ...c]); setSelectedCourse(newC); setIsCreatingCourse(false);
+        if (res.success && res.courseId) {
+          const newC: Course = { ...payload, _id: res.courseId, updatedAt: new Date().toISOString() };
+          setCourses(c => [newC, ...c]); 
+          setSelectedCourse(newC); 
+          setIsCreatingCourse(false);
+        }
       } else if (selectedCourse) {
-        await updateAdminCourse(selectedCourse._id, payload);
-        const updC: Course = { ...selectedCourse, ...payload, updatedAt: new Date().toISOString() };
-        setCourses(c => c.map(x => x._id === selectedCourse._id ? updC : x)); setSelectedCourse(updC);
+        const res = await updateAdminCourse(selectedCourse._id, payload);
+        if (res.success) {
+          const updC: Course = { ...selectedCourse, ...payload, updatedAt: new Date().toISOString() };
+          setCourses(c => c.map(x => x._id === selectedCourse._id ? updC : x)); 
+          setSelectedCourse(updC);
+        }
       }
       router.refresh();
     } catch (err) { console.error(err); } finally { setIsSavingCourse(false); }
