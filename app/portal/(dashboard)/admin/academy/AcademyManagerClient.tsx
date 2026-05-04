@@ -667,7 +667,18 @@ export default function AcademyManagerClient({ initialCourses }: { initialCourse
                           <textarea value={moduleForm.description} onChange={e => setModuleForm((f: any) => ({ ...f, description: e.target.value }))} rows={3} className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-5 py-3 text-sm dark:border-gray-700 dark:bg-gray-800" />
                         </div>
                         <div className="flex justify-end pt-4">
-                          <button onClick={async () => { setIsSavingModule(true); try { await updateAdminModule(moduleForm._id, moduleForm); router.refresh(); } finally { setIsSavingModule(false); } }} className="rounded-2xl bg-blue-600 px-8 py-3 text-sm font-bold text-white hover:shadow-lg transition-all">
+                          <button onClick={async () => { 
+                            setIsSavingModule(true); 
+                            try { 
+                              const res = await updateAdminModule(moduleForm._id, moduleForm); 
+                              if (res.success) {
+                                setModules(m => m.map(x => x._id === moduleForm._id ? res.module : x));
+                              }
+                              router.refresh(); 
+                            } finally { 
+                              setIsSavingModule(false); 
+                            } 
+                          }} className="rounded-2xl bg-blue-600 px-8 py-3 text-sm font-bold text-white hover:shadow-lg transition-all">
                             {isSavingModule ? 'Saving...' : 'Save Module Settings'}
                           </button>
                         </div>
