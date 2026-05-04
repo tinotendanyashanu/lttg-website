@@ -138,7 +138,32 @@ export default function LessonViewPage() {
                     <p className="text-gray-400 text-sm">Audio Lesson</p>
                   </div>
                 </div>
-                <audio src={lesson.audioUrl} controls className="w-full" />
+                <audio 
+                  controls 
+                  className="w-full"
+                  onError={(e) => {
+                    console.error("Audio playback error:", e);
+                  }}
+                >
+                  <source src={encodeURI(lesson.audioUrl)} type="audio/mpeg" />
+                  <source src={encodeURI(lesson.audioUrl)} type="audio/mp3" />
+                  <source src={encodeURI(lesson.audioUrl)} type="audio/wav" />
+                  <source src={encodeURI(lesson.audioUrl)} type="audio/ogg" />
+                  <source src={encodeURI(lesson.audioUrl)} type="audio/aac" />
+                  <source src={encodeURI(lesson.audioUrl)} type="audio/m4a" />
+                  Your browser does not support the audio element.
+                </audio>
+                <div className="mt-4 flex justify-center">
+                  <a 
+                    href={encodeURI(lesson.audioUrl)} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-[10px] uppercase tracking-widest font-bold text-gray-500 hover:text-brand-primary transition-colors flex items-center gap-2"
+                  >
+                    <span className="material-icons-outlined text-sm">download</span>
+                    Trouble playing? Download Audio
+                  </a>
+                </div>
               </div>
             )}
           </div>
