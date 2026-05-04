@@ -5,7 +5,7 @@ import { useFormStatus } from 'react-dom';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { authenticate } from '@/lib/actions/auth';
-import WalkingWoman from '@/components/WalkingWoman';
+import Image from 'next/image';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -21,29 +21,14 @@ function SubmitButton() {
   );
 }
 
-type CharacterState = 'idle' | 'walking' | 'typing' | 'success';
-
-function LoginForm({ 
-  setCharacterState 
-}: { 
-  setCharacterState: (state: CharacterState) => void 
-}) {
+function LoginForm() {
   const [errorMessage, dispatch] = useActionState(authenticate, undefined);
   const [email, setEmail] = useState('');
   const searchParams = useSearchParams();
   const loginSource = searchParams.get('loginSource') || '';
 
-  const handleTyping = () => {
-    setCharacterState('typing');
-    const timer = setTimeout(() => setCharacterState('walking'), 1000);
-    return () => clearTimeout(timer);
-  };
-
   return (
-    <form action={(formData) => {
-      setCharacterState('success');
-      dispatch(formData);
-    }} className="space-y-6 w-full max-w-sm">
+    <form action={dispatch} className="space-y-6 w-full max-w-sm">
       <input type="hidden" name="loginSource" value={loginSource} />
       
       <div className="space-y-2">
@@ -57,11 +42,7 @@ function LoginForm({
           autoComplete="email"
           required
           value={email}
-          onFocus={() => setCharacterState('walking')}
-          onChange={(e) => {
-            setEmail(e.target.value);
-            handleTyping();
-          }}
+          onChange={(e) => setEmail(e.target.value)}
           placeholder="name@company.com"
           className="h-12 w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 text-gray-900 dark:text-white outline-none transition focus:border-[#22c55e] focus:ring-2 focus:ring-[#22c55e]/20"
         />
@@ -82,8 +63,6 @@ function LoginForm({
           type="password"
           autoComplete="current-password"
           required
-          onFocus={() => setCharacterState('walking')}
-          onChange={handleTyping}
           placeholder="••••••••"
           className="h-12 w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 text-gray-900 dark:text-white outline-none transition focus:border-[#22c55e] focus:ring-2 focus:ring-[#22c55e]/20"
         />
@@ -104,24 +83,32 @@ function LoginForm({
 }
 
 export default function UnifiedLoginPage() {
-  const [charState, setCharState] = useState<CharacterState>('walking');
-
   return (
     <div className="flex min-h-screen bg-white dark:bg-[#09090b]">
       {/* The Stage Area (Split Screen) */}
       <div className="hidden lg:flex w-1/2 bg-[#050508] relative items-center justify-center overflow-hidden border-r border-violet-950/40">
-         <div className="w-full h-full max-w-2xl flex items-center justify-center">
-            <WalkingWoman state={charState} />
-         </div>
+         <Image 
+            src="/images/login-visual.png" 
+            alt="Login Visual" 
+            fill 
+            className="object-cover opacity-80"
+            priority
+         />
+         <div className="absolute inset-0 bg-gradient-to-t from-[#050508] via-transparent to-transparent opacity-60" />
       </div>
 
       {/* The Form Area */}
       <div className="w-full lg:w-1/2 flex items-center justify-center px-8 py-12 relative">
         <div className="w-full max-w-md flex flex-col items-center">
           
-          {/* Mobile Character Fallback */}
+          {/* Mobile Character Fallback Replacement */}
           <div className="lg:hidden w-full h-64 mb-8 relative flex items-center justify-center overflow-hidden rounded-2xl bg-[#050508] border border-violet-950/35">
-            <WalkingWoman state={charState} />
+            <Image 
+                src="/images/login-visual.png" 
+                alt="Login Visual" 
+                fill 
+                className="object-cover opacity-90"
+            />
           </div>
 
           <div className="mb-10 text-center w-full">
@@ -133,7 +120,7 @@ export default function UnifiedLoginPage() {
           </div>
 
           <Suspense fallback={<div className="h-40 flex items-center justify-center text-gray-400">Loading...</div>}>
-            <LoginForm setCharacterState={setCharState} />
+            <LoginForm />
           </Suspense>
           
           <div className="mt-10 pt-8 border-t border-gray-100 dark:border-gray-800 w-full text-center">
