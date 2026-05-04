@@ -63,7 +63,9 @@ export async function initiateAdminLogin(
 
   // Check if this IP has been verified before for this account
   const matchedAccount = adminAccounts.find(a => a._id.toString() === matchedAccountId);
-  const ipIsTrusted = ip && matchedAccount?.trustedIps?.includes(ip);
+  // SUSPENDED: Admin IP screening is currently disabled. 
+  // Always treating the IP as trusted to allow login without email OTP for new IPs.
+  const ipIsTrusted = true; // ip && matchedAccount?.trustedIps?.includes(ip);
 
   // Generate 6-digit OTP
   const otp = String(Math.floor(100000 + Math.random() * 900000));

@@ -1,9 +1,10 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useState, useEffect } from 'react';
 import { useFormStatus } from 'react-dom';
 import Link from 'next/link';
 import { authenticate } from '@/lib/actions/auth';
+import { motion, AnimatePresence } from 'framer-motion';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -19,68 +20,136 @@ function SubmitButton() {
   );
 }
 
+const MoonwalkingLeo = () => {
+  return (
+    <div className="flex flex-col items-center mb-6">
+      <motion.div
+        initial={{ x: -100, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        transition={{ duration: 1.5, ease: "easeOut" }}
+        className="relative"
+      >
+        <motion.div
+          animate={{
+            x: [0, -10, 0, -10, 0],
+          }}
+          transition={{
+            duration: 0.8,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+          className="text-[#1a73e8]"
+        >
+          <span className="material-icons-outlined text-6xl transform scale-x-[-1]">directions_walk</span>
+        </motion.div>
+        
+        {/* Subtle ground shadow */}
+        <motion.div 
+          animate={{ scaleX: [1, 1.2, 1] }}
+          transition={{ duration: 0.8, repeat: Infinity }}
+          className="h-1.5 w-12 bg-gray-200 dark:bg-gray-800 rounded-full mx-auto mt-[-8px] blur-[1px]" 
+        />
+      </motion.div>
+    </div>
+  );
+};
+
 export default function PortalLoginPage() {
   const [errorMessage, dispatch] = useActionState(authenticate, undefined);
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsReady(true), 2000);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#f8f9fa] dark:bg-[#0a0a0a] px-4">
-      <div className="w-full max-w-[448px] bg-white dark:bg-[#111111] p-8 md:p-12 rounded-2xl border border-[#dadce0] dark:border-[#222] shadow-sm">
-        <div className="text-center mb-10">
-          <Link href="/" className="inline-block mb-4">
-             <div className="text-2xl font-bold tracking-tighter text-[#1a73e8]">LeoTheTechGuy</div>
-          </Link>
-          <h1 className="text-2xl font-semibold text-[#202124] dark:text-white">Staff Portal</h1>
-          <p className="text-sm text-[#5f6368] dark:text-gray-400 mt-2">Internal employee &amp; admin access</p>
-        </div>
+      <div className="w-full max-w-[448px]">
+        <AnimatePresence mode="wait">
+          {!isReady ? (
+            <motion.div
+              key="intro"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="text-center"
+            >
+              <MoonwalkingLeo />
+              <h2 className="text-xl font-medium text-gray-500 animate-pulse">Initializing Portal...</h2>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="form"
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              className="bg-white dark:bg-[#111111] p-8 md:p-12 rounded-2xl border border-[#dadce0] dark:border-[#222] shadow-sm relative overflow-hidden"
+            >
+              {/* Character stays in corner */}
+              <div className="absolute -top-2 -right-2 opacity-10 pointer-events-none">
+                <span className="material-icons-outlined text-8xl text-[#1a73e8]">directions_walk</span>
+              </div>
 
-        <form action={dispatch} className="space-y-6">
-          <input type="hidden" name="loginSource" value="portal" />
-          
-          <div className="space-y-1">
-            <label className="block text-sm font-medium text-[#3c4043] dark:text-gray-300">
-              Internal Email
-            </label>
-            <input
-              name="email"
-              type="email"
-              required
-              className="w-full px-4 py-2.5 bg-white dark:bg-[#181818] border border-[#dadce0] dark:border-[#333] rounded-lg focus:ring-2 focus:ring-[#1a73e8] focus:border-[#1a73e8] outline-none transition-all text-[#202124] dark:text-white"
-              placeholder="name@leothetechguy.com"
-            />
-          </div>
+              <div className="text-center mb-10">
+                <Link href="/" className="inline-block mb-4">
+                   <div className="text-2xl font-bold tracking-tighter text-[#1a73e8]">LeoTheTechGuy</div>
+                </Link>
+                <h1 className="text-2xl font-semibold text-[#202124] dark:text-white">Staff Portal</h1>
+                <p className="text-sm text-[#5f6368] dark:text-gray-400 mt-2">Internal employee &amp; admin access</p>
+              </div>
 
-          <div className="space-y-1">
-            <div className="flex justify-between items-center">
-              <label className="block text-sm font-medium text-[#3c4043] dark:text-gray-300">
-                Password
-              </label>
-              <Link href="/forgot-password" title="Recover password" className="text-sm text-[#1a73e8] hover:underline font-medium">
-                Forgot?
-              </Link>
-            </div>
-            <input
-              name="password"
-              type="password"
-              required
-              className="w-full px-4 py-2.5 bg-white dark:bg-[#181818] border border-[#dadce0] dark:border-[#333] rounded-lg focus:ring-2 focus:ring-[#1a73e8] focus:border-[#1a73e8] outline-none transition-all text-[#202124] dark:text-white"
-              placeholder="Enter your password"
-            />
-          </div>
+              <form action={dispatch} className="space-y-6">
+                <input type="hidden" name="loginSource" value="portal" />
+                
+                <div className="space-y-1">
+                  <label className="block text-sm font-medium text-[#3c4043] dark:text-gray-300">
+                    Internal Email
+                  </label>
+                  <input
+                    name="email"
+                    type="email"
+                    required
+                    className="w-full px-4 py-2.5 bg-white dark:bg-[#181818] border border-[#dadce0] dark:border-[#333] rounded-lg focus:ring-2 focus:ring-[#1a73e8] focus:border-[#1a73e8] outline-none transition-all text-[#202124] dark:text-white"
+                    placeholder="name@leothetechguy.com"
+                  />
+                </div>
 
-          {errorMessage && (
-            <div className="p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900 rounded-lg text-red-600 dark:text-red-400 text-sm font-medium">
-              {errorMessage}
-            </div>
+                <div className="space-y-1">
+                  <div className="flex justify-between items-center">
+                    <label className="block text-sm font-medium text-[#3c4043] dark:text-gray-300">
+                      Password
+                    </label>
+                    <Link href="/forgot-password" title="Recover password" className="text-sm text-[#1a73e8] hover:underline font-medium">
+                      Forgot?
+                    </Link>
+                  </div>
+                  <input
+                    name="password"
+                    type="password"
+                    required
+                    className="w-full px-4 py-2.5 bg-white dark:bg-[#181818] border border-[#dadce0] dark:border-[#333] rounded-lg focus:ring-2 focus:ring-[#1a73e8] focus:border-[#1a73e8] outline-none transition-all text-[#202124] dark:text-white"
+                    placeholder="Enter your password"
+                  />
+                </div>
+
+                {errorMessage && (
+                  <div className="p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900 rounded-lg text-red-600 dark:text-red-400 text-sm font-medium">
+                    {errorMessage}
+                  </div>
+                )}
+
+                <SubmitButton />
+              </form>
+
+              <div className="mt-8 pt-8 border-t border-[#f1f3f4] dark:border-[#222] text-center">
+                <p className="text-sm text-[#5f6368] dark:text-gray-400 font-medium">
+                  Authorized access only. All sessions are monitored.
+                </p>
+              </div>
+            </motion.div>
           )}
-
-          <SubmitButton />
-        </form>
-
-        <div className="mt-8 pt-8 border-t border-[#f1f3f4] dark:border-[#222] text-center">
-          <p className="text-sm text-[#5f6368] dark:text-gray-400 font-medium">
-            Authorized access only. All sessions are monitored.
-          </p>
-        </div>
+        </AnimatePresence>
       </div>
     </div>
   );
