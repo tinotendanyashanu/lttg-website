@@ -21,7 +21,7 @@ export default function WalkingWoman({ state = 'walking', className = "" }: Walk
   const walkDuration = 1.2;
 
   // Animation variants for limbs
-  const legVariants = {
+  const legVariants: any = {
     walking: (delay: number) => ({
       rotate: [25, -25, 25],
       transition: {
@@ -34,7 +34,7 @@ export default function WalkingWoman({ state = 'walking', className = "" }: Walk
     idle: { rotate: 0 }
   };
 
-  const hairVariants = {
+  const hairVariants: any = {
     walking: {
       rotate: [-5, 5, -5],
       scaleX: [1, 1.05, 1],
@@ -46,7 +46,7 @@ export default function WalkingWoman({ state = 'walking', className = "" }: Walk
     }
   };
 
-  const bodyVariants = {
+  const bodyVariants: any = {
     walking: {
       y: [0, -4, 0],
       transition: {
