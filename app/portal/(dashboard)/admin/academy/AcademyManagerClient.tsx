@@ -17,17 +17,37 @@ interface UploadState {
   error: string | null;
 }
 
+interface Course {
+  _id: string;
+  title: string;
+  slug?: string;
+  summary?: string;
+  description?: string;
+  difficultyLevel: string;
+  category: string;
+  targetRoles: string | string[];
+  isPublished: boolean;
+  isRequired: boolean;
+  deadlineAt?: string;
+  estimatedDurationMinutes: number;
+  orderIndex: number;
+  heroIcon?: string;
+  quiz?: any;
+  thumbnailUrl?: string;
+  updatedAt?: string;
+}
+
 // ── Helpers ──────────────────────────────────────────────────────────────────
 function fmtQuiz(v: any) {
   if (!v?.questions?.length) return '';
   return JSON.stringify(v, null, 2);
 }
 function cleanQuiz(v: string) {
-  const t = v.trim();
+  const t = v?.trim() || '';
   return t ? t : undefined;
 }
 
-const EMPTY_COURSE = {
+const EMPTY_COURSE: Partial<Course> = {
   title: '', slug: '', summary: '', description: '',
   difficultyLevel: 'Beginner', category: 'Operations',
   targetRoles: 'all', isPublished: true, isRequired: false,
@@ -37,7 +57,7 @@ const EMPTY_COURSE = {
 
 // ── MediaUploader component ──────────────────────────────────────────────────
 function MediaUploader({
-  accept, label, icon, currentUrl, onUploaded, maxMb,
+  accept, label, icon, currentUrl, onUploaded, maxMb, showUrlInput
 }: {
   accept: string; label: string; icon: string;
   currentUrl?: string; onUploaded: (url: string) => void; maxMb: number;
@@ -197,10 +217,10 @@ const LESSON_TYPES: { type: LessonType; label: string; icon: string; color: stri
 
 export default function AcademyManagerClient({ initialCourses }: { initialCourses: any[] }) {
   const router = useRouter();
-  const [courses, setCourses] = useState(initialCourses || []);
+  const [courses, setCourses] = useState<Course[]>(initialCourses || []);
   const [filterDifficulty, setFilterDifficulty] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCourse, setSelectedCourse] = useState<any>(initialCourses?.[0] || null);
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(initialCourses?.[0] || null);
   const [modules, setModules] = useState<any[]>([]);
   const [lessons, setLessons] = useState<any[]>([]);
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(null);
@@ -245,7 +265,7 @@ export default function AcademyManagerClient({ initialCourses }: { initialCourse
   }, [selectedLessonId, lessons]);
 
   const filteredCourses = useMemo(() => {
-    return courses.filter((c: any) => {
+    return courses.filter((c: Course) => {
       if (filterDifficulty !== 'all' && c.difficultyLevel !== filterDifficulty) return false;
       if (searchQuery) {
         const q = searchQuery.toLowerCase();
@@ -266,11 +286,11 @@ export default function AcademyManagerClient({ initialCourses }: { initialCourse
     try {
       if (isCreatingCourse) {
         const res = await createAdminCourse(payload);
-        const newC = { ...payload, _id: res.courseId, updatedAt: new Date().toISOString() };
+        const newC: Course = { ...payload, _id: res.courseId as string, updatedAt: new Date().toISOString() };
         setCourses(c => [newC, ...c]); setSelectedCourse(newC); setIsCreatingCourse(false);
       } else if (selectedCourse) {
         await updateAdminCourse(selectedCourse._id, payload);
-        const updC = { ...selectedCourse, ...payload, updatedAt: new Date().toISOString() };
+        const updC: Course = { ...selectedCourse, ...payload, updatedAt: new Date().toISOString() };
         setCourses(c => c.map(x => x._id === selectedCourse._id ? updC : x)); setSelectedCourse(updC);
       }
       router.refresh();
@@ -353,7 +373,7 @@ export default function AcademyManagerClient({ initialCourses }: { initialCourse
         <div className="space-y-3">
           <h2 className="px-2 text-xs font-bold text-gray-400 uppercase tracking-widest">Course Catalog</h2>
           <div className="space-y-2 max-h-[calc(100vh-250px)] overflow-y-auto pr-2 custom-scrollbar">
-            {filteredCourses.map((c: any) => (
+            {filteredCourses.map((c: Course) => (
               <button
                 key={c._id} onClick={() => { setIsCreatingCourse(false); setSelectedCourse(c); }}
                 className={`group w-full rounded-3xl border p-4 text-left transition-all ${
@@ -397,7 +417,7 @@ export default function AcademyManagerClient({ initialCourses }: { initialCourse
                     <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{isCreatingCourse ? 'Create Course' : 'Course Settings'}</h2>
                     <p className="text-gray-500 text-sm mt-1">Configure your course metadata and curriculum architecture.</p>
                   </div>
-                  {!isCreatingCourse && (
+                  {!isCreatingCourse && selectedCourse && (
                     <button onClick={() => { if(confirm('Delete course?')) deleteAdminCourse(selectedCourse._id).then(() => router.refresh()); }} className="text-rose-500 hover:text-rose-600 font-semibold text-sm">Delete Course</button>
                   )}
                 </div>
@@ -408,16 +428,16 @@ export default function AcademyManagerClient({ initialCourses }: { initialCourse
                     <MediaUploader
                       accept="image/*" label="cover image" icon="image"
                       currentUrl={courseForm.thumbnailUrl} maxMb={5}
-                      onUploaded={u => setCourseForm(f => ({ ...f, thumbnailUrl: u }))}
+                      onUploaded={u => setCourseForm((f: any) => ({ ...f, thumbnailUrl: u }))}
                     />
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Hero Icon</p>
-                        <input value={courseForm.heroIcon} onChange={e => setCourseForm(f => ({ ...f, heroIcon: e.target.value }))} className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2 text-sm dark:border-gray-700 dark:bg-gray-800" />
+                        <input value={courseForm.heroIcon} onChange={e => setCourseForm((f: any) => ({ ...f, heroIcon: e.target.value }))} className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2 text-sm dark:border-gray-700 dark:bg-gray-800" />
                       </div>
                       <div className="space-y-2">
                         <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Order</p>
-                        <input type="number" value={courseForm.orderIndex} onChange={e => setCourseForm(f => ({ ...f, orderIndex: e.target.value }))} className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2 text-sm dark:border-gray-700 dark:bg-gray-800" />
+                        <input type="number" value={courseForm.orderIndex} onChange={e => setCourseForm((f: any) => ({ ...f, orderIndex: e.target.value }))} className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2 text-sm dark:border-gray-700 dark:bg-gray-800" />
                       </div>
                     </div>
                   </div>
@@ -426,39 +446,39 @@ export default function AcademyManagerClient({ initialCourses }: { initialCourse
                     <div className="grid gap-6 md:grid-cols-2">
                       <div className="space-y-2">
                         <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Title</p>
-                        <input value={courseForm.title} onChange={e => setCourseForm(f => ({ ...f, title: e.target.value }))} className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-5 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 focus:outline-none dark:border-gray-700 dark:bg-gray-800" />
+                        <input value={courseForm.title} onChange={e => setCourseForm((f: any) => ({ ...f, title: e.target.value }))} className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-5 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 focus:outline-none dark:border-gray-700 dark:bg-gray-800" />
                       </div>
                       <div className="space-y-2">
                         <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Slug</p>
-                        <input value={courseForm.slug} onChange={e => setCourseForm(f => ({ ...f, slug: e.target.value }))} className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-5 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 focus:outline-none dark:border-gray-700 dark:bg-gray-800" />
+                        <input value={courseForm.slug} onChange={e => setCourseForm((f: any) => ({ ...f, slug: e.target.value }))} className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-5 py-3 text-sm focus:ring-2 focus:ring-blue-500/20 focus:outline-none dark:border-gray-700 dark:bg-gray-800" />
                       </div>
                       <div className="space-y-2">
                         <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Difficulty</p>
-                        <select value={courseForm.difficultyLevel} onChange={e => setCourseForm(f => ({ ...f, difficultyLevel: e.target.value }))} className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-5 py-3 text-sm focus:outline-none dark:border-gray-700 dark:bg-gray-800">
+                        <select value={courseForm.difficultyLevel} onChange={e => setCourseForm((f: any) => ({ ...f, difficultyLevel: e.target.value }))} className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-5 py-3 text-sm focus:outline-none dark:border-gray-700 dark:bg-gray-800">
                           <option>Beginner</option><option>Intermediate</option><option>Advanced</option>
                         </select>
                       </div>
                       <div className="space-y-2">
                         <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Category</p>
-                        <select value={courseForm.category} onChange={e => setCourseForm(f => ({ ...f, category: e.target.value }))} className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-5 py-3 text-sm focus:outline-none dark:border-gray-700 dark:bg-gray-800">
+                        <select value={courseForm.category} onChange={e => setCourseForm((f: any) => ({ ...f, category: e.target.value }))} className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-5 py-3 text-sm focus:outline-none dark:border-gray-700 dark:bg-gray-800">
                           <option>Operations</option><option>Sales</option><option>Customer Success</option><option>Compliance</option><option>Product</option><option>Leadership</option>
                         </select>
                       </div>
                     </div>
                     <div className="space-y-2">
                       <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Summary</p>
-                      <input value={courseForm.summary} onChange={e => setCourseForm(f => ({ ...f, summary: e.target.value }))} className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-5 py-3 text-sm dark:border-gray-700 dark:bg-gray-800" />
+                      <input value={courseForm.summary} onChange={e => setCourseForm((f: any) => ({ ...f, summary: e.target.value }))} className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-5 py-3 text-sm dark:border-gray-700 dark:bg-gray-800" />
                     </div>
                     <div className="space-y-2">
                       <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Description</p>
-                      <textarea value={courseForm.description} onChange={e => setCourseForm(f => ({ ...f, description: e.target.value }))} rows={4} className="w-full rounded-3xl border border-gray-200 bg-gray-50 px-5 py-4 text-sm dark:border-gray-700 dark:bg-gray-800" />
+                      <textarea value={courseForm.description} onChange={e => setCourseForm((f: any) => ({ ...f, description: e.target.value }))} rows={4} className="w-full rounded-3xl border border-gray-200 bg-gray-50 px-5 py-4 text-sm dark:border-gray-700 dark:bg-gray-800" />
                     </div>
                     <div className="flex flex-wrap items-center gap-6 pt-4">
                       <label className="flex items-center gap-3 cursor-pointer group">
                         <div className={`w-10 h-6 rounded-full transition-all relative ${courseForm.isPublished ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-gray-700'}`}>
                           <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-all ${courseForm.isPublished ? 'translate-x-4' : ''}`} />
                         </div>
-                        <input type="checkbox" className="hidden" checked={courseForm.isPublished} onChange={e => setCourseForm(f => ({ ...f, isPublished: e.target.checked }))} />
+                        <input type="checkbox" className="hidden" checked={courseForm.isPublished} onChange={e => setCourseForm((f: any) => ({ ...f, isPublished: e.target.checked }))} />
                         <span className="text-sm font-bold text-gray-700 dark:text-gray-300">Published</span>
                       </label>
                       <button onClick={handleSaveCourse} disabled={isSavingCourse} className="ml-auto rounded-2xl bg-blue-600 px-10 py-4 text-sm font-bold text-white transition-all hover:bg-blue-700 disabled:opacity-50 hover:shadow-xl active:scale-95">
@@ -502,7 +522,7 @@ export default function AcademyManagerClient({ initialCourses }: { initialCourse
                           </button>
                           {selectedModuleId === m._id && (
                             <div className="pl-4 border-l-2 border-blue-500/20 ml-4 py-2 space-y-1">
-                              {lessons.filter(l => l.moduleId === m._id).map((l, lIdx) => (
+                              {lessons.filter(l => l.moduleId === m._id).map((l) => (
                                 <button
                                   key={l._id} onClick={() => setSelectedLessonId(l._id)}
                                   className={`w-full text-left p-3 rounded-2xl transition-all text-sm flex items-center gap-3 ${
@@ -536,7 +556,7 @@ export default function AcademyManagerClient({ initialCourses }: { initialCourse
                           <div className="flex border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 p-2">
                             {LESSON_TYPES.map(t => (
                               <button
-                                key={t.type} onClick={() => setLessonForm(f => ({ ...f, lessonType: t.type }))}
+                                key={t.type} onClick={() => setLessonForm((f: any) => ({ ...f, lessonType: t.type }))}
                                 className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl text-xs font-bold transition-all ${
                                   lessonForm.lessonType === t.type
                                     ? `bg-gradient-to-br ${t.color} text-white shadow-lg`
@@ -553,12 +573,12 @@ export default function AcademyManagerClient({ initialCourses }: { initialCourse
                             <div className="flex items-center justify-between">
                               <div className="space-y-1 flex-1 max-w-xl">
                                 <input
-                                  value={lessonForm.title} onChange={e => setLessonForm(f => ({ ...f, title: e.target.value }))}
+                                  value={lessonForm.title} onChange={e => setLessonForm((f: any) => ({ ...f, title: e.target.value }))}
                                   className="text-2xl font-bold bg-transparent border-none p-0 focus:ring-0 w-full placeholder:text-gray-200"
                                   placeholder="Untitled Lesson"
                                 />
                                 <input
-                                  value={lessonForm.summary} onChange={e => setLessonForm(f => ({ ...f, summary: e.target.value }))}
+                                  value={lessonForm.summary} onChange={e => setLessonForm((f: any) => ({ ...f, summary: e.target.value }))}
                                   className="text-sm text-gray-500 bg-transparent border-none p-0 focus:ring-0 w-full placeholder:text-gray-300"
                                   placeholder="Add a brief summary..."
                                 />
@@ -576,7 +596,7 @@ export default function AcademyManagerClient({ initialCourses }: { initialCourse
                                     accept="video/*" label="video lesson" icon="videocam"
                                     currentUrl={lessonForm.videoUrl} maxMb={500}
                                     showUrlInput={true}
-                                    onUploaded={u => setLessonForm(f => ({ ...f, videoUrl: u }))}
+                                    onUploaded={u => setLessonForm((f: any) => ({ ...f, videoUrl: u }))}
                                   />
                                 </div>
                               )}
@@ -587,7 +607,7 @@ export default function AcademyManagerClient({ initialCourses }: { initialCourse
                                   <MediaUploader
                                     accept="audio/*" label="audio recording" icon="headphones"
                                     currentUrl={lessonForm.audioUrl} maxMb={100}
-                                    onUploaded={u => setLessonForm(f => ({ ...f, audioUrl: u }))}
+                                    onUploaded={u => setLessonForm((f: any) => ({ ...f, audioUrl: u }))}
                                   />
                                 </div>
                               )}
@@ -595,7 +615,7 @@ export default function AcademyManagerClient({ initialCourses }: { initialCourse
                               <div className="space-y-4">
                                 <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Lesson Content (Markdown)</p>
                                 <textarea
-                                  value={lessonForm.content} onChange={e => setLessonForm(f => ({ ...f, content: e.target.value }))}
+                                  value={lessonForm.content} onChange={e => setLessonForm((f: any) => ({ ...f, content: e.target.value }))}
                                   rows={12} className="w-full rounded-3xl border border-gray-200 bg-gray-50 p-6 text-sm font-mono dark:border-gray-700 dark:bg-gray-800"
                                   placeholder="# Introduction..."
                                 />
@@ -606,7 +626,7 @@ export default function AcademyManagerClient({ initialCourses }: { initialCourse
                                   <div className="space-y-1">
                                     <p className="text-[10px] font-bold text-gray-400 uppercase">Duration</p>
                                     <div className="flex items-center gap-2">
-                                      <input type="number" value={lessonForm.estimatedDuration} onChange={e => setLessonForm(f => ({ ...f, estimatedDuration: e.target.value }))} className="w-16 bg-transparent border-none p-0 text-sm font-bold focus:ring-0" />
+                                      <input type="number" value={lessonForm.estimatedDuration} onChange={e => setLessonForm((f: any) => ({ ...f, estimatedDuration: parseInt(e.target.value) || 0 }))} className="w-16 bg-transparent border-none p-0 text-sm font-bold focus:ring-0" />
                                       <span className="text-xs text-gray-400">min</span>
                                     </div>
                                   </div>
@@ -628,16 +648,16 @@ export default function AcademyManagerClient({ initialCourses }: { initialCourse
                         <div className="grid gap-6 md:grid-cols-2">
                           <div className="space-y-2">
                             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Module Title</p>
-                            <input value={moduleForm.title} onChange={e => setModuleForm(f => ({ ...f, title: e.target.value }))} className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-5 py-3 text-sm dark:border-gray-700 dark:bg-gray-800" />
+                            <input value={moduleForm.title} onChange={e => setModuleForm((f: any) => ({ ...f, title: e.target.value }))} className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-5 py-3 text-sm dark:border-gray-700 dark:bg-gray-800" />
                           </div>
                           <div className="space-y-2">
                             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Order Index</p>
-                            <input type="number" value={moduleForm.orderIndex} onChange={e => setModuleForm(f => ({ ...f, orderIndex: e.target.value }))} className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-5 py-3 text-sm dark:border-gray-700 dark:bg-gray-800" />
+                            <input type="number" value={moduleForm.orderIndex} onChange={e => setModuleForm((f: any) => ({ ...f, orderIndex: parseInt(e.target.value) || 0 }))} className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-5 py-3 text-sm dark:border-gray-700 dark:bg-gray-800" />
                           </div>
                         </div>
                         <div className="space-y-2">
                           <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Description</p>
-                          <textarea value={moduleForm.description} onChange={e => setModuleForm(f => ({ ...f, description: e.target.value }))} rows={3} className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-5 py-3 text-sm dark:border-gray-700 dark:bg-gray-800" />
+                          <textarea value={moduleForm.description} onChange={e => setModuleForm((f: any) => ({ ...f, description: e.target.value }))} rows={3} className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-5 py-3 text-sm dark:border-gray-700 dark:bg-gray-800" />
                         </div>
                         <div className="flex justify-end pt-4">
                           <button onClick={async () => { setIsSavingModule(true); try { await updateAdminModule(moduleForm._id, moduleForm); router.refresh(); } finally { setIsSavingModule(false); } }} className="rounded-2xl bg-blue-600 px-8 py-3 text-sm font-bold text-white hover:shadow-lg transition-all">

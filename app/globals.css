@@ -44,6 +44,7 @@
   --radius-xl: calc(var(--radius) + 4px);
 
   --color-brand-primary: #2D2D2D;
+  --color-brand-secondary: #4A4A4A;
   --color-background-light: #F4F5F7;
   --color-background-dark: #121212;
   --color-surface-light: #FFFFFF;

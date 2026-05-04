@@ -6,13 +6,25 @@ import Link from 'next/link';
 import { getLessonContent, markLessonComplete } from '@/lib/actions/portalAcademy';
 import MarkdownRenderer from '@/components/portal/knowledge-base/MarkdownRenderer';
 
+interface LearningData {
+  lesson: any;
+  module: any;
+  course: any;
+  progress: any;
+  lessonState: any;
+  moduleStates: any[];
+  navigation: { previousLessonId?: string; nextLessonId?: string };
+  isLocked: boolean;
+  unlockReason?: string;
+}
+
 export default function LessonViewPage() {
   const params = useParams();
   const router = useRouter();
   const { courseId, lessonId } = params as { courseId: string, lessonId: string };
 
   const [loading, setLoading] = useState(true);
-  const [learningData, setLearningData] = useState<any>(null);
+  const [learningData, setLearningData] = useState<LearningData | null>(null);
   const [error, setError] = useState('');
   const [completing, setCompleting] = useState(false);
 
