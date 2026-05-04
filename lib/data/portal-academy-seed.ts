@@ -13,6 +13,7 @@ export const portalAcademySeed = [
     estimatedDurationMinutes: 95,
     orderIndex: 1,
     heroIcon: 'rocket_launch',
+    thumbnailUrl: '',
     quiz: {
       title: 'Final readiness check',
       passingScore: 80,
@@ -205,6 +206,7 @@ export const portalAcademySeed = [
     estimatedDurationMinutes: 70,
     orderIndex: 2,
     heroIcon: 'support_agent',
+    thumbnailUrl: '',
     modules: [
       {
         title: 'Expectation Management',
@@ -313,6 +315,7 @@ export const portalAcademySeed = [
     estimatedDurationMinutes: 55,
     orderIndex: 3,
     heroIcon: 'insights',
+    thumbnailUrl: '',
     modules: [
       {
         title: 'Reading Training Signals',

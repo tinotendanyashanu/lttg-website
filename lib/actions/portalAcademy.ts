@@ -69,6 +69,7 @@ async function ensurePortalAcademySeeded() {
       isRequired: courseSeed.isRequired,
       isPublished: courseSeed.isPublished,
       heroIcon: courseSeed.heroIcon,
+      thumbnailUrl: courseSeed.thumbnailUrl,
       quiz: courseSeed.quiz,
     });
 

@@ -395,7 +395,21 @@ export default function PortalShell({
                 <span className="material-icons-outlined">menu</span>
               </button>
               <h1 className="text-base md:text-xl font-bold text-gray-900 dark:text-white capitalize truncate pr-4">
-                {pathname === "/portal" ? "Dashboard" : pathname.split('/').pop()?.replace("-", " ")}
+                {(() => {
+                  if (pathname === "/portal") return "Dashboard";
+                  const parts = pathname.split('/').filter(Boolean);
+                  const lastPart = parts[parts.length - 1] || "";
+                  
+                  if (/^[0-9a-fA-F]{24}$/.test(lastPart)) {
+                    if (pathname.includes('/academy/courses/')) {
+                      if (pathname.includes('/lessons/')) return "Lesson Viewer";
+                      return "Course Overview";
+                    }
+                    return (parts[parts.length - 2] || "Portal").replace(/-/g, " ");
+                  }
+                  
+                  return lastPart.replace(/-/g, " ");
+                })()}
               </h1>
             </div>
             <div className="flex items-center gap-4">

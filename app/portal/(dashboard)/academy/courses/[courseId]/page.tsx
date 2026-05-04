@@ -35,13 +35,9 @@ export default async function CourseOverviewPage({ params }: { params: Promise<{
   });
 
   return (
-    <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[280px_minmax(0,1fr)]">
-      <aside className="space-y-4 lg:sticky lg:top-6 lg:self-start">
-        <Link href="/portal/academy" className="text-gray-500 hover:text-brand-primary flex items-center gap-1 text-sm font-medium transition-colors">
-          <span className="material-icons-outlined text-sm">arrow_back</span>
-          Back to Academy
-        </Link>
-
+    <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[280px_minmax(0,1fr)] flex-col-reverse lg:flex-row">
+      {/* Course Map - Sidebar (appears below content on mobile) */}
+      <aside className="space-y-4 lg:sticky lg:top-6 lg:self-start order-2 lg:order-1">
         <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-[#27272a]">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-lg font-bold text-gray-900 dark:text-white">Course Map</h2>
@@ -76,13 +72,8 @@ export default async function CourseOverviewPage({ params }: { params: Promise<{
           </div>
         </div>
       </aside>
-
-      <div className="space-y-8">
-      <Link href="/portal/academy" className="text-gray-500 hover:text-brand-primary flex items-center gap-1 text-sm font-medium transition-colors">
-        <span className="material-icons-outlined text-sm">arrow_back</span>
-        Back to Academy
-      </Link>
-
+      {/* Main Content */}
+      <div className="space-y-8 order-1 lg:order-2">
       <div className="bg-white dark:bg-[#27272a] rounded-3xl p-8 md:p-10 border border-gray-100 dark:border-gray-800 shadow-sm relative overflow-hidden">
         <div className="flex flex-col md:flex-row gap-10 relative z-10">
           {course.thumbnailUrl ? (

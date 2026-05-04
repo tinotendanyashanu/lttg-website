@@ -68,8 +68,24 @@ export default async function AcademyDashboard() {
           {courses.map((course: any) => {
             return (
               <Link key={course._id} href={`/portal/academy/courses/${course._id}`}>
-                <div className="bg-white dark:bg-[#27272a] rounded-2xl p-6 border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-shadow group cursor-pointer flex flex-col h-full">
-                  <div className="mb-4 flex items-start justify-between gap-3">
+                <div className="bg-white dark:bg-[#27272a] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-shadow group cursor-pointer flex flex-col h-full overflow-hidden">
+                  {/* Course Image */}
+                  <div className="relative aspect-video w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
+                    {course.thumbnailUrl ? (
+                      <img 
+                        src={course.thumbnailUrl} 
+                        alt={course.title}
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center">
+                        <span className="material-icons-outlined text-4xl text-gray-300 dark:text-gray-600">school</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="p-6 flex flex-col flex-1">
+                    <div className="mb-4 flex items-start justify-between gap-3">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className={`text-xs font-semibold px-2 py-1 flex items-center gap-1 rounded-md ${
                       course.difficultyLevel === 'Beginner' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
@@ -131,6 +147,7 @@ export default async function AcademyDashboard() {
                         Deadline: {new Date(course.deadlineAt).toLocaleDateString()}
                       </p>
                     )}
+                  </div>
                   </div>
                 </div>
               </Link>
