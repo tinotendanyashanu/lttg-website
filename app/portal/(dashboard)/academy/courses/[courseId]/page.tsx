@@ -84,71 +84,79 @@ export default async function CourseOverviewPage({ params }: { params: Promise<{
       </Link>
 
       <div className="bg-white dark:bg-[#27272a] rounded-3xl p-8 md:p-10 border border-gray-100 dark:border-gray-800 shadow-sm relative overflow-hidden">
-        <div className="absolute top-0 right-0 p-8 opacity-10 hidden md:block">
-          <span className="material-icons-outlined text-9xl">school</span>
-        </div>
-        
-        <div className="relative z-10 max-w-2xl">
-          <div className="flex items-center gap-3 mb-4">
-            <span className={`text-xs font-semibold px-2.5 py-1 rounded-md ${
-              course.difficultyLevel === 'Beginner' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
-              course.difficultyLevel === 'Intermediate' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
-              'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-            }`}>
-              {course.difficultyLevel}
-            </span>
-            {course.isRequired && (
-              <span className="text-xs font-semibold px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-900/40">
-                Required
-              </span>
-            )}
-            {progress?.isCompleted && (
-              <span className="text-xs font-semibold px-2.5 py-1 rounded-md bg-brand-primary/10 text-brand-primary border border-brand-primary/20 flex items-center gap-1">
-                <span className="material-icons-outlined text-xs">verified</span> Certified
-              </span>
-            )}
-          </div>
-          
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4 leading-tight">
-            {course.title}
-          </h1>
-          
-          <p className="text-gray-600 dark:text-gray-400 text-lg mb-8">
-            {course.summary || course.description}
-          </p>
-
-          <div className="bg-gray-50 dark:bg-[#1f1f22] rounded-xl p-5 border border-gray-100 dark:border-gray-800 flex flex-col gap-5 lg:flex-row lg:items-center">
-            <div className="flex-1">
-              <div className="flex justify-between text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                <span>Your Progress</span>
-                <span className={percent === 100 ? "text-green-500" : "text-brand-primary"}>{percent}%</span>
-              </div>
-              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 overflow-hidden">
-                <div 
-                  className={`h-full rounded-full transition-all duration-500 ease-out ${percent === 100 ? 'bg-green-500' : 'bg-brand-primary'}`} 
-                  style={{ width: `${percent}%` }}
-                ></div>
-              </div>
+        <div className="flex flex-col md:flex-row gap-10 relative z-10">
+          {course.thumbnailUrl ? (
+            <div className="w-full md:w-72 aspect-square rounded-3xl overflow-hidden shadow-2xl border-4 border-white dark:border-gray-800 shrink-0">
+              <img src={course.thumbnailUrl} alt={course.title} className="w-full h-full object-cover" />
             </div>
-            <div className="flex flex-wrap items-center gap-3">
-              {overdue && (
-                <span className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-700 dark:border-rose-900/40 dark:bg-rose-950/20 dark:text-rose-300">
-                  Overdue training
+          ) : (
+            <div className="absolute top-0 right-0 p-8 opacity-10 hidden md:block">
+              <span className="material-icons-outlined text-9xl">school</span>
+            </div>
+          )}
+          
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-4">
+              <span className={`text-xs font-semibold px-2.5 py-1 rounded-md ${
+                course.difficultyLevel === 'Beginner' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                course.difficultyLevel === 'Intermediate' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+              }`}>
+                {course.difficultyLevel}
+              </span>
+              {course.isRequired && (
+                <span className="text-xs font-semibold px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-900/40">
+                  Required
                 </span>
               )}
-              {course.deadlineAt && (
-                <span className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-600 dark:border-gray-700 dark:bg-[#27272a] dark:text-gray-300">
-                  Deadline: {new Date(course.deadlineAt).toLocaleDateString()}
+              {progress?.isCompleted && (
+                <span className="text-xs font-semibold px-2.5 py-1 rounded-md bg-brand-primary/10 text-brand-primary border border-brand-primary/20 flex items-center gap-1">
+                  <span className="material-icons-outlined text-xs">verified</span> Certified
                 </span>
               )}
-              {lessons.length > 0 && (
-                <Link 
-                  href={`/portal/academy/courses/${course._id}/lessons/${nextLessonId || lessons[0]._id}`}
-                  className="bg-brand-primary hover:bg-brand-secondary text-white px-6 py-2.5 rounded-xl font-semibold transition-colors shadow-sm shrink-0 whitespace-nowrap"
-                >
-                  {percent > 0 ? "Continue Course" : "Start Course"}
-                </Link>
-              )}
+            </div>
+            
+            <h1 className="text-3xl md:text-5xl font-black text-gray-900 dark:text-white mb-6 leading-tight">
+              {course.title}
+            </h1>
+            
+            <p className="text-gray-600 dark:text-gray-400 text-xl mb-10 leading-relaxed">
+              {course.summary || course.description}
+            </p>
+
+            <div className="bg-gray-50 dark:bg-[#1f1f22] rounded-2xl p-6 border border-gray-100 dark:border-gray-800 flex flex-col gap-6 lg:flex-row lg:items-center">
+              <div className="flex-1">
+                <div className="flex justify-between text-sm font-bold text-gray-700 dark:text-gray-200 mb-2">
+                  <span>Course Progress</span>
+                  <span className={percent === 100 ? "text-green-500" : "text-brand-primary"}>{percent}%</span>
+                </div>
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
+                  <div 
+                    className={`h-full rounded-full transition-all duration-700 ease-out ${percent === 100 ? 'bg-green-500' : 'bg-brand-primary shadow-[0_0_10px_rgba(59,130,246,0.5)]'}`} 
+                    style={{ width: `${percent}%` }}
+                  ></div>
+                </div>
+              </div>
+              <div className="flex flex-wrap items-center gap-3">
+                {overdue && (
+                  <span className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-700 dark:border-rose-900/40 dark:bg-rose-950/20 dark:text-rose-300">
+                    Overdue training
+                  </span>
+                )}
+                {course.deadlineAt && (
+                  <span className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-600 dark:border-gray-700 dark:bg-[#27272a] dark:text-gray-300">
+                    Deadline: {new Date(course.deadlineAt).toLocaleDateString()}
+                  </span>
+                )}
+                {lessons.length > 0 && (
+                  <Link 
+                    href={`/portal/academy/courses/${course._id}/lessons/${nextLessonId || lessons[0]._id}`}
+                    className="bg-brand-primary hover:bg-brand-secondary text-white px-10 py-4 rounded-2xl font-bold transition-all shadow-xl hover:shadow-brand-primary/20 hover:-translate-y-0.5 active:translate-y-0 shrink-0 whitespace-nowrap"
+                  >
+                    {percent > 0 ? "Continue Learning" : "Start Course Now"}
+                  </Link>
+                )}
+              </div>
             </div>
           </div>
         </div>

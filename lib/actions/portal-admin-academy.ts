@@ -74,6 +74,7 @@ export async function createAdminCourse(data: any) {
     slug: data.slug ? slugify(data.slug) : slugify(data.title),
     targetRoles: Array.isArray(data.targetRoles) ? data.targetRoles.map(normalizeRole) : [],
     quiz: parseQuizPayload(data.quiz),
+    thumbnailUrl: data.thumbnailUrl ?? undefined,
   };
 
   const course = await PortalCourse.create(payload);
@@ -95,6 +96,7 @@ export async function updateAdminCourse(courseId: string, data: any) {
     slug: data.slug ? slugify(data.slug) : slugify(data.title),
     targetRoles: Array.isArray(data.targetRoles) ? data.targetRoles.map(normalizeRole) : [],
     quiz: parseQuizPayload(data.quiz),
+    thumbnailUrl: data.thumbnailUrl ?? undefined,
   };
 
   const course = await PortalCourse.findByIdAndUpdate(courseId, { $set: payload }, { new: true });
@@ -217,6 +219,8 @@ export async function updateAdminLesson(lessonId: string, data: any) {
       ...data,
       slug: data.slug ? slugify(data.slug) : slugify(data.title),
       attachments,
+      audioUrl: data.audioUrl ?? undefined,
+      thumbnailUrl: data.thumbnailUrl ?? undefined,
     }
   }, { new: true });
   if (!lesson) throw new Error('Lesson not found');

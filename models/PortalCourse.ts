@@ -28,6 +28,7 @@ export interface IPortalCourse extends Document {
   isRequired?: boolean;
   deadlineAt?: Date;
   heroIcon?: string;
+  thumbnailUrl?: string;
   createdBy?: mongoose.Types.ObjectId;
   isPublished: boolean;
   quiz?: IPortalQuiz;
@@ -72,6 +73,7 @@ const PortalCourseSchema: Schema = new Schema({
   isRequired: { type: Boolean, default: false },
   deadlineAt: { type: Date },
   heroIcon: { type: String, default: 'school' },
+  thumbnailUrl: { type: String },
   createdBy: { type: Schema.Types.ObjectId, ref: 'Account' },
   isPublished: { type: Boolean, default: false },
   quiz: { type: PortalQuizSchema },

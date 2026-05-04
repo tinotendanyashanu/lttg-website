@@ -16,6 +16,12 @@ export default function LessonViewPage() {
   const [error, setError] = useState('');
   const [completing, setCompleting] = useState(false);
 
+  const getYouTubeId = (url: string) => {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+  };
+
   useEffect(() => {
     async function load() {
       const res = await getLessonContent(lessonId);
@@ -84,26 +90,51 @@ export default function LessonViewPage() {
       </nav>
 
       <div className="bg-white dark:bg-[#1f1f22] rounded-3xl overflow-hidden border border-gray-100 dark:border-gray-800 shadow-sm">
-        {lesson.videoUrl ? (
-          <div className="w-full aspect-video bg-black flex items-center justify-center relative">
-            <video 
-              src={lesson.videoUrl} 
-              controls 
-              className="w-full h-full object-contain"
-              poster="/placeholder-video.jpg"
-            />
+        {lesson.videoUrl || lesson.audioUrl ? (
+          <div className={`w-full ${lesson.videoUrl ? 'aspect-video' : 'py-12'} bg-black flex flex-col items-center justify-center relative`}>
+            {lesson.videoUrl ? (
+              getYouTubeId(lesson.videoUrl) ? (
+                <iframe
+                  src={`https://www.youtube.com/embed/${getYouTubeId(lesson.videoUrl)}?rel=0&modestbranding=1`}
+                  title={lesson.title}
+                  className="w-full h-full border-0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              ) : (
+                <video 
+                  src={lesson.videoUrl} 
+                  controls 
+                  className="w-full h-full object-contain"
+                  poster="/placeholder-video.jpg"
+                />
+              )
+            ) : (
+              <div className="w-full max-w-2xl px-8">
+                <div className="flex items-center gap-6 mb-8">
+                  <div className="w-20 h-20 rounded-full bg-brand-primary/20 flex items-center justify-center animate-pulse">
+                    <span className="material-icons-outlined text-brand-primary text-4xl">headphones</span>
+                  </div>
+                  <div className="flex-1">
+                    <h2 className="text-white text-xl font-bold mb-1">{lesson.title}</h2>
+                    <p className="text-gray-400 text-sm">Audio Lesson</p>
+                  </div>
+                </div>
+                <audio src={lesson.audioUrl} controls className="w-full" />
+              </div>
+            )}
           </div>
         ) : (
-          <div className="h-32 bg-linear-to-r from-brand-primary to-brand-secondary flex items-center px-8 relative overflow-hidden">
-             <span className="material-icons-outlined text-white/20 text-9xl absolute -right-4 -bottom-4">menu_book</span>
-             <h1 className="text-3xl font-bold text-white relative z-10 wrap-break-word pr-12 leading-tight flex-1">
+          <div className="h-48 bg-linear-to-r from-brand-primary to-brand-secondary flex items-center px-12 relative overflow-hidden">
+             <span className="material-icons-outlined text-white/20 text-[180px] absolute -right-8 -bottom-8 transform rotate-12">menu_book</span>
+             <h1 className="text-4xl font-black text-white relative z-10 wrap-break-word pr-12 leading-tight flex-1">
                 {lesson.title}
              </h1>
           </div>
         )}
 
         <div className="p-8 md:p-12">
-          {lesson.videoUrl && (
+          {(lesson.videoUrl || lesson.audioUrl) && (
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
               {lesson.title}
             </h1>

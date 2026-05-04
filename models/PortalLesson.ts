@@ -5,10 +5,12 @@ export interface IPortalLesson extends Document {
   courseId: mongoose.Types.ObjectId;
   title: string;
   slug?: string;
-  lessonType?: 'video' | 'text' | 'file' | 'task';
+  lessonType?: 'video' | 'audio' | 'text' | 'file' | 'task';
   summary?: string;
   content: string; // Markdown or rich text
   videoUrl?: string; // Optional video
+  audioUrl?: string; // Optional audio
+  thumbnailUrl?: string; // Lesson thumbnail
   attachments?: string[]; // URLs directly to files
   estimatedDuration?: number; // In minutes
   isRequired?: boolean;
@@ -25,12 +27,14 @@ const PortalLessonSchema: Schema = new Schema({
   slug: { type: String },
   lessonType: {
     type: String,
-    enum: ['video', 'text', 'file', 'task'],
+    enum: ['video', 'audio', 'text', 'file', 'task'],
     default: 'text',
   },
   summary: { type: String },
   content: { type: String, required: true },
   videoUrl: { type: String },
+  audioUrl: { type: String },
+  thumbnailUrl: { type: String },
   attachments: [{ type: String }],
   estimatedDuration: { type: Number }, // internal representation in minutes
   isRequired: { type: Boolean, default: true },
