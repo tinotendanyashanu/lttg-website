@@ -122,7 +122,7 @@ function MediaUploader({
             {isVideo && (
               getYouTubeId(preview) ? (
                 <iframe
-                  src={`https://www.youtube.com/embed/${getYouTubeId(preview)}?rel=0&modestbranding=1`}
+                  src={`https://www.youtube.com/embed/${getYouTubeId(preview)}?rel=0&modestbranding=1&controls=0`}
                   className="w-full aspect-video rounded-xl"
                   allowFullScreen
                 />

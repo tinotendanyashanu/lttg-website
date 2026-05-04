@@ -18,7 +18,6 @@ const PasswordSetupTokenSchema: Schema = new Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-PasswordSetupTokenSchema.index({ token: 1 });
 PasswordSetupTokenSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 export const PasswordSetupToken: Model<IPasswordSetupToken> =

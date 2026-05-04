@@ -113,7 +113,7 @@ export default function LessonViewPage() {
             {lesson.videoUrl ? (
               getYouTubeId(lesson.videoUrl) ? (
                 <iframe
-                  src={`https://www.youtube.com/embed/${getYouTubeId(lesson.videoUrl)}?rel=0&modestbranding=1`}
+                  src={`https://www.youtube.com/embed/${getYouTubeId(lesson.videoUrl)}?rel=0&modestbranding=1&controls=0`}
                   title={lesson.title}
                   className="w-full h-full border-0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

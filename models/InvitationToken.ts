@@ -22,7 +22,6 @@ const InvitationTokenSchema: Schema = new Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-InvitationTokenSchema.index({ token: 1 });
 InvitationTokenSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 export const InvitationToken: Model<IInvitationToken> =
