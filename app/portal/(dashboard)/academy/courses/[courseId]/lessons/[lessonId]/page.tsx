@@ -44,7 +44,7 @@ export default function LessonViewPage() {
     async function load() {
       const res = await getLessonContent(lessonId);
       if (res.success) {
-        setLearningData(res);
+        setLearningData(res as any);
       } else {
         setError(res.error || 'Failed to load lesson');
       }
