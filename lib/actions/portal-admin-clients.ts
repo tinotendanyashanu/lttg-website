@@ -10,6 +10,7 @@ import { createLinkedClientAccountUser } from '@/lib/actions/client';
 import { Account } from '@/models/Account';
 import { PasswordSetupToken } from '@/models/PasswordSetupToken';
 import { sendEmail, EmailTemplates } from '@/lib/email';
+import { extendBlackHoleDeadline } from '@/lib/actions/blackhole';
 import crypto from 'crypto';
 
 export async function getAdminClients() {
@@ -91,6 +92,10 @@ export async function createAdminClient(data: any) {
     actionType: 'client_created',
     newValue: client.businessName,
   });
+
+  if (account.roles.includes('employee') || account.roles.includes('intern')) {
+    await extendBlackHoleDeadline(account._id, 'lead');
+  }
 
   // Create a portal account for the client and send them a welcome email with login details
   if (data.clientEmail) {

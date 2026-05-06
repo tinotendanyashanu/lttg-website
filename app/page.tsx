@@ -136,7 +136,7 @@ export default function Home() {
                 Book a Strategy Session
                 <ArrowRight className="ml-2 w-5 h-5" />
               </button>
-              <Link href="/partner" className="inline-flex justify-center items-center px-8 py-4 text-base font-medium text-white bg-white/10 border border-white/20 rounded-full hover:bg-white/20 backdrop-blur-md transition-all duration-300">
+              <Link href="/portal/partner" className="inline-flex justify-center items-center px-8 py-4 text-base font-medium text-white bg-white/10 border border-white/20 rounded-full hover:bg-white/20 backdrop-blur-md transition-all duration-300">
                 Partner With Leo
               </Link>
             </div>

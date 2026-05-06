@@ -34,6 +34,9 @@ export interface IAccount extends Document {
     notes?: string;
   };
   passwordSetupRequired?: boolean;
+  blackHoleDeadline?: Date;
+  lifetimeDealsClosed?: number;
+  lifetimeLeadsRegistered?: number;
 }
 
 const AccountSchema: Schema = new Schema({
@@ -70,6 +73,9 @@ const AccountSchema: Schema = new Schema({
   },
   passwordSetupRequired: { type: Boolean, default: false },
   trustedIps: { type: [String], default: [] },
+  blackHoleDeadline: { type: Date },
+  lifetimeDealsClosed: { type: Number, default: 0 },
+  lifetimeLeadsRegistered: { type: Number, default: 0 },
 });
 
 AccountSchema.index({ linkedClientAccountId: 1 });

@@ -20,7 +20,7 @@ export default function SignupClient() {
        {/* Left Side - Form */}
        <div className="flex items-center justify-center p-8 bg-white text-slate-900">
         <div className="w-full max-w-sm">
-          <Link href="/partner" className="text-slate-400 text-sm hover:text-slate-900 transition-colors mb-8 block">&larr; Back to Partner Home</Link>
+          <Link href="/portal/partner" className="text-slate-400 text-sm hover:text-slate-900 transition-colors mb-8 block">&larr; Back to Partner Home</Link>
           <h1 className="text-3xl font-bold mb-2">Apply for Partnership</h1>
           <p className="text-slate-500 mb-8">Join the network and start earning. Applications are reviewed within 48 hours.</p>
           

@@ -31,7 +31,7 @@ export async function authenticate(
     const accountUser = await Account.findOne({ email });
 
     // Determine target redirect based on user's resolved role
-    let redirectTo = '/partner/dashboard';
+    let redirectTo = '/portal/partner/dashboard';
     let effectiveLoginSource = loginSource;
     
     if (loginSource === 'client_portal') {
@@ -45,20 +45,20 @@ export async function authenticate(
              if (accountUser.roles.includes('admin')) {
                  redirectTo = '/admin';
              } else if (accountUser.roles.includes('employee') || accountUser.roles.includes('intern')) {
-                 redirectTo = '/portal';
+                 redirectTo = '/portal/employee';
              }
          }
     } else {
          // Unified login — identify most probable destination
          if (partner && partner.role === 'partner' && !(accountUser && accountUser.roles.includes('admin'))) {
-              redirectTo = '/partner/dashboard';
+              redirectTo = '/portal/partner/dashboard';
               effectiveLoginSource = 'partner';
          } else if (accountUser) {
               if (accountUser.roles.includes('admin')) {
                   redirectTo = '/admin';
                   effectiveLoginSource = 'portal';
               } else if (accountUser.roles.includes('employee') || accountUser.roles.includes('intern')) {
-                  redirectTo = '/portal';
+                  redirectTo = '/portal/employee';
                   effectiveLoginSource = 'portal';
               } else if (accountUser.roles.includes('client')) {
                   redirectTo = '/portal/client/dashboard';
@@ -199,7 +199,7 @@ export async function registerPartner(prevState: unknown, formData: FormData) {
     
     // Send verification email
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/+$/, '') || 'http://localhost:3000';
-    const verificationLink = `${baseUrl}/partner/verify?token=${verificationToken}`;
+    const verificationLink = `${baseUrl}/portal/partner/verify?token=${verificationToken}`;
     
     await sendEmail({
         to: email,
@@ -232,7 +232,7 @@ export async function registerPartner(prevState: unknown, formData: FormData) {
   // The verify-email page will show the "check your inbox" prompt.
   // The dashboard gate in auth.config.ts will prevent access until email is verified.
   await signIn('credentials', { email, password: validatedFields.data.password, redirect: false });
-  redirect('/partner/verify-email');
+  redirect('/portal/partner/verify-email');
 }
 
 export async function verifyEmail(token: string) {
@@ -281,7 +281,7 @@ export async function resendVerificationEmail() {
         );
 
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/+$/, '') || 'http://localhost:3000';
-        const verificationLink = `${baseUrl}/partner/verify?token=${verificationToken}`;
+        const verificationLink = `${baseUrl}/portal/partner/verify?token=${verificationToken}`;
         
         await sendEmail({
             to: partner.email,
@@ -316,7 +316,7 @@ export async function forgotPassword(prevState: unknown, formData: FormData) {
     await partner.save();
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/+$/, '') || 'http://localhost:3000';
-    const resetLink = `${baseUrl}/partner/reset-password?token=${resetToken}`;
+    const resetLink = `${baseUrl}/portal/partner/reset-password?token=${resetToken}`;
 
     await sendEmail({
         to: partner.email,
@@ -394,6 +394,6 @@ export async function acceptTerms(prevState: unknown, formData: FormData) {
     termsVersion: CURRENT_TERMS_VERSION,
   });
 
-  revalidatePath('/partner/dashboard');
-  redirect('/partner/dashboard');
+  revalidatePath('/portal/partner/dashboard');
+  redirect('/portal/partner/dashboard');
 }

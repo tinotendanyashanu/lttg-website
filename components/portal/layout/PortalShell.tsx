@@ -145,9 +145,9 @@ export default function PortalShell({
 
           <nav className="flex-1 space-y-2 overflow-y-auto pr-2 pb-4">
             <Link
-              href="/portal"
+              href="/portal/employee"
               className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-center lg:justify-start'} gap-3 px-4 py-3 rounded-xl font-medium transition-colors group ${
-                pathname === "/portal"
+                pathname === "/portal/employee"
                   ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
                   : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
               }`}
@@ -396,7 +396,7 @@ export default function PortalShell({
               </button>
               <h1 className="text-base md:text-xl font-bold text-gray-900 dark:text-white capitalize truncate pr-4">
                 {(() => {
-                  if (pathname === "/portal") return "Dashboard";
+                  if (pathname === "/portal/employee") return "Dashboard";
                   const parts = pathname.split('/').filter(Boolean);
                   const lastPart = parts[parts.length - 1] || "";
                   

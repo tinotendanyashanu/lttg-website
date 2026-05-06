@@ -9,7 +9,9 @@ import {
   getPriorityQueue
 } from '@/lib/actions/dashboard';
 import { getActiveQuestsWithProgress } from '@/lib/actions/quests';
+import { getBlackHoleMetrics } from '@/lib/actions/blackhole';
 import SalesQuests from './widgets/SalesQuests';
+import BlackHoleWidget from './widgets/BlackHoleWidget';
 import IdentitySnapshot from './widgets/IdentitySnapshot';
 import PersonalPerformance from './widgets/PersonalPerformance';
 import PriorityQueue from './widgets/PriorityQueue';
@@ -36,7 +38,8 @@ export default async function UnifiedDashboard({ title, accountId, email, roles 
     recentActivityData,
     knowledgeData,
     commissionData,
-    salesQuests
+    salesQuests,
+    blackHoleMetrics
   ] = await Promise.all([
     getIdentitySnapshot(email),
     getPersonalPerformanceMetrics(accountId, roles),
@@ -44,7 +47,8 @@ export default async function UnifiedDashboard({ title, accountId, email, roles 
     getPersonalRecentActivity(accountId, roles),
     getKnowledgeShortcuts(),
     getInternEmployeeCommissionSnapshot(accountId, roles),
-    getActiveQuestsWithProgress(accountId, roles)
+    getActiveQuestsWithProgress(accountId, roles),
+    getBlackHoleMetrics(accountId)
   ]);
 
   if (!identityData) return <div>Failed to load profile.</div>;
@@ -63,6 +67,8 @@ export default async function UnifiedDashboard({ title, accountId, email, roles 
            </Link>
         </div>
       </div>
+
+      {blackHoleMetrics && <BlackHoleWidget metrics={blackHoleMetrics} />}
 
       {salesQuests.length > 0 && <SalesQuests quests={salesQuests} />}
 

@@ -213,6 +213,16 @@ export const EmailTemplates = {
       <p style="margin-top: 32px;">Best regards,<br /><strong style="color: #1e293b;">The Partner Team</strong></p>
     `),
     
+  blackHoleTermination: (name: string) =>
+    BaseTemplate(`
+      <h2 style="color: #dc2626; font-size: 20px; margin-top: 0; margin-bottom: 24px;">Account Deactivation Notice</h2>
+      <p>Hello ${name},</p>
+      <p>This is an automated notification from the LeoTheTechGuy System.</p>
+      <p>Your account has been deactivated due to extended inactivity (Black Hole protocol).</p>
+      <p>If you believe this was in error or you wish to be reinstated, please contact administration.</p>
+      <p style="margin-top: 32px;">Regards,<br /><strong style="color: #1e293b;">System Administration</strong></p>
+    `),
+
   adminNotification: (type: string, details: string) =>
     BaseTemplate(`
       <h2 style="color: #0f172a; font-size: 20px; margin-top: 0; margin-bottom: 24px;">System Notification: ${type}</h2>

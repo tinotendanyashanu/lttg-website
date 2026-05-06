@@ -14,7 +14,7 @@ export default async function VerifyPage({
         <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full text-center">
             <h1 className="text-2xl font-bold text-red-600 mb-4">Invalid Link</h1>
             <p className="text-gray-600 mb-6">The verification link is invalid or missing.</p>
-            <Link href="/partner" className="text-blue-600 hover:underline">Return to Home</Link>
+            <Link href="/portal/partner" className="text-blue-600 hover:underline">Return to Home</Link>
         </div>
       </div>
     );

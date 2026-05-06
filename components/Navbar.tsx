@@ -46,7 +46,7 @@ const Navbar = () => {
               Services
             </Link>
             {/* <Link href="/media" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Media</Link> */}
-            <Link href="/partner" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Partner</Link>
+            <Link href="/portal/partner" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Partner</Link>
             <Link href="/tech-stack" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Resources</Link>
             <Link href="/contact" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Contact</Link>
           </div>
@@ -90,7 +90,7 @@ const Navbar = () => {
             </div>
 
             {/* <Link href="/media" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50/50">Media</Link> */}
-            <Link href="/partner" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50/50">Partner</Link>
+            <Link href="/portal/partner" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50/50">Partner</Link>
             <Link href="/tech-stack" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50/50">Resources</Link>
             <Link href="/contact" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50/50">Contact</Link>
             <div className="pt-4 space-y-2">

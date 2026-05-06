@@ -165,7 +165,7 @@ export default function ServicesPage() {
                     A dedicated program for agencies and connectors. Earn commissions by referring high-ticket projects.
                 </p>
                 <Link 
-                    href="/partner" 
+                    href="/portal/partner" 
                     className="inline-flex items-center px-8 py-4 bg-indigo-600 text-white rounded-full font-medium hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-600/20"
                 >
                     Learn About Partnership <ArrowRight className="ml-2 w-5 h-5" />

@@ -8,6 +8,7 @@ import InternProfile from '@/models/InternProfile';
 import { Account } from '@/models/Account';
 import { ActivityLog } from '@/models/ActivityLog';
 import { getAccountByEmail } from '@/lib/data/account';
+import { extendBlackHoleDeadline } from '@/lib/actions/blackhole';
 import { revalidatePath } from 'next/cache';
 
 // Only allow specific statuses for Intern leads
@@ -82,6 +83,8 @@ export async function updateAdminLeadStatus(leadId: string, newStatus: AllowedAd
           });
         }
       }
+
+      await extendBlackHoleDeadline(lead.accountId, 'deal');
     }
 
     const prevStatus = lead.status;
