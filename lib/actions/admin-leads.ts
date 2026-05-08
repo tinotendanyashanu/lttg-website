@@ -84,7 +84,9 @@ export async function updateAdminLeadStatus(leadId: string, newStatus: AllowedAd
         }
       }
 
-      await extendBlackHoleDeadline(lead.accountId, 'deal');
+      if (lead.accountId) {
+        await extendBlackHoleDeadline(lead.accountId, 'deal');
+      }
     }
 
     const prevStatus = lead.status;

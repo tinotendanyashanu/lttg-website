@@ -1,5 +1,5 @@
 import AdminPageBanner from '@/components/admin/AdminPageBanner';
-import UserManagerClient from '@/app/portal/(dashboard)/admin/users/UserManagerClient';
+import UserManagerClient from '@/app/portal/employee/admin/users/UserManagerClient';
 import { getAdminUsers, getAdminTeams } from '@/lib/actions/portal-admin-users';
 
 export const metadata = { title: 'Employees | Admin' };

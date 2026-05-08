@@ -1,5 +1,5 @@
 import AdminPageBanner from '@/components/admin/AdminPageBanner';
-import KnowledgeManagerClient from '@/app/portal/(dashboard)/admin/knowledge/KnowledgeManagerClient';
+import KnowledgeManagerClient from '@/app/portal/employee/admin/knowledge/KnowledgeManagerClient';
 import { getAdminKnowledgeArticles } from '@/lib/actions/portal-admin-knowledge';
 
 export const metadata = { title: 'Knowledge Base | Admin' };

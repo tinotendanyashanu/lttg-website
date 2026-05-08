@@ -1,5 +1,5 @@
 import AdminPageBanner from '@/components/admin/AdminPageBanner';
-import CaseClientView from '@/app/portal/(dashboard)/admin/cases/CaseClientView';
+import CaseClientView from '@/app/portal/employee/admin/cases/CaseClientView';
 import { getAdminCases } from '@/lib/actions/portal-admin';
 
 export const metadata = { title: 'Cases | Admin' };

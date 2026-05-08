@@ -1,5 +1,5 @@
 import AdminPageBanner from '@/components/admin/AdminPageBanner';
-import CommissionManagerClient from '@/app/portal/(dashboard)/admin/manage-commissions/CommissionManagerClient';
+import CommissionManagerClient from '@/app/portal/employee/admin/manage-commissions/CommissionManagerClient';
 import { getAdminCommissionOverview } from '@/lib/actions/portal-admin';
 import dbConnect from '@/lib/mongodb';
 import { CaseCommission } from '@/models/CaseCommission';

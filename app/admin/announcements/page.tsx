@@ -1,5 +1,5 @@
 import AdminPageBanner from '@/components/admin/AdminPageBanner';
-import AdminAnnouncementsClient from '@/app/portal/(dashboard)/admin/announcements/AdminAnnouncementsClient';
+import AdminAnnouncementsClient from '@/app/portal/employee/admin/announcements/AdminAnnouncementsClient';
 import { getAnnouncementsHistory } from '@/lib/actions/announcements';
 
 export const metadata = { title: 'Announcements | Admin' };

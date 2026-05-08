@@ -1,5 +1,5 @@
 import AdminPageBanner from '@/components/admin/AdminPageBanner';
-import TeamManagerClient from '@/app/portal/(dashboard)/admin/teams/TeamManagerClient';
+import TeamManagerClient from '@/app/portal/employee/admin/teams/TeamManagerClient';
 import { getAdminTeams } from '@/lib/actions/portal-admin-teams';
 
 export const metadata = { title: 'Teams | Admin' };

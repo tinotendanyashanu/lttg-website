@@ -1,5 +1,5 @@
 import AdminPageBanner from '@/components/admin/AdminPageBanner';
-import AcademyManagerClient from '@/app/portal/(dashboard)/admin/academy/AcademyManagerClient';
+import AcademyManagerClient from '@/app/portal/employee/admin/academy/AcademyManagerClient';
 import { getAdminCourses } from '@/lib/actions/portal-admin-academy';
 
 export const metadata = { title: 'Academy | Admin' };

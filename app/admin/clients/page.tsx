@@ -1,5 +1,5 @@
 import AdminPageBanner from '@/components/admin/AdminPageBanner';
-import ClientManagerClient from '@/app/portal/(dashboard)/admin/clients/ClientManagerClient';
+import ClientManagerClient from '@/app/portal/employee/admin/clients/ClientManagerClient';
 import { getAdminClients } from '@/lib/actions/portal-admin-clients';
 
 export const metadata = { title: 'Clients | Admin' };
