@@ -156,8 +156,8 @@ export default function CaseDetailClient({ caseDoc, isAdmin, isAdminOrEmployee, 
   return (
     <div className="flex flex-col gap-6 w-full max-w-4xl mx-auto overflow-hidden">
       <header className="flex items-center gap-4">
-        <Link 
-          href="/portal/case-management"
+        <Link
+          href="/portal/employee/case-management"
           className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition"
         >
           <span className="material-icons-outlined block">arrow_back</span>
@@ -305,7 +305,7 @@ export default function CaseDetailClient({ caseDoc, isAdmin, isAdminOrEmployee, 
                     Search related playbooks
                 </Link>
                 <Link 
-                    href="/portal/knowledge-base" 
+                    href="/portal/employee/knowledge-base" 
                     target="_blank"
                     className="inline-flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl text-sm font-medium transition-colors border border-gray-200 dark:border-gray-700"
                 >

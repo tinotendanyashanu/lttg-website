@@ -50,7 +50,7 @@ export default function SubmitCaseClient({ submitCaseAction, isAdmin }: SubmitCa
       }
 
       if (res.success) {
-        router.push('/portal/case-management');
+        router.push('/portal/employee/case-management');
         router.refresh();
       } else {
         setError(res.error || 'An unexpected error occurred.');
@@ -78,7 +78,7 @@ export default function SubmitCaseClient({ submitCaseAction, isAdmin }: SubmitCa
     <div className="flex flex-col gap-6 w-full max-w-2xl mx-auto mt-8">
       <header className="flex items-center gap-4">
         <Link 
-          href="/portal/case-management"
+          href="/portal/employee/case-management"
           className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition text-gray-700 dark:text-gray-300"
         >
           <span className="material-icons-outlined block">arrow_back</span>

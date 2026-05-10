@@ -81,7 +81,7 @@ export default function PriorityQueue({ tasks }: { tasks: Task[] }) {
       </div>
       
       <div className="p-4 bg-gray-50/30 dark:bg-gray-800/20 text-center border-t border-gray-100 dark:border-gray-800">
-        <Link href="/portal/case-management" className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline">
+        <Link href="/portal/employee/case-management" className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline">
           View all active cases
         </Link>
       </div>

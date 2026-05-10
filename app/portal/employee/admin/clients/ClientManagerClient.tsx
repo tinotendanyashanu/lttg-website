@@ -791,7 +791,7 @@ export default function ClientManagerClient({ initialClients }: { initialClients
                     Documents
                   </p>
                   <Link 
-                    href="/portal/resources" 
+                    href="/portal/employee/resources" 
                     className="text-[10px] text-brand-primary hover:underline font-bold flex items-center gap-0.5"
                   >
                     <span className="material-icons-outlined text-[12px]">folder_zip</span>

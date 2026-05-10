@@ -159,9 +159,9 @@ export default function PortalShell({
 
             {isAdmin && (
               <Link
-                href="/portal/admin"
+                href="/portal/employee/admin"
                 className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-center lg:justify-start'} gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
-                  pathname === "/portal/admin"
+                  pathname === "/portal/employee/admin"
                     ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
                     : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
                 }`}
@@ -173,9 +173,9 @@ export default function PortalShell({
             )}
 
             <Link
-              href="/portal/case-management"
+              href="/portal/employee/case-management"
               className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-center lg:justify-start'} gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
-                pathname === "/portal/case-management"
+                pathname.startsWith("/portal/employee/case-management")
                   ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
                   : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
               }`}
@@ -186,9 +186,9 @@ export default function PortalShell({
             </Link>
 
             <Link
-              href="/portal/knowledge-base"
+              href="/portal/employee/knowledge-base"
               className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-center lg:justify-start'} gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
-                pathname.startsWith("/portal/knowledge-base")
+                pathname.startsWith("/portal/employee/knowledge-base")
                   ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
                   : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
               }`}
@@ -199,9 +199,9 @@ export default function PortalShell({
             </Link>
 
             <Link
-              href="/portal/team"
+              href="/portal/employee/team"
               className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-center lg:justify-start'} gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
-                pathname.startsWith("/portal/team")
+                pathname.startsWith("/portal/employee/team")
                   ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
                   : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
               }`}
@@ -212,9 +212,9 @@ export default function PortalShell({
             </Link>
 
             <Link
-              href="/portal/resources"
+              href="/portal/employee/resources"
               className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-center lg:justify-start'} gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
-                pathname.startsWith("/portal/resources")
+                pathname.startsWith("/portal/employee/resources")
                   ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
                   : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
               }`}
@@ -225,9 +225,22 @@ export default function PortalShell({
             </Link>
 
             <Link
-              href="/portal/profile"
+              href="/portal/employee/invoices"
               className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-center lg:justify-start'} gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
-                pathname.startsWith("/portal/profile")
+                pathname.startsWith("/portal/employee/invoices") && !pathname.startsWith("/portal/employee/admin/invoices")
+                  ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
+                  : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
+              }`}
+              title={isCollapsed ? "Invoices" : undefined}
+            >
+              <span className="material-icons-outlined text-[20px] group-hover:scale-110 transition-transform">receipt_long</span>
+              {!isCollapsed && <span className="hidden lg:block text-sm">Invoices</span>}
+            </Link>
+
+            <Link
+              href="/portal/employee/profile"
+              className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-center lg:justify-start'} gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
+                pathname.startsWith("/portal/employee/profile")
                   ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
                   : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
               }`}
@@ -239,9 +252,9 @@ export default function PortalShell({
 
             {(isAdmin || isIntern || roles.includes("employee")) && (
               <Link
-                href={isAdmin ? "/portal/admin/manage-commissions" : "/portal/earnings"}
+                href={isAdmin ? "/portal/employee/admin/manage-commissions" : "/portal/employee/earnings"}
                 className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-center lg:justify-start'} gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
-                  pathname === "/portal/admin/manage-commissions" || pathname === "/portal/earnings"
+                  pathname === "/portal/employee/admin/manage-commissions" || pathname === "/portal/employee/earnings"
                     ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
                     : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
                 }`}
@@ -253,9 +266,9 @@ export default function PortalShell({
             )}
 
             <Link
-              href="/portal/announcements"
+              href="/portal/employee/announcements"
               className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-center lg:justify-start'} gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
-                pathname.startsWith("/portal/announcements") && pathname !== "/portal/admin/announcements"
+                pathname === "/portal/employee/announcements"
                   ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
                   : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
               }`}
@@ -267,9 +280,9 @@ export default function PortalShell({
 
             {isAdmin && (
               <Link
-                href="/portal/admin/announcements"
+                href="/portal/employee/admin/announcements"
                 className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-center lg:justify-start'} gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
-                  pathname === "/portal/admin/announcements"
+                  pathname === "/portal/employee/admin/announcements"
                     ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
                     : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
                 }`}
@@ -282,9 +295,24 @@ export default function PortalShell({
 
             {isAdmin && (
               <Link
-                href="/portal/admin/tasks"
+                href="/portal/employee/admin/invoices"
                 className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-center lg:justify-start'} gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
-                  pathname.startsWith("/portal/admin/tasks")
+                  pathname.startsWith("/portal/employee/admin/invoices")
+                    ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
+                    : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
+                }`}
+                title={isCollapsed ? "Invoice Approvals" : undefined}
+              >
+                <span className="material-icons-outlined text-[20px] group-hover:scale-110 transition-transform">approval</span>
+                {!isCollapsed && <span className="hidden lg:block text-sm">Invoice Approvals</span>}
+              </Link>
+            )}
+
+            {isAdmin && (
+              <Link
+                href="/portal/employee/admin/tasks"
+                className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-center lg:justify-start'} gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
+                  pathname.startsWith("/portal/employee/admin/tasks")
                     ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
                     : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
                 }`}
@@ -297,11 +325,11 @@ export default function PortalShell({
 
             {isAdmin && (
               <Link
-                href="/portal/admin/teams"
+                href="/portal/employee/admin/teams"
                 className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-center lg:justify-start'} gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
-                  pathname === "/portal/admin/teams"
+                  pathname === "/portal/employee/admin/teams"
                     ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
-                    : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:text-white"
+                    : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
                 }`}
                 title={isCollapsed ? "Team Management" : undefined}
               >
@@ -312,9 +340,9 @@ export default function PortalShell({
 
             {isAdmin && (
               <Link
-                href="/portal/admin/quests"
+                href="/portal/employee/admin/quests"
                 className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-center lg:justify-start'} gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
-                  pathname === "/portal/admin/quests"
+                  pathname === "/portal/employee/admin/quests"
                     ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
                     : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
                 }`}
@@ -327,9 +355,9 @@ export default function PortalShell({
 
             {!isAdmin && (roles.includes("employee") || isIntern) && (
               <Link
-                href="/portal/quests"
+                href="/portal/employee/quests"
                 className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-center lg:justify-start'} gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
-                  pathname === "/portal/quests"
+                  pathname === "/portal/employee/quests"
                     ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
                     : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
                 }`}
@@ -341,9 +369,9 @@ export default function PortalShell({
             )}
 
             <Link
-              href="/portal/academy"
+              href="/portal/employee/academy"
               className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-center lg:justify-start'} gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
-                pathname.startsWith("/portal/academy")
+                pathname.startsWith("/portal/employee/academy")
                   ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
                   : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
               }`}
@@ -481,7 +509,7 @@ export default function PortalShell({
                     {roles.join(', ')}
                   </div>
                 </div>
-                <Link href="/portal/profile" className="w-10 h-10 rounded-full overflow-hidden border-2 border-white dark:border-gray-700 shadow-sm cursor-pointer bg-brand-primary flex items-center justify-center text-white font-bold shrink-0 hover:opacity-90 transition-opacity">
+                <Link href="/portal/employee/profile" className="w-10 h-10 rounded-full overflow-hidden border-2 border-white dark:border-gray-700 shadow-sm cursor-pointer bg-brand-primary flex items-center justify-center text-white font-bold shrink-0 hover:opacity-90 transition-opacity">
                   {user?.name?.[0] || user?.email?.[0]?.toUpperCase() || "U"}
                 </Link>
               </div>

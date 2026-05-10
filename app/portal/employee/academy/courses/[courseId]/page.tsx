@@ -1,6 +1,8 @@
 import { getCourseWithDetails } from '@/lib/actions/portalAcademy';
 import Link from 'next/link';
 
+export const dynamic = 'force-dynamic';
+
 export default async function CourseOverviewPage({ params }: { params: Promise<{ courseId: string }> }) {
   const resolvedParams = await params;
   const result = await getCourseWithDetails(resolvedParams.courseId);
@@ -10,7 +12,7 @@ export default async function CourseOverviewPage({ params }: { params: Promise<{
       <div className="p-8 text-center text-red-500">
         <h2 className="text-xl font-bold">Error loading course</h2>
         <p>{result.error}</p>
-        <Link href="/portal/academy" className="text-brand-primary hover:underline mt-4 inline-block">Back to Academy</Link>
+        <Link href="/portal/employee/academy" className="text-brand-primary hover:underline mt-4 inline-block">Back to Academy</Link>
       </div>
     );
   }

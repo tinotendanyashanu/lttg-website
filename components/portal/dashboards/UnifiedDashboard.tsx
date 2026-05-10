@@ -61,7 +61,7 @@ export default async function UnifiedDashboard({ title, accountId, email, roles 
           <p className="text-gray-500 dark:text-gray-400 mt-0.5 text-sm">Welcome back, {identityData.fullName.split(' ')[0]}! Here&apos;s your focus for today.</p>
         </div>
         <div className="flex items-center gap-3">
-           <Link href="/portal/intern/submit-lead" className="inline-flex items-center gap-2 bg-[#2F2F2F] hover:bg-[#4a4a4a] text-white rounded-full px-5 py-2.5 text-sm font-medium transition-colors">
+           <Link href="/portal/employee/intern/submit-lead" className="inline-flex items-center gap-2 bg-[#2F2F2F] hover:bg-[#4a4a4a] text-white rounded-full px-5 py-2.5 text-sm font-medium transition-colors">
               <span className="material-icons-outlined text-[16px]">add_circle</span>
               New Case
            </Link>

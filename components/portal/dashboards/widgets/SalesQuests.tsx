@@ -102,7 +102,7 @@ export default function SalesQuests({
             </p>
           </div>
           <Link
-            href="/portal/quests"
+            href="/portal/employee/quests"
             className="text-sm font-medium text-brand-primary hover:underline shrink-0 hidden sm:inline"
           >
             View all

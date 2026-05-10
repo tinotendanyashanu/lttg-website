@@ -291,6 +291,8 @@ export default function AcademyManagerClient({ initialCourses }: { initialCourse
           setCourses(c => [newC, ...c]); 
           setSelectedCourse(newC); 
           setIsCreatingCourse(false);
+        } else {
+          alert(res.message || 'Failed to create course');
         }
       } else if (selectedCourse) {
         const res = await updateAdminCourse(selectedCourse._id, payload);
@@ -298,10 +300,15 @@ export default function AcademyManagerClient({ initialCourses }: { initialCourse
           const updC: Course = { ...selectedCourse, ...payload, updatedAt: new Date().toISOString() };
           setCourses(c => c.map(x => x._id === selectedCourse._id ? updC : x)); 
           setSelectedCourse(updC);
+        } else {
+          alert(res.message || 'Failed to update course');
         }
       }
       router.refresh();
-    } catch (err) { console.error(err); } finally { setIsSavingCourse(false); }
+    } catch (err) { 
+      console.error(err);
+      alert('An unexpected error occurred while saving the course');
+    } finally { setIsSavingCourse(false); }
   };
 
   const handleAddModule = async () => {
@@ -333,8 +340,15 @@ export default function AcademyManagerClient({ initialCourses }: { initialCourse
     setIsSavingLesson(true);
     try {
       const res = await updateAdminLesson(lessonForm._id, lessonForm);
-      if (res.success) setLessons(l => l.map(x => x._id === lessonForm._id ? res.lesson : x));
-    } catch (err) { console.error(err); } finally { setIsSavingLesson(false); }
+      if (res.success) {
+        setLessons(l => l.map(x => x._id === lessonForm._id ? res.lesson : x));
+      } else {
+        alert(res.message || 'Failed to update lesson');
+      }
+    } catch (err) { 
+      console.error(err);
+      alert('An unexpected error occurred while saving the lesson');
+    } finally { setIsSavingLesson(false); }
   };
 
   const handleDeleteLesson = async (id: string) => {
@@ -673,8 +687,13 @@ export default function AcademyManagerClient({ initialCourses }: { initialCourse
                               const res = await updateAdminModule(moduleForm._id, moduleForm); 
                               if (res.success) {
                                 setModules(m => m.map(x => x._id === moduleForm._id ? res.module : x));
+                              } else {
+                                alert(res.message || 'Failed to update module');
                               }
                               router.refresh(); 
+                            } catch (err) {
+                              console.error(err);
+                              alert('An unexpected error occurred while saving the module');
                             } finally { 
                               setIsSavingModule(false); 
                             } 

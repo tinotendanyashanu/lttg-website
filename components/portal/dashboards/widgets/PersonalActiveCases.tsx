@@ -21,7 +21,7 @@ export default function PersonalActiveCases({ cases }: PersonalActiveCasesProps)
           </span>
           Active Cases Requiring Attention
         </h2>
-        <Link href="/portal/case-management" className="text-brand-primary text-sm font-medium hover:underline">
+        <Link href="/portal/employee/case-management" className="text-brand-primary text-sm font-medium hover:underline">
           View All
         </Link>
       </div>

@@ -18,7 +18,7 @@ export default function KnowledgeShortcuts({ articles }: KnowledgeShortcutsProps
           <span className="material-icons-outlined text-brand-primary">auto_stories</span>
           Knowledge Base
         </h2>
-        <Link href="/portal/knowledge-base" className="text-brand-primary text-sm font-semibold hover:underline">
+        <Link href="/portal/employee/knowledge-base" className="text-brand-primary text-sm font-semibold hover:underline">
           View all
         </Link>
       </div>

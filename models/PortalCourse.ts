@@ -56,7 +56,7 @@ const PortalCourseSchema: Schema = new Schema({
   title: { type: String, required: true },
   slug: { type: String, sparse: true, unique: true },
   summary: { type: String },
-  description: { type: String, required: true },
+  description: { type: String, default: '' },
   targetRoles: { type: [String], required: true },
   difficultyLevel: { 
     type: String, 

@@ -48,7 +48,7 @@ export default async function ArticleDetailedView({ params }: { params: Promise<
       {/* Top Breadcrumbs / Navigation */}
       <div className="max-w-[1400px] mx-auto px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400">
-            <Link href="/portal/knowledge-base" className="hover:text-blue-600 dark:hover:text-blue-500 transition-colors">Knowledge Base</Link>
+            <Link href="/portal/employee/knowledge-base" className="hover:text-blue-600 dark:hover:text-blue-500 transition-colors">Knowledge Base</Link>
             <span className="material-icons-outlined !text-[12px]">chevron_right</span>
             <span className="text-gray-900 dark:text-white">{article.categoryId?.name || article.category}</span>
         </div>

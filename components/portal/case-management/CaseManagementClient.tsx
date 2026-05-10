@@ -73,8 +73,8 @@ export default function CaseManagementClient({ cases: initialCases, isAdminOrEmp
              </button>
           </div>
 
-          <Link 
-            href="/portal/intern/submit-lead"
+          <Link
+            href="/portal/employee/intern/submit-lead"
             className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-6 py-3 rounded-2xl font-bold flex items-center gap-2 transition hover:opacity-90 active:scale-95 shadow-xl shadow-gray-900/10 whitespace-nowrap"
           >
             <span className="material-icons-outlined text-lg">add_circle</span>
@@ -181,7 +181,7 @@ function CaseRow({ c }: { c: any }) {
           <span className="font-bold text-gray-900 dark:text-white">{c.ownerId?.fullName || 'Unassigned'}</span>
         </div>
         <Link 
-          href={`/portal/case-management/${c._id}`} 
+          href={`/portal/employee/case-management/${c._id}`} 
           className="h-12 px-6 rounded-2xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white font-bold text-sm flex items-center gap-2 hover:bg-blue-600 hover:text-white transition-all shadow-sm"
         >
           Workspace
@@ -195,7 +195,7 @@ function CaseRow({ c }: { c: any }) {
 function CaseCard({ c }: { c: any }) {
   return (
     <Link 
-      href={`/portal/case-management/${c._id}`}
+      href={`/portal/employee/case-management/${c._id}`}
       className="bg-white dark:bg-[#18181b] p-5 rounded-2xl shadow-sm hover:shadow-xl transition-all border border-gray-100 dark:border-gray-800 group"
     >
       <div className="flex justify-between items-start mb-4">

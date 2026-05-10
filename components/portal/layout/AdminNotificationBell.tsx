@@ -98,7 +98,7 @@ export default function AdminNotificationBell() {
           <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
             <h3 className="font-semibold text-sm text-gray-900 dark:text-white">Recent Activity</h3>
             <Link
-              href="/portal/admin/activity"
+              href="/portal/employee/admin/activity"
               onClick={() => setOpen(false)}
               className="text-xs text-brand-primary hover:underline"
             >

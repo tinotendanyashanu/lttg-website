@@ -100,7 +100,7 @@ export default function LessonViewPage() {
     <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
       <div className="space-y-6">
       <nav className="flex items-center text-sm font-medium text-gray-500 dark:text-gray-400 space-x-2">
-        <Link href="/portal/academy" className="hover:text-brand-primary transition-colors">Academy</Link>
+        <Link href="/portal/employee/academy" className="hover:text-brand-primary transition-colors">Academy</Link>
         <span className="material-icons-outlined text-[16px]">chevron_right</span>
         <Link href={`/portal/academy/courses/${courseId}`} className="hover:text-brand-primary transition-colors truncate max-w-[150px]">{course?.title}</Link>
         <span className="material-icons-outlined text-[16px]">chevron_right</span>

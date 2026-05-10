@@ -289,7 +289,8 @@ export async function closeAdminCase(caseId: string) {
   }
   // ─────────────────────────────────────────────────────────────────────────
 
-  revalidatePath('/portal/admin/case-management');
+  revalidatePath('/portal/employee/admin/cases');
+  revalidatePath('/portal/employee/case-management');
   return { success: true };
 }
 

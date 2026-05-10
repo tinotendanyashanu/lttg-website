@@ -83,7 +83,7 @@ export default function KnowledgeSidebar({ categories, activeCategoryId }: Knowl
         <h2 className="px-3 text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400 mb-3">Explore</h2>
         <nav className="space-y-1">
           <Link 
-            href="/portal/knowledge-base" 
+            href="/portal/employee/knowledge-base" 
             className={`flex items-center gap-3 px-3 py-2 rounded-xl transition-all ${
               !activeCategoryId && pathname === '/portal/knowledge-base'
                 ? 'bg-gray-100 dark:bg-neutral-800 text-gray-900 dark:text-white font-semibold'
@@ -94,7 +94,7 @@ export default function KnowledgeSidebar({ categories, activeCategoryId }: Knowl
             <span className="text-sm">All Articles</span>
           </Link>
           <Link 
-            href="/portal/knowledge-base/favorites" 
+            href="/portal/employee/knowledge-base/favorites" 
             className="flex items-center gap-3 px-3 py-2 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-neutral-800 transition-all"
           >
             <span className="material-icons-outlined text-[18px]">star_border</span>

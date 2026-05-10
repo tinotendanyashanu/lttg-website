@@ -1,6 +1,8 @@
 import { getAvailableCourses } from '@/lib/actions/portalAcademy';
 import Link from 'next/link';
 
+export const dynamic = 'force-dynamic';
+
 export default async function AcademyDashboard() {
   const result = await getAvailableCourses();
 
@@ -211,7 +213,7 @@ export default async function AcademyDashboard() {
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Academy Analytics</h2>
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Internal completion and assessment signals across the training catalog.</p>
             </div>
-            <Link href="/portal/admin/academy" className="rounded-xl bg-brand-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-secondary">
+            <Link href="/portal/employee/admin/academy" className="rounded-xl bg-brand-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-secondary">
               Manage Academy
             </Link>
           </div>

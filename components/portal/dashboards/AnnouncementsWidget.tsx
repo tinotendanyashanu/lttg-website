@@ -98,7 +98,7 @@ export default function AnnouncementsWidget({ initialAnnouncements }: { initialA
           <span className="material-icons-outlined text-brand-primary">campaign</span>
           Announcements
         </h2>
-        <Link href="/portal/announcements" className="text-sm text-brand-primary font-medium hover:underline">
+        <Link href="/portal/employee/announcements" className="text-sm text-brand-primary font-medium hover:underline">
           View All
         </Link>
       </div>

@@ -94,7 +94,7 @@ export default function KnowledgeBaseOverview({
             
             {userRole === 'admin' && (
                 <Link 
-                    href="/portal/knowledge-base/create"
+                    href="/portal/employee/knowledge-base/create"
                     className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl text-sm font-bold shadow-lg shadow-blue-500/20 transition-all whitespace-nowrap"
                 >
                     New Article

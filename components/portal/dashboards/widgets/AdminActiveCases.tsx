@@ -31,7 +31,7 @@ export default function AdminActiveCases({ cases }: AdminActiveCasesProps) {
             </span>
             New Leads Awaiting Contact
           </h2>
-          <Link href="/portal/case-management" className="text-brand-primary text-sm font-medium hover:underline">
+          <Link href="/portal/employee/case-management" className="text-brand-primary text-sm font-medium hover:underline">
             View All
           </Link>
         </div>
@@ -67,7 +67,7 @@ export default function AdminActiveCases({ cases }: AdminActiveCasesProps) {
             </span>
             Pending Commissions
           </h2>
-          <Link href="/portal/admin/manage-commissions" className="text-brand-primary text-sm font-medium hover:underline">
+          <Link href="/portal/employee/admin/manage-commissions" className="text-brand-primary text-sm font-medium hover:underline">
             View All
           </Link>
         </div>

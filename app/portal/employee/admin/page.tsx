@@ -36,16 +36,17 @@ export default async function AdminDashboardOverviewPage() {
       {/* Quick Links */}
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
         {[
-          { label: 'Cases', icon: 'folder_shared', href: '/portal/admin/cases' },
-          { label: 'Clients', icon: 'business', href: '/portal/admin/clients' },
-          { label: 'Commissions', icon: 'monetization_on', href: '/portal/admin/manage-commissions' },
-          { label: 'Users', icon: 'people', href: '/portal/admin/users' },
-          { label: 'Knowledge Base', icon: 'menu_book', href: '/portal/admin/knowledge' },
-          { label: 'Academy', icon: 'school', href: '/portal/admin/academy' },
-          { label: 'Announcements', icon: 'campaign', href: '/portal/admin/announcements' },
-          { label: 'Sales Quests', icon: 'military_tech', href: '/portal/admin/quests' },
-          { label: 'Teams', icon: 'groups', href: '/portal/admin/teams' },
-          { label: 'Activity Logs', icon: 'history', href: '/portal/admin/activity' },
+          { label: 'Cases', icon: 'folder_shared', href: '/portal/employee/admin/cases' },
+          { label: 'Clients', icon: 'business', href: '/portal/employee/admin/clients' },
+          { label: 'Commissions', icon: 'monetization_on', href: '/portal/employee/admin/manage-commissions' },
+          { label: 'Invoice Approvals', icon: 'approval', href: '/portal/employee/admin/invoices' },
+          { label: 'Users', icon: 'people', href: '/portal/employee/admin/users' },
+          { label: 'Knowledge Base', icon: 'menu_book', href: '/portal/employee/admin/knowledge' },
+          { label: 'Academy', icon: 'school', href: '/portal/employee/admin/academy' },
+          { label: 'Announcements', icon: 'campaign', href: '/portal/employee/admin/announcements' },
+          { label: 'Sales Quests', icon: 'military_tech', href: '/portal/employee/admin/quests' },
+          { label: 'Teams', icon: 'groups', href: '/portal/employee/admin/teams' },
+          { label: 'Activity Logs', icon: 'history', href: '/portal/employee/admin/activity' },
         ].map((item, idx) => (
           <Link key={idx} href={item.href} className="flex flex-col items-center justify-center p-4 bg-white dark:bg-[#27272a] rounded-2xl border border-gray-100 dark:border-gray-800 hover:border-brand-primary/50 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all text-center gap-2 group">
             <span className="material-icons-outlined text-gray-400 group-hover:text-brand-primary transition-colors text-2xl">{item.icon}</span>

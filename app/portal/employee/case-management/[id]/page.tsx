@@ -41,7 +41,7 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
     .lean();
 
   if (!caseDoc) {
-    redirect('/portal/case-management');
+    redirect('/portal/employee/case-management');
   }
 
   const [commentsRes, logsRes] = await Promise.all([

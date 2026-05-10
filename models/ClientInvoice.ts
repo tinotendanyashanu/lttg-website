@@ -2,12 +2,16 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export type InvoiceStatus =
   | 'draft'
+  | 'pending_approval'
   | 'issued'
   | 'sent'
   | 'paid'
   | 'partially_paid'
   | 'overdue'
-  | 'cancelled';
+  | 'cancelled'
+  | 'rejected';
+
+export type InvoiceApprovalStatus = 'not_required' | 'pending' | 'approved' | 'rejected';
 
 export interface IPaymentHistoryEntry {
   amount: number;
@@ -45,6 +49,13 @@ export interface IClientInvoice extends Document {
   // Multi-currency: USD equivalent at time of creation/payment
   usdAmount?: number;
   exchangeRateUsed?: number;
+  // Employee invoice approval workflow
+  createdByEmployeeId?: mongoose.Types.ObjectId;
+  approvalStatus: InvoiceApprovalStatus;
+  approvedByAdminId?: mongoose.Types.ObjectId;
+  approvalNotes?: string;
+  submittedForApprovalAt?: Date;
+  approvedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -58,7 +69,7 @@ const ClientInvoiceSchema: Schema<IClientInvoice> = new Schema<IClientInvoice>(
     currency: { type: String, default: 'USD' },
     status: {
       type: String,
-      enum: ['draft', 'issued', 'sent', 'paid', 'partially_paid', 'overdue', 'cancelled'],
+      enum: ['draft', 'pending_approval', 'issued', 'sent', 'paid', 'partially_paid', 'overdue', 'cancelled', 'rejected'],
       default: 'draft',
     },
     description: { type: String },
@@ -92,6 +103,17 @@ const ClientInvoiceSchema: Schema<IClientInvoice> = new Schema<IClientInvoice>(
     // Multi-currency USD snapshot (optional — populated by exchange rate service)
     usdAmount: { type: Number },
     exchangeRateUsed: { type: Number },
+    // Employee invoice approval workflow
+    createdByEmployeeId: { type: Schema.Types.ObjectId, ref: 'Account' },
+    approvalStatus: {
+      type: String,
+      enum: ['not_required', 'pending', 'approved', 'rejected'],
+      default: 'not_required',
+    },
+    approvedByAdminId: { type: Schema.Types.ObjectId, ref: 'Account' },
+    approvalNotes: { type: String },
+    submittedForApprovalAt: { type: Date },
+    approvedAt: { type: Date },
   },
   { timestamps: true }
 );

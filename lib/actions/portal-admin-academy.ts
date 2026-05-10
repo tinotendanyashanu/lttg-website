@@ -25,7 +25,11 @@ function parseQuizPayload(rawQuiz: any) {
   if (typeof rawQuiz === 'string') {
     const trimmed = rawQuiz.trim();
     if (!trimmed) return undefined;
-    return JSON.parse(trimmed);
+    try {
+      return JSON.parse(trimmed);
+    } catch {
+      throw new Error('Invalid quiz JSON format. Please check your quiz configuration.');
+    }
   }
   return rawQuiz;
 }
@@ -69,6 +73,10 @@ export async function getAdminCourseDetails(courseId: string) {
 export async function createAdminCourse(data: any) {
   const account = await requireAdmin();
 
+  if (!data.title?.trim()) {
+    return { success: false, message: 'Title is required' };
+  }
+
   const payload = {
     ...data,
     slug: data.slug ? slugify(data.slug) : slugify(data.title),
@@ -90,6 +98,10 @@ export async function createAdminCourse(data: any) {
 
 export async function updateAdminCourse(courseId: string, data: any) {
   const account = await requireAdmin();
+
+  if (!data.title?.trim()) {
+    return { success: false, message: 'Title is required' };
+  }
 
   const payload = {
     ...data,
@@ -139,6 +151,10 @@ export async function deleteAdminCourse(courseId: string) {
 export async function createAdminModule(data: any) {
   const account = await requireAdmin();
 
+  if (!data.title?.trim()) {
+    return { success: false, message: 'Title is required' };
+  }
+
   const module = await PortalModule.create({
     ...data,
     slug: data.slug ? slugify(data.slug) : slugify(data.title),
@@ -151,11 +167,15 @@ export async function createAdminModule(data: any) {
     newValue: `Module created: ${module.title}`,
   });
 
-  return { success: true, module: JSON.parse(JSON.stringify(module)) };
+  return { success: true, module: JSON.parse(JSON.stringify(module.toObject())) };
 }
 
 export async function updateAdminModule(moduleId: string, data: any) {
   await requireAdmin();
+
+  if (!data.title?.trim()) {
+    return { success: false, message: 'Title is required' };
+  }
 
   const module = await PortalModule.findByIdAndUpdate(moduleId, {
     $set: {
@@ -164,7 +184,7 @@ export async function updateAdminModule(moduleId: string, data: any) {
       quiz: parseQuizPayload(data.quiz),
     }
   }, { new: true });
-  if (!module) throw new Error('Module not found');
+  if (!module) return { success: false, message: 'Module not found' };
 
   return { success: true, module: JSON.parse(JSON.stringify(module.toObject())) };
 }
@@ -181,6 +201,13 @@ export async function deleteAdminModule(moduleId: string) {
 // Lesson Management
 export async function createAdminLesson(data: any) {
   const account = await requireAdmin();
+
+  if (!data.title?.trim()) {
+    return { success: false, message: 'Title is required' };
+  }
+  if (!data.content?.trim()) {
+    return { success: false, message: 'Content is required' };
+  }
 
   const attachments = Array.isArray(data.attachments)
     ? data.attachments
@@ -201,11 +228,18 @@ export async function createAdminLesson(data: any) {
     newValue: `Lesson created: ${lesson.title}`,
   });
 
-  return { success: true, lesson: JSON.parse(JSON.stringify(lesson)) };
+  return { success: true, lesson: JSON.parse(JSON.stringify(lesson.toObject())) };
 }
 
 export async function updateAdminLesson(lessonId: string, data: any) {
   await requireAdmin();
+
+  if (!data.title?.trim()) {
+    return { success: false, message: 'Title is required' };
+  }
+  if (!data.content?.trim()) {
+    return { success: false, message: 'Content is required' };
+  }
 
   const attachments = Array.isArray(data.attachments)
     ? data.attachments
@@ -223,7 +257,7 @@ export async function updateAdminLesson(lessonId: string, data: any) {
       thumbnailUrl: data.thumbnailUrl ?? undefined,
     }
   }, { new: true });
-  if (!lesson) throw new Error('Lesson not found');
+  if (!lesson) return { success: false, message: 'Lesson not found' };
 
   return { success: true, lesson: JSON.parse(JSON.stringify(lesson.toObject())) };
 }

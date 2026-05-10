@@ -118,7 +118,7 @@ export default function CreateArticlePage() {
         </div>
         <div className="flex gap-3">
             <Link 
-            href="/portal/knowledge-base" 
+            href="/portal/employee/knowledge-base" 
             className="px-4 py-2 bg-white dark:bg-[#27272a] border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
             >
             Cancel
