@@ -18,7 +18,8 @@ import PriorityQueue from './widgets/PriorityQueue';
 import RecentActivityFeed from './widgets/RecentActivityFeed';
 import InternCommissionSnapshot from './widgets/InternCommissionSnapshot';
 import KnowledgeShortcuts from './widgets/KnowledgeShortcuts';
-import PerformanceTargets from './widgets/PerformanceTargets';
+import ActionableInsights from './widgets/ActionableInsights';
+import SalesFunnelWidget from './widgets/SalesFunnelWidget';
 
 interface UnifiedDashboardProps {
   title: string;
@@ -55,13 +56,14 @@ export default async function UnifiedDashboard({ title, accountId, email, roles 
 
   return (
     <div className="flex flex-col gap-8 h-full w-full pb-10">
+      {/* 0. Header Area */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white leading-tight">{title}</h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-0.5 text-sm">Welcome back, {identityData.fullName.split(' ')[0]}! Here&apos;s your focus for today.</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white leading-tight tracking-tight">{title}</h1>
+          <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm font-medium">Welcome back, {identityData.fullName.split(' ')[0]}! Here's your focus for today.</p>
         </div>
         <div className="flex items-center gap-3">
-           <Link href="/portal/employee/intern/submit-lead" className="inline-flex items-center gap-2 bg-[#2F2F2F] hover:bg-[#4a4a4a] text-white rounded-full px-5 py-2.5 text-sm font-medium transition-colors">
+           <Link href="/portal/employee/intern/submit-lead" className="inline-flex items-center gap-2 bg-[#2F2F2F] hover:bg-[#4a4a4a] text-white rounded-full px-5 py-2.5 text-sm font-medium transition-all shadow-sm hover:shadow-md">
               <span className="material-icons-outlined text-[16px]">add_circle</span>
               New Case
            </Link>
@@ -70,45 +72,53 @@ export default async function UnifiedDashboard({ title, accountId, email, roles 
 
       {blackHoleMetrics && <BlackHoleWidget metrics={blackHoleMetrics} />}
 
-      {salesQuests.length > 0 && <SalesQuests quests={salesQuests} />}
+      {/* 1. Top Section: Actionable Insights */}
+      <div className="w-full">
+        <ActionableInsights metrics={performanceData} />
+      </div>
 
-      {/* 1. Identity Snapshot & Performance */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <div className="xl:col-span-1">
-          <IdentitySnapshot 
-            fullName={identityData.fullName}
-            roles={identityData.roles}
-            teamId={identityData.teamId}
-            profileImageUrl={identityData.profileImageUrl}
-            isActive={identityData.isActive}
-          />
+      {/* 2. Middle Section: Identity & KPI Cards */}
+      <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
+        <div className="xl:col-span-1 h-full flex">
+          <div className="w-full h-full">
+            <IdentitySnapshot 
+              fullName={identityData.fullName}
+              roles={identityData.roles}
+              teamId={identityData.teamId}
+              profileImageUrl={identityData.profileImageUrl}
+              isActive={identityData.isActive}
+            />
+          </div>
         </div>
-        <div className="xl:col-span-2">
+        <div className="xl:col-span-3">
           <PersonalPerformance metrics={performanceData} isIntern={isIntern} />
         </div>
       </div>
 
-      {/* 2. Targets & Priority Queue */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-        <div className="lg:col-span-2">
-          <PerformanceTargets metrics={performanceData} />
-        </div>
-        <div className="lg:col-span-3">
-          <PriorityQueue tasks={priorityTasks} />
-        </div>
-      </div>
+      {/* 3. Below: Sales Quests */}
+      {salesQuests.length > 0 && <SalesQuests quests={salesQuests} />}
 
-      {/* 3. Commission & Recent Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-        <div className="lg:col-span-2">
-          <InternCommissionSnapshot metrics={commissionData} title={isIntern ? "Intern Commission" : "Employee Commission"} />
+      {/* 4. Bottom: Funnel & Activity */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div className="xl:col-span-1">
+          <SalesFunnelWidget metrics={performanceData} />
         </div>
-        <div className="lg:col-span-3">
+        <div className="xl:col-span-2">
           <RecentActivityFeed activities={recentActivityData} />
         </div>
       </div>
 
-      {/* 4. Knowledge */}
+      {/* 5. Priority Queue & Commission */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        <div className="lg:col-span-3">
+          <PriorityQueue tasks={priorityTasks} />
+        </div>
+        <div className="lg:col-span-2">
+          <InternCommissionSnapshot metrics={commissionData} title={isIntern ? "Intern Commission" : "Employee Commission"} />
+        </div>
+      </div>
+
+      {/* 6. Knowledge */}
       <div className="grid grid-cols-1">
         <KnowledgeShortcuts articles={knowledgeData} />
       </div>

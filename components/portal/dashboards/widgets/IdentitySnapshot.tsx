@@ -21,8 +21,8 @@ export default function IdentitySnapshot({
     : 'User';
 
   return (
-    <div className="bg-white dark:bg-[#27272a] p-6 rounded-2xl shadow-soft dark:shadow-none border border-gray-100 dark:border-gray-800 flex items-center gap-6">
-      <div className="relative w-20 h-20 rounded-full bg-brand-primary/10 flex items-center justify-center shrink-0 border-2 border-brand-primary/20 overflow-hidden">
+    <div className="bg-white/80 dark:bg-[#27272a]/80 backdrop-blur-md p-6 rounded-3xl shadow-sm hover:shadow-md transition-all border border-gray-100 dark:border-gray-800 flex flex-col items-center justify-center gap-4 w-full h-full text-center">
+      <div className="relative w-24 h-24 rounded-full bg-brand-primary/10 flex items-center justify-center shrink-0 border-4 border-white dark:border-[#27272a] shadow-sm overflow-hidden">
         {profileImageUrl ? (
           <Image 
             src={profileImageUrl} 
@@ -31,37 +31,31 @@ export default function IdentitySnapshot({
             className="object-cover"
           />
         ) : (
-          <span className="text-2xl font-bold text-brand-primary">
+          <span className="text-3xl font-bold text-brand-primary">
             {fullName.charAt(0).toUpperCase()}
           </span>
         )}
-        <span className={`absolute bottom-0 right-1 w-4 h-4 rounded-full border-2 border-white dark:border-[#27272a] ${isActive ? 'bg-green-500' : 'bg-gray-400'}`}></span>
+        <span className={`absolute bottom-1 right-1 w-4 h-4 rounded-full border-2 border-white dark:border-[#27272a] ${isActive ? 'bg-emerald-500' : 'bg-gray-400'}`}></span>
       </div>
       
-      <div className="flex-1">
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white leading-tight">
-          Welcome back, {fullName.split(' ')[0]}
+      <div className="flex flex-col items-center">
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white leading-tight tracking-tight">
+          {fullName}
         </h2>
-        <div className="mt-1 flex flex-wrap items-center gap-2 text-[13px]">
-          <span className="font-semibold text-brand-primary bg-brand-primary/10 px-2 py-0.5 rounded-md">
+        <div className="mt-2 flex flex-wrap justify-center items-center gap-2 text-xs">
+          <span className="font-bold text-brand-primary bg-brand-primary/10 px-2.5 py-1 rounded-lg uppercase tracking-wide">
             {displayRole}
           </span>
           {teamId && (
-            <>
-              <span className="text-gray-300 dark:text-gray-600">•</span>
-              <span className="text-gray-500 dark:text-gray-400 flex items-center gap-1 font-medium">
-                <span className="material-icons-outlined text-[16px]">groups</span>
-                Team Member
-              </span>
-            </>
+            <span className="text-gray-500 dark:text-gray-400 flex items-center gap-1 font-medium bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-lg">
+              <span className="material-icons-outlined text-[14px]">groups</span>
+              Team
+            </span>
           )}
           {roles.includes('intern') && (
-            <>
-              <span className="text-gray-300 dark:text-gray-600">•</span>
-              <span className="text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded-md font-semibold">
-                10% Rate
-              </span>
-            </>
+            <span className="text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/40 px-2 py-1 rounded-lg font-bold">
+              10% Rate
+            </span>
           )}
         </div>
       </div>

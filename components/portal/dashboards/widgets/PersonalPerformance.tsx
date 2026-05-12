@@ -18,99 +18,142 @@ interface PersonalPerformanceProps {
 
 interface PerformanceCard {
   label: string;
-  value: string | number;
+  current: number;
+  target: number;
+  unit: string;
   icon: string;
-  iconClass: string;
-  bgClass: string;
-  target?: string;
+  description: string;
 }
 
 export default function PersonalPerformance({ metrics, isIntern }: PersonalPerformanceProps) {
   if (!metrics) return null;
 
-  const statusColors = {
-    'On Track': 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800',
-    'Watchlist': 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800',
-    'At Risk': 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 border-orange-200 dark:border-orange-800',
-    'Contract Review': 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800',
-  };
-
   const cards: PerformanceCard[] = [
     {
-      label: 'Monthly Closed',
-      value: metrics.monthlyClosedDeals,
+      label: 'Deals Closed',
+      current: metrics.monthlyClosedDeals,
+      target: 2,
+      unit: 'deals',
       icon: 'check_circle',
-      iconClass: 'text-emerald-600 dark:text-emerald-400',
-      bgClass: 'bg-emerald-50 dark:bg-emerald-900/20',
-      target: 'Target: 2'
+      description: 'Converted leads this month'
     },
     {
-      label: 'Monthly Qualified',
-      value: metrics.monthlyQualifiedLeads,
+      label: 'Qualified Leads',
+      current: metrics.monthlyQualifiedLeads,
+      target: 5,
+      unit: 'leads',
       icon: 'stars',
-      iconClass: 'text-amber-600 dark:text-amber-400',
-      bgClass: 'bg-amber-50 dark:bg-amber-900/20',
-      target: 'Target: 5'
+      description: 'Leads moved to qualified'
     },
     {
       label: 'Follow-up Rate',
-      value: `${metrics.followUpRate}%`,
+      current: metrics.followUpRate,
+      target: 90,
+      unit: '%',
       icon: 'history',
-      iconClass: 'text-blue-600 dark:text-blue-400',
-      bgClass: 'bg-blue-50 dark:bg-blue-900/20',
-      target: 'Target: 90%'
+      description: 'Completed due tasks'
     },
     {
       label: 'CRM Compliance',
-      value: `${metrics.crmUpdateCompliance}%`,
+      current: metrics.crmUpdateCompliance,
+      target: 100,
+      unit: '%',
       icon: 'update',
-      iconClass: 'text-purple-600 dark:text-purple-400',
-      bgClass: 'bg-purple-50 dark:bg-purple-900/20',
-      target: 'Target: 100%'
+      description: 'Updated in last 48h'
     },
   ];
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <span className={`px-3 py-1 rounded-full text-xs font-bold border ${statusColors[metrics.status]}`}>
-            {metrics.status.toUpperCase()}
-          </span>
-          {metrics.isTopPerformer && (
-            <span className="bg-gradient-to-r from-amber-400 to-amber-600 text-white px-3 py-1 rounded-full text-xs font-bold shadow-sm flex items-center gap-1">
-              <span className="material-icons-outlined text-[14px]">military_tech</span>
-              TOP PERFORMER (25% COMM)
-            </span>
-          )}
-        </div>
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+          <span className="material-icons-outlined text-brand-primary">leaderboard</span>
+          Monthly Performance
+        </h2>
         <div className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-          April 2026 Performance Period
+          {new Date().toLocaleString('default', { month: 'long', year: 'numeric' })}
         </div>
       </div>
       
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {cards.map((card) => (
-          <div
-            key={card.label}
-            className="bg-white dark:bg-[#27272a] p-5 rounded-2xl shadow-soft border border-gray-100 dark:border-gray-800 transition-all group"
-          >
-            <div className="flex items-start justify-between mb-3">
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${card.bgClass}`}>
-                <span className={`material-icons-outlined text-[20px] ${card.iconClass}`}>
-                  {card.icon}
-                </span>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+        {cards.map((card) => {
+          const progress = Math.min((card.current / card.target) * 100, 100);
+          const isMet = card.current >= card.target;
+          const isEmpty = card.current === 0;
+          
+          let progressColor = 'bg-brand-primary';
+          if (isMet) {
+            progressColor = 'bg-emerald-500';
+          } else if (progress > 50) {
+            progressColor = 'bg-amber-500';
+          } else if (progress > 0) {
+            progressColor = 'bg-red-500';
+          }
+
+          let iconBg = 'bg-gray-50 dark:bg-gray-800/50';
+          let iconColor = 'text-gray-600 dark:text-gray-400';
+          if (isMet) {
+            iconBg = 'bg-emerald-50 dark:bg-emerald-900/20';
+            iconColor = 'text-emerald-600 dark:text-emerald-400';
+          } else if (progress > 50) {
+            iconBg = 'bg-amber-50 dark:bg-amber-900/20';
+            iconColor = 'text-amber-600 dark:text-amber-400';
+          }
+
+          return (
+            <div
+              key={card.label}
+              className="bg-white/80 dark:bg-[#27272a]/80 backdrop-blur-md p-5 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800 transition-all hover:shadow-md group relative overflow-hidden flex flex-col justify-between"
+            >
+              <div>
+                <div className="flex items-start justify-between mb-3">
+                  <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-colors ${iconBg}`}>
+                    <span className={`material-icons-outlined text-[20px] ${iconColor}`}>
+                      {card.icon}
+                    </span>
+                  </div>
+                  {isMet && (
+                    <span className="bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 text-[10px] uppercase font-bold px-2 py-1 rounded-full">
+                      Target Hit
+                    </span>
+                  )}
+                </div>
+                
+                <div className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
+                  {card.current}
+                  <span className="text-sm font-medium text-gray-400 dark:text-gray-500 ml-1">
+                    / {card.target}{card.unit === '%' ? '' : ' '}
+                  </span>
+                </div>
+                
+                <div className="text-sm font-semibold text-gray-900 dark:text-gray-100 mt-1">
+                  {card.label}
+                </div>
+                <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-1" title={card.description}>
+                  {card.description}
+                </div>
+              </div>
+
+              <div className="mt-5">
+                <div className="flex justify-between text-[10px] font-semibold uppercase tracking-wider mb-1.5 text-gray-500">
+                  <span>Progress</span>
+                  <span>{Math.round(progress)}%</span>
+                </div>
+                <div className="h-1.5 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                  <div 
+                    className={`h-full rounded-full transition-all duration-1000 ease-out ${progressColor} ${isEmpty ? 'w-0' : ''}`}
+                    style={{ width: isEmpty ? '0%' : `${progress}%` }}
+                  />
+                </div>
+                {isEmpty && (
+                  <div className="text-[10px] text-gray-400 mt-1.5 italic text-center">
+                    No activity yet
+                  </div>
+                )}
               </div>
             </div>
-            <div className="text-2xl font-bold text-gray-900 dark:text-white">{card.value}</div>
-            <div className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{card.label}</div>
-            {card.target && (
-              <div className="text-[10px] font-medium text-gray-400 dark:text-gray-500 mt-1 uppercase tracking-wider">
-                {card.target}
-              </div>
-            )}
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
