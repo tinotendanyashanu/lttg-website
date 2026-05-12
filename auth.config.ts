@@ -24,7 +24,8 @@ export const authConfig = {
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
-      const isOnDashboard = nextUrl.pathname.startsWith('/partner/dashboard');
+      const isOnPartnerDashboard = nextUrl.pathname.startsWith('/partner/dashboard');
+      const isOnMailDashboard = nextUrl.pathname.startsWith('/dashboard');
       const isOnAdmin = nextUrl.pathname.startsWith('/admin');
       const isOnPortal = nextUrl.pathname.startsWith('/portal');
 
@@ -98,8 +99,8 @@ export const authConfig = {
         return false;
       }
 
-      // Gate: if logged in but email not verified, redirect away from dashboard
-      if (isOnDashboard) {
+      // Gate: if logged in but email not verified, redirect away from partner dashboard
+      if (isOnPartnerDashboard) {
         if (!isLoggedIn) {
           const loginUrl = new URL('/login', nextUrl.origin);
           loginUrl.searchParams.set('loginSource', 'partner');
@@ -117,6 +118,18 @@ export const authConfig = {
           return Response.redirect(verifyUrl);
         }
         return true;
+      }
+
+      if (isOnMailDashboard) {
+        if (!isLoggedIn) {
+          const loginUrl = new URL('/login', nextUrl.origin);
+          loginUrl.searchParams.set('loginSource', 'portal');
+          return Response.redirect(loginUrl);
+        }
+        if (auth?.user?.role === 'admin' || auth?.user?.role === 'employee') {
+          return true;
+        }
+        return Response.redirect(new URL('/portal', nextUrl.origin));
       }
 
       if (isOnAdmin) {

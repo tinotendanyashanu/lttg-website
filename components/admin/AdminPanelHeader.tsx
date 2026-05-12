@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { Mail } from 'lucide-react';
 import { handleSignOut } from '@/lib/actions/auth';
 import AdminBreadcrumbs from './AdminBreadcrumbs';
 
@@ -230,6 +231,14 @@ export default function AdminPanelHeader({
 
       {/* Right */}
       <div className="flex items-center gap-2">
+        <Link
+          href="/dashboard/mail"
+          className="p-2 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#27272a] hover:text-gray-900 dark:hover:text-white transition-colors"
+          aria-label="Mail"
+          title="Mail"
+        >
+          <Mail className="w-5 h-5" />
+        </Link>
         {/* Cmd+K search button */}
         <button
           onClick={onOpenCommandPalette}

@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { Session } from "next-auth";
 import { signOut } from "next-auth/react";
 import Image from "next/image";
+import { Mail } from "lucide-react";
 import AdminNotificationBell from './AdminNotificationBell';
 
 export default function PortalShell({
@@ -98,6 +99,7 @@ export default function PortalShell({
 
   const isAdmin = roles.includes("admin");
   const isIntern = roles.includes("intern");
+  const canSeeMail = isAdmin || roles.includes("employee");
 
   return (
     <div className="bg-background-light dark:bg-background-dark text-gray-800 dark:text-gray-200 font-sans transition-colors duration-300 min-h-screen flex justify-center items-center w-full">
@@ -184,6 +186,21 @@ export default function PortalShell({
               <span className="material-icons-outlined text-[20px] group-hover:scale-110 transition-transform">folder_shared</span>
               {!isCollapsed && <span className="hidden lg:block text-sm">Case Management</span>}
             </Link>
+
+            {canSeeMail && (
+              <Link
+                href="/dashboard/mail"
+                className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-center lg:justify-start'} gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
+                  pathname.startsWith("/dashboard/mail")
+                    ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
+                    : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
+                }`}
+                title={isCollapsed ? "Mail" : undefined}
+              >
+                <Mail className="w-[20px] h-[20px] shrink-0 group-hover:scale-110 transition-transform" />
+                {!isCollapsed && <span className="hidden lg:block text-sm">Mail</span>}
+              </Link>
+            )}
 
             <Link
               href="/portal/employee/knowledge-base"
@@ -441,6 +458,16 @@ export default function PortalShell({
               </h1>
             </div>
             <div className="flex items-center gap-4">
+              {canSeeMail && (
+                <Link
+                  href="/dashboard/mail"
+                  className="hidden sm:flex p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-brand-primary"
+                  aria-label="Mail"
+                  title="Mail"
+                >
+                  <Mail className="w-5 h-5" />
+                </Link>
+              )}
               <div className="hidden md:flex items-center bg-white dark:bg-[#27272a] rounded-full px-4 py-2.5 w-64 shadow-sm border border-gray-100 dark:border-gray-700 relative group">
                 <span className="material-icons-outlined text-gray-400 text-xl">
                   {isSearching ? "sync" : "search"}

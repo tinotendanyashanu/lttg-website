@@ -1,0 +1,79 @@
+import type { MailCaseDetail, MailCaseListItem, MailMessage } from '@/lib/types/mail';
+
+const base = () => {
+  const u = process.env.NEXT_PUBLIC_BACKEND_URL;
+  if (!u) throw new Error('NEXT_PUBLIC_BACKEND_URL is not set');
+  return u.replace(/\/$/, '');
+};
+
+async function authFetch(path: string, token: string, init?: RequestInit) {
+  const res = await fetch(`${base()}${path}`, {
+    ...init,
+    headers: {
+      ...(init?.headers as Record<string, string>),
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return res;
+}
+
+export async function fetchMailCases(
+  token: string,
+  params: { status?: MailCaseListItem['status']; q?: string },
+): Promise<MailCaseListItem[]> {
+  const sp = new URLSearchParams();
+  if (params.status) sp.set('status', params.status);
+  if (params.q) sp.set('q', params.q);
+  const q = sp.toString();
+  const res = await authFetch(`/cases${q ? `?${q}` : ''}`, token);
+  if (!res.ok) throw new Error(`cases_${res.status}`);
+  return res.json();
+}
+
+export async function fetchMailCaseDetail(token: string, caseId: string): Promise<MailCaseDetail> {
+  const res = await authFetch(`/cases/${encodeURIComponent(caseId)}`, token);
+  if (!res.ok) throw new Error(`case_${res.status}`);
+  return res.json();
+}
+
+export async function fetchMailMessages(
+  token: string,
+  caseId: string,
+  params?: { skip?: number; limit?: number },
+): Promise<{ items: MailMessage[]; total: number }> {
+  const sp = new URLSearchParams();
+  if (params?.skip != null) sp.set('skip', String(params.skip));
+  if (params?.limit != null) sp.set('limit', String(params.limit));
+  const q = sp.toString();
+  const res = await authFetch(
+    `/cases/${encodeURIComponent(caseId)}/messages${q ? `?${q}` : ''}`,
+    token,
+  );
+  if (!res.ok) throw new Error(`messages_${res.status}`);
+  return res.json();
+}
+
+export async function sendMailMessage(
+  token: string,
+  payload: { caseId: string; content: string; files?: File[] },
+): Promise<{ message_id: string; gmail_message_id: string }> {
+  const fd = new FormData();
+  fd.set('case_id', payload.caseId);
+  fd.set('content', payload.content);
+  for (const f of payload.files ?? []) {
+    fd.append('files', f);
+  }
+  const res = await authFetch('/messages/send', token, { method: 'POST', body: fd });
+  if (!res.ok) throw new Error(`send_${res.status}`);
+  return res.json();
+}
+
+export async function triggerMailSync(token: string): Promise<{
+  fetched: number;
+  ingested: number;
+  skipped: number;
+}> {
+  const res = await authFetch('/emails/sync', token, { method: 'POST' });
+  if (!res.ok) throw new Error(`sync_${res.status}`);
+  return res.json();
+}

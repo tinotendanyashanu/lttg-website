@@ -27,7 +27,7 @@ const nextConfig: NextConfig = {
       { key: 'X-XSS-Protection', value: '0' },
       {
         key: 'Content-Security-Policy',
-        value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com https://vercel.live https://js.stripe.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' blob: data: https://images.unsplash.com https://api.dicebear.com https://pub-883bddd7b835432581437fc880cb8220.r2.dev; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://*.r2.dev https://api.stripe.com https://m.stripe.network; frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://vercel.live https://www.youtube.com; video-src 'self' blob: https://*.r2.dev; audio-src 'self' blob: https://*.r2.dev; object-src 'none';"
+        value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com https://vercel.live https://js.stripe.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' blob: data: https://images.unsplash.com https://api.dicebear.com https://*.r2.dev https://pub-883bddd7b835432581437fc880cb8220.r2.dev; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' http://127.0.0.1:8000 http://localhost:8000 https://*.r2.dev https://*.r2.cloudflarestorage.com https://api.stripe.com https://m.stripe.network; frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://vercel.live https://www.youtube.com; media-src 'self' blob: https://*.r2.dev https://pub-883bddd7b835432581437fc880cb8220.r2.dev; object-src 'none';"
       },
     ];
 

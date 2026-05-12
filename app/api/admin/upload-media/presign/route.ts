@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { getSessionWithDevBypass } from '@/lib/auth-util';
 import { getAccountByEmail } from '@/lib/data/account';
 import {
@@ -10,10 +11,9 @@ import {
   resolveMimeType,
 } from '@/lib/admin-upload-media';
 
-/**
- * Small multipart upload through the app (still subject to the host's body limit).
- * Prefer `/api/admin/upload-media/presign` + direct PUT to R2 for large files.
- */
+export const runtime = 'nodejs';
+export const maxDuration = 60;
+
 export async function POST(request: NextRequest) {
   try {
     const session = await getSessionWithDevBypass();
@@ -25,21 +25,31 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const formData = await request.formData();
-    const file = formData.get('file') as File | null;
-    const folderRaw = String((formData.get('folder') as string) || 'academy').replace(/^\/+|\/+$/g, '') || 'academy';
+    const body = (await request.json()) as {
+      filename?: string;
+      mimeType?: string;
+      folder?: string;
+      size?: number;
+    };
 
-    if (!file) {
-      return NextResponse.json({ error: 'No file provided' }, { status: 400 });
+    const filename = String(body.filename || '').trim();
+    if (!filename) {
+      return NextResponse.json({ error: 'filename is required' }, { status: 400 });
     }
+
+    const folderRaw = String(body.folder || 'academy').replace(/^\/+|\/+$/g, '') || 'academy';
     if (folderRaw.includes('..') || folderRaw.includes('//')) {
       return NextResponse.json({ error: 'Invalid folder' }, { status: 400 });
     }
+    const size = Number(body.size);
+    if (!Number.isFinite(size) || size < 1) {
+      return NextResponse.json({ error: 'Invalid file size' }, { status: 400 });
+    }
 
-    const mimeType = resolveMimeType(file.name, file.type);
+    const mimeType = resolveMimeType(filename, body.mimeType);
     if (!mimeType) {
       return NextResponse.json(
-        { error: 'Could not determine a supported file type; use a known extension or MIME type.' },
+        { error: 'Could not determine a supported file type; set a correct extension or MIME type.' },
         { status: 400 },
       );
     }
@@ -49,47 +59,43 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: `File type "${mimeType}" is not allowed` }, { status: 400 });
     }
 
-    if (file.size > MAX_SIZE[category]) {
+    if (size > MAX_SIZE[category]) {
       const maxMb = MAX_SIZE[category] / (1024 * 1024);
-      return NextResponse.json({ error: `File exceeds maximum size of ${maxMb}MB for ${category}` }, { status: 400 });
+      return NextResponse.json(
+        { error: `File exceeds maximum size of ${maxMb}MB for ${category}` },
+        { status: 400 },
+      );
     }
 
-    const key = buildUploadKey(folderRaw, category, file.name);
-    const buffer = Buffer.from(await file.arrayBuffer());
+    const key = buildUploadKey(folderRaw, category, filename);
     const bucket = process.env.R2_BUCKET_NAME;
     const publicBase = process.env.R2_PUBLIC_URL?.replace(/\/+$/, '');
     if (!bucket || !publicBase) {
       return NextResponse.json({ error: 'Storage is not configured' }, { status: 500 });
     }
 
-    const r2 = getR2S3Client();
-    await r2.send(
-      new PutObjectCommand({
-        Bucket: bucket,
-        Key: key,
-        Body: buffer,
-        ContentType: mimeType,
-        ContentLength: buffer.byteLength,
-      }),
-    );
+    const client = getR2S3Client();
+    const command = new PutObjectCommand({
+      Bucket: bucket,
+      Key: key,
+      ContentType: mimeType,
+    });
 
+    const uploadUrl = await getSignedUrl(client, command, { expiresIn: 3600 });
     const publicUrl = `${publicBase}/${key}`;
 
     return NextResponse.json({
-      success: true,
-      url: publicUrl,
+      uploadUrl,
+      publicUrl,
       key,
       category,
-      mimeType,
-      size: file.size,
-      name: file.name,
+      contentType: mimeType,
+      size,
+      name: filename,
     });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Upload failed';
-    console.error('[upload-media] Error:', error);
+    const message = error instanceof Error ? error.message : 'Presign failed';
+    console.error('[upload-media/presign] Error:', error);
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
-
-export const runtime = 'nodejs';
-export const maxDuration = 60;

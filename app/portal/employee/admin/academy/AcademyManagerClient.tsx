@@ -78,22 +78,54 @@ function MediaUploader({
 
   const handleFile = useCallback(async (file: File) => {
     setState({ uploading: true, progress: 0, error: null });
-    const fd = new FormData();
-    fd.append('file', file);
-    fd.append('folder', 'academy');
-
-    const ticker = setInterval(() => setState(s => ({ ...s, progress: Math.min(s.progress + 8, 88) })), 300);
     try {
-      const res = await fetch('/api/admin/upload-media', { method: 'POST', body: fd });
-      clearInterval(ticker);
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Upload failed');
+      const presignRes = await fetch('/api/admin/upload-media/presign', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          filename: file.name,
+          mimeType: file.type,
+          folder: 'academy',
+          size: file.size,
+        }),
+      });
+      const presignData = await presignRes.json();
+      if (!presignRes.ok) {
+        throw new Error(presignData.error || 'Could not start upload');
+      }
+
+      const { uploadUrl, publicUrl, contentType } = presignData as {
+        uploadUrl: string;
+        publicUrl: string;
+        contentType: string;
+      };
+
+      await new Promise<void>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.upload.addEventListener('progress', (e) => {
+          if (e.lengthComputable) {
+            const pct = Math.round((e.loaded / e.total) * 100);
+            setState((s) => ({ ...s, progress: pct }));
+          }
+        });
+        xhr.addEventListener('load', () => {
+          if (xhr.status >= 200 && xhr.status < 300) resolve();
+          else {
+            reject(new Error(`Upload failed (${xhr.status})`));
+          }
+        });
+        xhr.addEventListener('error', () => reject(new Error('Network error during upload')));
+        xhr.open('PUT', uploadUrl);
+        xhr.setRequestHeader('Content-Type', contentType);
+        xhr.send(file);
+      });
+
       setState({ uploading: false, progress: 100, error: null });
-      setPreview(data.url);
-      onUploaded(data.url);
-    } catch (err: any) {
-      clearInterval(ticker);
-      setState({ uploading: false, progress: 0, error: err.message });
+      setPreview(publicUrl);
+      onUploaded(publicUrl);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Upload failed';
+      setState({ uploading: false, progress: 0, error: message });
     }
   }, [onUploaded]);
 

@@ -17,6 +17,7 @@ export const NAV_SECTIONS: NavSection[] = [
     label: null,
     items: [
       { name: 'Overview',   href: '/admin',            icon: 'dashboard',  exact: true },
+      { name: 'Mail',       href: '/dashboard/mail',   icon: 'mail' },
       { name: 'Analytics',  href: '/admin/analytics',  icon: 'bar_chart' },
     ],
   },
@@ -57,7 +58,7 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { name: 'Knowledge Base', href: '/admin/knowledge',     icon: 'menu_book' },
       { name: 'Academy',        href: '/admin/academy',       icon: 'school' },
-      { name: 'Resources',      href: '/portal/resources',    icon: 'folder_zip' },
+      { name: 'Resources',      href: '/portal/employee/resources', icon: 'folder_zip' },
       { name: 'Announcements',  href: '/admin/announcements', icon: 'campaign' },
       { name: 'Contacts',       href: '/admin/contacts',      icon: 'message' },
     ],
