@@ -37,7 +37,7 @@ export async function addComment(caseId: string, message: string, visibilityLeve
       newValue: 'Comment added',
     });
 
-    revalidatePath(`/portal/case-management/${caseId}`);
+    revalidatePath(`/portal/employee/case-management/${caseId}`);
     return { success: true, message: 'Comment added successfully' };
   } catch (error) {
     console.error('Add comment error:', error);

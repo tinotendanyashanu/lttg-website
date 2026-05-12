@@ -112,7 +112,7 @@ export default function PortalQuizPlayer({
           </p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
             <button
-              onClick={() => router.push(`/portal/academy/courses/${courseId}`)}
+              onClick={() => router.push(`/portal/employee/academy/courses/${courseId}`)}
               className="rounded-xl bg-brand-primary px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-secondary"
             >
               Return to course

@@ -45,7 +45,7 @@ export default function SearchOverlay({ isOpen, onClose, userRole }: { isOpen: b
     } else if (e.key === 'ArrowUp') {
       setSelectedIndex(prev => Math.max(prev - 1, 0));
     } else if (e.key === 'Enter' && results[selectedIndex]) {
-      router.push(`/portal/knowledge-base/${results[selectedIndex].slug}`);
+      router.push(`/portal/employee/knowledge-base/${results[selectedIndex].slug}`);
       onClose();
     } else if (e.key === 'Escape') {
       onClose();
@@ -98,7 +98,7 @@ export default function SearchOverlay({ isOpen, onClose, userRole }: { isOpen: b
                 <div
                   key={article._id}
                   onClick={() => {
-                    router.push(`/portal/knowledge-base/${article.slug}`);
+                    router.push(`/portal/employee/knowledge-base/${article.slug}`);
                     onClose();
                   }}
                   onMouseEnter={() => setSelectedIndex(index)}

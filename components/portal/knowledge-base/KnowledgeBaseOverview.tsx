@@ -128,7 +128,7 @@ export default function KnowledgeBaseOverview({
              ) : (
                 <div className="grid grid-cols-1 gap-4">
                     {articles.map((article: any) => (
-                        <Link key={article._id} href={`/portal/knowledge-base/${article.slug}`} className="block group">
+                        <Link key={article._id} href={`/portal/employee/knowledge-base/${article.slug}`} className="block group">
                             <div className="bg-white dark:bg-[#27272a] rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-sm p-8 hover:shadow-xl hover:border-blue-100 dark:hover:border-blue-900/50 transition-all duration-500 relative overflow-hidden">
                                 {/* Type Indicator */}
                                 <div className={`absolute top-0 left-0 w-1.5 h-full ${

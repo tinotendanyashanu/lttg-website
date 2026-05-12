@@ -47,7 +47,7 @@ export default function PriorityQueue({ tasks }: { tasks: Task[] }) {
         {tasks.map((task) => (
           <Link 
             key={task.id} 
-            href={`/portal/case-management/${task.id}`}
+            href={`/portal/employee/case-management/${task.id}`}
             className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all border-b border-gray-100 last:border-0 dark:border-gray-800 group"
           >
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 shadow-sm transition-transform group-hover:scale-105 ${

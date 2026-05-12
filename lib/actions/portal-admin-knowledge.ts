@@ -65,7 +65,7 @@ export async function createAdminKnowledgeArticle(data: any) {
       newValue: `Article created: ${article.title}`,
     });
 
-    revalidatePath('/portal/knowledge-base');
+    revalidatePath('/portal/employee/knowledge-base');
     return { success: true, articleId: article._id.toString() };
   } catch (error: any) {
     console.error('Error creating knowledge article:', error);
@@ -110,8 +110,8 @@ export async function updateAdminKnowledgeArticle(articleId: string, data: any) 
       newValue: `Article updated: ${article.title}`,
     });
 
-    revalidatePath('/portal/knowledge-base');
-    revalidatePath(`/portal/knowledge-base/${article.slug}`);
+    revalidatePath('/portal/employee/knowledge-base');
+    revalidatePath(`/portal/employee/knowledge-base/${article.slug}`);
     return { success: true };
   } catch (error: any) {
     console.error('Error updating knowledge article:', error);
@@ -135,7 +135,7 @@ export async function deleteAdminKnowledgeArticle(articleId: string) {
     newValue: `Article deleted: ${article.title}`,
   });
 
-  revalidatePath('/portal/knowledge-base');
+  revalidatePath('/portal/employee/knowledge-base');
   return { success: true };
 }
 
@@ -144,7 +144,7 @@ export async function createKnowledgeCategory(data: any) {
     await dbConnect();
     await validateAdmin();
     const category = await KnowledgeCategory.create(data);
-    revalidatePath('/portal/knowledge-base');
+    revalidatePath('/portal/employee/knowledge-base');
     return { success: true, category: JSON.parse(JSON.stringify(category)) };
 }
 
@@ -152,7 +152,7 @@ export async function updateKnowledgeCategory(id: string, data: any) {
     await dbConnect();
     await validateAdmin();
     await KnowledgeCategory.findByIdAndUpdate(id, data);
-    revalidatePath('/portal/knowledge-base');
+    revalidatePath('/portal/employee/knowledge-base');
     return { success: true };
 }
 
@@ -160,6 +160,6 @@ export async function deleteKnowledgeCategory(id: string) {
     await dbConnect();
     await validateAdmin();
     await KnowledgeCategory.findByIdAndDelete(id);
-    revalidatePath('/portal/knowledge-base');
+    revalidatePath('/portal/employee/knowledge-base');
     return { success: true };
 }

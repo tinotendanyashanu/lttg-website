@@ -21,7 +21,7 @@ export default function AdminQuickActions() {
       title: 'Knowledge Base',
       description: 'Upload new training materials or company policies',
       icon: 'auto_stories',
-      href: '/portal/knowledge-base',
+      href: '/portal/employee/knowledge-base',
       color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30'
     },
     {

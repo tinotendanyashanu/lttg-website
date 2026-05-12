@@ -30,7 +30,7 @@ export default function KnowledgeShortcuts({ articles }: KnowledgeShortcutsProps
           {articles.map((article) => (
             <Link 
               key={article.id}
-              href={`/portal/knowledge-base/${article.slug}`}
+              href={`/portal/employee/knowledge-base/${article.slug}`}
               className="flex items-center gap-4 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors border border-transparent hover:border-gray-100 dark:hover:border-gray-700 group"
             >
               <div className="w-10 h-10 rounded-lg bg-brand-primary/10 text-brand-primary flex items-center justify-center shrink-0">

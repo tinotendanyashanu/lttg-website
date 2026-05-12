@@ -109,7 +109,7 @@ export default function EditArticlePage({ params }: { params: { articleId: strin
       } as any);
 
       if (result.success) {
-        router.push(`/portal/knowledge-base/${formData.slug}`);
+        router.push(`/portal/employee/knowledge-base/${formData.slug}`);
       } else {
         setError(result.error || 'Failed to update article');
       }
@@ -131,7 +131,7 @@ export default function EditArticlePage({ params }: { params: { articleId: strin
         </div>
         <div className="flex gap-3">
             <Link 
-            href={`/portal/knowledge-base/${params.articleId}`} 
+            href={`/portal/employee/knowledge-base/${params.articleId}`} 
             className="px-4 py-2 bg-white dark:bg-[#27272a] border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
             >
             Cancel

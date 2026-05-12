@@ -66,7 +66,7 @@ export async function createArticle(data: Partial<IKnowledgeArticle>) {
         );
     }
     
-    revalidatePath('/portal/knowledge-base');
+    revalidatePath('/portal/employee/knowledge-base');
     return { success: true, articleId: article._id.toString() };
   } catch (error: any) {
     console.error('Failed to create article:', error);
@@ -131,8 +131,8 @@ export async function updateArticle(id: string, data: Partial<IKnowledgeArticle>
         }
     }
 
-    revalidatePath('/portal/knowledge-base');
-    revalidatePath(`/portal/knowledge-base/${article.slug}`);
+    revalidatePath('/portal/employee/knowledge-base');
+    revalidatePath(`/portal/employee/knowledge-base/${article.slug}`);
     
     return { success: true, article: JSON.parse(JSON.stringify(article)) };
   } catch (error: any) {

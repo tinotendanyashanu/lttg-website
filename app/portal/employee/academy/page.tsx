@@ -69,7 +69,7 @@ export default async function AcademyDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {courses.map((course: any) => {
             return (
-              <Link key={course._id} href={`/portal/academy/courses/${course._id}`}>
+              <Link key={course._id} href={`/portal/employee/academy/courses/${course._id}`}>
                 <div className="bg-white dark:bg-[#27272a] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-shadow group cursor-pointer flex flex-col h-full overflow-hidden">
                   {/* Course Image */}
                   <div className="relative aspect-video w-full overflow-hidden bg-gray-100 dark:bg-gray-800">

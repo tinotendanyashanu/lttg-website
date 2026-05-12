@@ -73,7 +73,7 @@ export async function sendCaseMessage(caseId: string, body: string) {
   } catch (_) { /* Non-blocking */ }
 
   revalidatePath(`/portal/admin/cases`);
-  revalidatePath(`/portal/case-management`);
+  revalidatePath(`/portal/employee/case-management`);
 
   return { success: true, message: JSON.parse(JSON.stringify(msg)) };
 }

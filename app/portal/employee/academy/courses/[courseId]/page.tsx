@@ -143,7 +143,7 @@ export default async function CourseOverviewPage({ params }: { params: Promise<{
                 )}
                 {lessons.length > 0 && (
                   <Link 
-                    href={`/portal/academy/courses/${course._id}/lessons/${nextLessonId || lessons[0]._id}`}
+                    href={`/portal/employee/academy/courses/${course._id}/lessons/${nextLessonId || lessons[0]._id}`}
                     className="bg-brand-primary hover:bg-brand-secondary text-white px-10 py-4 rounded-2xl font-bold transition-all shadow-xl hover:shadow-brand-primary/20 hover:-translate-y-0.5 active:translate-y-0 shrink-0 whitespace-nowrap"
                   >
                     {percent > 0 ? "Continue Learning" : "Start Course Now"}
@@ -187,7 +187,7 @@ export default async function CourseOverviewPage({ params }: { params: Promise<{
                   return (
                     <Link
                       key={lesson._id}
-                      href={isLocked ? `/portal/academy/courses/${course._id}` : `/portal/academy/courses/${course._id}/lessons/${lesson._id}`}
+                      href={isLocked ? `/portal/employee/academy/courses/${course._id}` : `/portal/employee/academy/courses/${course._id}/lessons/${lesson._id}`}
                       className={`flex items-center gap-4 px-6 py-4 transition-colors group ${isLocked ? 'cursor-not-allowed opacity-70' : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'}`}
                     >
                       <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${
@@ -246,7 +246,7 @@ export default async function CourseOverviewPage({ params }: { params: Promise<{
                     </span>
                   ) : moduleStates.find((state: any) => state.moduleId === module._id)?.completedLessons === moduleStates.find((state: any) => state.moduleId === module._id)?.totalLessons ? (
                     <Link
-                      href={`/portal/academy/courses/${course._id}/modules/${module._id}/quiz`}
+                      href={`/portal/employee/academy/courses/${course._id}/modules/${module._id}/quiz`}
                       className="rounded-xl bg-brand-primary px-4 py-2 text-sm font-semibold text-white hover:bg-brand-secondary"
                     >
                       Take module quiz
@@ -279,7 +279,7 @@ export default async function CourseOverviewPage({ params }: { params: Promise<{
               </span>
             ) : percent === 100 ? (
               <Link
-                href={`/portal/academy/courses/${course._id}/quiz`}
+                href={`/portal/employee/academy/courses/${course._id}/quiz`}
                 className="rounded-xl bg-brand-primary px-4 py-2 text-sm font-semibold text-white hover:bg-brand-secondary"
               >
                 Take final assessment

@@ -39,7 +39,7 @@ export async function uploadResource(formData: FormData) {
       roleVisibility: visibilityArray
     });
 
-    revalidatePath('/portal/resources');
+    revalidatePath('/portal/employee/resources');
     revalidatePath('/portal/client/resources');
     return { success: true, message: 'Resource uploaded successfully' };
   } catch (error) {

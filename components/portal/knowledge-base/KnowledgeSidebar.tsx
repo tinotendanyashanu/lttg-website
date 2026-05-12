@@ -63,7 +63,7 @@ export default function KnowledgeSidebar({ categories, activeCategoryId }: Knowl
           <span className="material-icons-outlined text-[18px]">
             {category.icon || 'folder'}
           </span>
-          <Link href={`/portal/knowledge-base?category=${category._id}`} className="flex-1 truncate text-sm">
+          <Link href={`/portal/employee/knowledge-base?category=${category._id}`} className="flex-1 truncate text-sm">
             {category.name}
           </Link>
         </div>
@@ -85,7 +85,7 @@ export default function KnowledgeSidebar({ categories, activeCategoryId }: Knowl
           <Link 
             href="/portal/employee/knowledge-base" 
             className={`flex items-center gap-3 px-3 py-2 rounded-xl transition-all ${
-              !activeCategoryId && pathname === '/portal/knowledge-base'
+              !activeCategoryId && pathname === '/portal/employee/knowledge-base'
                 ? 'bg-gray-100 dark:bg-neutral-800 text-gray-900 dark:text-white font-semibold'
                 : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-neutral-800'
             }`}

@@ -98,7 +98,7 @@ export default function CreateArticlePage() {
       } as any);
 
       if (result.success) {
-        router.push('/portal/knowledge-base');
+        router.push('/portal/employee/knowledge-base');
       } else {
         setError(result.error || 'Failed to create article');
       }

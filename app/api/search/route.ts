@@ -60,7 +60,7 @@ export async function GET(request: Request) {
                 type: 'case',
                 title: c.businessName || c.contactName || 'Unnamed Case',
                 subtitle: `Status: ${c.status}`,
-                url: `/portal/case-management/${c._id.toString()}`
+                url: `/portal/employee/case-management/${c._id.toString()}`
             })),
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             ...accounts.map((a: any) => ({
@@ -68,7 +68,7 @@ export async function GET(request: Request) {
                 type: 'account',
                 title: a.fullName,
                 subtitle: `Role: ${a.roles ? a.roles.join(', ') : 'User'}`,
-                url: a.roles?.includes('admin') ? `/portal/admin/users` : `/portal/team`
+                url: a.roles?.includes('admin') ? `/portal/employee/admin/users` : `/portal/employee/team`
             })),
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             ...articles.map((art: any) => ({
@@ -76,7 +76,7 @@ export async function GET(request: Request) {
                 type: 'article',
                 title: art.title,
                 subtitle: `Category: ${art.category}`,
-                url: `/portal/knowledge-base/${art.slug}`
+                url: `/portal/employee/knowledge-base/${art.slug}`
             }))
         ];
 

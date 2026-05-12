@@ -55,7 +55,7 @@ export default async function ArticleDetailedView({ params }: { params: Promise<
         <div className="flex gap-2">
             {isAdminOrAuthor && (
               <Link 
-                href={`/portal/knowledge-base/${article.slug}/edit`} 
+                href={`/portal/employee/knowledge-base/${article.slug}/edit`} 
                 className="px-4 py-2 bg-white dark:bg-[#27272a] border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all flex items-center gap-2"
               >
                 <span className="material-icons-outlined text-sm">edit</span>
@@ -134,7 +134,7 @@ export default async function ArticleDetailedView({ params }: { params: Promise<
                         {article.relatedArticles.map((rel: any) => (
                             <Link 
                                 key={rel._id}
-                                href={`/portal/knowledge-base/${rel.slug}`}
+                                href={`/portal/employee/knowledge-base/${rel.slug}`}
                                 className="p-4 bg-white dark:bg-[#1c1c1e] border border-gray-100 dark:border-neutral-800 rounded-2xl hover:border-purple-500 transition-all group"
                             >
                                 <div className="flex items-center gap-3">
@@ -196,7 +196,7 @@ export default async function ArticleDetailedView({ params }: { params: Promise<
                             {article.backlinks.map((link: any) => (
                                 <Link 
                                     key={link._id}
-                                    href={`/portal/knowledge-base/${link.slug}`}
+                                    href={`/portal/employee/knowledge-base/${link.slug}`}
                                     className="block p-3 bg-white dark:bg-[#1c1c1e] border border-gray-100 dark:border-neutral-800 rounded-xl hover:border-blue-500 transition-all group"
                                 >
                                     <h5 className="text-[11px] font-bold text-gray-900 dark:text-white group-hover:text-blue-600 truncate">{link.title}</h5>

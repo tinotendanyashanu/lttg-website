@@ -58,13 +58,13 @@ export default function LessonViewPage() {
     const res = await markLessonComplete(courseId, lessonId);
     if (res.success) {
       if (res.needsModuleQuiz && learningData?.module?._id) {
-        router.push(`/portal/academy/courses/${courseId}/modules/${learningData.module._id}/quiz`);
+        router.push(`/portal/employee/academy/courses/${courseId}/modules/${learningData.module._id}/quiz`);
       } else if (res.needsCourseQuiz) {
-        router.push(`/portal/academy/courses/${courseId}/quiz`);
+        router.push(`/portal/employee/academy/courses/${courseId}/quiz`);
       } else if (res.nextLessonId) {
-        router.push(`/portal/academy/courses/${courseId}/lessons/${res.nextLessonId}`);
+        router.push(`/portal/employee/academy/courses/${courseId}/lessons/${res.nextLessonId}`);
       } else {
-        router.push(`/portal/academy/courses/${courseId}`);
+        router.push(`/portal/employee/academy/courses/${courseId}`);
       }
       router.refresh(); // Refresh the course page to show updated progress
     } else {
@@ -87,7 +87,7 @@ export default function LessonViewPage() {
         <span className="material-icons-outlined text-4xl mb-2">error_outline</span>
         <h2 className="text-xl font-bold">Error loading lesson</h2>
         <p>{error}</p>
-        <Link href={`/portal/academy/courses/${courseId}`} className="text-brand-primary hover:underline mt-4 inline-block font-semibold">Back to Course</Link>
+        <Link href={`/portal/employee/academy/courses/${courseId}`} className="text-brand-primary hover:underline mt-4 inline-block font-semibold">Back to Course</Link>
       </div>
     );
   }
@@ -102,7 +102,7 @@ export default function LessonViewPage() {
       <nav className="flex items-center text-sm font-medium text-gray-500 dark:text-gray-400 space-x-2">
         <Link href="/portal/employee/academy" className="hover:text-brand-primary transition-colors">Academy</Link>
         <span className="material-icons-outlined text-[16px]">chevron_right</span>
-        <Link href={`/portal/academy/courses/${courseId}`} className="hover:text-brand-primary transition-colors truncate max-w-[150px]">{course?.title}</Link>
+        <Link href={`/portal/employee/academy/courses/${courseId}`} className="hover:text-brand-primary transition-colors truncate max-w-[150px]">{course?.title}</Link>
         <span className="material-icons-outlined text-[16px]">chevron_right</span>
         <span className="truncate max-w-[200px] text-gray-900 dark:text-gray-200">{module?.title}</span>
       </nav>
@@ -198,7 +198,7 @@ export default function LessonViewPage() {
                   <p className="mt-1 text-sm">{unlockReason}</p>
                 </div>
               </div>
-              <Link href={`/portal/academy/courses/${courseId}`} className="mt-4 inline-flex rounded-xl bg-amber-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-amber-700">
+              <Link href={`/portal/employee/academy/courses/${courseId}`} className="mt-4 inline-flex rounded-xl bg-amber-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-amber-700">
                 Return to course
               </Link>
             </div>
@@ -276,7 +276,7 @@ export default function LessonViewPage() {
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">Navigation</p>
           <div className="mt-4 space-y-3">
             {navigation?.previousLessonId ? (
-              <Link href={`/portal/academy/courses/${courseId}/lessons/${navigation.previousLessonId}`} className="flex items-center justify-between rounded-2xl border border-gray-100 px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:border-brand-primary hover:text-brand-primary dark:border-gray-800 dark:text-gray-300">
+              <Link href={`/portal/employee/academy/courses/${courseId}/lessons/${navigation.previousLessonId}`} className="flex items-center justify-between rounded-2xl border border-gray-100 px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:border-brand-primary hover:text-brand-primary dark:border-gray-800 dark:text-gray-300">
                 <span>Previous lesson</span>
                 <span className="material-icons-outlined text-base">arrow_back</span>
               </Link>
@@ -285,12 +285,12 @@ export default function LessonViewPage() {
             )}
 
             {navigation?.nextLessonId ? (
-              <Link href={`/portal/academy/courses/${courseId}/lessons/${navigation.nextLessonId}`} className="flex items-center justify-between rounded-2xl border border-gray-100 px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:border-brand-primary hover:text-brand-primary dark:border-gray-800 dark:text-gray-300">
+              <Link href={`/portal/employee/academy/courses/${courseId}/lessons/${navigation.nextLessonId}`} className="flex items-center justify-between rounded-2xl border border-gray-100 px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:border-brand-primary hover:text-brand-primary dark:border-gray-800 dark:text-gray-300">
                 <span>Next lesson</span>
                 <span className="material-icons-outlined text-base">arrow_forward</span>
               </Link>
             ) : (
-              <Link href={`/portal/academy/courses/${courseId}`} className="flex items-center justify-between rounded-2xl border border-gray-100 px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:border-brand-primary hover:text-brand-primary dark:border-gray-800 dark:text-gray-300">
+              <Link href={`/portal/employee/academy/courses/${courseId}`} className="flex items-center justify-between rounded-2xl border border-gray-100 px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:border-brand-primary hover:text-brand-primary dark:border-gray-800 dark:text-gray-300">
                 <span>Back to course</span>
                 <span className="material-icons-outlined text-base">menu_book</span>
               </Link>

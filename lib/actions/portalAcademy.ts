@@ -650,9 +650,9 @@ export async function markLessonComplete(courseId: string, lessonId: string) {
 
     const afterSnapshot = await syncProgressState({ course, modules, lessonsByModule, progress, attempts });
 
-    revalidatePath('/portal/academy');
-    revalidatePath(`/portal/academy/courses/${courseId}`);
-    revalidatePath(`/portal/academy/courses/${courseId}/lessons/${lessonId}`);
+    revalidatePath('/portal/employee/academy');
+    revalidatePath(`/portal/employee/academy/courses/${courseId}`);
+    revalidatePath(`/portal/employee/academy/courses/${courseId}/lessons/${lessonId}`);
 
     return {
       success: true,
@@ -749,8 +749,8 @@ export async function submitQuiz(courseId: string, answers: number[]) {
     const refreshedAttempts = await PortalQuizAttempt.find({ accountId: account._id, courseId }).lean();
     const syncedSnapshot = await syncProgressState({ course, modules, lessonsByModule, progress, attempts: refreshedAttempts });
 
-    revalidatePath('/portal/academy');
-    revalidatePath(`/portal/academy/courses/${courseId}`);
+    revalidatePath('/portal/employee/academy');
+    revalidatePath(`/portal/employee/academy/courses/${courseId}`);
 
     return {
       success: true,
@@ -791,8 +791,8 @@ export async function submitModuleQuiz(courseId: string, moduleId: string, answe
     const refreshedAttempts = await PortalQuizAttempt.find({ accountId: account._id, courseId }).lean();
     const syncedSnapshot = await syncProgressState({ course, modules, lessonsByModule, progress, attempts: refreshedAttempts });
 
-    revalidatePath('/portal/academy');
-    revalidatePath(`/portal/academy/courses/${courseId}`);
+    revalidatePath('/portal/employee/academy');
+    revalidatePath(`/portal/employee/academy/courses/${courseId}`);
 
     return {
       success: true,

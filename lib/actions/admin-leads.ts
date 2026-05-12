@@ -101,8 +101,8 @@ export async function updateAdminLeadStatus(leadId: string, newStatus: AllowedAd
       newValue: newStatus,
     });
 
-    revalidatePath('/portal/case-management');
-    revalidatePath(`/portal/case-management/${leadId}`);
+    revalidatePath('/portal/employee/case-management');
+    revalidatePath(`/portal/employee/case-management/${leadId}`);
     return { success: true, message: `Lead status updated to ${newStatus}` };
   } catch (error) {
     console.error('Update admin lead status error:', error);
