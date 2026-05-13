@@ -26,7 +26,7 @@ async def ensure_indexes(db) -> None:
         "gmail_message_id",
         unique=True,
         partialFilterExpression={
-            "gmail_message_id": {"$exists": True, "$type": "string", "$ne": ""},
+            "gmail_message_id": {"$type": "string", "$gt": ""},
         },
     )
 
