@@ -8,7 +8,7 @@ export const metadata = { title: 'Invoice Approvals | Admin' };
 
 export default async function AdminInvoicesPage() {
   const session = await getSessionWithDevBypass();
-  if (!session?.user?.email) redirect('/portal/login');
+  if (!session?.user?.email) redirect('/login');
 
   const account = await getAccountByEmail(session.user.email);
   if (!account || !account.roles.includes('admin')) redirect('/portal/employee');

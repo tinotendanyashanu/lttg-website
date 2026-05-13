@@ -18,7 +18,7 @@ async function getPayments(clientId: string) {
 
 export default async function PaymentsPage() {
   const session = await auth();
-  if (!session?.user?.id) redirect('/portal/login');
+  if (!session?.user?.id) redirect('/login');
 
   const payments = await getPayments(session.user.id);
   const total = payments.reduce((sum: number, p: any) => sum + (p.amount || 0), 0);

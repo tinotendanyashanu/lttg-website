@@ -17,7 +17,7 @@ async function getCompanyProfile(userId: string) {
 
 export default async function CompanySettingsPage() {
   const session = await auth();
-  if (!session?.user?.id) redirect('/portal/login');
+  if (!session?.user?.id) redirect('/login');
 
   const cp = await getCompanyProfile(session.user.id);
 

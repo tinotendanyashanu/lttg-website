@@ -33,7 +33,7 @@ async function getCases(clientId: string) {
 
 export default async function CasesPage() {
   const session = await auth();
-  if (!session?.user?.id) redirect('/portal/login');
+  if (!session?.user?.id) redirect('/login');
 
   const cases = await getCases(session.user.id);
 

@@ -24,28 +24,32 @@ export const authConfig = {
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
-      const isOnPartnerDashboard = nextUrl.pathname.startsWith('/partner/dashboard');
+      const isOnPartnerDashboard = nextUrl.pathname.startsWith('/portal/partner/dashboard');
       const isOnMailDashboard = nextUrl.pathname.startsWith('/dashboard');
       const isOnAdmin = nextUrl.pathname.startsWith('/admin');
       const isOnPortal = nextUrl.pathname.startsWith('/portal');
 
-      // Specialized login pages
-      const isPartnerLogin = nextUrl.pathname === '/partner/login';
+      // Specialized login pages — redirect all to unified /login
+      const isPartnerLogin = nextUrl.pathname === '/partner/login' || nextUrl.pathname === '/portal/partner/login';
       const isStaffLogin = nextUrl.pathname === '/portal/login';
       const isClientLogin = nextUrl.pathname === '/portal/client/login';
 
-      if (isPartnerLogin || isStaffLogin || isClientLogin || nextUrl.pathname === '/login') {
+      if (isPartnerLogin || isStaffLogin || isClientLogin) {
+         return Response.redirect(new URL('/login', nextUrl.origin));
+      }
+
+      if (nextUrl.pathname === '/login') {
         if (!isLoggedIn) return true;
         if (auth?.user?.role === 'admin') {
           return Response.redirect(new URL('/admin', nextUrl.origin));
         }
         if (auth?.user?.role === 'employee' || auth?.user?.role === 'intern') {
-          return Response.redirect(new URL('/portal', nextUrl.origin));
+          return Response.redirect(new URL('/portal/employee', nextUrl.origin));
         }
         if (auth?.user?.role === 'client') {
           return Response.redirect(new URL('/portal/client/dashboard', nextUrl.origin));
         }
-        return Response.redirect(new URL('/partner/dashboard', nextUrl.origin));
+        return Response.redirect(new URL('/portal/partner/dashboard', nextUrl.origin));
       }
 
       if (isOnPortal) {

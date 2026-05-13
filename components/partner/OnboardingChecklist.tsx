@@ -33,7 +33,7 @@ export default function OnboardingChecklist({
       description: 'Add your company and personal details.',
       isCompleted: profileComplete,
       actionText: 'Go to Settings',
-      actionHref: '/partner/dashboard/settings'
+      actionHref: '/portal/partner/dashboard/settings'
     },
     {
       id: 'payout',
@@ -41,7 +41,7 @@ export default function OnboardingChecklist({
       description: 'Tell us how you want to receive commissions.',
       isCompleted: payoutMethodSet,
       actionText: 'Setup Payout',
-      actionHref: '/partner/dashboard/settings'
+      actionHref: '/portal/partner/dashboard/settings'
     },
     {
       id: 'academy',
@@ -49,7 +49,7 @@ export default function OnboardingChecklist({
       description: 'Learn how to sell Leo Systems services.',
       isCompleted: academyFinished,
       actionText: 'Open Academy',
-      actionHref: '/partner/dashboard/academy'
+      actionHref: '/portal/partner/dashboard/academy'
     },
     {
       id: 'deal',
@@ -57,7 +57,7 @@ export default function OnboardingChecklist({
       description: 'Submit your first lead or deal.',
       isCompleted: dealRegistered,
       actionText: 'Register Deal',
-      actionHref: '/partner/dashboard/deals/register'
+      actionHref: '/portal/partner/dashboard/deals/register'
     },
     {
       id: 'standards',
@@ -65,7 +65,7 @@ export default function OnboardingChecklist({
       description: 'Accept the affiliate terms and conditions.',
       isCompleted: standardsReviewed,
       actionText: 'View Rules',
-      actionHref: '/partner/dashboard/rules'
+      actionHref: '/portal/partner/dashboard/rules'
     }
   ];
 

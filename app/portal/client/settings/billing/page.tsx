@@ -25,7 +25,7 @@ async function getBillingSummary(clientId: string) {
 
 export default async function BillingSettingsPage() {
   const session = await auth();
-  if (!session?.user?.id) redirect('/portal/login');
+  if (!session?.user?.id) redirect('/login');
 
   const billing = await getBillingSummary(session.user.id);
   const totalDue = billing.outstanding.reduce((s: number, i: any) => s + (i.amount || 0), 0);

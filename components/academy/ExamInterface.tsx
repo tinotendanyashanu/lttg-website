@@ -84,7 +84,7 @@ export default function ExamInterface({ courseId, courseTitle, questions, passin
         <div className="flex justify-center space-x-4">
           {result.passed ? (
             <button 
-              onClick={() => router.push('/partner/dashboard/academy')}
+              onClick={() => router.push('/portal/partner/dashboard/academy')}
               className="px-8 py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition-colors"
             >
               Back to Academy

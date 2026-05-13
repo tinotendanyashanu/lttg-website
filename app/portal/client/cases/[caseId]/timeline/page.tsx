@@ -24,7 +24,7 @@ export default async function CaseTimelinePage({
 }) {
   const { caseId } = await params;
   const session = await auth();
-  if (!session?.user?.id) redirect('/portal/login');
+  if (!session?.user?.id) redirect('/login');
 
   const data = await getCaseTimeline(session.user.id, caseId);
   if (!data) notFound();

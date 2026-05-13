@@ -13,21 +13,21 @@ export default async function PortalLayout({
   const session = await getSessionWithDevBypass();
 
   if (!session?.user?.email) {
-    redirect('/portal/login');
+    redirect('/login');
   }
 
   const account = await getAccountByEmail(session.user.email);
 
   if (!account) {
-    redirect('/portal/login?error=account_missing');
+    redirect('/login?error=account_missing');
   }
 
   if (!account.roles || account.roles.length === 0) {
-    redirect('/portal/login?error=roles_missing');
+    redirect('/login?error=roles_missing');
   }
 
   if (account.isActive === false) {
-    redirect('/portal/login?error=account_inactive');
+    redirect('/login?error=account_inactive');
   }
 
   return (

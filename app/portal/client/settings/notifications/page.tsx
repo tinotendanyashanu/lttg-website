@@ -4,7 +4,7 @@ import { SettingsNav } from '@/components/portal/client/SettingsNav';
 
 export default async function NotificationSettingsPage() {
   const session = await auth();
-  if (!session?.user?.id) redirect('/portal/login');
+  if (!session?.user?.id) redirect('/login');
 
   const prefs = [
     { key: 'case_updates', label: 'Case Updates', desc: 'Notify me when my case status changes' },

@@ -8,10 +8,10 @@ export const metadata = { title: 'My Invoices | Employee Portal' };
 
 export default async function EmployeeInvoicesPage() {
   const session = await getSessionWithDevBypass();
-  if (!session?.user?.email) redirect('/portal/login');
+  if (!session?.user?.email) redirect('/login');
 
   const account = await getAccountByEmail(session.user.email);
-  if (!account) redirect('/portal/login');
+  if (!account) redirect('/login');
 
   const isStaff = account.roles.includes('admin') || account.roles.includes('employee') || account.roles.includes('intern');
   if (!isStaff) redirect('/portal/employee');

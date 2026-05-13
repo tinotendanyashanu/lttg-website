@@ -62,7 +62,7 @@ export default async function KnowledgebasePage({
 }) {
   const { category, q } = await searchParams;
   const session = await auth();
-  if (!session?.user?.id) redirect('/portal/login');
+  if (!session?.user?.id) redirect('/login');
 
   const dbArticles = await getArticles(session.user.id);
 

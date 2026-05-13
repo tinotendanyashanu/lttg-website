@@ -44,7 +44,7 @@ async function getReportData(clientId: string) {
 
 export default async function ReportsPage() {
   const session = await auth();
-  if (!session?.user?.id) redirect('/portal/login');
+  if (!session?.user?.id) redirect('/login');
 
   const data = await getReportData(session.user.id);
 

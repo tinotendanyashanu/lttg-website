@@ -10,7 +10,7 @@
     "setup:admin": "node scripts/setup-admin.js"
   },
   "engines": {
-    "node": ">=20.11 <21"
+    "node": ">=20.19 <21"
   },
   "packageManager": "npm@10.9.0",
   "dependencies": {

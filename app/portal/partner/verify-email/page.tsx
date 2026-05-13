@@ -11,19 +11,19 @@ export default async function VerifyEmailPromptPage() {
   const session = await auth();
 
   if (!session?.user?.email) {
-    redirect('/partner/login');
+    redirect('/login');
   }
 
   await dbConnect();
   const partner = await PartnerModel.findOne({ email: session.user.email }).lean();
 
   if (!partner) {
-    redirect('/partner/login');
+    redirect('/login');
   }
 
   // If already verified, allow them to enter the dashboard
   if (partner.emailVerified) {
-    redirect('/partner/dashboard');
+    redirect('/portal/partner/dashboard');
   }
 
   return (

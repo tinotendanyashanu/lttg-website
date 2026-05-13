@@ -22,7 +22,7 @@ async function getDealDetails(userId: string, dealId: string) {
 export default async function DealDetailPage(props: { params: Promise<{ id: string }> }) {
   const session = await auth();
   if (!session?.user?.id) {
-    redirect('/partner/login');
+    redirect('/login');
   }
 
   const { id } = await props.params;
@@ -33,7 +33,7 @@ export default async function DealDetailPage(props: { params: Promise<{ id: stri
       <div className="max-w-3xl mx-auto py-12 text-center">
         <h2 className="text-xl font-bold text-slate-900 mb-2">Deal Not Found</h2>
         <p className="text-slate-500 mb-6">The deal you are looking for does not exist or you do not have permission to view it.</p>
-        <Link href="/partner/dashboard/deals" className="text-emerald-600 font-bold hover:underline">
+        <Link href="/portal/partner/dashboard/deals" className="text-emerald-600 font-bold hover:underline">
           &larr; Back to Deals
         </Link>
       </div>
@@ -49,7 +49,7 @@ export default async function DealDetailPage(props: { params: Promise<{ id: stri
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      <Link href="/partner/dashboard/deals" className="inline-flex items-center text-slate-500 hover:text-slate-900 transition-colors">
+      <Link href="/portal/partner/dashboard/deals" className="inline-flex items-center text-slate-500 hover:text-slate-900 transition-colors">
         <ArrowLeft className="mr-2 h-4 w-4" />
         Back to Deals
       </Link>

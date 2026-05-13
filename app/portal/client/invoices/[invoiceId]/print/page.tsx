@@ -20,9 +20,9 @@ export default async function ClientInvoicePrintPage({
 }) {
   const { invoiceId } = await params;
   const session = await auth();
-  if (!session?.user?.accountId && !session?.user?.id) redirect('/portal/login');
+  if (!session?.user?.accountId && !session?.user?.id) redirect('/login');
   const accountId = session.user.accountId ?? session.user.id;
-  if (!accountId) redirect('/portal/login');
+  if (!accountId) redirect('/login');
 
   const invoice = await getInvoiceForClient(invoiceId, accountId);
   if (!invoice) notFound();

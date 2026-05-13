@@ -32,7 +32,7 @@ async function getQuotations(clientId: string) {
 
 export default async function ClientQuotationsPage() {
   const session = await auth();
-  if (!session?.user?.id) redirect('/portal/client/login');
+  if (!session?.user?.id) redirect('/login');
 
   const quotations = await getQuotations(session.user.id);
   const pending = quotations.filter((q: any) => q.status === 'sent');

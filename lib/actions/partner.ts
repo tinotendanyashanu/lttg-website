@@ -127,8 +127,8 @@ export async function registerDeal(prevState: unknown, formData: FormData) {
     }
   }
 
-  revalidatePath('/partner/dashboard/deals');
-  redirect('/partner/dashboard/deals');
+  revalidatePath('/portal/partner/dashboard/deals');
+  redirect('/portal/partner/dashboard/deals');
 }
 
 export async function completeOnboarding() {
@@ -137,7 +137,7 @@ export async function completeOnboarding() {
 
   await dbConnect();
   await Partner.findByIdAndUpdate(session.user.id, { hasCompletedOnboarding: true });
-  revalidatePath('/partner/dashboard');
+  revalidatePath('/portal/partner/dashboard');
 }
 
 export async function switchTier(targetTier: 'referral' | 'creator') {
@@ -163,7 +163,11 @@ export async function switchTier(targetTier: 'referral' | 'creator') {
     }
 
     const previousTier = partner.tier;
-    const updates: any = {
+    const updates: {
+      tier: 'referral' | 'creator';
+      partnerType: 'partner' | 'influencer';
+      referralCode?: string;
+    } = {
       tier: targetTier,
       partnerType: targetTier === 'creator' ? 'influencer' : 'partner'
     };
@@ -193,9 +197,9 @@ export async function switchTier(targetTier: 'referral' | 'creator') {
       message: `You have successfully switched to the ${targetTier === 'creator' ? 'Creator' : 'Referral'} tier.`,
     });
 
-    revalidatePath('/partner/dashboard');
-    revalidatePath('/partner/dashboard/settings');
-    revalidatePath('/partner/dashboard/tier');
+    revalidatePath('/portal/partner/dashboard');
+    revalidatePath('/portal/partner/dashboard/settings');
+    revalidatePath('/portal/partner/dashboard/tier');
 
     return { 
       success: true, 
@@ -241,8 +245,8 @@ export async function generateReferralCode() {
       message: `Your unique referral code has been generated: ${referralCode}`,
     });
 
-    revalidatePath('/partner/dashboard');
-    revalidatePath('/partner/dashboard/settings');
+    revalidatePath('/portal/partner/dashboard');
+    revalidatePath('/portal/partner/dashboard/settings');
 
     return { 
       success: true, 
@@ -255,4 +259,3 @@ export async function generateReferralCode() {
     return { success: false, message: 'Failed to generate referral code. Please try again.' };
   }
 }
-

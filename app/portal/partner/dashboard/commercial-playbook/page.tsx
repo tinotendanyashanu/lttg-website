@@ -15,7 +15,7 @@ import EscalationGuardrails from '@/components/partner/commercial-playbook/Escal
 export default async function CommercialPlaybookPage() {
   const session = await auth();
   if (!session?.user?.email) {
-    redirect('/partner/login');
+    redirect('/login');
   }
 
   await dbConnect();

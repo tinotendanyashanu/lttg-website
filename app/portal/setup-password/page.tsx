@@ -23,7 +23,7 @@ function SetupPasswordForm() {
           Your password has been set. You can now log in to your client portal.
         </p>
         <Link
-          href="/portal/client/login"
+          href="/login"
           className="w-full inline-block bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold text-center"
         >
           Go to Client Login

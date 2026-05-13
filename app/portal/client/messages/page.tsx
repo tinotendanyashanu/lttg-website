@@ -23,7 +23,7 @@ export default async function MessagesPage({
 }) {
   const { caseId } = await searchParams;
   const session = await auth();
-  if (!session?.user?.id) redirect('/portal/login');
+  if (!session?.user?.id) redirect('/login');
 
   const threads = await getThreads(session.user.id, caseId);
 

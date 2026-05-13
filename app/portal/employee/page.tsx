@@ -11,12 +11,12 @@ export default async function PortalPage() {
   const session = await getSessionWithDevBypass();
   
   if (!session?.user?.email) {
-    redirect("/portal/login");
+    redirect("/login");
   }
 
   const account = await getAccountByEmail(session.user.email);
   if (!account) {
-    redirect("/portal/login");
+    redirect("/login");
   }
 
   const roles = account.roles || [];

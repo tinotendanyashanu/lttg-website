@@ -16,7 +16,7 @@ export default function RegisterDealPage() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <Link href="/partner/dashboard/deals" className="inline-flex items-center text-slate-500 hover:text-slate-900 mb-6 transition-colors">
+      <Link href="/portal/partner/dashboard/deals" className="inline-flex items-center text-slate-500 hover:text-slate-900 mb-6 transition-colors">
         <ArrowLeft className="mr-2 h-4 w-4" />
         Back to Deals
       </Link>

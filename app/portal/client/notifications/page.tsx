@@ -40,7 +40,7 @@ async function getNotifications(clientId: string) {
 
 export default async function NotificationsPage() {
   const session = await auth();
-  if (!session?.user?.id) redirect('/portal/login');
+  if (!session?.user?.id) redirect('/login');
 
   const notifs = await getNotifications(session.user.id);
   const unread = notifs.filter((n: any) => !n.read).length;

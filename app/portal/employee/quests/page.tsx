@@ -11,10 +11,10 @@ export const metadata = {
 
 export default async function QuestsPage() {
   const session = await getSessionWithDevBypass();
-  if (!session?.user?.email) redirect('/portal/login');
+  if (!session?.user?.email) redirect('/login');
 
   const account = await getAccountByEmail(session.user.email);
-  if (!account) redirect('/portal/login');
+  if (!account) redirect('/login');
 
   const roles = account.roles || [];
   if (!roles.includes('employee') && !roles.includes('intern') && !roles.includes('admin')) {

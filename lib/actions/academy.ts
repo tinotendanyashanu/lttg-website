@@ -131,7 +131,7 @@ export async function submitExam(courseId: string, answers: number[]) {
      await partner.save();
   }
 
-  revalidatePath(`/partner/dashboard/academy`);
+  revalidatePath(`/portal/partner/dashboard/academy`);
   return { success: true, score, passed, passingScore: course.exam.passingScore };
 }
 
@@ -171,7 +171,7 @@ export async function completeLesson(courseId: string, lessonSlug: string) {
   }
 
   await partner.save();
-  revalidatePath('/partner/dashboard/academy');
+  revalidatePath('/portal/partner/dashboard/academy');
   return { success: true };
 }
 

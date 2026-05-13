@@ -19,7 +19,7 @@ async function getCourseWithExam(slug: string) {
 export default async function ExamPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const session = await auth();
-  if (!session?.user?.id) redirect('/partner/login'); // Should be handled by middleware mostly
+  if (!session?.user?.id) redirect('/login'); // Should be handled by middleware mostly
 
   const course = await getCourseWithExam(slug);
 
@@ -32,7 +32,7 @@ export default async function ExamPage({ params }: { params: Promise<{ slug: str
         <div className="max-w-2xl mx-auto text-center py-20">
             <h2 className="text-2xl font-bold text-slate-900 mb-2">No Exam Available</h2>
             <p className="text-slate-500 mb-8">This course does not currently have a final exam.</p>
-            <Link href={`/partner/dashboard/academy/${slug}`} className="text-emerald-600 hover:underline font-bold">
+            <Link href={`/portal/partner/dashboard/academy/${slug}`} className="text-emerald-600 hover:underline font-bold">
                 Return to Course
             </Link>
         </div>
@@ -43,7 +43,7 @@ export default async function ExamPage({ params }: { params: Promise<{ slug: str
     <div className="min-h-screen bg-slate-50 pb-20">
       <div className="max-w-5xl mx-auto px-6 pt-8">
         <Link 
-            href={`/partner/dashboard/academy/${slug}`} 
+            href={`/portal/partner/dashboard/academy/${slug}`} 
             className="inline-flex items-center text-slate-500 hover:text-slate-900 mb-8 transition-colors"
         >
             <ArrowLeft className="mr-2 h-4 w-4" />

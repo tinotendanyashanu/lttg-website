@@ -106,7 +106,7 @@ export default function PartnerPage() {
                   <ArrowRight className="ml-2 w-5 h-5" />
                 </Link>
                 <Link 
-                  href="/partner/login" 
+                  href="/login" 
                   className="inline-flex items-center justify-center px-10 py-5 text-base font-bold text-slate-900 bg-[#F5F5F7] rounded-full hover:bg-slate-200 transition-colors"
                 >
                   Partner Login
@@ -361,7 +361,7 @@ export default function PartnerPage() {
              >
                 Apply to Program
              </Link>
-             <Link href="/partner/login" className="px-10 py-5 text-lg font-bold text-slate-900 bg-white border border-slate-200 rounded-full hover:bg-slate-50 transition-colors">
+             <Link href="/login" className="px-10 py-5 text-lg font-bold text-slate-900 bg-white border border-slate-200 rounded-full hover:bg-slate-50 transition-colors">
                 Partner Login
              </Link>
           </div>

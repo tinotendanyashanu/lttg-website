@@ -7,14 +7,14 @@ export default function AdminQuickActions() {
       title: 'View All Leads',
       description: 'Review and manage all leads across the system',
       icon: 'business',
-      href: '/partner/dashboard/leads',
+      href: '/portal/partner/dashboard/leads',
       color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30'
     },
     {
       title: 'Manage Commissions',
       description: 'Approve and pay out pending commissions',
       icon: 'payments',
-      href: '/partner/dashboard/commissions',
+      href: '/portal/partner/dashboard/commissions',
       color: 'bg-green-100 text-green-600 dark:bg-green-900/30'
     },
     {
@@ -28,7 +28,7 @@ export default function AdminQuickActions() {
       title: 'Announcements',
       description: 'Post a new announcement to the team',
       icon: 'campaign',
-      href: '/partner/dashboard/team', // Using team as placeholder for announcements if it lacks a dedicated page
+      href: '/portal/partner/dashboard/team', // Using team as placeholder for announcements if it lacks a dedicated page
       color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30'
     }
   ];

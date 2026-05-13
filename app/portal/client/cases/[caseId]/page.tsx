@@ -47,7 +47,7 @@ export default async function CaseDetailPage({
 }) {
   const { caseId } = await params;
   const session = await auth();
-  if (!session?.user?.id) redirect('/portal/login');
+  if (!session?.user?.id) redirect('/login');
 
   const c = await getCase(session.user.id, caseId);
   if (!c) notFound();

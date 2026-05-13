@@ -24,7 +24,7 @@ export default async function AdminContactDetailPage(props: { params: Promise<{ 
     const params = await props.params;
     const session = await auth();
     if (!session?.user || session.user.role !== 'admin') {
-        redirect('/partner/login');
+        redirect('/login');
     }
 
     const contact = await getContact(params.id);

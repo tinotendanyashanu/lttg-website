@@ -6,7 +6,7 @@ import Link from 'next/link';
 
 export default async function ClientResourcesPage() {
   const session = await auth();
-  if (!session?.user?.email) redirect('/portal/client/login');
+  if (!session?.user?.email) redirect('/login');
 
   await dbConnect();
 

@@ -29,7 +29,7 @@ async function getOnboardingStatus(clientId: string) {
 
 export default async function OnboardingPage() {
   const session = await auth();
-  if (!session?.user?.id) redirect('/portal/login');
+  if (!session?.user?.id) redirect('/login');
 
   const status = await getOnboardingStatus(session.user.id);
 

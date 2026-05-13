@@ -75,7 +75,7 @@ export default async function PayInvoicePage({
     const { amount: customAmount } = await searchParams;
     const session = await auth();
     if (!session?.user?.id || session.user.role !== 'client') {
-      redirect('/portal/client/login');
+      redirect('/login');
     }
 
   // Check Stripe is configured before doing any DB work

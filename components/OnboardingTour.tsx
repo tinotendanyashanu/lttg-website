@@ -10,22 +10,22 @@ const standardSteps = [
   {
     title: "Welcome to your Partner Dashboard",
     description: "This is your command center. Track your referrals, earnings, and progress all in one place.",
-    target: "/partner/dashboard", 
+    target: "/portal/partner/dashboard", 
   },
   {
     title: "Track Your Deals",
     description: "Register new leads and monitor their status in real-time under the 'Recent Deals' section.",
-    target: "/partner/dashboard/deals", 
+    target: "/portal/partner/dashboard/deals", 
   },
   {
     title: "Partner Academy",
     description: "Level up your skills and unlock higher commission tiers by completing courses in the Academy.",
-    target: "/partner/dashboard/academy",
+    target: "/portal/partner/dashboard/academy",
   },
   {
     title: "Commission & Payouts",
     description: "View your earnings breakdown and payout history in the Earnings tab.",
-    target: "/partner/dashboard/earnings",
+    target: "/portal/partner/dashboard/earnings",
   }
 ];
 
@@ -33,22 +33,22 @@ const creatorSteps = [
   {
     title: "Welcome Content Creator",
     description: "Your dashboard is optimized for content-driven growth. Track clicks, leads, and commissions.",
-    target: "/partner/dashboard", 
+    target: "/portal/partner/dashboard", 
   },
   {
     title: "Get Your Link",
     description: "Copy your unique referral link from the Overview page and start sharing it with your audience.",
-    target: "/partner/dashboard", 
+    target: "/portal/partner/dashboard", 
   },
   {
     title: "Track Leads",
     description: "See exactly who signed up through your link in the Leads tab.",
-    target: "/partner/dashboard/leads", 
+    target: "/portal/partner/dashboard/leads", 
   },
   {
     title: "Academy & Resources",
     description: "Learn how to optimize your content for conversion in our Creator Academy.",
-    target: "/partner/dashboard/academy", 
+    target: "/portal/partner/dashboard/academy", 
   }
 ];
 

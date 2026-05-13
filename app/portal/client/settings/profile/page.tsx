@@ -19,7 +19,7 @@ async function getProfile(userId: string) {
 
 export default async function ProfileSettingsPage() {
   const session = await auth();
-  if (!session?.user?.id) redirect('/portal/login');
+  if (!session?.user?.id) redirect('/login');
 
   const profile = await getProfile(session.user.accountId || session.user.id);
 

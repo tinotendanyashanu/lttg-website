@@ -27,9 +27,9 @@ export default function CompleteLessonButton({
       await completeLesson(courseId, lessonSlug);
       router.refresh();
       if (nextLessonSlug) {
-          router.push(`/partner/dashboard/academy/${courseSlug}/${nextLessonSlug}`);
+          router.push(`/portal/partner/dashboard/academy/${courseSlug}/${nextLessonSlug}`);
       } else {
-          router.push(`/partner/dashboard/academy/${courseSlug}`);
+          router.push(`/portal/partner/dashboard/academy/${courseSlug}`);
       }
     } catch (error) {
       console.error(error);

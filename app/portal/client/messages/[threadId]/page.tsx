@@ -32,7 +32,7 @@ export default async function MessageThreadPage({
 }) {
   const { threadId } = await params;
   const session = await auth();
-  if (!session?.user?.id) redirect('/portal/login');
+  if (!session?.user?.id) redirect('/login');
 
   const data = await getThreadWithMessages(session.user.id, threadId);
   if (!data) notFound();

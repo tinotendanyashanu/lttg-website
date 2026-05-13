@@ -195,7 +195,7 @@ export default function SignupClient() {
             <SignupButton />
             
             <p className="text-center text-sm text-slate-500 mt-6">
-              Already have an account? <Link href="/partner/login" className="text-emerald-600 hover:text-emerald-700 font-medium">Log in</Link>
+              Already have an account? <Link href="/login" className="text-emerald-600 hover:text-emerald-700 font-medium">Log in</Link>
             </p>
           </form>
         </div>

@@ -40,7 +40,7 @@ export default async function AcademyPage() {
               const isCompleted = progress?.isCompleted;
 
               return (
-                  <Link key={course._id} href={`/partner/dashboard/academy/${course.slug}`} className="group block bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+                  <Link key={course._id} href={`/portal/partner/dashboard/academy/${course.slug}`} className="group block bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
                       <div className="relative h-48 w-full">
                           <Image 
                             src={course.thumbnailUrl} 

@@ -31,7 +31,7 @@ async function getTickets(clientId: string) {
 
 export default async function TicketsPage() {
   const session = await auth();
-  if (!session?.user?.id) redirect('/portal/login');
+  if (!session?.user?.id) redirect('/login');
 
   const tickets = await getTickets(session.user.id);
   const open = tickets.filter((t: any) => !['resolved', 'closed'].includes(t.status)).length;

@@ -42,7 +42,7 @@ export async function updateLeadStatus(leadId: string, newStatus: LeadStatus) {
     }
     await lead.save();
 
-    revalidatePath('/partner/dashboard/leads');
+    revalidatePath('/portal/partner/dashboard/leads');
     return { success: true, message: `Lead status updated to ${newStatus}` };
   } catch (error) {
     console.error('Update lead status error:', error);
@@ -140,8 +140,8 @@ export async function convertLeadToDeal(leadId: string, formData: FormData) {
       console.error('[FRAUD CHECK] convertLeadToDeal failed silently:', fraudErr);
     }
 
-    revalidatePath('/partner/dashboard/leads');
-    revalidatePath('/partner/dashboard/deals');
+    revalidatePath('/portal/partner/dashboard/leads');
+    revalidatePath('/portal/partner/dashboard/deals');
     return { success: true, message: 'Lead converted to deal successfully', dealId: deal._id.toString() };
   } catch (error) {
     console.error('Convert lead to deal error:', error);
@@ -197,7 +197,7 @@ export async function createManualLead(prevState: unknown, formData: FormData) {
       status: 'new',
     });
 
-    revalidatePath('/partner/dashboard/leads');
+    revalidatePath('/portal/partner/dashboard/leads');
     return { success: true, message: 'Lead created successfully' };
   } catch (error) {
     console.error('Create manual lead error:', error);

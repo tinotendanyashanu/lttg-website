@@ -41,7 +41,7 @@ function formatBytes(bytes: number) {
 
 export default async function EvidenceLibraryPage() {
   const session = await auth();
-  if (!session?.user?.id) redirect('/portal/login');
+  if (!session?.user?.id) redirect('/login');
 
   const evidence = await getEvidence(session.user.id);
 

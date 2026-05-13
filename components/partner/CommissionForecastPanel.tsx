@@ -33,7 +33,7 @@ export default function CommissionForecastPanel({
           </h3>
           <p className="text-sm text-slate-500 mt-1">Status and forecast for <span className="font-bold text-slate-800">{formattedDate}</span></p>
         </div>
-        <Link href="/partner/dashboard/settings" className="px-4 py-2 bg-slate-50 text-slate-700 rounded-xl text-sm font-medium hover:bg-slate-100 transition-colors">
+        <Link href="/portal/partner/dashboard/settings" className="px-4 py-2 bg-slate-50 text-slate-700 rounded-xl text-sm font-medium hover:bg-slate-100 transition-colors">
           Payout Settings
         </Link>
       </div>

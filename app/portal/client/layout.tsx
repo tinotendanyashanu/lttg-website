@@ -12,14 +12,14 @@ export default async function ClientPortalLayout({
   // Skip auth checks for the login page to prevent redirect loops
   const headersList = await headers();
   const pathname = headersList.get('x-pathname') ?? '';
-  if (pathname === '/portal/client/login') {
+  if (pathname === '/login') {
     return <>{children}</>;
   }
 
   const session = await auth();
 
   if (!session?.user?.email) {
-    redirect('/portal/client/login');
+    redirect('/login');
   }
 
   if (session.user.role !== 'client') {
@@ -30,7 +30,7 @@ export default async function ClientPortalLayout({
     ) {
       redirect('/portal');
     }
-    redirect('/portal/client/login');
+    redirect('/login');
   }
 
   let unreadNotifications = 0;

@@ -96,28 +96,28 @@ export default async function DashboardPage() {
       value: new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(partner.stats.totalReferredRevenue),
       icon: TrendingUp,
       color: 'bg-blue-500',
-      href: '/partner/dashboard/deals'
+      href: '/portal/partner/dashboard/deals'
     },
     {
       name: 'Lifetime Commission',
       value: new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(partner.stats.totalCommissionEarned),
       icon: DollarSign,
       color: 'bg-emerald-500',
-      href: '/partner/dashboard/earnings'
+      href: '/portal/partner/dashboard/earnings'
     },
     {
       name: 'Pending Commission',
       value: new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(partner.stats.pendingCommission),
       icon: Clock,
       color: 'bg-amber-500',
-      href: '/partner/dashboard/earnings'
+      href: '/portal/partner/dashboard/earnings'
     },
     {
       name: 'Academy Progress',
       value: `${completedCourses}/${totalCourses} Courses`,
       icon: GraduationCap,
       color: 'bg-indigo-500',
-      href: '/partner/dashboard/academy'
+      href: '/portal/partner/dashboard/academy'
     },
   ];
 
@@ -129,7 +129,7 @@ export default async function DashboardPage() {
             <h2 className="text-2xl font-bold text-slate-900">Overview</h2>
             <p className="text-slate-500">Welcome back, {partner.name}. Here&apos;s what&apos;s happening today.</p>
         </div>
-        <Link href="/partner/dashboard/deals/register" className="bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-800 transition-colors">
+        <Link href="/portal/partner/dashboard/deals/register" className="bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-800 transition-colors">
             + Register Deal
         </Link>
       </div>
@@ -238,7 +238,7 @@ export default async function DashboardPage() {
           <h3 className="text-lg font-bold text-slate-900 mb-4">Quick Actions</h3>
           <div className="space-y-3">
             <Link
-              href="/partner/dashboard/deals/register"
+              href="/portal/partner/dashboard/deals/register"
               className="flex items-center p-3 rounded-xl bg-emerald-50 text-emerald-800 hover:bg-emerald-100 transition-colors group"
             >
               <div className="p-2 bg-emerald-500 rounded-lg mr-3">
@@ -248,7 +248,7 @@ export default async function DashboardPage() {
               <ArrowRight className="h-4 w-4 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
             </Link>
             <Link
-              href="/partner/dashboard/academy"
+              href="/portal/partner/dashboard/academy"
               className="flex items-center p-3 rounded-xl bg-indigo-50 text-indigo-800 hover:bg-indigo-100 transition-colors group"
             >
               <div className="p-2 bg-indigo-500 rounded-lg mr-3">
@@ -258,7 +258,7 @@ export default async function DashboardPage() {
               <ArrowRight className="h-4 w-4 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
             </Link>
             <Link
-              href="/partner/dashboard/rules"
+              href="/portal/partner/dashboard/rules"
               className="flex items-center p-3 rounded-xl bg-slate-50 text-slate-800 hover:bg-slate-100 transition-colors group"
             >
               <div className="p-2 bg-slate-800 rounded-lg mr-3">
@@ -268,7 +268,7 @@ export default async function DashboardPage() {
               <ArrowRight className="h-4 w-4 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
             </Link>
             <Link
-              href="/partner/dashboard/settings"
+              href="/portal/partner/dashboard/settings"
               className="flex items-center p-3 rounded-xl bg-slate-50 text-slate-800 hover:bg-slate-100 transition-colors group"
             >
               <div className="p-2 bg-slate-600 rounded-lg mr-3">
@@ -328,7 +328,7 @@ export default async function DashboardPage() {
                 <h3 className="text-lg font-bold text-slate-900">Recent Deals</h3>
                 <p className="text-sm text-slate-500">Your latest registered opportunities.</p>
             </div>
-            <Link href="/partner/dashboard/deals" className="text-sm text-emerald-600 hover:text-emerald-700 font-bold px-4 py-2 bg-emerald-50 rounded-full transition-colors shrink-0">View All &rarr;</Link>
+            <Link href="/portal/partner/dashboard/deals" className="text-sm text-emerald-600 hover:text-emerald-700 font-bold px-4 py-2 bg-emerald-50 rounded-full transition-colors shrink-0">View All &rarr;</Link>
         </div>
 
         {/* Mobile card list */}
@@ -362,7 +362,7 @@ export default async function DashboardPage() {
             ))
           ) : (
             <div className="px-4 py-12 text-center text-slate-400 font-medium text-sm">
-              No deals yet. <Link href="/partner/dashboard/deals" className="text-emerald-600 hover:underline">Register your first deal</Link>.
+              No deals yet. <Link href="/portal/partner/dashboard/deals" className="text-emerald-600 hover:underline">Register your first deal</Link>.
             </div>
           )}
         </div>
@@ -407,7 +407,7 @@ export default async function DashboardPage() {
                     ) : (
                         <tr>
                             <td colSpan={4} className="px-8 py-16 text-center text-slate-400 font-medium">
-                                No deals registered yet. <Link href="/partner/dashboard/deals" className="text-emerald-600 hover:underline">Register your first deal</Link>.
+                                No deals registered yet. <Link href="/portal/partner/dashboard/deals" className="text-emerald-600 hover:underline">Register your first deal</Link>.
                             </td>
                         </tr>
                     )}

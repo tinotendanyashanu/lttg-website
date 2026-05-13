@@ -42,21 +42,22 @@ export default async function LessonPage(props: { params: Promise<{ slug: string
     <div className="max-w-4xl mx-auto">
         {/* Navigation Header */}
         <div className="flex items-center justify-between mb-8">
-            <Link href={`/partner/dashboard/academy/${params.slug}`} className="inline-flex items-center text-slate-500 hover:text-slate-900 transition-colors">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Course
+            <Link href={`/portal/partner/dashboard/academy/${params.slug}`} className="inline-flex items-center text-slate-500 hover:text-slate-900 transition-colors">
+              <ArrowLeft className="w-4 h-4 mr-1" />
+              Back to Course
             </Link>
-            <div className="flex items-center space-x-4">
-                {prevLesson && (
-                    <Link href={`/partner/dashboard/academy/${params.slug}/${prevLesson.slug}`} className="text-sm font-medium text-slate-500 hover:text-purple-600">
-                        &larr; Previous
-                    </Link>
-                )}
-                {nextLesson && (
-                    <Link href={`/partner/dashboard/academy/${params.slug}/${nextLesson.slug}`} className="text-sm font-medium text-slate-500 hover:text-purple-600">
-                        Next &rarr;
-                    </Link>
-                )}
+
+            <div className="flex items-center gap-4">
+            {prevLesson && (
+              <Link href={`/portal/partner/dashboard/academy/${params.slug}/${prevLesson.slug}`} className="text-sm font-medium text-slate-500 hover:text-purple-600">
+                &larr; Previous
+              </Link>
+            )}
+            {nextLesson && (
+              <Link href={`/portal/partner/dashboard/academy/${params.slug}/${nextLesson.slug}`} className="text-sm font-medium text-slate-500 hover:text-purple-600">
+                Next &rarr;
+              </Link>
+            )}
             </div>
         </div>
 

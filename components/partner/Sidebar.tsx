@@ -31,20 +31,20 @@ import { Partner } from '@/types';
 // All sidebar items are visible to every partner regardless of tier or partnerType.
 // Tier only affects commission rate, badge display, and revenue thresholds — never feature access.
 const navigation = [
-  { name: 'Overview', href: '/partner/dashboard', icon: LayoutDashboard },
-  { name: 'Register Deal', href: '/partner/dashboard/deals/register', icon: PlusCircle },
-  { name: 'Deals', href: '/partner/dashboard/deals', icon: Briefcase },
-  { name: 'Leads', href: '/partner/dashboard/leads', icon: MousePointer2 },
-  { name: 'Referral Links', href: '/partner/dashboard/referral-links', icon: Link2 },
-  { name: 'Earnings', href: '/partner/dashboard/earnings', icon: DollarSign },
-  { name: 'Academy', href: '/partner/dashboard/academy', icon: GraduationCap },
-  { name: 'Commercial Playbook', href: '/partner/dashboard/commercial-playbook', icon: BookOpen },
-  { name: 'Tier Progress', href: '/partner/dashboard/tier', icon: Award },
+  { name: 'Overview', href: '/portal/partner/dashboard', icon: LayoutDashboard },
+  { name: 'Register Deal', href: '/portal/partner/dashboard/deals/register', icon: PlusCircle },
+  { name: 'Deals', href: '/portal/partner/dashboard/deals', icon: Briefcase },
+  { name: 'Leads', href: '/portal/partner/dashboard/leads', icon: MousePointer2 },
+  { name: 'Referral Links', href: '/portal/partner/dashboard/referral-links', icon: Link2 },
+  { name: 'Earnings', href: '/portal/partner/dashboard/earnings', icon: DollarSign },
+  { name: 'Academy', href: '/portal/partner/dashboard/academy', icon: GraduationCap },
+  { name: 'Commercial Playbook', href: '/portal/partner/dashboard/commercial-playbook', icon: BookOpen },
+  { name: 'Tier Progress', href: '/portal/partner/dashboard/tier', icon: Award },
 ];
 
 const secondaryNavigation = [
-  { name: 'Program Rules', href: '/partner/dashboard/rules', icon: Shield },
-  { name: 'Settings', href: '/partner/dashboard/settings', icon: Settings },
+  { name: 'Program Rules', href: '/portal/partner/dashboard/rules', icon: Shield },
+  { name: 'Settings', href: '/portal/partner/dashboard/settings', icon: Settings },
 ];
 
 export default function Sidebar({

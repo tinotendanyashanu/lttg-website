@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 export default async function HelpPage() {
   const session = await auth();
-  if (!session?.user?.id) redirect('/portal/login');
+  if (!session?.user?.id) redirect('/login');
 
   return (
     <div className="space-y-6 max-w-2xl">

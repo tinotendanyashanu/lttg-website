@@ -26,7 +26,7 @@ async function getContracts(clientId: string) {
 
 export default async function ContractsPage() {
   const session = await auth();
-  if (!session?.user?.id) redirect('/portal/login');
+  if (!session?.user?.id) redirect('/login');
 
   const contracts = await getContracts(session.user.id);
   const pendingSign = contracts.filter((c: any) => ['sent', 'under_review'].includes(c.status));

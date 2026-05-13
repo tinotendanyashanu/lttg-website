@@ -294,8 +294,8 @@ export async function updateDealStatus(
   }
 
   revalidatePath('/admin/deals');
-  revalidatePath('/partner/dashboard/deals');
-  revalidatePath('/partner/dashboard'); // For stats
+  revalidatePath('/portal/partner/dashboard/deals');
+  revalidatePath('/portal/partner/dashboard'); // For stats
 }
 
 export async function recordCommissionPayment(dealId: string, amount: number, method: string, reference: string) {
@@ -375,9 +375,9 @@ export async function recordCommissionPayment(dealId: string, amount: number, me
 
     revalidatePath('/admin/payouts');
     revalidatePath('/admin/deals');
-    revalidatePath('/partner/dashboard/earnings');
-    revalidatePath('/partner/dashboard/deals');
-    revalidatePath('/partner/dashboard');
+    revalidatePath('/portal/partner/dashboard/earnings');
+    revalidatePath('/portal/partner/dashboard/deals');
+    revalidatePath('/portal/partner/dashboard');
 }
 
 export async function deletePartner(partnerId: string) {

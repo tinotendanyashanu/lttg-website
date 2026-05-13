@@ -16,7 +16,7 @@ function ResetPasswordForm() {
         <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full text-center">
             <h1 className="text-xl font-bold text-red-600 mb-4">Invalid Link</h1>
             <p className="text-gray-600 mb-4">Missing reset token.</p>
-            <Link href="/partner/login" className="text-blue-600 hover:underline">Return to Login</Link>
+            <Link href="/login" className="text-blue-600 hover:underline">Return to Login</Link>
         </div>
       );
   }
@@ -37,7 +37,7 @@ function ResetPasswordForm() {
       
       {state?.success && (
           <div className="text-center">
-              <Link href="/partner/login" className="text-blue-600 font-medium hover:underline">
+              <Link href="/login" className="text-blue-600 font-medium hover:underline">
                   Proceed to Login
               </Link>
           </div>

@@ -28,7 +28,7 @@ export default async function ContractPrintPage({
   params: Promise<{ contractId: string }>;
 }) {
   const session = await auth();
-  if (!session?.user?.id) redirect('/portal/login');
+  if (!session?.user?.id) redirect('/login');
 
   const { contractId } = await params;
   const data = await getContractData(contractId, session.user.id);

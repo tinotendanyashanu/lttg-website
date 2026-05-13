@@ -25,7 +25,7 @@ async function getInvoices(clientId: string) {
 
 export default async function InvoicesPage() {
   const session = await auth();
-  if (!session?.user?.id) redirect('/portal/login');
+  if (!session?.user?.id) redirect('/login');
 
   const invoices = await getInvoices(session.user.id);
   const unpaid = invoices.filter((i: any) => ['issued', 'sent', 'overdue'].includes(i.status));

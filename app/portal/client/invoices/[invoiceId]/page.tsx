@@ -55,7 +55,7 @@ export default async function InvoiceDetailPage({
   const { payment } = await searchParams;
   const paymentJustCompleted = payment === 'success';
   const session = await auth();
-  if (!session?.user?.id) redirect('/portal/login');
+  if (!session?.user?.id) redirect('/login');
 
   const data = await getInvoiceWithClient(session.user.id, invoiceId);
   if (!data) notFound();

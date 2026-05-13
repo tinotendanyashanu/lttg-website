@@ -1,6 +1,17 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+let resend: Resend | null = null;
+
+function getResendClient() {
+  const apiKey = process.env.RESEND_API_KEY;
+
+  if (!apiKey) {
+    throw new Error('RESEND_API_KEY is not configured');
+  }
+
+  resend ??= new Resend(apiKey);
+  return resend;
+}
 
 const FROM_EMAIL = 'LeoTheTechGuy <noreply@leothetechguy.com>'; // Verified domain
 const ADMIN_EMAIL = 'contact@leothetechguy.com'; 
@@ -45,7 +56,7 @@ export async function sendEmail({
   replyTo?: string;
 }) {
   try {
-    const data = await resend.emails.send({
+    const data = await getResendClient().emails.send({
       from: FROM_EMAIL,
       to,
       subject,
@@ -68,7 +79,7 @@ export async function sendAdminNotification({
   replyTo?: string;
 }) {
   try {
-      const data = await resend.emails.send({
+      await getResendClient().emails.send({
           from: FROM_EMAIL,
           to: ADMIN_EMAIL,
           subject: `[ADMIN] ${subject}`,

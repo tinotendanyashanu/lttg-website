@@ -8,7 +8,7 @@ import { Case } from '@/models/Case';
 
 export default async function EarningsPage() {
   const session = await getSessionWithDevBypass();
-  if (!session?.user?.email) redirect('/portal/login');
+  if (!session?.user?.email) redirect('/login');
 
   const account = await getAccountByEmail(session.user.email);
   if (!account || (!account.roles.includes('intern') && !account.roles.includes('employee'))) {

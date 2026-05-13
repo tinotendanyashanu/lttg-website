@@ -31,7 +31,7 @@ export default async function CourseDetailPage(props: { params: Promise<{ slug: 
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
-       <Link href="/partner/dashboard/academy" className="inline-flex items-center text-slate-500 hover:text-slate-900 transition-colors">
+       <Link href="/portal/partner/dashboard/academy" className="inline-flex items-center text-slate-500 hover:text-slate-900 transition-colors">
         <ArrowLeft className="mr-2 h-4 w-4" />
         Back to Academy
       </Link>
@@ -64,7 +64,7 @@ export default async function CourseDetailPage(props: { params: Promise<{ slug: 
                       return (
                           <Link 
                             key={lesson.slug} 
-                            href={isLocked ? '#' : `/partner/dashboard/academy/${course.slug}/${lesson.slug}`}
+                            href={isLocked ? '#' : `/portal/partner/dashboard/academy/${course.slug}/${lesson.slug}`}
                             className={`flex items-center justify-between p-4 rounded-lg border transition-all ${
                                 isLocked 
                                 ? 'bg-slate-50 border-slate-100 opacity-75 cursor-not-allowed' 
@@ -94,7 +94,7 @@ export default async function CourseDetailPage(props: { params: Promise<{ slug: 
                   {/* Final Exam Link */}
                   <div className="pt-4 border-t border-slate-100 mt-4">
                       <Link 
-                          href={`/partner/dashboard/academy/${course.slug}/exam`}
+                          href={`/portal/partner/dashboard/academy/${course.slug}/exam`}
                           className="flex items-center justify-between p-4 rounded-lg border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 hover:border-indigo-300 transition-all group"
                       >
                           <div className="flex items-center space-x-4">

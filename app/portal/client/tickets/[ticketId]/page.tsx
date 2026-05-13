@@ -36,7 +36,7 @@ export default async function TicketDetailPage({
 }) {
   const { ticketId } = await params;
   const session = await auth();
-  if (!session?.user?.id) redirect('/portal/login');
+  if (!session?.user?.id) redirect('/login');
 
   const ticket = await getTicket(session.user.id, ticketId);
   if (!ticket) notFound();

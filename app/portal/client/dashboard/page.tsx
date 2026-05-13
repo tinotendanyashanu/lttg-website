@@ -71,7 +71,7 @@ async function getDashboardData(clientId: string) {
 
 export default async function ClientDashboardPage() {
   const session = await auth();
-  if (!session?.user?.id) redirect('/portal/login');
+  if (!session?.user?.id) redirect('/login');
 
   const data = await getDashboardData(session.user.id);
   const firstName = (session.user.name || session.user.email?.split('@')[0] || 'Client').split(' ')[0];

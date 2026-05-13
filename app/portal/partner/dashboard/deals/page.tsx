@@ -50,7 +50,7 @@ export default async function DealsPage(props: {
           <p className="text-slate-500">Manage your registered opportunities.</p>
         </div>
         <Link 
-          href="/partner/dashboard/deals/register" 
+          href="/portal/partner/dashboard/deals/register" 
           className="self-start sm:self-auto inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 transition-colors shadow-sm shadow-emerald-200"
         >
           <Plus className="mr-2 h-4 w-4" />
@@ -116,7 +116,7 @@ export default async function DealsPage(props: {
                   Value: {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(deal.finalValue || deal.estimatedValue)}
                 </p>
                 <div className="pt-2">
-                  <Link href={`/partner/dashboard/deals/${deal._id}`} className="text-xs font-bold text-emerald-600 hover:text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-lg inline-block">
+                  <Link href={`/portal/partner/dashboard/deals/${deal._id}`} className="text-xs font-bold text-emerald-600 hover:text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-lg inline-block">
                     View Details &rarr;
                   </Link>
                 </div>
@@ -124,7 +124,7 @@ export default async function DealsPage(props: {
             ))
           ) : (
             <div className="px-4 py-12 text-center text-slate-400 font-medium text-sm">
-              No deals found. <Link href="/partner/dashboard/deals/register" className="text-emerald-600 hover:underline">Register your first deal</Link> to start earning.
+              No deals found. <Link href="/portal/partner/dashboard/deals/register" className="text-emerald-600 hover:underline">Register your first deal</Link> to start earning.
             </div>
           )}
         </div>
@@ -167,7 +167,7 @@ export default async function DealsPage(props: {
                                 </td>
                                 <td className="px-8 py-5 text-slate-400 font-medium">{new Date(deal.createdAt).toLocaleDateString()}</td>
                                 <td className="px-8 py-5 text-right">
-                                    <Link href={`/partner/dashboard/deals/${deal._id}`} className="text-xs font-bold text-emerald-600 hover:text-emerald-700 opacity-0 group-hover:opacity-100 transition-opacity bg-emerald-50 px-3 py-1.5 rounded-lg inline-block">
+                                    <Link href={`/portal/partner/dashboard/deals/${deal._id}`} className="text-xs font-bold text-emerald-600 hover:text-emerald-700 opacity-0 group-hover:opacity-100 transition-opacity bg-emerald-50 px-3 py-1.5 rounded-lg inline-block">
                                         View
                                     </Link>
                                 </td>
@@ -176,7 +176,7 @@ export default async function DealsPage(props: {
                     ) : (
                         <tr>
                             <td colSpan={7} className="px-8 py-16 text-center text-slate-400 font-medium">
-                                No deals found. <Link href="/partner/dashboard/deals/register" className="text-emerald-600 hover:underline">Register your first deal</Link> to start earning.
+                                No deals found. <Link href="/portal/partner/dashboard/deals/register" className="text-emerald-600 hover:underline">Register your first deal</Link> to start earning.
                             </td>
                         </tr>
                     )}

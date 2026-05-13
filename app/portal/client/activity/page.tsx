@@ -49,7 +49,7 @@ async function getActivity(clientId: string) {
 
 export default async function ActivityPage() {
   const session = await auth();
-  if (!session?.user?.id) redirect('/portal/login');
+  if (!session?.user?.id) redirect('/login');
 
   const activities = await getActivity(session.user.id);
 

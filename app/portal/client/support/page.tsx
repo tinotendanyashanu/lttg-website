@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 export default async function SupportPage() {
   const session = await auth();
-  if (!session?.user?.id) redirect('/portal/login');
+  if (!session?.user?.id) redirect('/login');
 
   const resources = [
     {

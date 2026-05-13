@@ -54,8 +54,8 @@ export async function updateBankDetails(prevState: unknown, formData: FormData) 
         }
     );
 
-    revalidatePath('/partner/dashboard/settings');
-    revalidatePath('/partner/dashboard/earnings'); // In case we show payment info there
+    revalidatePath('/portal/partner/dashboard/settings');
+    revalidatePath('/portal/partner/dashboard/earnings'); // In case we show payment info there
     
     return {
         message: 'Bank details updated successfully.',
@@ -134,8 +134,8 @@ export async function updatePayoutSettings(prevState: unknown, formData: FormDat
         }
     );
 
-    revalidatePath('/partner/dashboard/settings');
-    revalidatePath('/partner/dashboard/earnings');
+    revalidatePath('/portal/partner/dashboard/settings');
+    revalidatePath('/portal/partner/dashboard/earnings');
     
     return {
         message: 'Payout settings updated successfully.',
