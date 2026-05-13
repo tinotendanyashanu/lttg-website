@@ -3,7 +3,14 @@ import type { MailCaseDetail, MailCaseListItem, MailMessage } from '@/lib/types/
 const base = () => {
   const u = process.env.NEXT_PUBLIC_BACKEND_URL;
   if (!u) throw new Error('NEXT_PUBLIC_BACKEND_URL is not set');
-  return u.replace(/\/$/, '');
+  let normalized = u.trim().replace(/^['"]|['"]$/g, '');
+  if (normalized.startsWith('NEXT_PUBLIC_BACKEND_URL=')) {
+    normalized = normalized.split('=', 2)[1].trim().replace(/^['"]|['"]$/g, '');
+  }
+  if (!/^https?:\/\//i.test(normalized)) {
+    normalized = `https://${normalized.replace(/^\/+/, '')}`;
+  }
+  return normalized.replace(/\/$/, '');
 };
 
 async function authFetch(path: string, token: string, init?: RequestInit) {
