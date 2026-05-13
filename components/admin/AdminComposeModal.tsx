@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import ClientCombobox from '@/components/ClientCombobox';
 import { adminCreateThread } from '@/lib/actions/admin-messages';
 import { useRouter } from 'next/navigation';
 
@@ -86,19 +87,7 @@ export default function AdminComposeModal({ clients }: Props) {
             <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">Client *</label>
-                <select
-                  value={clientId}
-                  onChange={(e) => setClientId(e.target.value)}
-                  required
-                  className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#27272a] text-gray-900 dark:text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/30"
-                >
-                  <option value="">Select a client…</option>
-                  {clients.map((c) => (
-                    <option key={c._id} value={c._id}>
-                      {c.fullName} ({c.email})
-                    </option>
-                  ))}
-                </select>
+                <ClientCombobox clients={clients} value={clientId} onChange={setClientId} placeholder="Select a client..." />
               </div>
 
               <div>

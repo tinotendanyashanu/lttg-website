@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Upload
 
 from app.deps import get_current_user, get_db, get_gmail, get_r2
 from app.models.user import UserDoc
-from app.services.message_service import send_employee_message
+from app.services.message_service import send_employee_message, send_new_employee_email
 
 router = APIRouter(tags=["messages"])
 
@@ -103,3 +103,42 @@ async def send_message(
         raise HTTPException(status_code=400, detail=str(e)) from e
 
     return res
+
+
+@router.post("/messages/send-new")
+async def send_new_message(
+    user: Annotated[UserDoc, Depends(get_current_user)],
+    db: Annotated[object, Depends(get_db)],
+    gmail: Annotated[object, Depends(get_gmail)],
+    r2: Annotated[object, Depends(get_r2)],
+    recipient_email: str = Form(..., min_length=3, max_length=320),
+    recipient_name: str = Form("", max_length=200),
+    subject: str = Form(..., min_length=1, max_length=500),
+    content: str = Form(..., min_length=1, max_length=100_000),
+    files: list[UploadFile] | None = File(None),
+):
+    from motor.motor_asyncio import AsyncIOMotorDatabase
+
+    dba: AsyncIOMotorDatabase = db  # type: ignore[assignment]
+    file_payloads: list[tuple[str, bytes, str]] = []
+    for uf in files or []:
+        if not uf.filename:
+            continue
+        data = await uf.read()
+        ct = uf.content_type or "application/octet-stream"
+        file_payloads.append((uf.filename, data, ct))
+
+    try:
+        return await send_new_employee_email(
+            dba,
+            r2,
+            gmail,
+            employee_user_id=user.id,
+            recipient_email=recipient_email,
+            recipient_name=recipient_name,
+            subject=subject,
+            content=content,
+            files=file_payloads,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e

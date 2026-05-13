@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import ClientCombobox from '@/components/ClientCombobox';
 import {
   createEmployeeInvoice,
   submitInvoiceForApproval,
@@ -274,17 +275,13 @@ export default function EmployeeInvoicesClient({ initialInvoices, clientMap, cli
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Client *</label>
-                  <select
+                  <ClientCombobox
+                    clients={clients}
                     value={clientId}
-                    onChange={(e) => setClientId(e.target.value)}
-                    required
-                    className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                  >
-                    <option value="">Select client…</option>
-                    {clients.map((c: any) => (
-                      <option key={c._id} value={c._id}>{c.fullName || c.email}</option>
-                    ))}
-                  </select>
+                    onChange={setClientId}
+                    placeholder="Select client..."
+                    accentClassName="text-blue-600"
+                  />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Currency</label>

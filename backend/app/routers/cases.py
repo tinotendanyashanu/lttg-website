@@ -11,6 +11,14 @@ from app.models.user import UserDoc
 
 router = APIRouter(prefix="/cases", tags=["cases"])
 
+clients_router = APIRouter(prefix="/clients", tags=["clients"])
+
+
+class ClientListItemOut(BaseModel):
+    id: str
+    name: str
+    email: str
+
 
 class ThreadSummaryOut(BaseModel):
     id: str
@@ -197,3 +205,27 @@ async def create_case(
         }
     )
     return {"id": case_id}
+
+
+@clients_router.get("", response_model=list[ClientListItemOut])
+async def list_clients(
+    _: Annotated[UserDoc, Depends(get_current_user)],
+    db: Annotated[object, Depends(get_db)],
+    q: str | None = Query(None, max_length=200),
+    limit: int = Query(100, ge=1, le=500),
+):
+    from motor.motor_asyncio import AsyncIOMotorDatabase
+
+    dba: AsyncIOMotorDatabase = db  # type: ignore[assignment]
+    filt: dict = {}
+    if q:
+        import re
+
+        term = re.escape(q.strip())
+        filt = {"$or": [{"name": {"$regex": term, "$options": "i"}}, {"email": {"$regex": term, "$options": "i"}}]}
+
+    cur = dba.clients.find(filt).sort("name", 1).limit(limit)
+    return [
+        ClientListItemOut(id=str(c["_id"]), name=c.get("name", ""), email=c.get("email", ""))
+        async for c in cur
+    ]

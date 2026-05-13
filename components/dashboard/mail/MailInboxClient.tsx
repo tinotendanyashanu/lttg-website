@@ -3,12 +3,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
-import { ArrowLeft, Loader2, Mail, Paperclip, RefreshCw, Send } from 'lucide-react';
-import type { MailCaseDetail, MailCaseListItem, MailMessage } from '@/lib/types/mail';
+import { ArrowLeft, Loader2, Mail, Paperclip, Plus, RefreshCw, Send, X } from 'lucide-react';
+import ClientCombobox from '@/components/ClientCombobox';
+import type { MailCaseDetail, MailCaseListItem, MailClient, MailMessage } from '@/lib/types/mail';
 import {
+  fetchMailClients,
   fetchMailCaseDetail,
   fetchMailCases,
   fetchMailMessages,
+  sendNewMailMessage,
   sendMailMessage,
   triggerMailSync,
 } from '@/lib/services/mail-api';
@@ -51,10 +54,20 @@ export default function MailInboxClient({ userId, role, displayName }: MailInbox
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [detail, setDetail] = useState<MailCaseDetail | null>(null);
   const [messages, setMessages] = useState<MailMessage[]>([]);
+  const [clients, setClients] = useState<MailClient[]>([]);
   const [loadingList, setLoadingList] = useState(true);
   const [loadingThread, setLoadingThread] = useState(false);
   const [compose, setCompose] = useState('');
   const [files, setFiles] = useState<File[]>([]);
+  const [newOpen, setNewOpen] = useState(false);
+  const [recipientMode, setRecipientMode] = useState<'existing' | 'outside'>('existing');
+  const [newClientId, setNewClientId] = useState('');
+  const [newName, setNewName] = useState('');
+  const [newEmail, setNewEmail] = useState('');
+  const [newSubject, setNewSubject] = useState('');
+  const [newContent, setNewContent] = useState('');
+  const [newFiles, setNewFiles] = useState<File[]>([]);
+  const [sendingNew, setSendingNew] = useState(false);
   const [banner, setBanner] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
   const searchRef = useRef(search);
@@ -121,6 +134,13 @@ export default function MailInboxClient({ userId, role, displayName }: MailInbox
   }, [token, caseFilter, refreshCases]);
 
   useEffect(() => {
+    if (!token) return;
+    fetchMailClients(token)
+      .then(setClients)
+      .catch(() => setBanner('Could not load clients.'));
+  }, [token]);
+
+  useEffect(() => {
     if (selectedId && token) void refreshThread();
   }, [selectedId, token, refreshThread]);
 
@@ -157,6 +177,46 @@ export default function MailInboxClient({ userId, role, displayName }: MailInbox
       const msg = e instanceof Error ? e.message : '';
       if (msg.includes('403')) setBanner('You cannot send on this case.');
       else setBanner('Send failed.');
+    }
+  };
+
+  const handleSendNew = async () => {
+    const t = token ?? (await loadToken());
+    if (!t || sendingNew) return;
+
+    const selectedClient = clients.find((client) => client.id === newClientId);
+    const recipientEmail = recipientMode === 'existing' ? selectedClient?.email : newEmail.trim();
+    const recipientName = recipientMode === 'existing' ? selectedClient?.name : newName.trim();
+
+    if (!recipientEmail || !newSubject.trim() || !newContent.trim()) {
+      setBanner('Recipient, subject, and message are required.');
+      return;
+    }
+
+    setSendingNew(true);
+    try {
+      const sent = await sendNewMailMessage(t, {
+        recipientEmail,
+        recipientName,
+        subject: newSubject.trim(),
+        content: newContent.trim(),
+        files: newFiles,
+      });
+      setNewOpen(false);
+      setRecipientMode('existing');
+      setNewClientId('');
+      setNewName('');
+      setNewEmail('');
+      setNewSubject('');
+      setNewContent('');
+      setNewFiles([]);
+      setSelectedId(sent.case_id);
+      await refreshCases();
+      setClients(await fetchMailClients(t));
+    } catch {
+      setBanner('Send failed.');
+    } finally {
+      setSendingNew(false);
     }
   };
 
@@ -206,17 +266,130 @@ export default function MailInboxClient({ userId, role, displayName }: MailInbox
           </div>
         </div>
         {(role === 'admin' || role === 'employee') && (
-          <button
-            type="button"
-            onClick={() => void handleSync()}
-            disabled={syncing}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-gray-900 dark:bg-white text-white dark:text-gray-900 disabled:opacity-50"
-          >
-            {syncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
-            Sync
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setNewOpen(true)}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-brand-primary text-white"
+            >
+              <Plus className="w-4 h-4" />
+              New
+            </button>
+            <button
+              type="button"
+              onClick={() => void handleSync()}
+              disabled={syncing}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-gray-900 dark:bg-white text-white dark:text-gray-900 disabled:opacity-50"
+            >
+              {syncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+              Sync
+            </button>
+          </div>
         )}
       </header>
+
+      {newOpen && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 p-4">
+          <div className="my-8 w-full max-w-2xl rounded-2xl border border-gray-200 bg-white shadow-2xl dark:border-gray-800 dark:bg-[#27272a]">
+            <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4 dark:border-gray-800">
+              <h2 className="text-base font-bold">New Email</h2>
+              <button type="button" onClick={() => setNewOpen(false)} className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800" aria-label="Close">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="space-y-4 px-5 py-5">
+              <div className="inline-flex overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700">
+                <button
+                  type="button"
+                  onClick={() => setRecipientMode('existing')}
+                  className={`px-4 py-2 text-sm font-semibold ${recipientMode === 'existing' ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900' : 'bg-white text-gray-600 dark:bg-[#27272a] dark:text-gray-300'}`}
+                >
+                  Existing Client
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRecipientMode('outside')}
+                  className={`px-4 py-2 text-sm font-semibold ${recipientMode === 'outside' ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900' : 'bg-white text-gray-600 dark:bg-[#27272a] dark:text-gray-300'}`}
+                >
+                  Outside Database
+                </button>
+              </div>
+
+              {recipientMode === 'existing' ? (
+                <div>
+                  <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-gray-500">Client</label>
+                  <ClientCombobox
+                    clients={clients.map((client) => ({ _id: client.id, fullName: client.name, email: client.email }))}
+                    value={newClientId}
+                    onChange={setNewClientId}
+                    placeholder="Select a client..."
+                  />
+                </div>
+              ) : (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-gray-500">Name</label>
+                    <input
+                      value={newName}
+                      onChange={(event) => setNewName(event.target.value)}
+                      className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm dark:border-gray-700 dark:bg-[#18181b]"
+                      placeholder="Client name"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-gray-500">Email</label>
+                    <input
+                      type="email"
+                      value={newEmail}
+                      onChange={(event) => setNewEmail(event.target.value)}
+                      className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm dark:border-gray-700 dark:bg-[#18181b]"
+                      placeholder="client@example.com"
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-gray-500">Subject</label>
+                <input
+                  value={newSubject}
+                  onChange={(event) => setNewSubject(event.target.value)}
+                  className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm dark:border-gray-700 dark:bg-[#18181b]"
+                  placeholder="Subject"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-gray-500">Message</label>
+                <textarea
+                  value={newContent}
+                  onChange={(event) => setNewContent(event.target.value)}
+                  rows={7}
+                  className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm dark:border-gray-700 dark:bg-[#18181b]"
+                  placeholder="Write your email..."
+                />
+              </div>
+              <div className="flex items-center justify-between gap-3">
+                <label className="cursor-pointer text-xs font-semibold text-gray-500">
+                  <input type="file" multiple className="hidden" onChange={(event) => setNewFiles(event.target.files ? Array.from(event.target.files) : [])} />
+                  <span className="inline-flex items-center gap-1 rounded-xl border border-gray-200 px-3 py-2 dark:border-gray-700">
+                    <Paperclip className="h-4 w-4" /> Attach
+                  </span>
+                </label>
+                <button
+                  type="button"
+                  onClick={() => void handleSendNew()}
+                  disabled={sendingNew || !newSubject.trim() || !newContent.trim()}
+                  className="inline-flex items-center gap-2 rounded-xl bg-gray-900 px-5 py-2.5 text-sm font-bold text-white disabled:opacity-40 dark:bg-white dark:text-gray-900"
+                >
+                  {sendingNew ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                  Send
+                </button>
+              </div>
+              {newFiles.length > 0 && <p className="text-xs text-gray-500">{newFiles.map((file) => file.name).join(', ')}</p>}
+            </div>
+          </div>
+        </div>
+      )}
 
       {banner && (
         <div className="mx-4 mt-3 px-4 py-2 rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-200 text-sm border border-amber-200 dark:border-amber-800">

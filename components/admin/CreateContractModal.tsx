@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition, useEffect } from 'react';
+import ClientCombobox from '@/components/ClientCombobox';
 import { createAdminContract } from '@/lib/actions/admin-contracts';
 import { getContractTemplates } from '@/lib/actions/contract-templates';
 import { interpolateTemplate, extractTemplateVariables } from '@/lib/contract-utils';
@@ -213,19 +214,7 @@ export default function CreateContractModal({ clients }: Props) {
                   <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">
                     Client *
                   </label>
-                  <select
-                    value={clientId}
-                    onChange={(e) => setClientId(e.target.value)}
-                    required
-                    className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#27272a] text-gray-900 dark:text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/30"
-                  >
-                    <option value="">Select a client…</option>
-                    {clients.map((c) => (
-                      <option key={c._id} value={c._id}>
-                        {c.fullName} ({c.email})
-                      </option>
-                    ))}
-                  </select>
+                  <ClientCombobox clients={clients} value={clientId} onChange={setClientId} placeholder="Select a client..." />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">

@@ -1,4 +1,4 @@
-import type { MailCaseDetail, MailCaseListItem, MailMessage } from '@/lib/types/mail';
+import type { MailCaseDetail, MailCaseListItem, MailClient, MailMessage } from '@/lib/types/mail';
 
 const base = () => {
   const u = process.env.NEXT_PUBLIC_BACKEND_URL;
@@ -72,6 +72,32 @@ export async function sendMailMessage(
   }
   const res = await authFetch('/messages/send', token, { method: 'POST', body: fd });
   if (!res.ok) throw new Error(`send_${res.status}`);
+  return res.json();
+}
+
+export async function fetchMailClients(token: string, q?: string): Promise<MailClient[]> {
+  const sp = new URLSearchParams();
+  if (q) sp.set('q', q);
+  const qs = sp.toString();
+  const res = await authFetch(`/clients${qs ? `?${qs}` : ''}`, token);
+  if (!res.ok) throw new Error(`clients_${res.status}`);
+  return res.json();
+}
+
+export async function sendNewMailMessage(
+  token: string,
+  payload: { recipientEmail: string; recipientName?: string; subject: string; content: string; files?: File[] },
+): Promise<{ case_id: string; message_id: string; gmail_message_id: string }> {
+  const fd = new FormData();
+  fd.set('recipient_email', payload.recipientEmail);
+  fd.set('recipient_name', payload.recipientName ?? '');
+  fd.set('subject', payload.subject);
+  fd.set('content', payload.content);
+  for (const f of payload.files ?? []) {
+    fd.append('files', f);
+  }
+  const res = await authFetch('/messages/send-new', token, { method: 'POST', body: fd });
+  if (!res.ok) throw new Error(`send_new_${res.status}`);
   return res.json();
 }
 

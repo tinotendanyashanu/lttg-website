@@ -77,6 +77,7 @@ def create_app() -> FastAPI:
 
     app.include_router(health.router)
     app.include_router(cases.router)
+    app.include_router(cases.clients_router)
     app.include_router(messages.router)
     app.include_router(sync.router)
     return app

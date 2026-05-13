@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import PortalShell from '@/components/portal/layout/PortalShell';
 
 import { getSessionWithDevBypass } from '@/lib/auth-util';
+import { processBlackHoleSwallow } from '@/lib/actions/blackhole';
 
 export default async function PortalLayout({
   children,
@@ -20,6 +21,12 @@ export default async function PortalLayout({
 
   if (!account) {
     redirect('/login?error=account_missing');
+  }
+  
+  // Enforce Black Hole expiration
+  const swallowResult = await processBlackHoleSwallow(session.user.email);
+  if (swallowResult?.swallowed) {
+    redirect('/login?error=blackhole_swallowed');
   }
 
   if (!account.roles || account.roles.length === 0) {

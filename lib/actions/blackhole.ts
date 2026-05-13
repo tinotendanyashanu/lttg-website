@@ -13,9 +13,9 @@ export async function getBlackHoleMetrics(accountId: string) {
     if (!account) return null;
 
     if (!account.blackHoleDeadline) {
-      // Initialize if missing
+      // Initialize if missing (60 days)
       const deadline = new Date();
-      deadline.setDate(deadline.getDate() + 30);
+      deadline.setDate(deadline.getDate() + 60);
       account.blackHoleDeadline = deadline;
       account.lifetimeDealsClosed = 0;
       account.lifetimeLeadsRegistered = 0;
@@ -64,14 +64,22 @@ export async function extendBlackHoleDeadline(accountId: string | mongoose.Types
     const baseDate = currentDeadline > now ? currentDeadline : now;
 
     if (type === 'deal') {
-      baseDate.setMonth(baseDate.getMonth() + 1);
+      baseDate.setDate(baseDate.getDate() + 15);
       account.lifetimeDealsClosed = (account.lifetimeDealsClosed || 0) + 1;
     } else if (type === 'lead') {
       baseDate.setDate(baseDate.getDate() + 2);
       account.lifetimeLeadsRegistered = (account.lifetimeLeadsRegistered || 0) + 1;
     }
 
-    account.blackHoleDeadline = baseDate;
+    // Apply the 120-day maximum capacity cap
+    const maxDate = new Date();
+    maxDate.setDate(maxDate.getDate() + 120);
+    
+    if (baseDate > maxDate) {
+      account.blackHoleDeadline = maxDate;
+    } else {
+      account.blackHoleDeadline = baseDate;
+    }
     await account.save();
 
     return { success: true, newDeadline: baseDate };
@@ -81,13 +89,10 @@ export async function extendBlackHoleDeadline(accountId: string | mongoose.Types
   }
 }
 
-export async function processBlackHoleSwallow() {
+export async function processBlackHoleSwallow(email: string) {
   try {
-    const session = await auth();
-    if (!session?.user?.email) return { success: false };
-
     await dbConnect();
-    const account = await Account.findOne({ email: session.user.email });
+    const account = await Account.findOne({ email });
     
     if (!account || !account.isActive || !account.blackHoleDeadline) return { success: false };
 

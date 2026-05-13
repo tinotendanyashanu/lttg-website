@@ -43,3 +43,9 @@ export interface MailMessage {
   timestamp: string;
   gmail_message_id: string | null;
 }
+
+export interface MailClient {
+  id: string;
+  name: string;
+  email: string;
+}

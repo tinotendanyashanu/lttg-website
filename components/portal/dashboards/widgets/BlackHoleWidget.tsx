@@ -68,7 +68,7 @@ export default function BlackHoleWidget({ metrics }: BlackHoleWidgetProps) {
               Event Horizon Tracker
             </h2>
             <p className="text-sm text-gray-500 mt-1 max-w-sm">
-              Your account lifecycle is tied to your activity. Close deals and register leads to extend your orbit and avoid the Black Hole.
+              Your contract depends on your activity. Close deals (+15 days) and register leads (+2 days) to extend your lifespan. <strong className="text-red-400 font-medium">Reaching 0 days results in immediate termination.</strong>
             </p>
           </div>
 
@@ -77,7 +77,7 @@ export default function BlackHoleWidget({ metrics }: BlackHoleWidgetProps) {
               <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Lifespan</span>
               <div className="flex flex-wrap items-baseline gap-x-1 gap-y-0.5">
                 <span className={`text-3xl font-black tracking-tighter ${textColor}`}>{daysRemaining}</span>
-                <span className="text-sm font-medium text-gray-500">days</span>
+                <span className="text-sm font-medium text-gray-500">/ 120</span>
               </div>
             </div>
 
@@ -85,7 +85,7 @@ export default function BlackHoleWidget({ metrics }: BlackHoleWidgetProps) {
               <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Deals</span>
               <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
                 <span className="text-2xl font-bold text-white tracking-tighter">{deals}</span>
-                <span className="whitespace-nowrap text-xs font-medium text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-full">+30d ea</span>
+                <span className="whitespace-nowrap text-xs font-medium text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-full">+15d ea</span>
               </div>
             </div>
 
@@ -98,7 +98,22 @@ export default function BlackHoleWidget({ metrics }: BlackHoleWidgetProps) {
             </div>
           </div>
           
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
+          <div className="w-full max-w-2xl mt-4">
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Capacity Shield</span>
+              <span className={`text-xs font-bold ${textColor}`}>{Math.round((daysRemaining / 120) * 100)}%</span>
+            </div>
+            <div className="h-2 w-full bg-white/10 rounded-full overflow-hidden border border-white/5">
+              <motion.div 
+                className={`h-full rounded-full bg-linear-to-r ${ringColor}`}
+                initial={{ width: 0 }}
+                animate={{ width: `${Math.min(100, (daysRemaining / 120) * 100)}%` }}
+                transition={{ duration: 1.5, ease: "easeOut" }}
+              />
+            </div>
+          </div>
+
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 mt-2">
              <div className={`w-2 h-2 rounded-full ${textColor} ${pulseAnimation} bg-current`} />
              <span className="text-xs font-medium text-gray-300">{statusText}</span>
           </div>
