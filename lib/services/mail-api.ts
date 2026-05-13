@@ -43,6 +43,19 @@ export async function fetchMailCaseDetail(token: string, caseId: string): Promis
   return res.json();
 }
 
+export async function updateMailCaseStatus(
+  token: string,
+  caseId: string,
+  status: 'open' | 'closed'
+): Promise<void> {
+  const res = await authFetch(`/cases/${encodeURIComponent(caseId)}`, token, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status }),
+  });
+  if (!res.ok) throw new Error(`update_case_${res.status}`);
+}
+
 export async function fetchMailMessages(
   token: string,
   caseId: string,

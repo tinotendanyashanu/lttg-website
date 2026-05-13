@@ -9,7 +9,7 @@ import mongoose from 'mongoose';
 export async function getBlackHoleMetrics(accountId: string) {
   try {
     await dbConnect();
-    const account = await Account.findById(accountId).select('blackHoleDeadline lifetimeDealsClosed lifetimeLeadsRegistered isActive');
+    const account = await Account.findById(accountId);
     if (!account) return null;
 
     if (!account.blackHoleDeadline) {

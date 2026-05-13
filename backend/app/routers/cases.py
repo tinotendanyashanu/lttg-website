@@ -69,6 +69,10 @@ class CreateCaseBody(BaseModel):
     subject: str | None = Field(default=None, max_length=500)
 
 
+class UpdateCaseBody(BaseModel):
+    status: Literal["open", "closed"]
+
+
 @router.get("", response_model=list[CaseListItemOut])
 async def list_cases(
     user: Annotated[UserDoc, Depends(get_current_user)],
@@ -214,6 +218,30 @@ async def create_case(
         }
     )
     return {"id": case_id}
+
+
+@router.patch("/{case_id}", response_model=dict)
+async def update_case(
+    case_id: str,
+    body: UpdateCaseBody,
+    user: Annotated[UserDoc, Depends(get_current_user)],
+    db: Annotated[object, Depends(get_db)],
+):
+    from motor.motor_asyncio import AsyncIOMotorDatabase
+
+    dba: AsyncIOMotorDatabase = db  # type: ignore[assignment]
+    c = await dba.cases.find_one({"_id": case_id})
+    if not c:
+        raise HTTPException(status_code=404, detail="case_not_found")
+    if user.role != "admin" and c["assigned_to"] != user.id:
+        raise HTTPException(status_code=403, detail="forbidden")
+
+    await dba.cases.update_one(
+        {"_id": case_id},
+        {"$set": {"status": body.status}}
+    )
+    return {"status": "ok"}
+
 
 
 @clients_router.get("", response_model=list[ClientListItemOut])

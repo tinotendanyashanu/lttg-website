@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
-import { ArrowLeft, Loader2, Mail, Paperclip, Plus, RefreshCw, Send, X } from 'lucide-react';
+import { ArrowLeft, Loader2, Mail, Paperclip, Plus, RefreshCw, Send, X, Reply, Forward, CheckCircle2, ArchiveRestore, User } from 'lucide-react';
 import ClientCombobox from '@/components/ClientCombobox';
 import type { MailCaseDetail, MailCaseListItem, MailClient, MailMessage } from '@/lib/types/mail';
 import {
@@ -14,6 +14,7 @@ import {
   sendNewMailMessage,
   sendMailMessage,
   triggerMailSync,
+  updateMailCaseStatus,
 } from '@/lib/services/mail-api';
 
 function useVisibilityInterval(visibleMs: number, hiddenMs: number, cb: () => void) {
@@ -235,6 +236,31 @@ export default function MailInboxClient({ userId, role, displayName }: MailInbox
     }
   };
 
+  const handleToggleStatus = async () => {
+    if (!detail) return;
+    const t = token ?? (await loadToken());
+    if (!t) return;
+    try {
+      const newStatus = detail.status === 'open' ? 'closed' : 'open';
+      await updateMailCaseStatus(t, detail.id, newStatus);
+      await refreshCases();
+      await refreshThread();
+    } catch {
+      setBanner(`Failed to mark case as ${detail.status === 'open' ? 'closed' : 'open'}.`);
+    }
+  };
+
+  const handleReplyMessage = (msg: MailMessage) => {
+    const text = `\n\n> On ${new Date(msg.timestamp).toLocaleString()}, ${msg.sender_type === 'employee' ? 'Team' : detail?.client_name || 'Client'} wrote:\n> ${msg.content.replace(/\n/g, '\n> ')}`;
+    setCompose(text);
+    // document.getElementById('compose-textarea')?.focus(); is ideal but simple scroll to bottom works
+  };
+
+  const handleForwardMessage = (msg: MailMessage) => {
+    const text = `\n\n---------- Forwarded message ---------\nDate: ${new Date(msg.timestamp).toLocaleString()}\nFrom: ${msg.sender_type === 'employee' ? 'Team' : detail?.client_name || 'Client'}\n\n${msg.content}`;
+    setCompose(text);
+  };
+
   if (tokenError) {
     return (
       <div className="max-w-lg mx-auto mt-20 p-6 rounded-2xl bg-white dark:bg-[#27272a] border border-gray-200 dark:border-gray-800 shadow-sm">
@@ -438,37 +464,45 @@ export default function MailInboxClient({ userId, role, displayName }: MailInbox
             ) : cases.length === 0 ? (
               <p className="p-6 text-sm text-gray-500">No cases yet.</p>
             ) : (
-              cases.map((c) => (
-                <button
-                  key={c.id}
-                  type="button"
-                  onClick={() => setSelectedId(c.id)}
-                  className={`w-full text-left px-4 py-3 border-b border-gray-50 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors ${
-                    selectedId === c.id ? 'bg-blue-50/80 dark:bg-blue-900/20' : ''
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <p className="text-xs font-bold text-brand-primary">{c.id}</p>
-                      <p className="text-sm font-semibold truncate">{c.client_name}</p>
-                      <p className="text-xs text-gray-500 truncate">{c.client_email}</p>
-                      {c.last_message_preview && (
-                        <p className="text-xs text-gray-400 mt-1 line-clamp-2">{c.last_message_preview}</p>
-                      )}
+              cases.map((c) => {
+                const initial = c.client_name.charAt(0).toUpperCase() || '?';
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => setSelectedId(c.id)}
+                    className={`w-full text-left px-4 py-3 border-b border-gray-100 dark:border-gray-800 transition-colors ${
+                      selectedId === c.id 
+                        ? 'bg-brand-primary/5 dark:bg-brand-primary/10 border-l-2 border-l-brand-primary' 
+                        : 'hover:bg-gray-50 dark:hover:bg-gray-800/50 border-l-2 border-l-transparent'
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-primary/20 to-brand-primary/10 flex items-center justify-center shrink-0">
+                        <span className="text-brand-primary font-bold text-sm">{initial}</span>
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-start justify-between gap-2">
+                          <p className={`text-sm truncate ${c.has_unread_client ? 'font-bold' : 'font-semibold text-gray-900 dark:text-gray-100'}`}>
+                            {c.client_name}
+                          </p>
+                          {c.last_message_at && (
+                            <span className={`text-[10px] shrink-0 ${c.has_unread_client ? 'text-brand-primary font-bold' : 'text-gray-400'}`}>
+                              {formatDistanceToNow(new Date(c.last_message_at), { addSuffix: true })}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-gray-500 truncate mb-0.5">{c.client_email}</p>
+                        {c.last_message_preview && (
+                          <p className={`text-xs line-clamp-2 ${c.has_unread_client ? 'text-gray-700 dark:text-gray-300 font-medium' : 'text-gray-400 dark:text-gray-500'}`}>
+                            {c.last_message_preview}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex flex-col items-end gap-1 shrink-0">
-                      {c.last_message_at && (
-                        <span className="text-[10px] text-gray-400">
-                          {formatDistanceToNow(new Date(c.last_message_at), { addSuffix: true })}
-                        </span>
-                      )}
-                      {c.has_unread_client && (
-                        <span className="w-2 h-2 rounded-full bg-brand-primary" title="Client replied" />
-                      )}
-                    </div>
-                  </div>
-                </button>
-              ))
+                  </button>
+                );
+              })
             )}
           </div>
         </aside>
@@ -485,10 +519,31 @@ export default function MailInboxClient({ userId, role, displayName }: MailInbox
             </div>
           ) : (
             <>
-              <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-[#27272a] shrink-0">
-                <p className="text-xs font-bold text-brand-primary">{detail?.id}</p>
-                <p className="text-lg font-bold">{detail?.client_name}</p>
-                <p className="text-sm text-gray-500">{detail?.client_email}</p>
+              <div className="px-5 py-4 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-[#27272a] shrink-0 flex items-center justify-between">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <p className="text-lg font-bold">{detail?.client_name}</p>
+                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${detail?.status === 'open' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'}`}>
+                      {detail?.status}
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-500 flex items-center gap-2">
+                    <User className="w-4 h-4" /> {detail?.client_email}
+                  </p>
+                </div>
+                {canActOnCase && (
+                  <button
+                    onClick={() => void handleToggleStatus()}
+                    className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm font-semibold transition-colors ${
+                      detail?.status === 'open'
+                        ? 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                        : 'bg-brand-primary/10 text-brand-primary hover:bg-brand-primary/20'
+                    }`}
+                  >
+                    {detail?.status === 'open' ? <CheckCircle2 className="w-4 h-4" /> : <ArchiveRestore className="w-4 h-4" />}
+                    {detail?.status === 'open' ? 'Close Case' : 'Reopen Case'}
+                  </button>
+                )}
               </div>
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {messages.map((m) => {
@@ -496,31 +551,41 @@ export default function MailInboxClient({ userId, role, displayName }: MailInbox
                   return (
                     <div key={m.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
                       <div
-                        className={`max-w-[85%] rounded-2xl px-4 py-3 shadow-sm ${
+                        className={`max-w-[85%] rounded-2xl px-5 py-4 shadow-sm group relative ${
                           mine
-                            ? 'bg-brand-primary text-white rounded-br-md'
-                            : 'bg-white dark:bg-[#27272a] border border-gray-100 dark:border-gray-800 rounded-bl-md'
+                            ? 'bg-brand-primary text-white rounded-br-sm'
+                            : 'bg-white dark:bg-[#27272a] border border-gray-100 dark:border-gray-800 rounded-bl-sm'
                         }`}
                       >
-                        <p className="text-[10px] font-bold opacity-70 mb-1">
-                          {mine ? 'Team' : 'Client'} ·{' '}
-                          {m.timestamp ? formatDistanceToNow(new Date(m.timestamp), { addSuffix: true }) : ''}
-                        </p>
-                        <p className="text-sm whitespace-pre-wrap">{m.content}</p>
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-[11px] font-bold opacity-70">
+                            {mine ? 'Team' : detail?.client_name || 'Client'} ·{' '}
+                            {m.timestamp ? formatDistanceToNow(new Date(m.timestamp), { addSuffix: true }) : ''}
+                          </p>
+                          <div className={`flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity ${mine ? 'text-white/80' : 'text-gray-400'}`}>
+                            <button onClick={() => handleReplyMessage(m)} title="Reply" className="p-1 hover:bg-black/10 dark:hover:bg-white/10 rounded-md">
+                              <Reply className="w-3.5 h-3.5" />
+                            </button>
+                            <button onClick={() => handleForwardMessage(m)} title="Forward" className="p-1 hover:bg-black/10 dark:hover:bg-white/10 rounded-md">
+                              <Forward className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                        <p className="text-[15px] leading-relaxed whitespace-pre-wrap">{m.content}</p>
                         {m.attachments?.length > 0 && (
-                          <div className="flex flex-wrap gap-2 mt-2">
+                          <div className="flex flex-wrap gap-2 mt-4 pt-3 border-t border-black/5 dark:border-white/5">
                             {m.attachments.map((a) => (
                               <a
                                 key={a.url}
                                 href={a.url}
                                 target="_blank"
                                 rel="noreferrer"
-                                className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-lg ${
-                                  mine ? 'bg-white/20' : 'bg-gray-100 dark:bg-gray-800'
+                                className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-xl transition-colors ${
+                                  mine ? 'bg-black/20 hover:bg-black/30 text-white' : 'bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-100 dark:border-gray-700'
                                 }`}
                               >
-                                <Paperclip className="w-3 h-3" />
-                                {a.filename}
+                                <Paperclip className="w-3.5 h-3.5" />
+                                <span className="truncate max-w-[150px]">{a.filename}</span>
                               </a>
                             ))}
                           </div>
@@ -534,32 +599,37 @@ export default function MailInboxClient({ userId, role, displayName }: MailInbox
               {canActOnCase ? (
                 <footer className="border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-[#27272a] p-4 shrink-0 sticky bottom-0">
                   <div className="flex flex-col gap-2">
-                    <textarea
-                      value={compose}
-                      onChange={(e) => setCompose(e.target.value)}
-                      placeholder="Write a reply…"
-                      rows={3}
-                      className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-[#18181b] px-3 py-2 text-sm resize-none"
-                    />
+                    <div className="relative">
+                      <textarea
+                        id="compose-textarea"
+                        value={compose}
+                        onChange={(e) => setCompose(e.target.value)}
+                        placeholder="Write a reply…"
+                        rows={4}
+                        className="w-full rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#18181b] px-4 py-3 text-[15px] leading-relaxed resize-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary transition-all shadow-sm"
+                      />
+                    </div>
                     <div className="flex items-center justify-between gap-2 flex-wrap">
-                      <label className="text-xs font-semibold text-gray-500 cursor-pointer">
-                        <input
-                          type="file"
-                          multiple
-                          className="hidden"
-                          onChange={(e) => setFiles(e.target.files ? Array.from(e.target.files) : [])}
-                        />
-                        <span className="inline-flex items-center gap-1 px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700">
-                          <Paperclip className="w-4 h-4" /> Attach
-                        </span>
-                      </label>
+                      <div className="flex items-center gap-2">
+                        <label className="text-xs font-semibold text-gray-500 cursor-pointer hover:text-gray-900 dark:hover:text-white transition-colors">
+                          <input
+                            type="file"
+                            multiple
+                            className="hidden"
+                            onChange={(e) => setFiles(e.target.files ? Array.from(e.target.files) : [])}
+                          />
+                          <span className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-gray-50 hover:bg-gray-100 dark:bg-gray-800/50 dark:hover:bg-gray-800 transition-colors">
+                            <Paperclip className="w-4 h-4" /> Attach Files
+                          </span>
+                        </label>
+                      </div>
                       <button
                         type="button"
                         onClick={() => void handleSend()}
                         disabled={!compose.trim()}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm bg-gray-900 dark:bg-white text-white dark:text-gray-900 disabled:opacity-40"
+                        className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm bg-brand-primary text-white hover:bg-brand-primary/90 disabled:opacity-40 transition-all shadow-sm shadow-brand-primary/20"
                       >
-                        <Send className="w-4 h-4" /> Send
+                        <Send className="w-4 h-4" /> Send Reply
                       </button>
                     </div>
                     {files.length > 0 && (
