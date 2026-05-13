@@ -525,7 +525,7 @@ export default function MailInboxClient({ userId, role, displayName }: MailInbox
                     }`}
                   >
                     <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-primary/20 to-brand-primary/10 flex items-center justify-center shrink-0">
+                      <div className="w-10 h-10 rounded-full bg-linear-to-br from-brand-primary/20 to-brand-primary/10 flex items-center justify-center shrink-0">
                         <span className="text-brand-primary font-bold text-sm">{initial}</span>
                       </div>
                       <div className="min-w-0 flex-1">
@@ -618,7 +618,11 @@ export default function MailInboxClient({ userId, role, displayName }: MailInbox
                             </button>
                           </div>
                         </div>
-                        <div className="text-[15px] leading-relaxed whitespace-pre-wrap prose prose-sm dark:prose-invert prose-p:my-1 prose-headings:my-2 prose-a:text-brand-primary max-w-none">
+                        <div className={`text-[15px] leading-relaxed whitespace-pre-wrap prose prose-sm prose-p:my-1 prose-headings:my-2 max-w-none ${
+                          mine 
+                            ? '**:text-white prose-a:underline' 
+                            : 'dark:prose-invert prose-a:text-brand-primary'
+                        }`}>
                           <ReactMarkdown>{m.content}</ReactMarkdown>
                         </div>
                         {m.attachments?.length > 0 && (
