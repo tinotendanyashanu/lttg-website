@@ -55,7 +55,7 @@ export default async function UnifiedDashboard({ title, accountId, email, roles 
   if (!identityData) return <div>Failed to load profile.</div>;
 
   return (
-    <div className="flex flex-col gap-8 h-full w-full pb-10">
+    <div className="flex flex-col gap-8 w-full pb-10">
       {/* 0. Header Area */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>

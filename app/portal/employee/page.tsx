@@ -29,21 +29,21 @@ export default async function PortalPage() {
 
   if (roles.includes("admin")) {
     return (
-      <div className="flex flex-col h-full w-full">
+      <div className="flex flex-col w-full">
         <AnnouncementsWidget initialAnnouncements={announcements || []} />
         <AdminDashboard email={email} />
       </div>
     );
   } else if (roles.includes("employee")) {
     return (
-      <div className="flex flex-col h-full w-full">
+      <div className="flex flex-col w-full">
         <AnnouncementsWidget initialAnnouncements={announcements || []} />
         <UnifiedDashboard title="Employee Dashboard" accountId={accountId} email={email} roles={roles} />
       </div>
     );
   } else if (roles.includes("intern")) {
     return (
-      <div className="flex flex-col h-full w-full">
+      <div className="flex flex-col w-full">
         <AnnouncementsWidget initialAnnouncements={announcements || []} />
         <UnifiedDashboard title="Intern Dashboard" accountId={accountId} email={email} roles={roles} />
       </div>

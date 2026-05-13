@@ -53,7 +53,7 @@ export default function BlackHoleWidget({ metrics }: BlackHoleWidgetProps) {
   }
 
   return (
-    <div className="relative w-full overflow-hidden rounded-3xl bg-[#0a0a0a] border border-[#1f1f1f] shadow-2xl p-6 sm:p-8 isolate">
+    <div className="relative w-full shrink-0 overflow-hidden rounded-3xl bg-[#0a0a0a] border border-[#1f1f1f] shadow-2xl p-6 sm:p-8 isolate">
       {/* Background stars / grid */}
       <div className="absolute inset-0 z-0 opacity-20 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent pointer-events-none" />
       <div className="absolute inset-0 z-0 bg-[url('/noise.svg')] opacity-5 mix-blend-overlay pointer-events-none" />
