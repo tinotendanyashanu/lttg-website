@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, Any
 
 from app.services.case_service import ingest_inbound_message
-from app.services.gmail_service import GmailService
+from app.services.gmail_service import GmailAuthError, GmailService
 from app.services.r2_service import R2Service
 
 if TYPE_CHECKING:
@@ -89,6 +89,9 @@ def start_background_sync(
             try:
                 res = await sync_gmail_once(db, gmail, r2)
                 logger.info("background sync: %s", res)
+            except GmailAuthError as e:
+                logger.error("background sync stopped: %s", e)
+                return
             except Exception as e:
                 logger.exception("background sync failed: %s", e)
             await asyncio.sleep(interval)

@@ -21,6 +21,10 @@ DISABLE_BACKGROUND_SYNC=1 uvicorn app.main:app --reload --host 0.0.0.0 --port 80
 
 Create OAuth 2.0 credentials (Desktop or Web) in [Google Cloud Console](https://developers.google.com/workspace/guides/create-credentials), enable the Gmail API, then complete the OAuth flow to obtain a **refresh token**. Official guide: [Using OAuth 2.0 to Access Google APIs](https://developers.google.com/identity/protocols/oauth2). Store the refresh token in `GOOGLE_REFRESH_TOKEN` — never commit it.
 
+The token must be granted Gmail permissions for the operations this app performs. Use at least `https://www.googleapis.com/auth/gmail.modify`; include `https://www.googleapis.com/auth/gmail.send` if employee replies are sent through Gmail. Leave `GOOGLE_OAUTH_SCOPES` empty unless you intentionally need to override the scopes sent during token refresh.
+
+In Railway, paste only env var values, not whole `.env` lines. For example, `GOOGLE_REFRESH_TOKEN` should be `1//...`, not `GOOGLE_REFRESH_TOKEN=1//...`.
+
 ### Tests
 
 ```bash

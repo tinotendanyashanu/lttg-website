@@ -2,6 +2,7 @@
 
 from functools import lru_cache
 
+from pydantic import ValidationInfo, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -15,6 +16,7 @@ class Settings(BaseSettings):
     google_client_secret: str
     google_refresh_token: str
     google_sync_user: str = "me"
+    google_oauth_scopes: str | None = None
 
     r2_access_key_id: str
     r2_secret_access_key: str
@@ -29,6 +31,29 @@ class Settings(BaseSettings):
     @property
     def cors_origin_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
+
+    @property
+    def google_oauth_scope_list(self) -> list[str] | None:
+        if not self.google_oauth_scopes:
+            return None
+        scopes = [
+            scope.strip()
+            for chunk in self.google_oauth_scopes.split(",")
+            for scope in chunk.split()
+            if scope.strip()
+        ]
+        return scopes or None
+
+    @field_validator("*", mode="before")
+    @classmethod
+    def normalize_env_assignment_value(cls, value, info: ValidationInfo):
+        if value is None:
+            return value
+        text = str(value).strip().strip('"').strip("'")
+        env_name = info.field_name.upper()
+        if text.startswith(f"{env_name}="):
+            text = text.split("=", 1)[1].strip().strip('"').strip("'")
+        return text or None
 
 
 @lru_cache

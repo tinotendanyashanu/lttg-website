@@ -12,6 +12,7 @@ from email.utils import formatdate, parsedate_to_datetime
 from typing import Any
 
 from google.auth.transport.requests import Request
+from google.auth.exceptions import RefreshError
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
@@ -65,28 +66,39 @@ class ParsedGmailMessage:
     internet_message_id: str | None
 
 
+class GmailAuthError(RuntimeError):
+    """Raised when Gmail OAuth credentials cannot be refreshed."""
+
+
 class GmailService:
     def __init__(self, settings: Settings) -> None:
         self._settings = settings
         self._service: Any | None = None
 
     def _creds(self) -> Credentials:
-        return Credentials(
-            token=None,
-            refresh_token=self._settings.google_refresh_token,
-            token_uri="https://oauth2.googleapis.com/token",
-            client_id=self._settings.google_client_id,
-            client_secret=self._settings.google_client_secret,
-            scopes=[
-                "https://www.googleapis.com/auth/gmail.modify",
-                "https://www.googleapis.com/auth/gmail.readonly",
-            ],
-        )
+        kwargs = {
+            "token": None,
+            "refresh_token": self._settings.google_refresh_token,
+            "token_uri": "https://oauth2.googleapis.com/token",
+            "client_id": self._settings.google_client_id,
+            "client_secret": self._settings.google_client_secret,
+        }
+        scopes = self._settings.google_oauth_scope_list
+        if scopes:
+            kwargs["scopes"] = scopes
+        return Credentials(**kwargs)
 
     def _get_service(self) -> Any:
         if self._service is None:
             creds = self._creds()
-            creds.refresh(Request())
+            try:
+                creds.refresh(Request())
+            except RefreshError as exc:
+                self.reset_client()
+                raise GmailAuthError(
+                    "Gmail OAuth refresh failed. Recreate GOOGLE_REFRESH_TOKEN with Gmail API "
+                    "enabled and the scopes required by this app."
+                ) from exc
             self._service = build("gmail", "v1", credentials=creds, cache_discovery=False)
         return self._service
 
