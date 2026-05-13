@@ -62,7 +62,7 @@ export default function BlackHoleWidget({ metrics }: BlackHoleWidgetProps) {
       <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8 h-full">
         
         {/* Left Side: Info & Metrics */}
-        <div className="flex-1 space-y-6">
+        <div className="flex-1 min-w-0 space-y-6">
           <div>
             <h2 className="text-xl sm:text-2xl font-bold bg-clip-text text-transparent bg-linear-to-r from-gray-100 to-gray-400 tracking-tight">
               Event Horizon Tracker
@@ -72,28 +72,28 @@ export default function BlackHoleWidget({ metrics }: BlackHoleWidgetProps) {
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-4">
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-md flex flex-col justify-center min-w-[120px]">
+          <div className="grid w-full max-w-2xl grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-md flex min-w-0 flex-col justify-center">
               <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Lifespan</span>
-              <div className="flex items-baseline gap-1">
+              <div className="flex flex-wrap items-baseline gap-x-1 gap-y-0.5">
                 <span className={`text-3xl font-black tracking-tighter ${textColor}`}>{daysRemaining}</span>
                 <span className="text-sm font-medium text-gray-500">days</span>
               </div>
             </div>
 
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-md flex flex-col justify-center min-w-[120px]">
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-md flex min-w-0 flex-col justify-center">
               <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Deals</span>
-              <div className="flex items-baseline gap-1">
+              <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
                 <span className="text-2xl font-bold text-white tracking-tighter">{deals}</span>
-                <span className="text-xs font-medium text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-full ml-2">+30d ea</span>
+                <span className="whitespace-nowrap text-xs font-medium text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-full">+30d ea</span>
               </div>
             </div>
 
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-md flex flex-col justify-center min-w-[120px]">
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-md flex min-w-0 flex-col justify-center">
               <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Leads</span>
-              <div className="flex items-baseline gap-1">
+              <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
                 <span className="text-2xl font-bold text-white tracking-tighter">{leads}</span>
-                <span className="text-xs font-medium text-blue-400 bg-blue-400/10 px-2 py-0.5 rounded-full ml-2">+2d ea</span>
+                <span className="whitespace-nowrap text-xs font-medium text-blue-400 bg-blue-400/10 px-2 py-0.5 rounded-full">+2d ea</span>
               </div>
             </div>
           </div>
