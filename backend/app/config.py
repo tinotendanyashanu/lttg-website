@@ -11,6 +11,7 @@ class Settings(BaseSettings):
 
     mongodb_uri: str
     mongodb_db_name: str = "mailcases"
+    mongodb_app_db_name: str | None = None
 
     google_client_id: str
     google_client_secret: str

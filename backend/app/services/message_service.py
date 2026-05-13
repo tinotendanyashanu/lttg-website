@@ -167,11 +167,10 @@ async def send_new_employee_email(
     )
 
     clean_subject = subject.strip() or "Message from LeoTheTechGuy"
-    tagged_subject = f"[{case_id}] {clean_subject}"
     body_html = f"<div style='font-family:sans-serif'>{content.replace(chr(10), '<br/>')}</div>"
     gthread, gmsg = gmail.send_email(
         to=client["email"],
-        subject=tagged_subject,
+        subject=clean_subject,
         body_html=body_html,
         body_text=content,
         attachments=att_for_gmail if att_for_gmail else None,

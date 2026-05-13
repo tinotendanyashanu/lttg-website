@@ -18,7 +18,7 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
 from app.config import Settings
-from app.utils.email_parse import parse_rfc822_raw, strip_case_tag_from_subject
+from app.utils.email_parse import parse_rfc822_raw, strip_case_tag_from_subject, strip_quoted_reply
 
 
 def _b64decode(data: str) -> bytes:
@@ -199,6 +199,7 @@ class GmailService:
         if not body_text and body_html:
             body_text = re.sub(r"<[^>]+>", " ", body_html)
             body_text = re.sub(r"\s+", " ", body_text).strip()
+        body_text = strip_quoted_reply(body_text)
 
         return ParsedGmailMessage(
             gmail_thread_id=tid,
@@ -230,6 +231,7 @@ class GmailService:
         if not body_text and body_html:
             body_text = re.sub(r"<[^>]+>", " ", body_html)
             body_text = re.sub(r"\s+", " ", body_text).strip()
+        body_text = strip_quoted_reply(body_text)
         return ParsedGmailMessage(
             gmail_thread_id=tid,
             gmail_message_id=mid,

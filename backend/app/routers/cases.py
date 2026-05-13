@@ -1,17 +1,26 @@
 """Case listing and detail."""
 
 from typing import Annotated, Literal
+from datetime import datetime, timezone
 
 from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, EmailStr, Field
 
-from app.deps import case_access_filter, get_current_user, get_db, require_admin
+from app.deps import case_access_filter, get_app_db, get_current_user, get_db, require_admin
 from app.models.user import UserDoc
 
 router = APIRouter(prefix="/cases", tags=["cases"])
 
 clients_router = APIRouter(prefix="/clients", tags=["clients"])
+
+
+def utc_iso(dt: datetime | None) -> str | None:
+    if not dt:
+        return None
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(timezone.utc).isoformat()
 
 
 class ClientListItemOut(BaseModel):
@@ -110,8 +119,8 @@ async def list_cases(
                 client_email=email,
                 assigned_to=c["assigned_to"],
                 status=c["status"],
-                created_at=c["created_at"].isoformat() if c.get("created_at") else "",
-                last_message_at=c["last_message_at"].isoformat() if c.get("last_message_at") else None,
+                created_at=utc_iso(c.get("created_at")) or "",
+                last_message_at=utc_iso(c.get("last_message_at")),
                 last_message_preview=c.get("last_message_preview"),
                 last_sender_type=c.get("last_sender_type"),
                 has_unread_client=bool(unread),
@@ -158,8 +167,8 @@ async def get_case(
         client_email=cl.get("email", ""),
         assigned_to=c["assigned_to"],
         status=c["status"],
-        created_at=c["created_at"].isoformat() if c.get("created_at") else "",
-        last_message_at=c["last_message_at"].isoformat() if c.get("last_message_at") else None,
+        created_at=utc_iso(c.get("created_at")) or "",
+        last_message_at=utc_iso(c.get("last_message_at")),
         last_message_preview=c.get("last_message_preview"),
         threads=summaries,
     )
@@ -210,22 +219,38 @@ async def create_case(
 @clients_router.get("", response_model=list[ClientListItemOut])
 async def list_clients(
     _: Annotated[UserDoc, Depends(get_current_user)],
-    db: Annotated[object, Depends(get_db)],
+    db: Annotated[object, Depends(get_app_db)],
     q: str | None = Query(None, max_length=200),
     limit: int = Query(100, ge=1, le=500),
 ):
     from motor.motor_asyncio import AsyncIOMotorDatabase
 
     dba: AsyncIOMotorDatabase = db  # type: ignore[assignment]
-    filt: dict = {}
+    filt: dict = {
+        "roles": "client",
+        "isActive": True,
+        "linkedClientAccountId": {"$exists": False},
+    }
     if q:
         import re
 
         term = re.escape(q.strip())
-        filt = {"$or": [{"name": {"$regex": term, "$options": "i"}}, {"email": {"$regex": term, "$options": "i"}}]}
+        filt["$or"] = [
+            {"fullName": {"$regex": term, "$options": "i"}},
+            {"email": {"$regex": term, "$options": "i"}},
+            {"clientProfile.companyName": {"$regex": term, "$options": "i"}},
+        ]
 
-    cur = dba.clients.find(filt).sort("name", 1).limit(limit)
+    cur = (
+        dba.accounts.find(filt, {"fullName": 1, "email": 1, "clientProfile.companyName": 1})
+        .sort("fullName", 1)
+        .limit(limit)
+    )
     return [
-        ClientListItemOut(id=str(c["_id"]), name=c.get("name", ""), email=c.get("email", ""))
+        ClientListItemOut(
+            id=str(c["_id"]),
+            name=c.get("fullName") or c.get("clientProfile", {}).get("companyName") or c.get("email", ""),
+            email=c.get("email", ""),
+        )
         async for c in cur
     ]

@@ -7,6 +7,7 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
+from pymongo.errors import ConfigurationError
 
 from app.config import get_settings
 from app.routers import cases, health, messages, sync
@@ -37,10 +38,18 @@ async def lifespan(app: FastAPI):
     settings = get_settings()
     mongo = AsyncIOMotorClient(settings.mongodb_uri)
     db = mongo[settings.mongodb_db_name]
+    if settings.mongodb_app_db_name:
+        app_db = mongo[settings.mongodb_app_db_name]
+    else:
+        try:
+            app_db = mongo.get_default_database()
+        except ConfigurationError:
+            app_db = mongo["test"]
     await ensure_indexes(db)
 
     app.state.mongo_client = mongo
     app.state.db = db
+    app.state.app_db = app_db
     app.state.settings = settings
     app.state.gmail = GmailService(settings)
     app.state.r2 = R2Service(settings)

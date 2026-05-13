@@ -17,6 +17,10 @@ async def get_db(request: Request):
     return request.app.state.db
 
 
+async def get_app_db(request: Request):
+    return request.app.state.app_db
+
+
 async def get_gmail(request: Request):
     return request.app.state.gmail
 

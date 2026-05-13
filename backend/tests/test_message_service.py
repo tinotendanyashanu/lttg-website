@@ -33,3 +33,37 @@ async def test_send_new_email_does_not_create_case_when_upload_fails():
     assert await db.cases.count_documents({}) == 0
     assert await db.threads.count_documents({}) == 0
     assert await db.messages.count_documents({}) == 0
+
+
+@pytest.mark.asyncio
+async def test_send_new_email_uses_entered_subject_without_case_prefix():
+    db = AsyncMongoMockClient()["t"]
+
+    class FakeR2:
+        async def upload_attachment(self, *_args, **_kwargs):
+            raise AssertionError("no files should be uploaded")
+
+    class FakeGmail:
+        def __init__(self):
+            self.subject = None
+
+        def send_email(self, **kwargs):
+            self.subject = kwargs["subject"]
+            return "gmail-thread-1", "gmail-message-1"
+
+    gmail = FakeGmail()
+
+    result = await send_new_employee_email(
+        db,
+        FakeR2(),
+        gmail,
+        employee_user_id="employee-1",
+        recipient_email="client@example.com",
+        recipient_name="Client",
+        subject="Quick intro",
+        content="Body",
+        files=[],
+    )
+
+    assert result["case_id"].startswith("CASE-")
+    assert gmail.subject == "Quick intro"

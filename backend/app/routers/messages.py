@@ -1,6 +1,7 @@
 """Messages: list for case + send."""
 
 from typing import Annotated
+from datetime import datetime, timezone
 
 from bson import ObjectId
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
@@ -11,6 +12,14 @@ from app.services.message_service import send_employee_message, send_new_employe
 from app.services.r2_service import StorageUploadError
 
 router = APIRouter(tags=["messages"])
+
+
+def utc_iso(dt: datetime | None) -> str:
+    if not dt:
+        return ""
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(timezone.utc).isoformat()
 
 
 @router.get("/cases/{case_id}/messages")
@@ -51,7 +60,7 @@ async def list_case_messages(
                 "sender_id": m.get("sender_id"),
                 "content": m.get("content", ""),
                 "attachments": m.get("attachments", []),
-                "timestamp": m["timestamp"].isoformat() if m.get("timestamp") else "",
+                "timestamp": utc_iso(m.get("timestamp")),
                 "gmail_message_id": m.get("gmail_message_id"),
             }
         )
