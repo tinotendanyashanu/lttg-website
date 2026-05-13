@@ -138,19 +138,6 @@ async def send_new_employee_email(
     case_id = await next_case_id(db)
     now = datetime.utcnow()
 
-    await db.cases.insert_one(
-        {
-            "_id": case_id,
-            "client_id": str(client["_id"]),
-            "assigned_to": employee_user_id,
-            "status": "open",
-            "created_at": now,
-            "last_message_at": None,
-            "last_message_preview": None,
-            "last_sender_type": None,
-        }
-    )
-
     att_meta: list[dict[str, Any]] = []
     att_for_gmail: list[tuple[str, bytes, str]] = []
     for fn, data, ctype in files:
@@ -165,6 +152,19 @@ async def send_new_employee_email(
             }
         )
         att_for_gmail.append((fn, data, safe_ctype))
+
+    await db.cases.insert_one(
+        {
+            "_id": case_id,
+            "client_id": str(client["_id"]),
+            "assigned_to": employee_user_id,
+            "status": "open",
+            "created_at": now,
+            "last_message_at": None,
+            "last_message_preview": None,
+            "last_sender_type": None,
+        }
+    )
 
     clean_subject = subject.strip() or "Message from LeoTheTechGuy"
     tagged_subject = f"[{case_id}] {clean_subject}"

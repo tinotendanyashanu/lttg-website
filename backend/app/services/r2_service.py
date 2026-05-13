@@ -7,6 +7,7 @@ from datetime import datetime
 from typing import TypedDict
 
 import boto3
+from botocore.exceptions import BotoCoreError, ClientError
 from botocore.client import BaseClient
 
 from app.config import Settings
@@ -23,6 +24,10 @@ class UploadResult(TypedDict):
     size: int
 
 
+class StorageUploadError(RuntimeError):
+    """Raised when the configured object storage rejects an upload."""
+
+
 class R2Service:
     def __init__(self, settings: Settings) -> None:
         self._settings = settings
@@ -35,12 +40,18 @@ class R2Service:
         )
 
     def _put_object_sync(self, key: str, body: bytes, content_type: str) -> None:
-        self._client.put_object(
-            Bucket=self._settings.r2_bucket_name,
-            Key=key,
-            Body=body,
-            ContentType=content_type or "application/octet-stream",
-        )
+        try:
+            self._client.put_object(
+                Bucket=self._settings.r2_bucket_name,
+                Key=key,
+                Body=body,
+                ContentType=content_type or "application/octet-stream",
+            )
+        except ClientError as exc:
+            code = exc.response.get("Error", {}).get("Code", "unknown")
+            raise StorageUploadError(f"r2_put_object_failed:{code}") from exc
+        except BotoCoreError as exc:
+            raise StorageUploadError("r2_put_object_failed") from exc
 
     def _presign_sync(self, key: str, expires: int) -> str:
         return self._client.generate_presigned_url(

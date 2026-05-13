@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Upload
 from app.deps import get_current_user, get_db, get_gmail, get_r2
 from app.models.user import UserDoc
 from app.services.message_service import send_employee_message, send_new_employee_email
+from app.services.r2_service import StorageUploadError
 
 router = APIRouter(tags=["messages"])
 
@@ -101,6 +102,8 @@ async def send_message(
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
+    except StorageUploadError as e:
+        raise HTTPException(status_code=502, detail="storage_upload_failed") from e
 
     return res
 
@@ -142,3 +145,5 @@ async def send_new_message(
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
+    except StorageUploadError as e:
+        raise HTTPException(status_code=502, detail="storage_upload_failed") from e
