@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
-import { ArrowLeft, Loader2, Mail, Paperclip, Plus, RefreshCw, Send, X, Reply, Forward, CheckCircle2, ArchiveRestore, User } from 'lucide-react';
+import { ArrowLeft, Loader2, Mail, Paperclip, Plus, RefreshCw, Send, X, Reply, Forward, CheckCircle2, ArchiveRestore, User, Bold, Italic, List, Link as LinkIcon } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 import ClientCombobox from '@/components/ClientCombobox';
 import type { MailCaseDetail, MailCaseListItem, MailClient, MailMessage } from '@/lib/types/mail';
 import {
@@ -261,6 +262,34 @@ export default function MailInboxClient({ userId, role, displayName }: MailInbox
     setCompose(text);
   };
 
+  const handleFormat = (prefix: string, suffix: string = '') => {
+    const textarea = document.getElementById('compose-textarea') as HTMLTextAreaElement;
+    if (!textarea) return;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selected = compose.substring(start, end);
+    const newText = compose.substring(0, start) + prefix + selected + suffix + compose.substring(end);
+    setCompose(newText);
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(start + prefix.length, end + prefix.length);
+    }, 0);
+  };
+
+  const handleFormatNew = (prefix: string, suffix: string = '') => {
+    const textarea = document.getElementById('new-compose-textarea') as HTMLTextAreaElement;
+    if (!textarea) return;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selected = newContent.substring(start, end);
+    const newText = newContent.substring(0, start) + prefix + selected + suffix + newContent.substring(end);
+    setNewContent(newText);
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(start + prefix.length, end + prefix.length);
+    }, 0);
+  };
+
   if (tokenError) {
     return (
       <div className="max-w-lg mx-auto mt-20 p-6 rounded-2xl bg-white dark:bg-[#27272a] border border-gray-200 dark:border-gray-800 shadow-sm">
@@ -385,14 +414,32 @@ export default function MailInboxClient({ userId, role, displayName }: MailInbox
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-gray-500">Message</label>
-                <textarea
-                  value={newContent}
-                  onChange={(event) => setNewContent(event.target.value)}
-                  rows={7}
-                  className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm dark:border-gray-700 dark:bg-[#18181b]"
-                  placeholder="Write your email..."
-                />
+                <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-gray-500">Message (Markdown Supported)</label>
+                <div className="border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-[#18181b] overflow-hidden focus-within:ring-2 focus-within:ring-gray-900 dark:focus-within:ring-white focus-within:border-gray-900 dark:focus-within:border-white transition-all">
+                  <div className="flex items-center gap-1 border-b border-gray-200 dark:border-gray-700 px-2 py-1.5 bg-gray-100/50 dark:bg-[#27272a]/50">
+                    <button type="button" onClick={() => handleFormatNew('**', '**')} className="p-1 rounded-md hover:bg-black/5 dark:hover:bg-white/5 text-gray-600 dark:text-gray-400" title="Bold">
+                      <Bold className="w-3.5 h-3.5" />
+                    </button>
+                    <button type="button" onClick={() => handleFormatNew('*', '*')} className="p-1 rounded-md hover:bg-black/5 dark:hover:bg-white/5 text-gray-600 dark:text-gray-400" title="Italic">
+                      <Italic className="w-3.5 h-3.5" />
+                    </button>
+                    <div className="w-px h-3 bg-gray-300 dark:bg-gray-600 mx-1" />
+                    <button type="button" onClick={() => handleFormatNew('- ')} className="p-1 rounded-md hover:bg-black/5 dark:hover:bg-white/5 text-gray-600 dark:text-gray-400" title="Bulleted List">
+                      <List className="w-3.5 h-3.5" />
+                    </button>
+                    <button type="button" onClick={() => handleFormatNew('[', '](url)')} className="p-1 rounded-md hover:bg-black/5 dark:hover:bg-white/5 text-gray-600 dark:text-gray-400" title="Link">
+                      <LinkIcon className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                  <textarea
+                    id="new-compose-textarea"
+                    value={newContent}
+                    onChange={(event) => setNewContent(event.target.value)}
+                    rows={7}
+                    className="w-full resize-none border-0 bg-transparent px-3 py-2.5 text-sm focus:ring-0 outline-none"
+                    placeholder="Write your email..."
+                  />
+                </div>
               </div>
               <div className="flex items-center justify-between gap-3">
                 <label className="cursor-pointer text-xs font-semibold text-gray-500">
@@ -571,7 +618,9 @@ export default function MailInboxClient({ userId, role, displayName }: MailInbox
                             </button>
                           </div>
                         </div>
-                        <p className="text-[15px] leading-relaxed whitespace-pre-wrap">{m.content}</p>
+                        <div className="text-[15px] leading-relaxed whitespace-pre-wrap prose prose-sm dark:prose-invert prose-p:my-1 prose-headings:my-2 prose-a:text-brand-primary max-w-none">
+                          <ReactMarkdown>{m.content}</ReactMarkdown>
+                        </div>
                         {m.attachments?.length > 0 && (
                           <div className="flex flex-wrap gap-2 mt-4 pt-3 border-t border-black/5 dark:border-white/5">
                             {m.attachments.map((a) => (
@@ -599,17 +648,32 @@ export default function MailInboxClient({ userId, role, displayName }: MailInbox
               {canActOnCase ? (
                 <footer className="border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-[#27272a] p-4 shrink-0 sticky bottom-0">
                   <div className="flex flex-col gap-2">
-                    <div className="relative">
+                    <div className="border border-gray-200 dark:border-gray-700 rounded-2xl bg-white dark:bg-[#18181b] overflow-hidden focus-within:ring-2 focus-within:ring-brand-primary/20 focus-within:border-brand-primary transition-all shadow-sm">
+                      <div className="flex items-center gap-1 border-b border-gray-100 dark:border-gray-800 px-3 py-2 bg-gray-50/50 dark:bg-gray-900/50">
+                        <button type="button" onClick={() => handleFormat('**', '**')} className="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 text-gray-600 dark:text-gray-400" title="Bold">
+                          <Bold className="w-4 h-4" />
+                        </button>
+                        <button type="button" onClick={() => handleFormat('*', '*')} className="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 text-gray-600 dark:text-gray-400" title="Italic">
+                          <Italic className="w-4 h-4" />
+                        </button>
+                        <div className="w-px h-4 bg-gray-200 dark:bg-gray-700 mx-1" />
+                        <button type="button" onClick={() => handleFormat('- ')} className="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 text-gray-600 dark:text-gray-400" title="Bulleted List">
+                          <List className="w-4 h-4" />
+                        </button>
+                        <button type="button" onClick={() => handleFormat('[', '](url)')} className="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 text-gray-600 dark:text-gray-400" title="Link">
+                          <LinkIcon className="w-4 h-4" />
+                        </button>
+                      </div>
                       <textarea
                         id="compose-textarea"
                         value={compose}
                         onChange={(e) => setCompose(e.target.value)}
-                        placeholder="Write a reply…"
-                        rows={4}
-                        className="w-full rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#18181b] px-4 py-3 text-[15px] leading-relaxed resize-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary transition-all shadow-sm"
+                        placeholder="Write a reply (Markdown supported)…"
+                        rows={5}
+                        className="w-full bg-transparent border-0 px-4 py-3 text-[15px] leading-relaxed resize-none focus:ring-0 outline-none"
                       />
                     </div>
-                    <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <div className="flex items-center justify-between gap-2 flex-wrap mt-1">
                       <div className="flex items-center gap-2">
                         <label className="text-xs font-semibold text-gray-500 cursor-pointer hover:text-gray-900 dark:hover:text-white transition-colors">
                           <input
