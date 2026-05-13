@@ -25,6 +25,8 @@ The token must be granted Gmail permissions for the operations this app performs
 
 In Railway, paste only env var values, not whole `.env` lines. For example, `GOOGLE_REFRESH_TOKEN` should be `1//...`, not `GOOGLE_REFRESH_TOKEN=1//...`.
 
+Background sync only ingests new Gmail messages after at least one `admin` or `employee` user exists in the mail backend database. Visiting the mail dashboard as an admin/employee creates that mirror user automatically through `/api/mail/token`.
+
 ### Tests
 
 ```bash

@@ -45,6 +45,15 @@ async def sync_gmail_once(
 
     fetched = ingested = skipped = 0
     try:
+        assignable_users = await db.users.count_documents({"role": {"$in": ["employee", "admin"]}})
+        if assignable_users == 0:
+            logger.warning("sync deferred: no admin or employee users available for assignment")
+            await db.sync_state.update_one(
+                {"_id": "gmail"},
+                {"$set": {"lock_until": None, "updated_at": datetime.utcnow()}},
+            )
+            return {"fetched": 0, "ingested": 0, "skipped": 0}
+
         hid = None
         if st:
             hid = st.get("last_history_id")
