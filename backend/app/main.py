@@ -10,7 +10,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo.errors import ConfigurationError
 
 from app.config import get_settings
-from app.routers import cases, health, messages, sync
+from app.routers import cases, health, messages, social, sync
 from app.services.gmail_service import GmailService
 from app.services.r2_service import R2Service
 from app.services.sync_service import start_background_sync
@@ -22,7 +22,14 @@ async def ensure_indexes(db) -> None:
     await db.clients.create_index("email", unique=True)
     await db.threads.create_index("gmail_thread_id", unique=True)
     await db.messages.create_index([("thread_id", 1), ("timestamp", 1)])
+    await db.clients.create_index("instagram_id", sparse=True)
+    await db.clients.create_index("facebook_id", sparse=True)
     await db.cases.create_index([("assigned_to", 1), ("status", 1)])
+    await db.social_accounts.create_index([("platform", 1), ("page_id", 1)])
+    await db.social_conversations.create_index([("platform", 1), ("conversation_id", 1)], unique=True)
+    await db.social_conversations.create_index([("assigned_to", 1), ("updated_at", -1)])
+    await db.messages.create_index([("type", 1), ("conversation_id", 1), ("timestamp", 1)])
+    await db.posts.create_index([("created_by", 1), ("created_at", -1)])
     await db.messages.create_index(
         "gmail_message_id",
         unique=True,
@@ -88,6 +95,7 @@ def create_app() -> FastAPI:
     app.include_router(cases.router)
     app.include_router(cases.clients_router)
     app.include_router(messages.router)
+    app.include_router(social.router)
     app.include_router(sync.router)
     return app
 

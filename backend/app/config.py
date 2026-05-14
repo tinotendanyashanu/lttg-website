@@ -29,6 +29,12 @@ class Settings(BaseSettings):
     cors_origins: str = "http://localhost:3000"
     sync_interval_seconds: int = 45
 
+    meta_app_id: str | None = None
+    meta_app_secret: str | None = None
+    meta_redirect_uri: str | None = None
+    meta_webhook_verify_token: str | None = None
+    meta_graph_version: str = "v20.0"
+
     @property
     def cors_origin_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]

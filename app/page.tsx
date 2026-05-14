@@ -8,6 +8,8 @@ import StrategySessionModal from '@/components/StrategySessionModal';
 import { ArrowRight, Code2, BrainCircuit, ShieldCheck, Lightbulb, Volume2, VolumeX, Terminal, Layout, Database } from 'lucide-react';
 import Link from 'next/link';
 
+import { services, getServiceIcon } from '@/data/services';
+
 const HERO_VIDEOS = [
   '/videos/hero-video1.mp4',
   '/videos/hero-video2.mp4',
@@ -168,47 +170,40 @@ export default function Home() {
             I bridge the gap between <span className="text-[#10B981] font-medium">business strategy</span> and <span className="text-blue-600 font-medium">technical execution</span>. Adaptable, disciplined, and focused on building <span className="text-amber-500 font-medium">systems that last</span>. No buzzwords, just results.
           </p>
         </div>
-      </section>
-
       {/* Services Preview */}
       <section className="relative z-10 py-24 px-6 lg:px-8 max-w-7xl mx-auto" suppressHydrationWarning>
         <h2 className="sr-only">Services</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {[
-            {
-              title: "SME Systems",
-              desc: "Automate workflows, deploy CRM engines, and cut operational costs with intelligent systems.",
-              icon: <BrainCircuit className="w-8 h-8 text-[#10B981]" />,
-              link: "/services/sme"
-            },
-            {
-              title: "Startup Scaling",
-              desc: "MVP development, product integration, and cloud architecture for high-growth founders.",
-              icon: <Code2 className="w-8 h-8 text-blue-600" />,
-              link: "/services/startups"
-            },
-            {
-              title: "Enterprise AI",
-              desc: "Digital transformation, secure RAG deployment, and department-wide automation.",
-              icon: <ShieldCheck className="w-8 h-8 text-emerald-500" />,
-              link: "/services/enterprise"
-            },
-            {
-              title: "Strategy & Advisory",
-              desc: "For leaders who need clarity before building. Direction, architecture review, and technology strategy.",
-              icon: <Lightbulb className="w-8 h-8 text-amber-500" />,
-              link: "/book"
-            }
-          ].map((service, i) => (
-            <div key={i} className="p-6 rounded-2xl bg-white border border-slate-100 hover:border-slate-200 hover:shadow-lg transition-all duration-300 group">
-              <div className="mb-4 p-3 bg-slate-50 rounded-xl w-max group-hover:bg-blue-50 transition-colors">{service.icon}</div>
-              <h3 className="text-xl font-bold text-slate-900 mb-3">{service.title}</h3>
-              <p className="text-slate-600 leading-relaxed mb-4">{service.desc}</p>
-              <Link href={service.link} className="text-sm font-medium text-blue-600 hover:text-blue-700 inline-flex items-center">
-                Learn more <ArrowRight className="ml-1 w-3 h-3" />
-              </Link>
-            </div>
-          ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8">
+          {services.map((service, i) => {
+            const Icon = getServiceIcon(service.icon);
+            const isComingSoon = service.completion && service.completion < 100;
+            
+            return (
+              <div key={i} className="p-6 rounded-2xl bg-white border border-slate-100 hover:border-slate-200 hover:shadow-lg transition-all duration-300 group relative overflow-hidden">
+                {isComingSoon && (
+                  <div className="absolute top-0 right-0">
+                    <div className="bg-amber-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl uppercase tracking-wider">
+                      Coming Soon
+                    </div>
+                  </div>
+                )}
+                <div className="mb-4 p-3 bg-slate-50 rounded-xl w-max group-hover:bg-blue-50 transition-colors">
+                  <Icon className={`w-8 h-8 ${service.color.includes('[#') ? service.color : 'text-blue-600'}`} />
+                </div>
+                <h3 className="text-xl font-bold text-slate-900 mb-3">{service.title}</h3>
+                <p className="text-slate-600 leading-relaxed mb-4 text-sm">{service.description}</p>
+                {isComingSoon ? (
+                   <span className="text-sm font-medium text-slate-400 cursor-not-allowed inline-flex items-center">
+                    Beta Access Soon <ArrowRight className="ml-1 w-3 h-3" />
+                  </span>
+                ) : (
+                  <Link href={`/services/${service.id}`} className="text-sm font-medium text-blue-600 hover:text-blue-700 inline-flex items-center">
+                    Learn more <ArrowRight className="ml-1 w-3 h-3" />
+                  </Link>
+                )}
+              </div>
+            );
+          })}
         </div>
       </section>
 

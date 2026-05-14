@@ -126,7 +126,32 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      {/* Slide 5: How I Work - New Section */}
+      {/* Slide 5: Social Media */}
+      <section className="relative h-screen w-full snap-start overflow-hidden flex items-center justify-center">
+        <div className="absolute inset-0 z-0 opacity-60">
+           <Prism animationType="rotate" hueShift={0.9} hoverStrength={1} scale={4.5} suspendWhenOffscreen={true} />
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/80 z-0 pointer-events-none" />
+
+        <div className="relative z-10 text-center px-6 max-w-4xl mx-auto flex flex-col items-center">
+          <div className="bg-amber-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-6 animate-pulse">
+            Coming Soon
+          </div>
+          <h2 className="text-5xl md:text-7xl font-bold text-white tracking-tight mb-6 drop-shadow-2xl">
+            Social Media Systems
+          </h2>
+          <p className="text-xl md:text-2xl text-slate-200 mb-10 font-light tracking-wide max-w-2xl drop-shadow-md">
+             Automated engagement, intelligent posting, and cross-platform growth.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+            <span className="px-10 py-3.5 bg-white/10 text-white/50 border border-white/20 rounded-full font-medium sm:min-w-[200px] flex items-center justify-center cursor-not-allowed">
+              Coming Soon <ArrowRight className="ml-2 w-4 h-4 opacity-30" />
+            </span>
+          </div>
+        </div>
+      </section>
+
+      {/* Slide 6: How I Work - New Section */}
       <section className="relative h-screen w-full snap-start overflow-hidden flex items-center justify-center">
         <div className="absolute inset-0 z-0 opacity-60">
            <Prism animationType="hover" hueShift={0.2} hoverStrength={1} scale={4} suspendWhenOffscreen={true} />

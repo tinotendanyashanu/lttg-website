@@ -1,4 +1,4 @@
-import { BrainCircuit, Code2, ShieldCheck, Lightbulb } from 'lucide-react';
+import { BrainCircuit, Code2, ShieldCheck, Lightbulb, MessagesSquare } from 'lucide-react';
 
 export interface Service {
   id: string;
@@ -19,6 +19,7 @@ export interface Service {
   lightBg: string;
   accentColor: string;  // New: Hex color for accents
   gradient: string;     // New: Tailwind gradient classes
+  completion?: number;   // New: 0-100 completion percentage
   benefits: {
     title: string;
     description: string;
@@ -64,6 +65,7 @@ export const services: Service[] = [
     lightBg: "bg-emerald-50",
     accentColor: "#10B981",
     gradient: "from-emerald-500/20 via-transparent to-transparent",
+    completion: 100,
     benefits: [
       {
         title: "Reduce Manual Work",
@@ -148,6 +150,7 @@ export const services: Service[] = [
     lightBg: "bg-blue-50",
     accentColor: "#4C8BFF",
     gradient: "from-blue-500/20 via-transparent to-transparent",
+    completion: 100,
     benefits: [
       {
         title: "Fast & Responsive",
@@ -232,6 +235,7 @@ export const services: Service[] = [
     lightBg: "bg-emerald-50",
     accentColor: "#10B981",
     gradient: "from-emerald-500/20 via-transparent to-transparent",
+    completion: 100,
     benefits: [
       {
         title: "Identify Vulnerabilities",
@@ -289,6 +293,91 @@ export const services: Service[] = [
     ]
   },
   {
+    id: "social-media",
+    title: "Social Media Management",
+    subtitle: "Grow Your Digital Presence",
+    headline: "Engage Your Audience.",
+    subheadline: "Build Your Brand.",
+    description: "I help brands grow their presence across social platforms through automated posting, intelligent engagement, and data-driven strategy.",
+    longDescription: "Managing multiple social media channels can be overwhelming. I build systems that automate the heavy lifting—scheduling posts, monitoring mentions, and analyzing performance—while ensuring your brand voice remains authentic and engaging. From custom content calendars to AI-powered sentiment analysis, I provide the tools and strategy you need to turn social media from a chore into a growth engine.",
+    offerings: [
+      "Automated Content Scheduling",
+      "Multi-Platform Management",
+      "AI-Generated Post Content",
+      "Engagement & Community Monitoring",
+      "Social Analytics Dashboards",
+      "Campaign Performance Tracking",
+      "Influencer Outreach Automation",
+      "Brand Sentiment Analysis"
+    ],
+    outcome: "A consistent, high-impact social presence that drives results.",
+    cta: "Grow Your Socials",
+    icon: "MessagesSquare",
+    image: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=2874&auto=format&fit=crop",
+    color: "text-pink-500",
+    bg: "bg-pink-500/10",
+    border: "border-pink-500/20",
+    lightBg: "bg-pink-50",
+    accentColor: "#EC4899",
+    gradient: "from-pink-500/20 via-transparent to-transparent",
+    completion: 80,
+    benefits: [
+      {
+        title: "Save Time on Posting",
+        description: "Automate your content calendar so you can focus on strategy instead of scheduling."
+      },
+      {
+        title: "Consistent Brand Voice",
+        description: "Maintain a steady presence across all platforms without burnout."
+      },
+      {
+        title: "Data-Driven Growth",
+        description: "Use real analytics to understand what works and double down on high-performing content."
+      },
+      {
+        title: "Instant Engagement",
+        description: "Respond to mentions and messages faster with intelligent automation."
+      }
+    ],
+    process: [
+      {
+        step: "01",
+        title: "Social Audit",
+        description: "Analyzing your current social presence, audience demographics, and competitor landscape."
+      },
+      {
+        step: "02",
+        title: "Strategy Development",
+        description: "Creating a custom content plan and selecting the right automation tools for your brand."
+      },
+      {
+        step: "03",
+        title: "System Integration",
+        description: "Setting up your automated dashboard and connecting your social accounts securely."
+      },
+      {
+        step: "04",
+        title: "Ongoing Optimization",
+        description: "Continuous monitoring and adjustment based on performance data and platform trends."
+      }
+    ],
+    technologies: ["Meta API", "Twitter/X API", "LinkedIn API", "OpenAI", "Claude", "Buffer", "Hootsuite", "Custom Dashboards"],
+    faqs: [
+      {
+        question: "Is automation safe for my brand?",
+        answer: "Yes, when done correctly. We use official APIs and focus on automating the 'work' while keeping the 'voice' human and authentic."
+      },
+      {
+        question: "Which platforms do you support?",
+        answer: "I support all major platforms including LinkedIn, Twitter/X, Instagram, and Facebook."
+      },
+      {
+        question: "Do you provide content creation?",
+        answer: "I provide AI-assisted content generation and strategic templates, but I recommend having a human review for the final brand polish."
+      }
+    ]
+  },
+  {
     id: "mentorship",
     title: "Tech Mentorship & Strategy",
     subtitle: "Helping You Build Something Real",
@@ -316,6 +405,7 @@ export const services: Service[] = [
     lightBg: "bg-amber-50",
     accentColor: "#F59E0B",
     gradient: "from-amber-500/20 via-transparent to-transparent",
+    completion: 100,
     benefits: [
       {
         title: "Avoid Costly Mistakes",
@@ -383,7 +473,9 @@ export function getServiceIcon(iconName: string) {
     BrainCircuit,
     Code2,
     ShieldCheck,
-    Lightbulb
+    Lightbulb,
+    MessagesSquare
   };
   return icons[iconName] || BrainCircuit;
 }
+

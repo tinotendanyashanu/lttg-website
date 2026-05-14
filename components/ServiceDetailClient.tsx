@@ -89,6 +89,11 @@ export default function ServiceDetailClient({ service }: { service: Service }) {
               >
                 <IconComponent className="w-5 h-5" />
                 <span>{service.title}</span>
+                {service.completion && service.completion < 100 && (
+                  <span className="ml-2 bg-amber-500 text-white text-[10px] px-2 py-0.5 rounded font-bold uppercase animate-pulse">
+                    Coming Soon
+                  </span>
+                )}
               </div>
             </motion.div>
 
