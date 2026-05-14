@@ -170,6 +170,7 @@ export default function Home() {
             I bridge the gap between <span className="text-[#10B981] font-medium">business strategy</span> and <span className="text-blue-600 font-medium">technical execution</span>. Adaptable, disciplined, and focused on building <span className="text-amber-500 font-medium">systems that last</span>. No buzzwords, just results.
           </p>
         </div>
+      </section>
       {/* Services Preview */}
       <section className="relative z-10 py-24 px-6 lg:px-8 max-w-7xl mx-auto" suppressHydrationWarning>
         <h2 className="sr-only">Services</h2>
