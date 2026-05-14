@@ -28,10 +28,11 @@ const Footer = () => {
             <p className="text-sm text-slate-500 leading-relaxed max-w-xs">
               I create intelligent, scalable tools for innovators and teams ready to grow. Bridging the gap between imagination and engineering.
             </p>
-            <div className="pt-2 flex gap-4 text-xs text-slate-400">
-              <span>© 2025 LeoTheTechGuy.</span>
-              <Link href="/privacy-policy" className="hover:text-slate-600 transition-colors">Privacy</Link>
+            <div className="pt-2 flex flex-wrap gap-4 text-xs text-slate-400">
+              <span>© 2026 LeoTheTechGuy.</span>
+              <Link href="/privacy" className="hover:text-slate-600 transition-colors">Privacy</Link>
               <Link href="/terms" className="hover:text-slate-600 transition-colors">Terms</Link>
+              <Link href="/data-deletion" className="hover:text-slate-600 transition-colors">Data Rights</Link>
             </div>
           </div>
 

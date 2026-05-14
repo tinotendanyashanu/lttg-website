@@ -13,7 +13,7 @@ export default function TermsOfService() {
 
       <div className="pt-32 pb-24 px-6 lg:px-8 max-w-4xl mx-auto">
         <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6">Terms of Service</h1>
-        <p className="text-slate-500 mb-12">Last Updated: February 19, 2026</p>
+        <p className="text-slate-500 mb-12">Last Updated: May 14, 2026</p>
 
         <div className="prose prose-slate prose-lg max-w-none space-y-12">
 
