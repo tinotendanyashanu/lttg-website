@@ -169,8 +169,17 @@ export default function SocialInboxClient({ userId, role }: SocialInboxClientPro
       setPostSchedule('');
       await refreshPosts();
       setBanner(postStatus === 'published' ? 'Post published.' : 'Post saved.');
-    } catch {
-      setBanner('Post failed. Instagram publishing requires at least one public image URL or uploaded image.');
+    } catch (err: any) {
+      const msg = err.message || '';
+      if (msg.includes('social_account_not_connected')) {
+        setBanner('Post failed. Meta account for this platform is not connected.');
+      } else if (msg.includes('instagram_media_required')) {
+        setBanner('Post failed. Instagram posts require at least one image or video.');
+      } else if (msg.includes('400')) {
+        setBanner('Post failed. Please check your content and scheduled time.');
+      } else {
+        setBanner('Post failed. Confirm Meta permissions and platform requirements.');
+      }
     } finally {
       setPosting(false);
     }

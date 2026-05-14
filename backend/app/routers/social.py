@@ -295,12 +295,12 @@ async def create_social_post(
     user: Annotated[UserDoc, Depends(get_current_user)],
     db: Annotated[object, Depends(get_db)],
     r2: Annotated[object, Depends(get_r2)],
-    platform: Literal["facebook", "instagram"] = Form(...),
-    content: str = Form(..., min_length=1, max_length=63_000),
-    status: Literal["draft", "scheduled", "published"] = Form("draft"),
-    scheduled_time: str | None = Form(None),
-    media_urls: list[str] | None = Form(None),
-    files: list[UploadFile] | None = File(None),
+    platform: Annotated[Literal["facebook", "instagram"], Form()],
+    content: Annotated[str, Form(min_length=1, max_length=63_000)],
+    status: Annotated[Literal["draft", "scheduled", "published"], Form()] = "draft",
+    scheduled_time: Annotated[str | None, Form()] = None,
+    media_urls: Annotated[list[str] | None, Form()] = None,
+    files: Annotated[list[UploadFile] | None, File()] = None,
 ):
     from motor.motor_asyncio import AsyncIOMotorDatabase
 
@@ -317,7 +317,17 @@ async def create_social_post(
             raise HTTPException(status_code=502, detail="storage_upload_failed") from e
         urls.append(up["url"])
 
-    parsed_schedule = datetime.fromisoformat(scheduled_time) if scheduled_time else None
+    parsed_schedule = None
+    if scheduled_time:
+        try:
+            parsed_schedule = datetime.fromisoformat(scheduled_time)
+        except ValueError:
+             # Try common datetime-local format if fromisoformat fails
+             try:
+                 parsed_schedule = datetime.strptime(scheduled_time, "%Y-%m-%dT%H:%M")
+             except ValueError:
+                 raise HTTPException(status_code=400, detail="invalid_scheduled_time_format")
+
     now = datetime.utcnow()
     doc = {
         "_id": ObjectId(),
