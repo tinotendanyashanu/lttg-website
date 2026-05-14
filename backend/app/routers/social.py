@@ -295,19 +295,27 @@ async def create_social_post(
     user: Annotated[UserDoc, Depends(get_current_user)],
     db: Annotated[object, Depends(get_db)],
     r2: Annotated[object, Depends(get_r2)],
-    platform: Annotated[Literal["facebook", "instagram"], Form()],
-    content: Annotated[str, Form(min_length=1, max_length=63_000)],
-    status: Annotated[Literal["draft", "scheduled", "published"], Form()] = "draft",
+    platform: Annotated[str, Form()],
+    content: Annotated[str, Form()],
+    status: Annotated[str, Form()] = "draft",
     scheduled_time: Annotated[str | None, Form()] = None,
-    media_urls: Annotated[list[str] | None, Form()] = None,
-    files: Annotated[list[UploadFile] | None, File()] = None,
+    media_urls: Annotated[list[str], Form()] = [],
+    files: Annotated[list[UploadFile], File()] = [],
 ):
     from motor.motor_asyncio import AsyncIOMotorDatabase
 
     require_staff(user)
+    
+    if platform not in ("facebook", "instagram"):
+        raise HTTPException(status_code=400, detail=f"invalid_platform:{platform}")
+    if not content or len(content) > 63000:
+        raise HTTPException(status_code=400, detail=f"invalid_content_length:{len(content) if content else 0}")
+    if status not in ("draft", "scheduled", "published"):
+        raise HTTPException(status_code=400, detail=f"invalid_status:{status}")
+
     dba: AsyncIOMotorDatabase = db  # type: ignore[assignment]
-    urls = list(media_urls or [])
-    for uf in files or []:
+    urls = list(media_urls)
+    for uf in files:
         if not uf.filename:
             continue
         data = await uf.read()
@@ -318,11 +326,10 @@ async def create_social_post(
         urls.append(up["url"])
 
     parsed_schedule = None
-    if scheduled_time:
+    if scheduled_time and scheduled_time.strip():
         try:
             parsed_schedule = datetime.fromisoformat(scheduled_time)
         except ValueError:
-             # Try common datetime-local format if fromisoformat fails
              try:
                  parsed_schedule = datetime.strptime(scheduled_time, "%Y-%m-%dT%H:%M")
              except ValueError:
@@ -347,6 +354,7 @@ async def create_social_post(
             raise HTTPException(status_code=400, detail="social_account_not_connected")
         if platform == "instagram" and not urls:
             raise HTTPException(status_code=400, detail="instagram_media_required")
+        
         service = MetaService(request.app.state.settings)
         try:
             published = await service.publish_post(platform=platform, account=account, content=content, media_urls=urls)

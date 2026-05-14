@@ -175,8 +175,10 @@ export default function SocialInboxClient({ userId, role }: SocialInboxClientPro
         setBanner('Post failed. Meta account for this platform is not connected.');
       } else if (msg.includes('instagram_media_required')) {
         setBanner('Post failed. Instagram posts require at least one image or video.');
-      } else if (msg.includes('400')) {
-        setBanner('Post failed. Please check your content and scheduled time.');
+      } else if (msg.includes('social_post_400')) {
+        // Show the detailed error from backend if available
+        const detail = msg.split(': ')[1] || 'Check content and schedule.';
+        setBanner(`Post failed: ${detail}`);
       } else {
         setBanner('Post failed. Confirm Meta permissions and platform requirements.');
       }

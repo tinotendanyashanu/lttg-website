@@ -75,8 +75,20 @@ export async function createSocialPost(
   if (payload.scheduledTime) fd.set('scheduled_time', payload.scheduledTime);
   for (const url of payload.mediaUrls ?? []) fd.append('media_urls', url);
   for (const f of payload.files ?? []) fd.append('files', f);
+  
   const res = await authFetch('/social/post', token, { method: 'POST', body: fd });
-  if (!res.ok) throw new Error(`social_post_${res.status}`);
+  
+  if (!res.ok) {
+    let detail = '';
+    try {
+      const errData = await res.json();
+      detail = errData.detail || JSON.stringify(errData);
+    } catch {
+      detail = res.statusText;
+    }
+    throw new Error(`social_post_${res.status}: ${detail}`);
+  }
+  
   return res.json();
 }
 
