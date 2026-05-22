@@ -305,6 +305,23 @@ export default function PortalShell({
               </Link>
             )}
 
+            {(isAdmin || roles.includes('employee')) && (
+              <Link
+                href="/portal/employee/chat"
+                className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
+                  pathname.startsWith("/portal/employee/chat")
+                    ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
+                    : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
+                }`}
+                title={isCollapsed ? "Chat Inbox" : undefined}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="material-icons-outlined text-[20px] group-hover:scale-110 transition-transform">chat_bubble</span>
+                  {!isCollapsed && <span className="hidden lg:block text-sm">Chat Inbox</span>}
+                </div>
+              </Link>
+            )}
+
             <Link
               href="/portal/employee/announcements"
               className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-center lg:justify-start'} gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${

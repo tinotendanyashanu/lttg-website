@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { X, ArrowRight, Loader2, CheckCircle, MessageCircle, Mail } from 'lucide-react';
+import Link from 'next/link';
 
 interface Props {
   isOpen: boolean;
@@ -75,33 +76,48 @@ export default function StrategySessionModal({ isOpen, onClose }: Props) {
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-5">
               <CheckCircle className="w-8 h-8 text-green-600" />
             </div>
-            <h2 className="text-2xl font-bold text-slate-900 mb-2">Details Received!</h2>
+            <h2 className="text-2xl font-bold text-slate-900 mb-2">Step 1 Complete!</h2>
             <p className="text-slate-500 mb-8">
-              Your request has been saved. Continue the conversation below.
+              I&apos;ve received your details. To make the most of our time, please **choose a specific slot** on my calendar now.
             </p>
             <div className="flex flex-col gap-3">
-              <a
-                href={whatsappUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-3 w-full px-6 py-4 bg-[#25D366] text-white font-semibold rounded-2xl hover:bg-[#1ebe5d] transition-colors"
+              <Link
+                href="/book"
+                onClick={onClose}
+                className="inline-flex items-center justify-center gap-3 w-full px-6 py-4 bg-[#0071e3] text-white font-semibold rounded-2xl hover:bg-[#0077ED] transition-colors"
               >
-                <MessageCircle className="w-5 h-5" />
-                Continue on WhatsApp
-              </a>
-              <a
-                href={emailUrl}
-                className="inline-flex items-center justify-center gap-3 w-full px-6 py-4 bg-slate-100 text-slate-900 font-semibold rounded-2xl hover:bg-slate-200 transition-colors"
-              >
-                <Mail className="w-5 h-5" />
-                Send Email Instead
-              </a>
+                Schedule Your Slot Now
+                <ArrowRight className="w-5 h-5" />
+              </Link>
+              <div className="flex items-center gap-2 py-2">
+                <div className="h-px bg-slate-100 flex-grow"></div>
+                <span className="text-[10px] text-slate-400 uppercase font-bold tracking-widest">Or connect via</span>
+                <div className="h-px bg-slate-100 flex-grow"></div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <a
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 px-4 py-3 bg-[#25D366]/10 text-[#25D366] text-sm font-semibold rounded-xl hover:bg-[#25D366]/20 transition-colors"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  WhatsApp
+                </a>
+                <a
+                  href={emailUrl}
+                  className="inline-flex items-center justify-center gap-2 px-4 py-3 bg-slate-100 text-slate-900 text-sm font-semibold rounded-xl hover:bg-slate-200 transition-colors"
+                >
+                  <Mail className="w-4 h-4" />
+                  Email
+                </a>
+              </div>
             </div>
           </div>
         ) : (
           <>
             <h2 className="text-2xl font-bold text-slate-900 mb-1">Book a Strategy Session</h2>
-            <p className="text-slate-500 mb-7 text-sm">Leave your details and what you need — I&apos;ll reach out to schedule a call.</p>
+            <p className="text-slate-500 mb-7 text-sm">Align your technology with your revenue goals. I&apos;ll help you map out the execution.</p>
 
             {error && (
               <div className="mb-5 p-4 bg-red-50 text-red-700 rounded-xl text-sm border border-red-100">

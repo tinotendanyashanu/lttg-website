@@ -9,6 +9,8 @@ import { ArrowRight, Code2, BrainCircuit, ShieldCheck, Lightbulb, Volume2, Volum
 import Link from 'next/link';
 
 import { services, getServiceIcon } from '@/data/services';
+import Testimonials from '@/components/Testimonials';
+import ChatWidget from '@/components/ChatWidget';
 
 const HERO_VIDEOS = [
   '/videos/hero-video1.mp4',
@@ -22,8 +24,29 @@ export default function Home() {
   const [isMuted, setIsMuted] = useState(true);
   const [loadedVideos, setLoadedVideos] = useState<Set<number>>(new Set());
   const [isHeroReady, setIsHeroReady] = useState(false);
+  const [auditEmail, setAuditEmail] = useState('');
+  const [auditLoading, setAuditLoading] = useState(false);
+  const [auditSuccess, setAuditSuccess] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+
+  const handleAuditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!auditEmail) return;
+    setAuditLoading(true);
+    try {
+      const res = await fetch('/api/audit-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: auditEmail }),
+      });
+      if (res.ok) setAuditSuccess(true);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setAuditLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (audioRef.current) {
@@ -129,8 +152,11 @@ export default function Home() {
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-semibold tracking-tight text-white mb-6 leading-[1.05]">
               AI & Digital <span className="text-[#10B981]">Infrastructure Architect.</span>
             </h1>
-            <p className="text-xl lg:text-2xl text-slate-100 leading-relaxed mb-10 font-normal max-w-2xl">
+            <p className="text-xl lg:text-2xl text-slate-100 leading-relaxed mb-6 font-normal max-w-2xl">
               I help businesses build scalable systems that run themselves. From AI automation to enterprise cloud infrastructure, I design the technology that powers your growth.
+            </p>
+            <p className="text-lg text-emerald-400 font-medium mb-10 max-w-2xl">
+              The technical partner for Founders and SMEs who have outgrown their current tech stack.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 mb-12">
@@ -153,12 +179,26 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <p className="text-center text-sm font-semibold text-slate-500 mb-8 uppercase tracking-wider">Infrastructure & Systems Deployed For</p>
           <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
-             {/* Placeholders for logos */}
-             <div className="text-xl font-bold text-slate-400">PreciAgro</div>
-             <div className="text-xl font-bold text-slate-400">UpperhandZim</div>
-             <div className="text-xl font-bold text-slate-400">ZimPrep</div>
-             <div className="text-xl font-bold text-slate-400">zimcelebsofficial.com</div>
-             <div className="text-xl font-bold text-slate-400">DigitalGeeks</div>
+             <div className="flex flex-col items-center">
+                <span className="text-xl font-bold text-slate-400">PreciAgro</span>
+                <span className="text-[10px] text-slate-500 font-medium uppercase tracking-tighter mt-1">10k+ Farmers Scaled</span>
+             </div>
+             <div className="flex flex-col items-center">
+                <span className="text-xl font-bold text-slate-400">UpperhandZim</span>
+                <span className="text-[10px] text-slate-500 font-medium uppercase tracking-tighter mt-1">Marketplace Automation</span>
+             </div>
+             <div className="flex flex-col items-center">
+                <span className="text-xl font-bold text-slate-400">ZimPrep</span>
+                <span className="text-[10px] text-slate-500 font-medium uppercase tracking-tighter mt-1">AI Exam Readiness</span>
+             </div>
+             <div className="flex flex-col items-center">
+                <span className="text-xl font-bold text-slate-400">ZimCelebs</span>
+                <span className="text-[10px] text-slate-500 font-medium uppercase tracking-tighter mt-1">500k+ Monthly Reads</span>
+             </div>
+             <div className="flex flex-col items-center">
+                <span className="text-xl font-bold text-slate-400">DigitalGeeks</span>
+                <span className="text-[10px] text-slate-500 font-medium uppercase tracking-tighter mt-1">Enterprise Cloud</span>
+             </div>
           </div>
         </div>
       </section>
@@ -173,35 +213,77 @@ export default function Home() {
       </section>
       {/* Services Preview */}
       <section className="relative z-10 py-24 px-6 lg:px-8 max-w-7xl mx-auto" suppressHydrationWarning>
-        <h2 className="sr-only">Services</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+          <div className="max-w-2xl">
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4">Core Expertise</h2>
+            <p className="text-lg text-slate-500 dark:text-gray-400">Specialized engineering services to take your business from manual to autonomous.</p>
+          </div>
+          <Link href="/services" className="text-sm font-bold text-blue-600 hover:text-blue-700 flex items-center gap-2 group">
+            View All Services 
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
           {services.map((service, i) => {
             const Icon = getServiceIcon(service.icon);
             const isComingSoon = service.completion && service.completion < 100;
             
             return (
-              <div key={i} className="p-6 rounded-2xl bg-white border border-slate-100 hover:border-slate-200 hover:shadow-lg transition-all duration-300 group relative overflow-hidden">
+              <div 
+                key={i} 
+                className="group relative flex flex-col p-8 rounded-[2.5rem] bg-white dark:bg-[#18181b] border border-slate-100 dark:border-slate-800 hover:border-blue-500/20 transition-all duration-500 hover:shadow-[0_20px_50px_rgba(0,0,0,0.05)] dark:hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden h-full"
+              >
+                {/* Glossy Shimmer Effect */}
+                <div className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none" />
+                
+                {/* Background decorative element */}
+                <div className="absolute -right-12 -top-12 w-32 h-32 bg-gradient-to-br from-blue-500/5 to-transparent rounded-full blur-3xl group-hover:scale-150 transition-transform duration-1000" />
+                
                 {isComingSoon && (
-                  <div className="absolute top-0 right-0">
-                    <div className="bg-amber-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl uppercase tracking-wider">
-                      Coming Soon
-                    </div>
+                  <div className="absolute top-6 right-6 z-20">
+                    <span className="flex h-2 w-2 relative">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                    </span>
                   </div>
                 )}
-                <div className="mb-4 p-3 bg-slate-50 rounded-xl w-max group-hover:bg-blue-50 transition-colors">
+
+                <div className={`mb-8 p-4 rounded-2xl w-max transition-all duration-500 group-hover:scale-110 group-hover:shadow-lg ${service.bg || 'bg-slate-50'} dark:bg-slate-800/50`}>
                   <Icon className={`w-8 h-8 ${service.color.includes('[#') ? service.color : 'text-blue-600'}`} />
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-3">{service.title}</h3>
-                <p className="text-slate-600 leading-relaxed mb-4 text-sm">{service.description}</p>
-                {isComingSoon ? (
-                   <span className="text-sm font-medium text-slate-400 cursor-not-allowed inline-flex items-center">
-                    Beta Access Soon <ArrowRight className="ml-1 w-3 h-3" />
-                  </span>
-                ) : (
-                  <Link href={`/services/${service.id}`} className="text-sm font-medium text-blue-600 hover:text-blue-700 inline-flex items-center">
-                    Learn more <ArrowRight className="ml-1 w-3 h-3" />
-                  </Link>
-                )}
+
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-4">
+                    <h3 className="text-xl font-bold text-slate-900 dark:text-white group-hover:text-blue-600 transition-colors leading-tight">
+                      {service.title}
+                    </h3>
+                  </div>
+                  <p className="text-slate-500 dark:text-gray-400 leading-relaxed text-sm mb-8 line-clamp-4">
+                    {service.description}
+                  </p>
+                </div>
+
+                <div className="mt-auto">
+                  {isComingSoon ? (
+                    <div className="inline-flex items-center px-4 py-2 rounded-full bg-slate-50 dark:bg-slate-800/50 text-[10px] font-bold text-slate-400 uppercase tracking-widest border border-slate-100 dark:border-slate-700">
+                      Beta Access Soon
+                    </div>
+                  ) : (
+                    <Link 
+                      href={`/services/${service.id}`} 
+                      className="inline-flex items-center gap-3 text-sm font-bold text-slate-900 dark:text-white group/btn"
+                    >
+                      <span className="relative overflow-hidden h-5">
+                        <span className="block group-hover/btn:-translate-y-full transition-transform duration-300">Learn more</span>
+                        <span className="absolute top-0 left-0 block translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300 text-blue-600">Explore</span>
+                      </span>
+                      <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center group-hover/btn:bg-blue-600 group-hover/btn:text-white group-hover/btn:scale-110 transition-all duration-300">
+                        <ArrowRight className="w-4 h-4" />
+                      </div>
+                    </Link>
+                  )}
+                </div>
               </div>
             );
           })}
@@ -257,7 +339,7 @@ export default function Home() {
                     { name: "High-Performance Web", icon: <Terminal className="w-6 h-6 text-slate-900" /> },
                     { name: "Structured Codebase", icon: <Code2 className="w-6 h-6 text-blue-600" /> },
                     { name: "Precision Design", icon: <Layout className="w-6 h-6 text-cyan-500" /> },
-                    { name: "Scalable Data Layer", icon: <Database className="w-6 h-6 text-emerald-500" /> }
+                    { name: "Systems that don't break", icon: <Database className="w-6 h-6 text-emerald-500" /> }
                 ].map((tech, i) => (
                     <div key={i} className="flex flex-col items-center justify-center p-8 bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 group">
                         <div className="mb-4 p-4 bg-slate-50 rounded-full group-hover:scale-110 transition-transform duration-300">
@@ -364,6 +446,8 @@ export default function Home() {
         </div>
       </section>
 
+      <Testimonials />
+
       {/* Philosophy Section */}
       <section className="py-32 bg-white">
         <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
@@ -411,12 +495,33 @@ export default function Home() {
                          A rigorous 10-point architectural audit to determine if your infrastructure is ready for enterprise AI integration.
                      </p>
                      
-                     <div className="bg-white p-2 rounded-full shadow-sm max-w-md flex pl-6 border border-slate-200 focus-within:ring-2 ring-slate-900/10 transition-all">
-                        <input type="email" placeholder="email@company.com" className="bg-transparent flex-grow outline-none text-slate-900 placeholder:text-slate-400" />
-                        <button className="bg-slate-900 text-white px-6 py-3 rounded-full font-medium hover:bg-slate-800 transition-colors">
-                            Download
-                        </button>
-                     </div>
+                     {auditSuccess ? (
+                        <div className="bg-white p-8 rounded-3xl border border-emerald-100 shadow-sm animate-in fade-in duration-500">
+                            <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mb-4 text-emerald-600">
+                                <ShieldCheck className="w-6 h-6" />
+                            </div>
+                            <h3 className="text-xl font-bold text-slate-900 mb-2">Protocol Requested!</h3>
+                            <p className="text-slate-500">I&apos;ve sent a confirmation to your email. You&apos;ll receive the full audit within 24 hours.</p>
+                        </div>
+                     ) : (
+                        <form onSubmit={handleAuditSubmit} className="bg-white p-2 rounded-full shadow-sm max-w-md flex pl-6 border border-slate-200 focus-within:ring-2 ring-slate-900/10 transition-all">
+                            <input 
+                                type="email" 
+                                required
+                                value={auditEmail}
+                                onChange={(e) => setAuditEmail(e.target.value)}
+                                placeholder="email@company.com" 
+                                className="bg-transparent flex-grow outline-none text-slate-900 placeholder:text-slate-400" 
+                            />
+                            <button 
+                                type="submit"
+                                disabled={auditLoading}
+                                className="bg-slate-900 text-white px-6 py-3 rounded-full font-medium hover:bg-slate-800 transition-colors disabled:opacity-70"
+                            >
+                                {auditLoading ? 'Requesting...' : 'Download'}
+                            </button>
+                        </form>
+                     )}
                      <p className="text-xs text-slate-400 mt-4 ml-6">Free for founders. No spam.</p>
                  </div>
                  <div className="flex justify-center items-center">
@@ -520,6 +625,7 @@ export default function Home() {
       <Footer />
 
       <StrategySessionModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <ChatWidget />
     </main>
   );
 }

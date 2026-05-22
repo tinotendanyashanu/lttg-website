@@ -32,6 +32,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { name: 'Invoices',  href: '/admin/invoices',  icon: 'receipt_long' },
       { name: 'Tickets',   href: '/admin/tickets',   icon: 'support_agent' },
       { name: 'Messages',  href: '/admin/messages',  icon: 'chat' },
+      { name: 'Chat Inbox', href: '/admin/chat',     icon: 'chat_bubble' },
     ],
   },
   {
@@ -60,6 +61,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { name: 'Academy',        href: '/admin/academy',       icon: 'school' },
       { name: 'Resources',      href: '/portal/employee/resources', icon: 'folder_zip' },
       { name: 'Announcements',  href: '/admin/announcements', icon: 'campaign' },
+      { name: 'Testimonials',   href: '/admin/testimonials',  icon: 'reviews' },
       { name: 'Contacts',       href: '/admin/contacts',      icon: 'message' },
     ],
   },

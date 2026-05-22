@@ -30,6 +30,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: '/portal/client/knowledgebase', icon: 'menu_book', label: 'Knowledge Base' },
   { href: '/portal/client/support', icon: 'help_outline', label: 'Support' },
   { href: '/portal/client/notifications', icon: 'notifications', label: 'Notifications' },
+  { href: '/portal/client/feedback', icon: 'reviews', label: 'Leave Feedback' },
   { href: '/portal/client/security', icon: 'security', label: 'Security' },
   { href: '/portal/client/settings', icon: 'settings', label: 'Settings' },
 ];
@@ -38,8 +39,8 @@ const NAV_ITEMS: NavItem[] = [
 const BOTTOM_NAV: NavItem[] = [
   { href: '/portal/client/dashboard', icon: 'dashboard', label: 'Home', exact: true },
   { href: '/portal/client/cases', icon: 'folder_shared', label: 'Cases' },
+  { href: '/portal/client/feedback', icon: 'reviews', label: 'Feedback' },
   { href: '/portal/client/messages', icon: 'chat', label: 'Messages' },
-  { href: '/portal/client/invoices', icon: 'receipt_long', label: 'Invoices' },
 ];
 
 export default function ClientPortalShell({

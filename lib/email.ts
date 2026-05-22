@@ -234,6 +234,21 @@ export const EmailTemplates = {
       <p style="margin-top: 32px;">Regards,<br /><strong style="color: #1e293b;">System Administration</strong></p>
     `),
 
+  auditConfirmation: (email: string) =>
+    BaseTemplate(`
+      <h2 style="color: #0f172a; font-size: 20px; margin-top: 0; margin-bottom: 24px;">AI Readiness Protocol Requested</h2>
+      <p>Hello,</p>
+      <p>Thank you for requesting the <strong>AI Readiness Protocol</strong> architectural audit.</p>
+      <p>I have received your request for the 10-point audit. My team and I are currently preparing the document for your specific industry context.</p>
+      <p><strong>What happens next?</strong></p>
+      <ul>
+        <li>I will review your request and reach out within 24 hours.</li>
+        <li>You will receive the full PDF protocol along with a few initial observations about your potential AI integration path.</li>
+      </ul>
+      <p>In the meantime, if you have any urgent questions, feel free to reply to this email.</p>
+      <p style="margin-top: 32px;">Best regards,<br /><strong style="color: #1e293b;">Leo</strong></p>
+    `),
+
   adminNotification: (type: string, details: string) =>
     BaseTemplate(`
       <h2 style="color: #0f172a; font-size: 20px; margin-top: 0; margin-bottom: 24px;">System Notification: ${type}</h2>

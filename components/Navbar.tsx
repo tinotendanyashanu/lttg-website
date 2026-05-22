@@ -1,13 +1,15 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Calendar } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import StrategySessionModal from './StrategySessionModal';
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -23,6 +25,7 @@ const Navbar = () => {
   }, []);
 
   return (
+    <>
     <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled ? 'glass shadow-sm' : 'glass border-b border-white/50'}`}>
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
@@ -45,7 +48,6 @@ const Navbar = () => {
             <Link href="/services" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
               Services
             </Link>
-            {/* <Link href="/media" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Media</Link> */}
             <Link href="/portal/partner" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Partner</Link>
             <Link href="/tech-stack" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Resources</Link>
             <Link href="/contact" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Contact</Link>
@@ -53,10 +55,13 @@ const Navbar = () => {
 
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center gap-3">
-            <Link href="/contact" className="group relative px-5 py-2 text-sm font-medium text-[#4C8BFF] bg-white border border-[#4C8BFF]/30 rounded-lg hover:border-[#4C8BFF] hover:shadow-[0_0_15px_rgba(76,139,255,0.2)] transition-all duration-300 overflow-hidden">
-              <span className="relative z-10">Work With Me</span>
-              <div className="absolute inset-0 h-full w-full bg-[#4C8BFF]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            </Link>
+            <button 
+              onClick={() => setIsModalOpen(true)}
+              className="group relative px-5 py-2 text-sm font-bold text-white bg-slate-900 rounded-full hover:bg-black transition-all duration-300 flex items-center gap-2"
+            >
+              <Calendar className="w-4 h-4" />
+              Book a Session
+            </button>
           </div>
 
           {/* Mobile Menu Button */}
@@ -89,19 +94,27 @@ const Navbar = () => {
               </div>
             </div>
 
-            {/* <Link href="/media" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50/50">Media</Link> */}
             <Link href="/portal/partner" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50/50">Partner</Link>
             <Link href="/tech-stack" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50/50">Resources</Link>
             <Link href="/contact" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50/50">Contact</Link>
-            <div className="pt-4 space-y-2">
-              <Link href="/contact" onClick={() => setIsMobileMenuOpen(false)} className="block w-full text-center px-5 py-3 text-base font-medium text-[#4C8BFF] border border-[#4C8BFF] rounded-lg bg-white shadow-sm">
-                Work With Me
-              </Link>
+            <div className="pt-4">
+              <button 
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  setIsModalOpen(true);
+                }} 
+                className="w-full text-center px-5 py-3 text-base font-bold text-white bg-slate-900 rounded-xl"
+              >
+                Book a Session
+              </button>
             </div>
           </div>
         </div>
       )}
     </nav>
+    
+    <StrategySessionModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+    </>
   );
 };
 
