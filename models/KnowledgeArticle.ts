@@ -31,6 +31,8 @@ export interface IKnowledgeArticle extends Document {
   lastReviewedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
+  embedding?: number[];
+  embeddingUpdatedAt?: Date;
 }
 
 const KnowledgeArticleSchema: Schema = new Schema({
@@ -58,6 +60,8 @@ const KnowledgeArticleSchema: Schema = new Schema({
   relatedArticles: [{ type: Schema.Types.ObjectId, ref: 'KnowledgeArticle' }],
   backlinks: [{ type: Schema.Types.ObjectId, ref: 'KnowledgeArticle' }],
   lastReviewedAt: { type: Date },
+  embedding: { type: [Number], default: undefined, select: false },
+  embeddingUpdatedAt: { type: Date },
 }, { timestamps: true });
 
 KnowledgeArticleSchema.index({ category: 1 });

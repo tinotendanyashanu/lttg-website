@@ -49,6 +49,17 @@ export async function createArticle(data: Partial<IKnowledgeArticle>) {
     const article = new KnowledgeArticle(data);
     await article.save();
 
+    // Generate embedding asynchronously — don't block the save
+    if (process.env.GOOGLE_AI_API_KEY) {
+      import('@/lib/rag').then(async ({ generateEmbedding, buildArticleText }) => {
+        try {
+          const text = buildArticleText({ title: article.title, subtitle: article.subtitle, tags: article.tags, content: article.content });
+          const embedding = await generateEmbedding(text);
+          await KnowledgeArticle.findByIdAndUpdate(article._id, { embedding, embeddingUpdatedAt: new Date() });
+        } catch { /* embedding failure is non-fatal */ }
+      });
+    }
+
     // Create initial version
     await KnowledgeArticleVersion.create({
         articleId: article._id,
@@ -107,6 +118,17 @@ export async function updateArticle(id: string, data: Partial<IKnowledgeArticle>
     );
     
     if (!article) return { success: false, error: 'Article not found' };
+
+    // Re-embed if content or title changed
+    if (process.env.GOOGLE_AI_API_KEY && (data.content !== undefined || data.title !== undefined)) {
+      import('@/lib/rag').then(async ({ generateEmbedding, buildArticleText }) => {
+        try {
+          const text = buildArticleText({ title: article.title, subtitle: article.subtitle ?? undefined, tags: article.tags, content: article.content });
+          const embedding = await generateEmbedding(text);
+          await KnowledgeArticle.findByIdAndUpdate(article._id, { embedding, embeddingUpdatedAt: new Date() });
+        } catch { /* embedding failure is non-fatal */ }
+      });
+    }
 
     // 3. Handle Backlinks
     if (data.relatedArticles) {
