@@ -1,6 +1,36 @@
 import dbConnect from './mongodb';
 import type { BotResponse } from './chatbot';
 
+// Returns a plain-text context string for injection into the AI system prompt
+export async function getKBContext(query: string): Promise<string> {
+  try {
+    await dbConnect();
+    const { KnowledgeArticle } = await import('@/models/KnowledgeArticle');
+
+    const articles = await KnowledgeArticle.find(
+      {
+        $text: { $search: query },
+        status: 'published',
+        $or: [{ roleVisibility: 'all' }, { roleVisibility: 'client' }],
+      },
+      { score: { $meta: 'textScore' }, title: 1, content: 1 }
+    )
+      .sort({ score: { $meta: 'textScore' } })
+      .limit(2)
+      .lean();
+
+    if (!articles.length) return '';
+
+    return (articles as any[]).map(a => {
+      const raw = typeof a.content === 'string' ? a.content : JSON.stringify(a.content);
+      const snippet = raw.replace(/[#*`[\]]/g, '').slice(0, 400).trim();
+      return `### ${a.title}\n${snippet}`;
+    }).join('\n\n');
+  } catch {
+    return '';
+  }
+}
+
 export async function searchKnowledge(query: string): Promise<BotResponse | null> {
   await dbConnect();
   const { KnowledgeArticle } = await import('@/models/KnowledgeArticle');

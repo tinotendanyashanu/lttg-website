@@ -21,6 +21,7 @@ export interface IChatSession extends Document {
   employeeNotifiedAt?: Date;
   visitorNotifiedAt?: Date;
   resolvedAt?: Date;
+  leadScore?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -51,6 +52,7 @@ const ChatSessionSchema: Schema = new Schema(
     employeeNotifiedAt: { type: Date },
     visitorNotifiedAt: { type: Date },
     resolvedAt: { type: Date },
+    leadScore: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

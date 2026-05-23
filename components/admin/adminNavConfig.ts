@@ -32,7 +32,8 @@ export const NAV_SECTIONS: NavSection[] = [
       { name: 'Invoices',  href: '/admin/invoices',  icon: 'receipt_long' },
       { name: 'Tickets',   href: '/admin/tickets',   icon: 'support_agent' },
       { name: 'Messages',  href: '/admin/messages',  icon: 'chat' },
-      { name: 'Chat Inbox', href: '/admin/chat',     icon: 'chat_bubble' },
+      { name: 'Chat Inbox',  href: '/admin/chat',          icon: 'chat_bubble' },
+      { name: 'AI Insights', href: '/admin/chat/insights', icon: 'psychology' },
     ],
   },
   {
