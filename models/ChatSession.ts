@@ -22,6 +22,9 @@ export interface IChatSession extends Document {
   visitorNotifiedAt?: Date;
   resolvedAt?: Date;
   leadScore?: number;
+  converted?: boolean;
+  conversionEvent?: string;
+  convertedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -53,6 +56,9 @@ const ChatSessionSchema: Schema = new Schema(
     visitorNotifiedAt: { type: Date },
     resolvedAt: { type: Date },
     leadScore: { type: Number, default: 0 },
+    converted: { type: Boolean, default: false },
+    conversionEvent: { type: String },
+    convertedAt: { type: Date },
   },
   { timestamps: true }
 );

@@ -10,7 +10,6 @@ import Link from 'next/link';
 
 import { services, getServiceIcon } from '@/data/services';
 import Testimonials from '@/components/Testimonials';
-import ChatWidget from '@/components/ChatWidget';
 
 const HERO_VIDEOS = [
   '/videos/hero-video1.mp4',
@@ -625,7 +624,6 @@ export default function Home() {
       <Footer />
 
       <StrategySessionModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
-      <ChatWidget />
     </main>
   );
 }

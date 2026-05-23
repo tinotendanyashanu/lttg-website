@@ -87,7 +87,24 @@ function MessageBubble({ msg }: { msg: Message }) {
   );
 }
 
-function ActionPills({ actions, onEscalate }: { actions: Action[]; onEscalate: () => void }) {
+function ActionPills({
+  actions,
+  onEscalate,
+  sessionId,
+}: {
+  actions: Action[];
+  onEscalate: () => void;
+  sessionId: string;
+}) {
+  function trackConversion(label: string) {
+    if (!sessionId) return;
+    fetch('/api/chat/converted', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sessionId, event: label }),
+    }).catch(() => {});
+  }
+
   return (
     <div className="flex flex-wrap gap-2 mt-1 mb-1">
       {actions.map((a, i) => {
@@ -108,6 +125,7 @@ function ActionPills({ actions, onEscalate }: { actions: Action[]; onEscalate: (
             href={a.href}
             target={a.href?.startsWith('http') ? '_blank' : undefined}
             rel="noreferrer"
+            onClick={() => trackConversion(a.label)}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full text-xs font-semibold text-gray-700 dark:text-gray-200 hover:border-[#7c3aed] hover:text-[#7c3aed] transition-colors"
           >
             <ArrowRight className="w-3 h-3" /> {a.label}
@@ -208,18 +226,14 @@ export default function ChatWidget() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, typing]);
 
-  // Restore session from server if navigating back
+  // Restore session from server on every page load — keeps chat alive as user navigates
   useEffect(() => {
     if (!sessionId || messages.length > 0) return;
-    const dbId = localStorage.getItem(SESSION_DB_KEY);
-    if (!dbId) return;
     fetch(`/api/chat/session/${sessionId}`).then(r => r.json()).then(data => {
       if (data.session?.messages?.length > 0) {
         setMessages(data.session.messages.map((m: any) => ({ ...m, timestamp: new Date(m.timestamp) })));
         setChatStatus(data.session.status);
-        if (data.session.status !== 'bot') {
-          setView('waiting');
-        }
+        if (data.session.status !== 'bot') setView('waiting');
       }
     }).catch(() => {});
   }, [sessionId]);
@@ -422,7 +436,7 @@ export default function ChatWidget() {
                   )}
                   {pendingActions && !typing && (
                     <div className="pl-9">
-                      <ActionPills actions={pendingActions} onEscalate={() => setView('escalate')} />
+                      <ActionPills actions={pendingActions} onEscalate={() => setView('escalate')} sessionId={sessionId} />
                     </div>
                   )}
 

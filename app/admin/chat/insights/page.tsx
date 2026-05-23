@@ -27,18 +27,19 @@ async function getInsightsData() {
       ChatSession.countDocuments({}),
       ChatSession.countDocuments({ status: { $in: ['pending_human', 'human_active'] } }),
       ChatSession.countDocuments({ status: 'resolved' }),
+      ChatSession.countDocuments({ converted: true }),
     ]),
     ChatSession.find({ leadScore: { $gte: 7 } })
       .sort({ updatedAt: -1 })
       .limit(5)
-      .select('sessionId visitorName visitorEmail leadScore status updatedAt messages')
+      .select('sessionId visitorName visitorEmail leadScore status converted updatedAt messages')
       .lean(),
   ]);
 
   return {
     gaps: JSON.parse(JSON.stringify(gaps)),
     gapCounts: { pending: counts[0], approved: counts[1], rejected: counts[2] },
-    sessionStats: { total: sessionStats[0], escalated: sessionStats[1], resolved: sessionStats[2] },
+    sessionStats: { total: sessionStats[0], escalated: sessionStats[1], resolved: sessionStats[2], converted: sessionStats[3] },
     highIntentSessions: JSON.parse(JSON.stringify(highIntentSessions)),
   };
 }
@@ -51,7 +52,7 @@ export default async function ChatInsightsPage() {
   const { gaps, gapCounts, sessionStats, highIntentSessions } = await getInsightsData();
 
   const conversionRate = sessionStats.total > 0
-    ? Math.round((sessionStats.escalated + sessionStats.resolved) / sessionStats.total * 100)
+    ? Math.round(sessionStats.converted / sessionStats.total * 100)
     : 0;
 
   return (
@@ -68,7 +69,7 @@ export default async function ChatInsightsPage() {
           { label: 'Knowledge Gaps', value: gapCounts.pending, color: 'text-amber-500', icon: 'lightbulb' },
           { label: 'Total Sessions', value: sessionStats.total, color: 'text-[#7c3aed]', icon: 'chat_bubble' },
           { label: 'Escalated / Active', value: sessionStats.escalated, color: 'text-blue-500', icon: 'support_agent' },
-          { label: 'Conversion Rate', value: `${conversionRate}%`, color: 'text-emerald-500', icon: 'trending_up' },
+          { label: 'CTA Conversions', value: `${sessionStats.converted} (${conversionRate}%)`, color: 'text-emerald-500', icon: 'trending_up' },
         ].map(s => (
           <div key={s.label} className="bg-white dark:bg-[#27272a] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-soft p-5">
             <div className="flex items-center gap-2 mb-2">
@@ -110,6 +111,9 @@ export default async function ChatInsightsPage() {
                     <div className="flex items-center gap-1 justify-end">
                       <span className="material-icons-outlined text-[12px] text-emerald-500">bolt</span>
                       <span className="text-xs font-bold text-emerald-600">{s.leadScore}/10</span>
+                      {s.converted && (
+                        <span className="ml-1 text-[9px] font-bold text-white bg-emerald-500 px-1.5 py-0.5 rounded-full">CONVERTED</span>
+                      )}
                     </div>
                     <span className={`text-[10px] font-semibold ${
                       s.status === 'pending_human' ? 'text-amber-500' :
