@@ -54,6 +54,10 @@ export async function getKBContext(query: string): Promise<string> {
   }
 }
 
+// Used ONLY by the no-AI regex fallback bot. Without an LLM we cannot summarize an
+// article safely, and raw article text must never be shown to a visitor. So we only
+// check whether relevant client-safe material exists and, if so, respond
+// conversationally and offer a human — we never return the article content itself.
 export async function searchKnowledge(query: string): Promise<BotResponse | null> {
   try {
     await dbConnect();
@@ -71,17 +75,21 @@ export async function searchKnowledge(query: string): Promise<BotResponse | null
       .limit(5)
       .lean();
 
-    const snippet = (articles as KnowledgeArticleSnippet[])
-      .map(article => toGuidanceSnippet(article, 450))
-      .find(Boolean);
+    const hasRelevant = (articles as KnowledgeArticleSnippet[]).some(
+      article => toGuidanceSnippet(article, 450).length > 0
+    );
 
-    if (!snippet) return null;
+    if (!hasRelevant) return null;
 
     return {
-      content: `${snippet}\n\nDoes that answer your question, or would you like the team to look at your specific situation?`,
-      confidence: 0.75,
+      content:
+        "That's something we can definitely help with. To give you accurate, specific guidance rather than a generic answer, the best next step is a quick chat with our team — they'll tailor it to your situation. Want me to connect you, or would you prefer to book a free call?",
+      confidence: 0.6,
       shouldEscalate: false,
-      actions: [{ label: "Talk to Our Team", type: "escalate" }],
+      actions: [
+        { label: "Talk to Our Team", type: "escalate" },
+        { label: "Book a Free Call", type: "booking", href: "https://cal.com/leothetechguy" },
+      ],
     };
   } catch {
     return null;

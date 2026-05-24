@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import { ChatSession } from "@/models/ChatSession";
+import { sanitizeBotReply } from "@/lib/chat-sanitizer";
 
 type BotReply = {
   content: string;
@@ -105,6 +106,10 @@ export async function POST(request: Request) {
       aiError = "GOOGLE_AI_API_KEY not configured";
       botReply = await getFallbackResponse(safeMessage, visitorMessageCount);
     }
+
+    // Final safety net: strip any internal/raw content before it is stored or shown.
+    // Applies to BOTH the AI path and the regex fallback — nothing reaches the visitor unscrubbed.
+    botReply.content = sanitizeBotReply(botReply.content);
 
     session.aiMode = aiMode;
     session.aiModel = aiModel;
