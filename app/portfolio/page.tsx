@@ -3,11 +3,11 @@
 import React, { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { ArrowUpRight, Code2 } from 'lucide-react';
+import { ArrowUpRight, MonitorPlay } from 'lucide-react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { projects } from '@/data/projects';
-import ProjectCard from '@/components/ProjectCard';
+import ProjectLivePreviewCard from '@/components/ProjectLivePreviewCard';
 
 export default function Portfolio() {
   const [activeCategory, setActiveCategory] = useState('All');
@@ -35,17 +35,17 @@ export default function Portfolio() {
           className="max-w-3xl"
         >
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-50 border border-slate-200 text-slate-600 text-sm font-medium mb-8 shadow-sm">
-            <Code2 className="w-4 h-4" />
-            <span>Digital Playground</span>
+            <MonitorPlay className="w-4 h-4" />
+            <span>Live Project Previews</span>
           </div>
           <h1 className="text-5xl sm:text-7xl font-bold tracking-tight text-slate-900 mb-8 leading-tight">
-            Selected <br/>
+            Explore the work <br/>
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4C8BFF] to-[#10B981]">
-              Works & Experiments.
+              while it runs.
             </span>
           </h1>
           <p className="text-xl text-slate-600 leading-relaxed font-normal max-w-2xl text-balance">
-            From enterprise-grade platforms to weekend experiments. A collection of projects that push the boundaries of what&apos;s possible with code.
+            Browse live project views directly on the page, then open any project when you want the full interactive experience.
           </p>
         </motion.div>
       </section>
@@ -69,15 +69,15 @@ export default function Portfolio() {
         </div>
       </section>
 
-      {/* Projects Grid (Bento) */}
+      {/* Live Preview Grid */}
       <section className="pb-32 px-6 lg:px-8 max-w-7xl mx-auto">
         <motion.div 
           layout
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-fr"
+          className="grid grid-cols-1 lg:grid-cols-2 gap-6"
         >
           <AnimatePresence mode='popLayout'>
             {filteredProjects.map((project) => (
-               <ProjectCard key={project.id} project={project} />
+               <ProjectLivePreviewCard key={project.id} project={project} />
             ))}
           </AnimatePresence>
         </motion.div>
