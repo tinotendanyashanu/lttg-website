@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
-export type RoleVisibility = 'intern' | 'employee' | 'admin' | 'all';
+export type RoleVisibility = 'intern' | 'employee' | 'admin' | 'client' | 'all';
 export type KnowledgeType = 'article' | 'resource' | 'policy';
 export type ArticleStatus = 'draft' | 'published' | 'archived';
 
@@ -33,6 +33,7 @@ export interface IKnowledgeArticle extends Document {
   updatedAt: Date;
   embedding?: number[];
   embeddingUpdatedAt?: Date;
+  embeddingModel?: string;
 }
 
 const KnowledgeArticleSchema: Schema = new Schema({
@@ -62,6 +63,7 @@ const KnowledgeArticleSchema: Schema = new Schema({
   lastReviewedAt: { type: Date },
   embedding: { type: [Number], default: undefined, select: false },
   embeddingUpdatedAt: { type: Date },
+  embeddingModel: { type: String },
 }, { timestamps: true });
 
 KnowledgeArticleSchema.index({ category: 1 });

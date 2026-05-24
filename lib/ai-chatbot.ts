@@ -1,14 +1,18 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // Model routing — configurable via env vars
-// Primary: cheapest model handles 90%+ of conversations
-// Upgraded: for complex multi-turn sessions or high-intent leads
-const PRIMARY_MODEL = process.env.GEMINI_PRIMARY_MODEL || 'gemini-1.5-flash-8b';
-const UPGRADED_MODEL = process.env.GEMINI_UPGRADED_MODEL || 'gemini-1.5-flash';
+// Keep these defaults on stable, verified model IDs. Stale model aliases silently
+// degrade the site into the regex fallback bot.
+const PRIMARY_MODEL = process.env.GEMINI_PRIMARY_MODEL || 'gemini-2.5-flash';
+const UPGRADED_MODEL = process.env.GEMINI_UPGRADED_MODEL || 'gemini-2.5-flash';
 
 function selectModel(messageCount: number, leadScore: number): string {
   if (messageCount >= 6 || leadScore >= 7) return UPGRADED_MODEL;
   return PRIMARY_MODEL;
+}
+
+export function getSelectedChatModel(messageCount: number, leadScore: number): string {
+  return selectModel(messageCount, leadScore);
 }
 
 const SERVICES_CONTEXT = `
@@ -132,8 +136,8 @@ export async function getAIBotResponse(
     systemInstruction,
     generationConfig: {
       responseMimeType: 'application/json',
-      temperature: 0.75,
-      maxOutputTokens: 512,
+      temperature: 0.45,
+      maxOutputTokens: 700,
     },
   });
 
@@ -158,7 +162,7 @@ export async function getAIBotResponse(
       detectedGap: Boolean(parsed.detectedGap),
       gapTitle: String(parsed.gapTitle || '').trim(),
       gapSuggestedContent: String(parsed.gapSuggestedContent || '').trim(),
-      actions: Array.isArray(parsed.actions) ? parsed.actions.slice(0, 2) : [],
+      actions: sanitizeActions(parsed.actions),
     };
   } catch {
     // Strip any markdown code fences and retry parse
@@ -189,4 +193,27 @@ export async function getAIBotResponse(
       };
     }
   }
+}
+
+
+function sanitizeActions(actions: unknown): AIBotResponse["actions"] {
+  if (!Array.isArray(actions)) return [];
+
+  return actions
+    .slice(0, 2)
+    .map((action: unknown) => {
+      if (!action || typeof action !== "object") return null;
+      const raw = action as { type?: unknown; label?: unknown; href?: unknown };
+      const type = String(raw.type);
+      if (!["booking", "service", "escalate"].includes(type)) return null;
+
+      const label = String(raw.label || "").trim().slice(0, 40);
+      if (!label) return null;
+
+      const href = typeof raw.href === "string" ? raw.href.trim() : undefined;
+      if (href && !href.startsWith("/") && !href.startsWith("https://cal.com/")) return null;
+
+      return { label, type: type as "booking" | "service" | "escalate", ...(href ? { href } : {}) };
+    })
+    .filter(Boolean) as AIBotResponse["actions"];
 }

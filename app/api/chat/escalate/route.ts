@@ -39,7 +39,7 @@ export async function POST(request: Request) {
 
     await session.save();
 
-    const sessionUrl = `${SITE_URL}/admin/chat/${session._id}`;
+    const sessionUrl = `${SITE_URL}/portal/employee/chat/${session._id}`;
     const visitorReturnUrl = `${SITE_URL}/?chatSession=${sessionId}`;
 
     // Notify admin/team

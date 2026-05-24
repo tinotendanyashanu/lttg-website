@@ -33,7 +33,7 @@ const INTENTS: { intent: Intent; patterns: RegExp[] }[] = [
   },
   {
     intent: 'pricing',
-    patterns: [/\b(price|pricing|cost|quote|how much|rates?|fee|budget|afford|expensive|cheap|package)\b/i],
+    patterns: [/\b(price|pricing|cost|quote|how\s*much|rates?|fee|budget|afford|expensive|cheap|package)\b/i],
   },
   {
     intent: 'booking',
@@ -133,7 +133,7 @@ export async function getBotResponse(
   if (intent === 'pricing') {
     return {
       content:
-        "Great question on pricing! Our projects are scoped individually because every business has unique needs. A basic website starts from ~€1,500, AI automation from ~€3,000, and security audits from ~€800. The best way to get an accurate number is a free 30-minute call — no pressure, just clarity.",
+        "Projects are scoped individually because every business has unique needs. A basic website starts from ~€1,500, AI automation from ~€3,000, and security audits from ~€800. For an accurate quote, the next step is a free 30-minute strategy call so we can scope the work properly. What are you trying to build?",
       confidence: 0.9,
       shouldEscalate: false,
       actions: [

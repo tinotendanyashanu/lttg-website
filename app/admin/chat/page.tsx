@@ -9,6 +9,18 @@ export const dynamic = 'force-dynamic';
 
 type ChatStatus = 'bot' | 'pending_human' | 'human_active' | 'resolved';
 
+interface AdminChatListSession {
+  _id: string;
+  visitorName?: string;
+  visitorEmail?: string;
+  status: ChatStatus;
+  messages?: { content?: string }[];
+  updatedAt?: string;
+  aiMode?: string;
+  aiModel?: string;
+  leadScore?: number;
+}
+
 async function getChatSessions() {
   await dbConnect();
   const { ChatSession } = await import('@/models/ChatSession');
@@ -23,7 +35,7 @@ async function getChatSessions() {
   const sessions = await ChatSession.find({ status: { $in: ['pending_human', 'human_active', 'bot'] } })
     .sort({ updatedAt: -1 })
     .limit(50)
-    .select('sessionId visitorName visitorEmail status messages assignedEmployeeName updatedAt createdAt')
+    .select('sessionId visitorName visitorEmail status messages assignedEmployeeName leadScore aiMode aiModel aiError aiConfidence retrievalUsed leadSummary updatedAt createdAt')
     .lean();
 
   return {
@@ -41,8 +53,8 @@ const STATUS_CONFIG: Record<ChatStatus, { label: string; color: string; dot: str
 
 export default async function AdminChatPage() {
   const session = await auth();
-  const role = (session?.user as any)?.role;
-  if (!session?.user || !['admin', 'employee'].includes(role)) redirect('/admin/login');
+  const role = (session?.user as { role?: string })?.role;
+  if (!session?.user || !role || !['admin', 'employee'].includes(role)) redirect('/admin/login');
 
   const { sessions, stats } = await getChatSessions();
 
@@ -83,7 +95,7 @@ export default async function AdminChatPage() {
           </div>
         ) : (
           <div className="divide-y divide-gray-50 dark:divide-gray-800">
-            {(sessions as any[]).map(s => {
+            {(sessions as AdminChatListSession[]).map(s => {
               const cfg = STATUS_CONFIG[s.status as ChatStatus] || STATUS_CONFIG.bot;
               const lastMsg = s.messages?.[s.messages.length - 1];
               const preview = lastMsg?.content?.slice(0, 90) || 'No messages yet';
@@ -119,6 +131,9 @@ export default async function AdminChatPage() {
                     {s.visitorEmail && (
                       <p className="text-xs text-gray-400 dark:text-gray-500 mb-1">{s.visitorEmail}</p>
                     )}
+                    <p className="text-[10px] text-gray-400 dark:text-gray-500 mb-1">
+                      AI: {s.aiMode || "unknown"} · Model: {s.aiModel || "n/a"} · Lead: {s.leadScore || 0}/10
+                    </p>
                     <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{preview}</p>
                   </div>
                   <div className="flex-shrink-0 text-right">

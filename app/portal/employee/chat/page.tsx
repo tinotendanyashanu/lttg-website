@@ -26,6 +26,21 @@ const STATUS_CONFIG: Record<ChatStatus, { label: string; color: string; dot: str
   resolved: { label: 'Resolved', color: 'bg-gray-50 text-gray-500 dark:bg-gray-800 dark:text-gray-400', dot: 'bg-gray-300' },
 };
 
+const STATUS_ORDER: ChatStatus[] = ['pending_human', 'human_active', 'bot', 'resolved'];
+
+function getStatusConfig(status: ChatStatus) {
+  switch (status) {
+    case 'bot':
+      return STATUS_CONFIG.bot;
+    case 'pending_human':
+      return STATUS_CONFIG.pending_human;
+    case 'human_active':
+      return STATUS_CONFIG.human_active;
+    case 'resolved':
+      return STATUS_CONFIG.resolved;
+  }
+}
+
 async function getSessions(isAdmin: boolean) {
   await dbConnect();
   const { ChatSession } = await import('@/models/ChatSession');
@@ -84,9 +99,9 @@ export default async function EmployeeChatPage() {
 
       {/* Stats row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {(['pending_human', 'human_active', 'bot', 'resolved'] as ChatStatus[]).map(s => {
+        {STATUS_ORDER.map(s => {
           const count = (sessions as ChatSessionRow[]).filter(r => r.status === s).length;
-          const cfg = STATUS_CONFIG[s];
+          const cfg = getStatusConfig(s);
           return (
             <div key={s} className="bg-white dark:bg-[#27272a] rounded-xl border border-gray-100 dark:border-gray-800 p-4 text-center">
               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">{cfg.label}</p>
@@ -114,7 +129,7 @@ export default async function EmployeeChatPage() {
         ) : (
           <div className="divide-y divide-gray-50 dark:divide-gray-800">
             {(sessions as ChatSessionRow[]).map(s => {
-              const cfg = STATUS_CONFIG[s.status];
+              const cfg = getStatusConfig(s.status);
               const lastMsg = s.messages?.[s.messages.length - 1];
               const preview = lastMsg?.content?.slice(0, 80) || '';
               const diff = Date.now() - new Date(s.updatedAt).getTime();
@@ -127,7 +142,7 @@ export default async function EmployeeChatPage() {
               return (
                 <Link
                   key={s._id}
-                  href={`/admin/chat/${s._id}`}
+                  href={`/portal/employee/chat/${s._id}`}
                   className="flex items-start gap-4 px-5 py-4 hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors"
                 >
                   <div className="w-10 h-10 rounded-full bg-[#7c3aed]/10 flex items-center justify-center text-[#7c3aed] font-bold text-sm flex-shrink-0 mt-0.5">
@@ -162,9 +177,7 @@ export default async function EmployeeChatPage() {
       </div>
 
       <p className="text-xs text-center text-gray-400 dark:text-gray-500">
-        Replies are sent from the{' '}
-        <Link href="/admin/chat" className="text-[#7c3aed] hover:underline">Admin Chat panel</Link>.
-        Visitors receive an email with a link to continue the conversation.
+        Open a session to reply as a team member. Visitors receive an email with a link to continue the conversation.
       </p>
     </div>
   );

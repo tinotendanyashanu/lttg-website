@@ -58,6 +58,7 @@ export async function createAdminKnowledgeArticle(data: any) {
     }
 
     const article = await KnowledgeArticle.create({ ...data, createdBy: account.email });
+    generateArticleEmbedding(article._id, article).catch(() => {});
 
     await ActivityLog.create({
       actorAccountId: account._id,
@@ -103,6 +104,9 @@ export async function updateAdminKnowledgeArticle(articleId: string, data: any) 
 
     const article = await KnowledgeArticle.findByIdAndUpdate(articleId, { $set: data }, { new: true });
     if (!article) return { success: false, error: 'Article not found' };
+    if (data.content !== undefined || data.title !== undefined || data.subtitle !== undefined || data.tags !== undefined) {
+      generateArticleEmbedding(article._id, article).catch(() => {});
+    }
 
     await ActivityLog.create({
       actorAccountId: account._id,
@@ -162,4 +166,25 @@ export async function deleteKnowledgeCategory(id: string) {
     await KnowledgeCategory.findByIdAndDelete(id);
     revalidatePath('/portal/employee/knowledge-base');
     return { success: true };
+}
+
+
+async function generateArticleEmbedding(articleId: any, article: any) {
+  if (!process.env.GOOGLE_AI_API_KEY) return;
+
+  const { generateEmbedding, buildArticleText, EMBEDDING_MODEL } = await import("@/lib/rag");
+  const text = buildArticleText({
+    title: article.title,
+    subtitle: article.subtitle,
+    tags: article.tags,
+    content: article.content,
+  });
+  if (!text) return;
+
+  const embedding = await generateEmbedding(text);
+  await KnowledgeArticle.findByIdAndUpdate(articleId, {
+    embedding,
+    embeddingUpdatedAt: new Date(),
+    embeddingModel: EMBEDDING_MODEL,
+  });
 }

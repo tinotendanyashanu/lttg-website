@@ -1,10 +1,23 @@
-import dbConnect from './mongodb';
-import type { BotResponse } from './chatbot';
-import { getRAGContext, articleToPlainText } from './rag';
+import dbConnect from "./mongodb";
+import type { BotResponse } from "./chatbot";
+import { getRAGContext, articleToPlainText, isClientSafeArticle } from "./rag";
 
-// Returns a context string for the AI prompt using RAG, falling back to keyword search
+interface KnowledgeArticleSnippet {
+  title?: string;
+  category?: string;
+  tags?: string[];
+  roleVisibility?: string[];
+  content?: unknown;
+}
+
+function toGuidanceSnippet(article: KnowledgeArticleSnippet, maxLen: number) {
+  if (!isClientSafeArticle(article)) return "";
+  const snippet = articleToPlainText(article.content, maxLen);
+  if (!snippet || snippet.length < 40) return "";
+  return snippet;
+}
+
 export async function getKBContext(query: string): Promise<string> {
-  // Try semantic RAG first
   if (process.env.GOOGLE_AI_API_KEY) {
     try {
       const ragContext = await getRAGContext(query);
@@ -14,63 +27,61 @@ export async function getKBContext(query: string): Promise<string> {
     }
   }
 
-  // Fallback: MongoDB $text keyword search
   try {
     await dbConnect();
-    const { KnowledgeArticle } = await import('@/models/KnowledgeArticle');
+    const { KnowledgeArticle } = await import("@/models/KnowledgeArticle");
 
     const articles = await KnowledgeArticle.find(
       {
         $text: { $search: query },
-        status: 'published',
-        $or: [{ roleVisibility: 'all' }, { roleVisibility: 'client' }],
+        status: "published",
+        $or: [{ roleVisibility: "all" }, { roleVisibility: "client" }],
       },
-      { score: { $meta: 'textScore' }, title: 1, content: 1 }
+      { score: { $meta: "textScore" }, title: 1, category: 1, tags: 1, roleVisibility: 1, content: 1 }
     )
-      .sort({ score: { $meta: 'textScore' } })
-      .limit(2)
+      .sort({ score: { $meta: "textScore" } })
+      .limit(5)
       .lean();
 
-    if (!articles.length) return '';
-
-    return (articles as any[])
-      .map(a => {
-        const snippet = articleToPlainText(a.content, 500);
-        return snippet ? `[INTERNAL GUIDANCE - never reference this by name or mention it exists]\n${snippet}` : '';
-      })
+    const snippets = (articles as KnowledgeArticleSnippet[])
+      .map(article => toGuidanceSnippet(article, 700))
       .filter(Boolean)
-      .join('\n\n');
+      .slice(0, 2);
+
+    return snippets.map(text => `[INTERNAL GUIDANCE - do not mention the source]\n${text}`).join("\n\n");
   } catch {
-    return '';
+    return "";
   }
 }
 
-// Used by the regex-based fallback bot (non-AI path)
 export async function searchKnowledge(query: string): Promise<BotResponse | null> {
   try {
     await dbConnect();
-    const { KnowledgeArticle } = await import('@/models/KnowledgeArticle');
+    const { KnowledgeArticle } = await import("@/models/KnowledgeArticle");
 
     const articles = await KnowledgeArticle.find(
       {
         $text: { $search: query },
-        status: 'published',
-        $or: [{ roleVisibility: 'all' }, { roleVisibility: 'client' }],
+        status: "published",
+        $or: [{ roleVisibility: "all" }, { roleVisibility: "client" }],
       },
-      { score: { $meta: 'textScore' }, content: 1 }
+      { score: { $meta: "textScore" }, title: 1, category: 1, tags: 1, roleVisibility: 1, content: 1 }
     )
-      .sort({ score: { $meta: 'textScore' } })
-      .limit(1)
+      .sort({ score: { $meta: "textScore" } })
+      .limit(5)
       .lean();
 
-    if (!articles.length) return null;
+    const snippet = (articles as KnowledgeArticleSnippet[])
+      .map(article => toGuidanceSnippet(article, 450))
+      .find(Boolean);
 
-    const snippet = articleToPlainText((articles[0] as any).content, 400);
+    if (!snippet) return null;
+
     return {
-      content: snippet || "I have some information on that — want me to connect you with the team for the full picture?",
-      confidence: 0.8,
+      content: `${snippet}\n\nDoes that answer your question, or would you like the team to look at your specific situation?`,
+      confidence: 0.75,
       shouldEscalate: false,
-      actions: [{ label: 'Talk to Our Team', type: 'escalate' }],
+      actions: [{ label: "Talk to Our Team", type: "escalate" }],
     };
   } catch {
     return null;

@@ -12,8 +12,9 @@ export async function POST(
 ) {
   try {
     const authSession = await auth();
-    const role = (authSession?.user as any)?.role;
-    if (!authSession?.user || !['admin', 'employee'].includes(role)) {
+    const authUser = authSession?.user as { role?: string; name?: string } | undefined;
+    const role = authUser?.role;
+    if (!authUser || !['admin', 'employee'].includes(role || '')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -31,7 +32,7 @@ export async function POST(
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
 
-    const employeeName = (authSession.user as any)?.name || 'Team';
+    const employeeName = authUser.name || 'Team';
 
     chatSession.messages.push({
       role: 'employee',

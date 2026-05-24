@@ -37,7 +37,7 @@ export async function POST(request: Request) {
 
     if (shouldNotify) {
       session.employeeNotifiedAt = new Date();
-      const sessionUrl = `${SITE_URL}/admin/chat/${session._id}`;
+      const sessionUrl = `${SITE_URL}/portal/employee/chat/${session._id}`;
       await sendAdminNotification({
         subject: `💬 ${session.visitorName || 'Visitor'} replied in chat`,
         text: `${session.visitorName || 'Visitor'} (${session.visitorEmail || 'no email'}) sent a new message.\n\nReply: ${sessionUrl}`,

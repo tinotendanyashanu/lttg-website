@@ -36,8 +36,8 @@ export default async function AdminChatSessionPage({
 }) {
   const { sessionId } = await params;
   const authSession = await auth();
-  const role = (authSession?.user as any)?.role;
-  if (!authSession?.user || !['admin', 'employee'].includes(role)) redirect('/admin/login');
+  const role = (authSession?.user as { role?: string })?.role;
+  if (!authSession?.user || !role || !['admin', 'employee'].includes(role)) redirect('/admin/login');
 
   const chatSession = await getSession(sessionId);
   if (!chatSession) notFound();
@@ -98,6 +98,11 @@ export default async function AdminChatSessionPage({
               {new Date(chatSession.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </p>
           </div>
+        </div>
+        <div className="mt-4 rounded-xl bg-gray-50 dark:bg-gray-800/60 p-3 text-xs text-gray-500 dark:text-gray-400 space-y-1">
+          <p><span className="font-semibold text-gray-700 dark:text-gray-200">AI:</span> {chatSession.aiMode || "unknown"} · {chatSession.aiModel || "n/a"} · lead {chatSession.leadScore || 0}/10</p>
+          {chatSession.leadSummary && <p><span className="font-semibold text-gray-700 dark:text-gray-200">Summary:</span> {chatSession.leadSummary}</p>}
+          {chatSession.aiError && <p className="text-red-500"><span className="font-semibold">AI error:</span> {chatSession.aiError}</p>}
         </div>
       </div>
 

@@ -22,6 +22,12 @@ export interface IChatSession extends Document {
   visitorNotifiedAt?: Date;
   resolvedAt?: Date;
   leadScore?: number;
+  aiMode?: string;
+  aiModel?: string;
+  aiError?: string;
+  aiConfidence?: number;
+  retrievalUsed?: boolean;
+  leadSummary?: string;
   converted?: boolean;
   conversionEvent?: string;
   convertedAt?: Date;
@@ -56,6 +62,12 @@ const ChatSessionSchema: Schema = new Schema(
     visitorNotifiedAt: { type: Date },
     resolvedAt: { type: Date },
     leadScore: { type: Number, default: 0 },
+    aiMode: { type: String },
+    aiModel: { type: String },
+    aiError: { type: String },
+    aiConfidence: { type: Number },
+    retrievalUsed: { type: Boolean, default: false },
+    leadSummary: { type: String },
     converted: { type: Boolean, default: false },
     conversionEvent: { type: String },
     convertedAt: { type: Date },
