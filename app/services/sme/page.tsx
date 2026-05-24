@@ -51,8 +51,7 @@ export default function SMEPage() {
                             <h3 className="text-2xl font-bold text-slate-900">Audit & Map</h3>
                         </div>
                         <p className="text-slate-600 text-lg leading-relaxed pl-14 border-l-2 border-slate-200 group-hover:border-emerald-500 transition-colors duration-300">
-                            Let&apos;s build something that grows with you.
-r business. From lead intake to invoice generation, we identify where human hours are being wasted on robot work.
+                            Before we automate anything, we map your business. From lead intake to invoice generation, we pinpoint exactly where human hours are being wasted on work a machine should handle.
                         </p>
                     </div>
 
@@ -267,10 +266,11 @@ r business. From lead intake to invoice generation, we identify where human hour
       {/* Final Stats / Impact */}
       <section className="py-24 bg-white border-t border-slate-200">
           <div className="max-w-7xl mx-auto px-6 lg:px-8">
-               <div className="text-center mb-16">
-                   <h2 className="text-3xl font-bold text-slate-900">Quantifiable Impact</h2>
+               <div className="text-center mb-16 max-w-2xl mx-auto">
+                   <h2 className="text-3xl font-bold text-slate-900">What We Engineer For</h2>
+                   <p className="mt-4 text-slate-500 text-sm">Design targets we build toward — actual results depend on your starting point, scope, and market.</p>
                </div>
-               <div className="grid md:grid-cols-3 gap-12 text-center divider-y md:divide-y-0 md:divide-x divide-slate-200">
+               <div className="grid md:grid-cols-3 gap-12 text-center divide-y md:divide-y-0 md:divide-x divide-slate-200">
                     <div className="p-4">
                         <div className="text-5xl font-bold mb-2 text-slate-900">30%</div>
                         <div className="text-emerald-600 font-medium">Reduction in OpEx</div>

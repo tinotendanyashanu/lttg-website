@@ -32,16 +32,23 @@ export default function ServicesPage() {
             SME Solutions
           </h2>
           <p className="text-xl md:text-2xl text-slate-200 mb-10 font-light tracking-wide max-w-2xl drop-shadow-md">
-            AI-powered systems that streamline operations and increase revenue.
+            Too much admin, not enough visibility. We replace repetitive workflows with intelligent automation — so your team focuses on growth, not grunt work.
           </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-            <Link 
-              href="/services/sme" 
-              className="px-10 py-3.5 bg-white text-black rounded-full font-medium sm:min-w-[200px] hover:bg-slate-200 transition-colors flex items-center justify-center group"
-            >
-              Explore SME Solutions <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
+
+          <div className="flex flex-col items-center gap-4 w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+              <Link
+                href="/services/sme"
+                className="px-10 py-3.5 bg-white text-black rounded-full font-medium sm:min-w-[200px] hover:bg-slate-200 transition-colors flex items-center justify-center group"
+              >
+                Explore SME Solutions <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </div>
+            <div className="flex flex-wrap gap-2 justify-center items-center">
+              <span className="text-white/40 text-xs">Or explore directly:</span>
+              <Link href="/services/ai-automation" className="px-3 py-1.5 rounded-full border border-white/20 text-white/60 text-xs hover:text-white hover:border-white/40 transition-colors">AI & Automation</Link>
+              <Link href="/services/software-dev" className="px-3 py-1.5 rounded-full border border-white/20 text-white/60 text-xs hover:text-white hover:border-white/40 transition-colors">Full-Stack Builds</Link>
+            </div>
           </div>
         </div>
         
@@ -63,15 +70,23 @@ export default function ServicesPage() {
             Startup Solutions
           </h2>
           <p className="text-xl md:text-2xl text-slate-200 mb-10 font-light tracking-wide max-w-2xl drop-shadow-md">
-             Scalable product architecture, MVP builds, and SaaS systems.
+            Speed is life, but technical debt is death. We build MVPs in weeks — with the architecture to support your next ten thousand users.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-            <Link 
-              href="/services/startups" 
-              className="px-10 py-3.5 bg-white text-black rounded-full font-medium sm:min-w-[200px] hover:bg-slate-200 transition-colors flex items-center justify-center group"
-            >
-              Explore Startup Solutions <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
+          <div className="flex flex-col items-center gap-4 w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+              <Link
+                href="/services/startups"
+                className="px-10 py-3.5 bg-white text-black rounded-full font-medium sm:min-w-[200px] hover:bg-slate-200 transition-colors flex items-center justify-center group"
+              >
+                Explore Startup Solutions <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </div>
+            <div className="flex flex-wrap gap-2 justify-center items-center">
+              <span className="text-white/40 text-xs">Or explore directly:</span>
+              <Link href="/services/software-dev" className="px-3 py-1.5 rounded-full border border-white/20 text-white/60 text-xs hover:text-white hover:border-white/40 transition-colors">Full-Stack Builds</Link>
+              <Link href="/services/ai-automation" className="px-3 py-1.5 rounded-full border border-white/20 text-white/60 text-xs hover:text-white hover:border-white/40 transition-colors">AI Features</Link>
+              <Link href="/services/mentorship" className="px-3 py-1.5 rounded-full border border-white/20 text-white/60 text-xs hover:text-white hover:border-white/40 transition-colors">CTO Advisory</Link>
+            </div>
           </div>
         </div>
       </section>
@@ -88,15 +103,22 @@ export default function ServicesPage() {
             Enterprise Solutions
           </h2>
           <p className="text-xl md:text-2xl text-slate-200 mb-10 font-light tracking-wide max-w-2xl drop-shadow-md">
-             Secure AI infrastructure and digital transformation systems.
+            Legacy systems slow innovation. We modernise critical workflows, deploy private AI, and build the security posture your enterprise clients demand.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-            <Link 
-              href="/services/enterprise" 
-              className="px-10 py-3.5 bg-white text-black rounded-full font-medium sm:min-w-[200px] hover:bg-slate-200 transition-colors flex items-center justify-center group"
-            >
-              Explore Enterprise Solutions <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
+          <div className="flex flex-col items-center gap-4 w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+              <Link
+                href="/services/enterprise"
+                className="px-10 py-3.5 bg-white text-black rounded-full font-medium sm:min-w-[200px] hover:bg-slate-200 transition-colors flex items-center justify-center group"
+              >
+                Explore Enterprise Solutions <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </div>
+            <div className="flex flex-wrap gap-2 justify-center items-center">
+              <span className="text-white/40 text-xs">Or explore directly:</span>
+              <Link href="/services/ai-automation" className="px-3 py-1.5 rounded-full border border-white/20 text-white/60 text-xs hover:text-white hover:border-white/40 transition-colors">Enterprise AI</Link>
+              <Link href="/services/cybersecurity" className="px-3 py-1.5 rounded-full border border-white/20 text-white/60 text-xs hover:text-white hover:border-white/40 transition-colors">Security & Compliance</Link>
+            </div>
           </div>
         </div>
       </section>
@@ -113,15 +135,22 @@ export default function ServicesPage() {
             Individual Solutions
           </h2>
           <p className="text-xl md:text-2xl text-slate-200 mb-10 font-light tracking-wide max-w-2xl drop-shadow-md">
-             High-performance websites and digital platforms built properly.
+            A social profile isn&apos;t a brand. We build custom platforms that own your audience, rank on search, and generate leads while you sleep.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-            <Link 
-              href="/services/individuals" 
-              className="px-10 py-3.5 bg-white text-black rounded-full font-medium sm:min-w-[200px] hover:bg-slate-200 transition-colors flex items-center justify-center group"
-            >
-              Explore Individual Solutions <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
+          <div className="flex flex-col items-center gap-4 w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+              <Link
+                href="/services/individuals"
+                className="px-10 py-3.5 bg-white text-black rounded-full font-medium sm:min-w-[200px] hover:bg-slate-200 transition-colors flex items-center justify-center group"
+              >
+                Explore Individual Solutions <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </div>
+            <div className="flex flex-wrap gap-2 justify-center items-center">
+              <span className="text-white/40 text-xs">Or explore directly:</span>
+              <Link href="/services/software-dev" className="px-3 py-1.5 rounded-full border border-white/20 text-white/60 text-xs hover:text-white hover:border-white/40 transition-colors">Portfolio & Platforms</Link>
+              <Link href="/services/social-media" className="px-3 py-1.5 rounded-full border border-white/20 text-white/60 text-xs hover:text-white hover:border-white/40 transition-colors">Social Systems</Link>
+            </div>
           </div>
         </div>
       </section>
@@ -135,7 +164,7 @@ export default function ServicesPage() {
 
         <div className="relative z-10 text-center px-6 max-w-4xl mx-auto flex flex-col items-center">
           <div className="bg-amber-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-6 animate-pulse">
-            Coming Soon
+            In Development
           </div>
           <h2 className="text-5xl md:text-7xl font-bold text-white tracking-tight mb-6 drop-shadow-2xl">
             Social Media Systems
@@ -144,9 +173,12 @@ export default function ServicesPage() {
              Automated engagement, intelligent posting, and cross-platform growth.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-            <span className="px-10 py-3.5 bg-white/10 text-white/50 border border-white/20 rounded-full font-medium sm:min-w-[200px] flex items-center justify-center cursor-not-allowed">
-              Coming Soon <ArrowRight className="ml-2 w-4 h-4 opacity-30" />
-            </span>
+            <Link
+              href="/services/social-media"
+              className="px-10 py-3.5 bg-white text-black rounded-full font-medium sm:min-w-[200px] hover:bg-slate-200 transition-colors flex items-center justify-center group"
+            >
+              Explore Social Media Systems <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </Link>
           </div>
         </div>
       </section>
@@ -160,10 +192,10 @@ export default function ServicesPage() {
 
         <div className="relative z-10 text-center px-6 max-w-4xl mx-auto flex flex-col items-center">
           <h2 className="text-5xl md:text-7xl font-bold text-white tracking-tight mb-6 drop-shadow-2xl">
-            How I Work
+            How We Work
           </h2>
           <p className="text-xl md:text-2xl text-slate-200 mb-10 font-light tracking-wide max-w-2xl drop-shadow-md">
-             Transparent, structured, and outcome-driven.
+            Transparent, structured, and outcome-driven — from first call to final handover.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
             <Link 

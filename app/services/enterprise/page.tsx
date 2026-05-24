@@ -227,7 +227,7 @@ export default function EnterprisePage() {
                   <div>
                       <h2 className="text-3xl md:text-5xl font-bold mb-6">Enterprise-Grade Reliability.</h2>
                       <p className="text-xl text-slate-400 leading-relaxed mb-8">
-                          We design for five-nines uptime. Our infrastructure is redundant, secure, and compliant with international standards.
+                          We design for 99.9%+ uptime. Our infrastructure is redundant, continuously monitored, and aligned with international compliance standards.
                       </p>
                       <Link href="/contact" className="inline-flex items-center px-8 py-4 bg-indigo-600 text-white rounded-full font-bold hover:bg-indigo-700 transition-colors">
                           Schedule Consultation <ArrowRight className="ml-2 w-5 h-5" />
@@ -258,10 +258,11 @@ export default function EnterprisePage() {
       {/* Final Stats / Impact */}
       <section className="py-24 bg-white border-t border-slate-200">
           <div className="max-w-7xl mx-auto px-6 lg:px-8">
-               <div className="text-center mb-16">
-                   <h2 className="text-3xl font-bold text-slate-900">Quantifiable Impact</h2>
+               <div className="text-center mb-16 max-w-2xl mx-auto">
+                   <h2 className="text-3xl font-bold text-slate-900">What We Engineer For</h2>
+                   <p className="mt-4 text-slate-500 text-sm">Design targets we build toward — actual results depend on your starting point, scope, and market.</p>
                </div>
-                <div className="grid md:grid-cols-3 gap-12 text-center divider-y md:divide-y-0 md:divide-x divide-slate-200">
+                <div className="grid md:grid-cols-3 gap-12 text-center divide-y md:divide-y-0 md:divide-x divide-slate-200">
                     <div className="p-4">
                         <div className="text-5xl font-bold mb-2 text-slate-900">SOC2</div>
                         <div className="text-indigo-600 font-medium">Compliance Ready</div>

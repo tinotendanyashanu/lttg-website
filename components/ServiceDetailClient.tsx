@@ -106,11 +106,11 @@ export default function ServiceDetailClient({ service }: { service: Service }) {
               <span className="opacity-90" style={{ color: service.accentColor }}>{service.subheadline}</span>
             </motion.h1>
 
-            <motion.p 
+            <motion.p
               variants={fadeInUp}
               className="text-xl sm:text-2xl text-slate-300 leading-relaxed font-light max-w-2xl mb-12"
             >
-              {service.longDescription}
+              {service.description}
             </motion.p>
 
             <motion.div variants={fadeInUp} className="flex flex-wrap gap-4">
@@ -133,18 +133,58 @@ export default function ServiceDetailClient({ service }: { service: Service }) {
         </div>
       </section>
 
+      {/* Engagement Snapshot */}
+      {(service.whoFor || service.timeline || service.engagement) && (
+        <section className="py-16 px-6 lg:px-8 bg-slate-50 border-b border-slate-100">
+          <div className="max-w-5xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {service.whoFor && (
+                <div>
+                  <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3">Who It&apos;s For</h3>
+                  <p className="text-slate-700 leading-relaxed text-sm">{service.whoFor}</p>
+                </div>
+              )}
+              {service.timeline && (
+                <div>
+                  <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3">Typical Timeline</h3>
+                  <p className="text-slate-700 leading-relaxed text-sm">{service.timeline}</p>
+                </div>
+              )}
+              {service.engagement && (
+                <div>
+                  <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3">Engagement Model</h3>
+                  <p className="text-slate-700 leading-relaxed text-sm">{service.engagement}</p>
+                </div>
+              )}
+            </div>
+            {service.clientNeeds && service.clientNeeds.length > 0 && (
+              <div className="mt-10 pt-8 border-t border-slate-200">
+                <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4">What We Need From You</h3>
+                <ul className="flex flex-wrap gap-3">
+                  {service.clientNeeds.map((need, i) => (
+                    <li key={i} className="px-4 py-2 rounded-full bg-white border border-slate-200 text-slate-600 text-sm">
+                      {need}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
       {/* Offerings Grid */}
       <section className="py-32 px-6 lg:px-8 bg-white">
         <div className="max-w-7xl mx-auto">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             className="text-center mb-20"
           >
             <h2 className="text-4xl lg:text-5xl font-bold text-slate-900 mb-6">What&apos;s Included</h2>
-            <p className="text-xl text-slate-600 max-w-2xl mx-auto">
-              Everything you need to {service.outcome.toLowerCase()}
+            <p className="text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
+              {service.longDescription}
             </p>
           </motion.div>
 
@@ -311,14 +351,14 @@ export default function ServiceDetailClient({ service }: { service: Service }) {
             Ready to start?
           </h2>
           <p className="text-xl text-slate-600 mb-12 max-w-2xl mx-auto">
-            Let&apos;s discuss how {service.title} can transform your business.
+            Book a free 30-minute discovery call. We&apos;ll scope your project, answer your questions, and tell you exactly what working together looks like.
           </p>
-          <Link 
-            href="/contact" 
+          <Link
+            href="/book"
             className="inline-flex justify-center items-center px-12 py-6 text-xl font-bold text-white rounded-full hover:brightness-110 transition-all duration-300 shadow-xl shadow-blue-500/20 hover:shadow-blue-500/40 hover:-translate-y-1"
             style={{ backgroundColor: service.accentColor || '#4C8BFF' }}
           >
-            Start Project
+            Book a Discovery Call
             <ArrowUpRight className="ml-2 w-6 h-6" />
           </Link>
         </motion.div>

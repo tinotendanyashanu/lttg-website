@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import StrategySessionModal from '@/components/StrategySessionModal';
-import { ArrowRight, Code2, BrainCircuit, ShieldCheck, Lightbulb, Volume2, VolumeX, Terminal, Layout, Database } from 'lucide-react';
+import { ArrowRight, Code2, ShieldCheck, Volume2, VolumeX, Terminal, Layout, Database } from 'lucide-react';
 import Link from 'next/link';
 
 import { services, getServiceIcon } from '@/data/services';
@@ -360,9 +360,17 @@ export default function Home() {
       {/* Engineering Case Studies (Selected Works) */}
       <section className="relative z-10 py-32 bg-[#0A0A0A] text-white overflow-hidden">
         <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
-            <div className="mb-24">
-                <h2 className="text-5xl md:text-7xl font-semibold tracking-tighter mb-6">Selected Works.</h2>
-                <p className="text-xl text-neutral-400 max-w-xl font-medium">Infrastructure that defines industries.</p>
+            <div className="mb-24 flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
+                <div>
+                    <h2 className="text-5xl md:text-7xl font-semibold tracking-tighter mb-6">Selected Works.</h2>
+                    <p className="text-xl text-neutral-400 max-w-xl font-medium">Infrastructure that defines industries.</p>
+                </div>
+                <Link
+                    href="/portfolio"
+                    className="inline-flex w-max items-center justify-center rounded-full border border-white/15 bg-white px-6 py-3 text-sm font-semibold text-slate-950 transition-all duration-200 hover:bg-neutral-200"
+                >
+                    View Full Portfolio <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
             </div>
 
             <div className="flex flex-col gap-32">

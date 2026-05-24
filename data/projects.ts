@@ -1,5 +1,5 @@
 import { ElementType } from 'react';
-import { Globe, Database, Smartphone, Layout, Home, Heart, Truck } from 'lucide-react';
+import { CalendarDays, CreditCard, Globe, Database, Smartphone, Layout, Home, Heart, Truck } from 'lucide-react';
 
 export interface Project {
   id: string;
@@ -122,6 +122,37 @@ export const projects: Project[] = [
     size: 'medium',
     gradient: "from-rose-500/20 to-orange-500/20",
     icon: Globe,
+    status: 'Live'
+  },
+  {
+    id: "swipee",
+    title: "Swipee",
+    category: "FinTech & Payments",
+    description: "A payments and business operations platform for informal economy merchants, built around card payments, mobile money, instant cash-out, and merchant tools.",
+    impact: "Helping small businesses accept more payment types and keep cash flow moving through a scalable financial infrastructure layer.",
+    link: "https://www.swipeeup.store/",
+    liveUrl: "https://www.swipeeup.store/",
+    previewUrl: "https://www.swipeeup.store/",
+    tags: ["FinTech", "Payments", "Merchant Tools", "Mobile Money"],
+    size: 'medium',
+    gradient: "from-lime-500/20 to-emerald-500/20",
+    icon: CreditCard,
+    status: 'Live'
+  },
+  {
+    id: "ace-events-africa",
+    title: "Ace Events Africa",
+    category: "Event Staffing",
+    description: "A professional event staffing website for Cape Town events, covering bar staff, waitrons, brand ambassadors, drivers, porters, and event support crews.",
+    impact: "Positioning a trusted staffing partner for corporate functions, festivals, weddings, launches, and private events.",
+    link: "https://aceeventsafrica.com/",
+    liveUrl: "https://aceeventsafrica.com/",
+    previewUrl: "https://aceeventsafrica.com/",
+    previewEmbeddable: false,
+    tags: ["Event Staffing", "Hospitality", "Recruiting", "Cape Town"],
+    size: 'medium',
+    gradient: "from-fuchsia-500/20 to-rose-500/20",
+    icon: CalendarDays,
     status: 'Live'
   },
   {

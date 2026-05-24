@@ -34,6 +34,10 @@ export interface Service {
     question: string;
     answer: string;
   }[];
+  whoFor?: string;
+  timeline?: string;
+  engagement?: string;
+  clientNeeds?: string[];
 }
 
 export const services: Service[] = [
@@ -43,8 +47,8 @@ export const services: Service[] = [
     subtitle: "Smarter Systems, Less Work",
     headline: "Smarter Systems.",
     subheadline: "Less Work.",
-    description: "I build AI tools that automate tasks, analyze data, and bring intelligence into everyday operations. From prediction engines to chatbots to custom models, if it's powered by AI, I'm interested.",
-    longDescription: "Artificial Intelligence isn't just a buzzword—it's a transformative tool that can revolutionize how your business operates. I specialize in building practical AI solutions that solve real problems: automating repetitive tasks, extracting insights from data, and creating intelligent systems that learn and improve over time. Whether you need a custom chatbot that actually understands context, a prediction engine that helps you make better decisions, or a computer vision system that processes visual data at scale, I deliver AI that works in the real world—not just in demos.",
+    description: "We build AI tools that automate tasks, analyze data, and bring intelligence into everyday operations. From prediction engines to chatbots to custom models, if it's powered by AI, we're interested.",
+    longDescription: "Artificial Intelligence isn't just a buzzword—it's a transformative tool that can revolutionize how your business operates. We specialize in building practical AI solutions that solve real problems: automating repetitive tasks, extracting insights from data, and creating intelligent systems that learn and improve over time. Whether you need a custom chatbot that actually understands context, a prediction engine that helps you make better decisions, or a computer vision system that processes visual data at scale, we deliver AI that works in the real world—not just in demos.",
     offerings: [
       "Custom LLM Integration (GPT-4, Claude)",
       "Automated Workflows & AI Agents",
@@ -55,7 +59,7 @@ export const services: Service[] = [
       "Machine Learning Model Development",
       "AI-Powered Data Analysis"
     ],
-    outcome: "Systems that think, learn, and save you 20+ hours a week.",
+    outcome: "Systems that think, learn, and measurably reduce manual overhead.",
     cta: "Automate Your Business",
     icon: "BrainCircuit",
     image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?q=80&w=2832&auto=format&fit=crop",
@@ -93,7 +97,7 @@ export const services: Service[] = [
       {
         step: "02",
         title: "Solution Design",
-        description: "I architect a custom AI solution tailored to your specific needs, selecting the right models and technologies."
+        description: "We architect a custom AI solution tailored to your specific needs, selecting the right models and technologies."
       },
       {
         step: "03",
@@ -120,7 +124,11 @@ export const services: Service[] = [
         question: "Will AI replace my team?",
         answer: "AI is designed to augment your team, not replace them. It handles repetitive tasks so your people can focus on creative, strategic work that requires human judgment and empathy."
       }
-    ]
+    ],
+    whoFor: "Businesses with repetitive manual workflows, unstructured data they're not acting on, or customer-facing processes that need to scale without adding headcount.",
+    timeline: "4–12 weeks depending on complexity — a focused automation pilot can be live in 4 weeks.",
+    engagement: "Fixed-scope project or phased retainer with monthly optimisation cycles.",
+    clientNeeds: ["Access to current workflows and data sources", "A point of contact for iterative feedback", "Deployment environment or cloud account"]
   },
   {
     id: "software-dev",
@@ -128,8 +136,8 @@ export const services: Service[] = [
     subtitle: "Clean, Modern Software Built With Care",
     headline: "Beautiful Code.",
     subheadline: "Scalable Systems.",
-    description: "I build applications that feel smooth, work fast, and scale. Whether it's a platform, dashboard, API, or full system, I make sure it's elegant, efficient, and future-ready.",
-    longDescription: "Great software isn't just about making things work—it's about building systems that are maintainable, scalable, and delightful to use. With years of experience across the full stack, I create web applications that combine beautiful front-end experiences with robust, secure back-end architecture. From high-performance web apps to complex SaaS platforms, I write clean, tested code that other developers can understand and extend. I don't just ship features—I build foundations that support your growth for years to come.",
+    description: "We build applications that feel smooth, work fast, and scale. Whether it's a platform, dashboard, API, or full system, we make sure it's elegant, efficient, and future-ready.",
+    longDescription: "Great software isn't just about making things work—it's about building systems that are maintainable, scalable, and delightful to use. With years of experience across the full stack, we create web applications that combine beautiful front-end experiences with robust, secure back-end architecture. From high-performance web apps to complex SaaS platforms, we write clean, tested code that other developers can understand and extend. We don't just ship features—we build foundations that support your growth for years to come.",
     offerings: [
       "High-Performance Web Apps (Next.js, React)",
       "Scalable SaaS Platforms",
@@ -195,17 +203,21 @@ export const services: Service[] = [
     faqs: [
       {
         question: "What technologies do you use?",
-        answer: "I primarily work with Next.js, React, TypeScript, and Node.js for web applications. For databases, I use PostgreSQL, MongoDB, or the best fit for your needs. I'm always learning and adapting to use the right tool for each job."
+        answer: "We primarily work with Next.js, React, TypeScript, and Node.js for web applications. For databases, we use PostgreSQL, MongoDB, or the best fit for your needs. We're always learning and adapting to use the right tool for each job."
       },
       {
         question: "Do you provide ongoing maintenance?",
-        answer: "Yes, I offer maintenance and support packages to keep your application running smoothly, handle updates, and implement new features as your business grows."
+        answer: "Yes, we offer maintenance and support packages to keep your application running smoothly, handle updates, and implement new features as your business grows."
       },
       {
         question: "How do you handle project communication?",
-        answer: "I believe in transparency. You'll have access to a project dashboard, regular video updates, and direct communication channels. No surprises, no disappearing acts."
+        answer: "We believe in transparency. You'll have access to a project dashboard, regular video updates, and direct communication channels. No surprises, no disappearing acts."
       }
-    ]
+    ],
+    whoFor: "Founders, product teams, and companies outgrowing their current stack — from pre-launch MVPs to maturing SaaS platforms.",
+    timeline: "MVPs in 4–6 weeks; full platform builds typically 8–16 weeks depending on scope.",
+    engagement: "Fixed-scope project or milestone-based sprints with defined deliverables.",
+    clientNeeds: ["Clear feature requirements or user stories", "Design direction or existing brand assets", "Access to any existing codebase if applicable"]
   },
   {
     id: "cybersecurity",
@@ -213,8 +225,8 @@ export const services: Service[] = [
     subtitle: "Protect What Matters",
     headline: "Protect Everything.",
     subheadline: "Trust Nothing.",
-    description: "I break things to understand them, then secure them so nobody else can break them. I help founders keep their systems safe from day one.",
-    longDescription: "In today's threat landscape, security can't be an afterthought—it needs to be built into every layer of your system. I bring a hacker's mindset to defense: understanding how attackers think and operate, then building walls they can't breach. From conducting thorough vulnerability assessments to designing secure architectures from scratch, I help you protect your users' data, your reputation, and your business. Whether you're a startup handling sensitive data or an established company looking to level up your security posture, I provide the expertise you need.",
+    description: "We break things to understand them, then secure them so nobody else can break them. We help founders keep their systems safe from day one.",
+    longDescription: "In today's threat landscape, security can't be an afterthought—it needs to be built into every layer of your system. We bring a hacker's mindset to defense: understanding how attackers think and operate, then building walls they can't breach. From conducting thorough vulnerability assessments to designing secure architectures from scratch, we help you protect your users' data, your reputation, and your business. Whether you're a startup handling sensitive data or an established company looking to level up your security posture, we provide the expertise you need.",
     offerings: [
       "Vulnerability Assessments & Audits",
       "Secure Architecture Design",
@@ -225,7 +237,7 @@ export const services: Service[] = [
       "Security Training & Awareness",
       "Secure Code Review"
     ],
-    outcome: "Peace of mind knowing your product is bulletproof.",
+    outcome: "A clear security posture and a product your users can trust.",
     cta: "Secure Your System",
     icon: "ShieldCheck",
     image: "https://images.unsplash.com/photo-1563986768609-322da13575f3?q=80&w=2940&auto=format&fit=crop",
@@ -284,13 +296,17 @@ export const services: Service[] = [
       },
       {
         question: "What's included in a penetration test?",
-        answer: "I simulate real-world attacks on your systems, attempting to find vulnerabilities the way an attacker would. You'll receive a detailed report with findings, risk ratings, and clear remediation steps."
+        answer: "We simulate real-world attacks on your systems, attempting to find vulnerabilities the way an attacker would. You'll receive a detailed report with findings, risk ratings, and clear remediation steps."
       },
       {
         question: "How often should security assessments be done?",
         answer: "At minimum, annually or after any major system changes. For higher-risk applications, quarterly assessments and continuous monitoring are recommended."
       }
-    ]
+    ],
+    whoFor: "Startups before a fundraising round, teams handling sensitive user data, and companies that need to demonstrate security posture to enterprise clients.",
+    timeline: "Assessment in 1–3 weeks; remediation and hardening scope varies by findings.",
+    engagement: "Fixed assessment engagement with a written report, or ongoing advisory retainer.",
+    clientNeeds: ["Access to target systems in a staging or production-equivalent environment", "Existing architecture documentation", "Stakeholder availability for debrief and prioritisation"]
   },
   {
     id: "social-media",
@@ -298,8 +314,8 @@ export const services: Service[] = [
     subtitle: "Grow Your Digital Presence",
     headline: "Engage Your Audience.",
     subheadline: "Build Your Brand.",
-    description: "I help brands grow their presence across social platforms through automated posting, intelligent engagement, and data-driven strategy.",
-    longDescription: "Managing multiple social media channels can be overwhelming. I build systems that automate the heavy lifting—scheduling posts, monitoring mentions, and analyzing performance—while ensuring your brand voice remains authentic and engaging. From custom content calendars to AI-powered sentiment analysis, I provide the tools and strategy you need to turn social media from a chore into a growth engine.",
+    description: "We help brands grow their presence across social platforms through automated posting, intelligent engagement, and data-driven strategy.",
+    longDescription: "Managing multiple social media channels can be overwhelming. We build systems that automate the heavy lifting—scheduling posts, monitoring mentions, and analyzing performance—while ensuring your brand voice remains authentic and engaging. From custom content calendars to AI-powered sentiment analysis, we provide the tools and strategy you need to turn social media from a chore into a growth engine.",
     offerings: [
       "Automated Content Scheduling",
       "Multi-Platform Management",
@@ -369,13 +385,17 @@ export const services: Service[] = [
       },
       {
         question: "Which platforms do you support?",
-        answer: "I support all major platforms including LinkedIn, Twitter/X, Instagram, and Facebook."
+        answer: "We support all major platforms including LinkedIn, Twitter/X, Instagram, and Facebook."
       },
       {
         question: "Do you provide content creation?",
-        answer: "I provide AI-assisted content generation and strategic templates, but I recommend having a human review for the final brand polish."
+        answer: "We provide AI-assisted content generation and strategic templates, but we recommend having a human review for the final brand polish."
       }
-    ]
+    ],
+    whoFor: "Brands, creators, and growing businesses wanting a consistent, data-driven social presence without managing it manually.",
+    timeline: "Setup and onboarding in 1–2 weeks; ongoing monthly engagement thereafter.",
+    engagement: "Monthly retainer with a defined content scope and performance review each cycle.",
+    clientNeeds: ["Brand guidelines or tone-of-voice notes", "Admin access to your social accounts", "A point of contact for content approvals"]
   },
   {
     id: "mentorship",
@@ -383,8 +403,8 @@ export const services: Service[] = [
     subtitle: "Helping You Build Something Real",
     headline: "Build Smarter.",
     subheadline: "Move Faster.",
-    description: "If you have an idea but don't know how to execute it, I'll help you plan it, break it down, and turn it into a working product.",
-    longDescription: "Having a great idea is just the beginning—turning it into reality requires technical knowledge, strategic planning, and experience navigating the countless decisions that come with building a product. Whether you're a non-technical founder trying to understand your options, a startup looking for part-time CTO guidance, or a junior developer wanting to level up, I provide the mentorship and strategic advice you need. I've been through the trenches of building products, making mistakes, and finding solutions. Let me help you skip the expensive lessons and get to success faster.",
+    description: "If you have an idea but don't know how to execute it, we'll help you plan it, break it down, and turn it into a working product.",
+    longDescription: "Having a great idea is just the beginning—turning it into reality requires technical knowledge, strategic planning, and experience navigating the countless decisions that come with building a product. Whether you're a non-technical founder trying to understand your options, a startup looking for part-time CTO guidance, or a junior developer wanting to level up, we provide the mentorship and strategic advice you need. We've been through the trenches of building products, making mistakes, and finding solutions. Let us help you skip the expensive lessons and get to success faster.",
     offerings: [
       "Technical Roadmap Planning",
       "MVP Strategy & Scope Definition",
@@ -450,17 +470,21 @@ export const services: Service[] = [
     faqs: [
       {
         question: "I'm non-technical. Can you still help me?",
-        answer: "Absolutely! I bridge the gap between business strategy and technical execution. I translate complex architectural concepts into clear business value."
+        answer: "Absolutely! We bridge the gap between business strategy and technical execution. We translate complex architectural concepts into clear business value."
       },
       {
         question: "What's CTO-as-a-Service?",
-        answer: "It's fractional technical leadership for startups and SMEs. I provide the strategic oversight of a CTO without the full-time cost—guiding architecture, hiring, and roadmap decisions."
+        answer: "It's fractional technical leadership for startups and SMEs. We provide the strategic oversight of a CTO without the full-time cost—guiding architecture, hiring, and roadmap decisions."
       },
       {
         question: "How often would we meet?",
         answer: "It depends on your needs. Whether it's a one-off strategy session or a monthly retainer for ongoing advisory, we structure the engagement to drive maximum impact."
       }
-    ]
+    ],
+    whoFor: "Non-technical founders, early-stage CTOs, and developers who want to build faster, make better decisions, and avoid expensive mistakes.",
+    timeline: "Flexible — one-off sessions from 90 minutes, or a structured multi-week programme.",
+    engagement: "Hourly advisory, monthly retainer, or a defined strategic sprint.",
+    clientNeeds: ["A clear goal or challenge you want to work through", "Openness to direct feedback", "Commitment to follow-through between sessions"]
   }
 ];
 

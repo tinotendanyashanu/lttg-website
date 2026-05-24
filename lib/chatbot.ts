@@ -81,9 +81,9 @@ function detectIntent(message: string): Intent {
 function getServiceByIntent(intent: Intent) {
   const map: Record<string, string> = {
     service_ai: 'ai-automation',
-    service_dev: 'web-development',
+    service_dev: 'software-dev',
     service_security: 'cybersecurity',
-    service_marketing: 'digital-marketing',
+    service_marketing: 'social-media',
   };
   const id = map[intent];
   return id ? services.find(s => s.id === id) : null;

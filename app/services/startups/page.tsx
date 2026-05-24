@@ -25,7 +25,7 @@ export default function StartupsPage() {
       
       <ServiceHero 
         title="Engineering for Growth."
-        description="Build it right the first time. We provide the technical foundation that investors trust and users love."
+        description="Ship fast without regret. We build the technical foundation that holds up under real load — and scales as you grow."
         ctaText="Start My Build"
         ctaLink="/contact"
         themeColor="blue"
@@ -264,21 +264,22 @@ export default function StartupsPage() {
       {/* Final Stats / Impact */}
       <section className="py-24 bg-white border-t border-slate-200">
           <div className="max-w-7xl mx-auto px-6 lg:px-8">
-               <div className="text-center mb-16">
-                   <h2 className="text-3xl font-bold text-slate-900">Quantifiable Impact</h2>
+               <div className="text-center mb-16 max-w-2xl mx-auto">
+                   <h2 className="text-3xl font-bold text-slate-900">What We Engineer For</h2>
+                   <p className="mt-4 text-slate-500 text-sm">Design targets we build toward — actual results depend on your starting point, scope, and market.</p>
                </div>
-               <div className="grid md:grid-cols-3 gap-12 text-center divider-y md:divide-y-0 md:divide-x divide-slate-200">
+               <div className="grid md:grid-cols-3 gap-12 text-center divide-y md:divide-y-0 md:divide-x divide-slate-200">
                     <div className="p-4">
                         <div className="text-5xl font-bold mb-2 text-slate-900">4-6</div>
                         <div className="text-blue-600 font-medium">Weeks to Launch</div>
                     </div>
                      <div className="p-4">
                         <div className="text-5xl font-bold mb-2 text-slate-900">99.9%</div>
-                        <div className="text-blue-600 font-medium">Uptime Guarantee</div>
+                        <div className="text-blue-600 font-medium">Uptime Target</div>
                     </div>
                      <div className="p-4">
-                        <div className="text-5xl font-bold mb-2 text-slate-900">0</div>
-                        <div className="text-blue-600 font-medium">Technical Debt</div>
+                        <div className="text-5xl font-bold mb-2 text-slate-900">90+</div>
+                        <div className="text-blue-600 font-medium">Lighthouse Score</div>
                     </div>
                </div>
           </div>

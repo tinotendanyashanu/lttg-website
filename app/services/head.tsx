@@ -1,6 +1,6 @@
 export default function Head() {
-  const title = "Services | AI, Automation, Full-Stack Engineering, Cybersecurity";
-  const description = "Premium engineering services: AI and automation, scalable web apps, cybersecurity, and technical mentorship from Leo The Tech Guy.";
+  const title = "Services | AI Automation, Full-Stack Builds, Cybersecurity & More — Leo The Tech Guy";
+  const description = "We build AI automation systems, full-stack web platforms, cybersecurity infrastructure, and social media systems for SMEs, startups, enterprises, and individuals. No templates — custom-engineered for your business.";
   const url = "https://leothetechguy.com/services";
   const image = "https://leothetechguy.com/images/og-cover.svg";
 

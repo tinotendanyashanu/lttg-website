@@ -184,7 +184,7 @@ export default function IndividualsPage() {
                         </div>
                         <h3 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">Booking & Automation</h3>
                         <p className="text-lg text-slate-600 mb-8 leading-relaxed">
-                            Stop telling people about your idea and show them. We build high-fidelity &quot;clickable&quot; prototypes that look and feel like the real thing. Perfect for pitching investors or validating with users.
+                            Stop playing email tag to find a time. We wire smart scheduling, intake forms, and payment collection into one seamless flow — so clients can book, pay, and prepare without you lifting a finger.
                         </p>
                         
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
@@ -243,7 +243,7 @@ export default function IndividualsPage() {
                       </div>
                       <div className="bg-white/5 border border-white/10 p-6 rounded-xl backdrop-blur-sm">
                           <h4 className="font-bold text-lg mb-2 text-emerald-400">Mobile Perfect</h4>
-                          <p className="text-sm text-slate-400">You own everything we build. It&apos;s your IP.</p>
+                          <p className="text-sm text-slate-400">Flawless on every screen, from phone to desktop.</p>
                       </div>
                        <div className="bg-white/5 border border-white/10 p-6 rounded-xl backdrop-blur-sm">
                           <h4 className="font-bold text-lg mb-2 text-emerald-400">Fast Loading</h4>
@@ -261,10 +261,11 @@ export default function IndividualsPage() {
       {/* Final Stats / Impact */}
       <section className="py-24 bg-white border-t border-slate-200">
           <div className="max-w-7xl mx-auto px-6 lg:px-8">
-               <div className="text-center mb-16">
-                   <h2 className="text-3xl font-bold text-slate-900">Quantifiable Impact</h2>
+               <div className="text-center mb-16 max-w-2xl mx-auto">
+                   <h2 className="text-3xl font-bold text-slate-900">What We Engineer For</h2>
+                   <p className="mt-4 text-slate-500 text-sm">Design targets we build toward — actual results depend on your starting point, scope, and market.</p>
                </div>
-               <div className="grid md:grid-cols-3 gap-12 text-center divider-y md:divide-y-0 md:divide-x divide-slate-200">
+               <div className="grid md:grid-cols-3 gap-12 text-center divide-y md:divide-y-0 md:divide-x divide-slate-200">
                     <div className="p-4">
                         <div className="text-5xl font-bold mb-2 text-slate-900">2x</div>
                         <div className="text-emerald-600 font-medium">Conversion Rate</div>
