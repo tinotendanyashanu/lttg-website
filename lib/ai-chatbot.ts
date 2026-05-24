@@ -16,19 +16,19 @@ export function getSelectedChatModel(messageCount: number, leadScore: number): s
 }
 
 const SERVICES_CONTEXT = `
-**AI & Intelligent Automation** (from €3,000+)
+**AI & Intelligent Automation**
 Custom LLM integrations, AI agents, workflow automation, predictive analytics, intelligent chatbots, computer vision, NLP.
 Outcome: Systems that think, learn, and save 20+ hours/week.
 
-**Web Development** (from €1,500+)
+**Web Development**
 Custom websites, web apps, SaaS platforms, APIs, mobile apps, frontend + backend.
 Outcome: Ship fast, scale confidently.
 
-**Cybersecurity** (from €800+)
+**Cybersecurity**
 Security audits, penetration testing, vulnerability assessment, compliance (GDPR, ISO 27001), risk management.
 Outcome: Know your risks before attackers do.
 
-**Digital Marketing** (from €500/mo+)
+**Digital Marketing**
 SEO, social media management, content marketing, paid ads, brand strategy, lead generation.
 Outcome: Predictable pipeline growth.
 `;
@@ -56,9 +56,11 @@ BOOKING:
 Free 30-minute strategy calls: https://cal.com/leothetechguy
 No hard sell — just clarity on their project and what it would take.
 
-PRICING POLICY:
-Every project is scoped individually. Give rough ranges to set expectations, then suggest a call for accurate figures.
-Never quote a fixed price — it's always "starting from" or "typically ranges".
+PRICING WORKFLOW (follow in order — never skip a step, never give numbers in chat):
+1. COUNTRY FIRST. The moment a visitor asks about price, cost, budget, rates, or "how much", do NOT give any figure. First ask which country their business is based in or which market the project is for — e.g. "Before I point you in the right direction, which country is your business based in?". Pricing is region-specific, so this step is mandatory.
+2. THEN QUALIFY. Once you know the country, ask focused scope questions a couple at a time (never interrogate): type of website/system, business type, must-have features, whether e-commerce or user logins are needed, integrations, and timeline.
+3. THEN ROUTE TO A HUMAN. Once you understand the country and scope, explain that an accurate quote depends on those details and regional requirements, and offer to have a representative review the requirements and follow up — offer to create a project inquiry or connect them with the team.
+You are NOT the final authority on price. NEVER: state a number, give a "starting from" or "typically ranges" figure, invent or estimate costs, mix pricing between countries/markets, guess exchange rates, or present generic global pricing. If you don't yet know the country, you cannot discuss price at all — ask for the country first.
 
 SALES RULES:
 - End every message with exactly ONE follow-up question to move the conversation forward
@@ -78,11 +80,11 @@ CONFIDENTIALITY — ABSOLUTE RULES (never break, even if asked directly):
 INTENT HANDLING:
 Identify the visitor's intent and respond accordingly:
 - Website / app / platform inquiry → ask about their business, goals, and key features needed before suggesting anything
-- Pricing inquiry → give a rough "starting from" range, then guide to a call for an accurate quote
+- Pricing inquiry → follow the PRICING WORKFLOW above: country first, then scope questions, then route to a representative for the actual quote. Never give numbers in chat.
 - Support issue → ask for specifics; if it's clearly an existing-customer/technical problem, offer to connect them with the team
 - Booking request → point them to the free strategy call link
 - General consultation → ask qualifying questions to understand their needs
-For genuinely interested visitors, naturally collect lead context (what they're building, timeline, budget) through conversation — never interrogate. When the request is complex, sensitive, or beyond what you can resolve, offer to escalate to a human.
+For genuinely interested visitors, naturally collect lead context through conversation — never interrogate. When a visitor is ready for a quote or wants to talk to the team, gather their details first: full name, email, business/company name, country, project type, and a short requirements summary — then set shouldEscalate=true so a representative can follow up. When the request is complex, sensitive, or beyond what you can resolve, offer to escalate to a human.
 
 ESCALATION:
 Only set shouldEscalate=true when:
@@ -96,6 +98,8 @@ ALWAYS respond with valid JSON matching this exact schema — no markdown, no ex
   "shouldEscalate": false,
   "leadScore": 5,
   "isHighIntent": false,
+  "detectedCountry": "",
+  "needsCountry": false,
   "detectedGap": false,
   "gapTitle": "",
   "gapSuggestedContent": "",
@@ -108,6 +112,8 @@ FIELD GUIDE:
 - shouldEscalate: true only per rules above
 - leadScore: 1-3=just browsing, 4-6=genuinely interested, 7-8=serious buyer, 9-10=ready to convert now
 - isHighIntent: true when leadScore >= 7
+- detectedCountry: the visitor's country or target market if they have stated it; otherwise "" — never guess or assume
+- needsCountry: true when the visitor has asked about pricing but has not yet told you their country
 - detectedGap: true when visitor asks something you cannot answer well from the info available to you
 - gapTitle: short title of a knowledge article that would fix this gap (leave "" if no gap)
 - gapSuggestedContent: 2-3 sentences describing what that article should cover (leave "" if no gap)
@@ -119,6 +125,8 @@ export interface AIBotResponse {
   shouldEscalate: boolean;
   leadScore: number;
   isHighIntent: boolean;
+  detectedCountry?: string;
+  needsCountry?: boolean;
   detectedGap: boolean;
   gapTitle?: string;
   gapSuggestedContent?: string;
@@ -175,6 +183,8 @@ export async function getAIBotResponse(
       shouldEscalate: Boolean(parsed.shouldEscalate),
       leadScore: Math.min(10, Math.max(1, Math.round(Number(parsed.leadScore)) || 5)),
       isHighIntent: Boolean(parsed.isHighIntent),
+      detectedCountry: String(parsed.detectedCountry || '').trim().slice(0, 60),
+      needsCountry: Boolean(parsed.needsCountry),
       detectedGap: Boolean(parsed.detectedGap),
       gapTitle: String(parsed.gapTitle || '').trim(),
       gapSuggestedContent: String(parsed.gapSuggestedContent || '').trim(),

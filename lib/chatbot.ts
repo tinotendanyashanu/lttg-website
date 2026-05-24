@@ -133,12 +133,12 @@ export async function getBotResponse(
   if (intent === 'pricing') {
     return {
       content:
-        "Projects are scoped individually because every business has unique needs. A basic website starts from ~€1,500, AI automation from ~€3,000, and security audits from ~€800. For an accurate quote, the next step is a free 30-minute strategy call so we can scope the work properly. What are you trying to build?",
+        "Happy to help you scope this out. Pricing depends on your project's requirements and the region it's for, so before I point you in the right direction — which country is your business based in?",
       confidence: 0.9,
       shouldEscalate: false,
       actions: [
-        { label: 'Book a Free Quote Call', type: 'booking', href: 'https://cal.com/leothetechguy' },
         { label: 'Talk to Our Team', type: 'escalate' },
+        { label: 'Book a Free Call', type: 'booking', href: 'https://cal.com/leothetechguy' },
       ],
     };
   }

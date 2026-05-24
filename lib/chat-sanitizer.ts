@@ -30,11 +30,42 @@ const BANNED_PHRASES: RegExp[] = [
   /\bknowledge base article\b/gi,
   /\bknowledge base\b/gi,
   /\bsales pricing guide\b/gi,
-  /\bpricing (?:sheet|guide)\b/gi,
+  /\bpricing (?:sheet|guide|table)\b/gi,
+  /\b(?:rate card|price list)\b/gi,
   /\bfor internal use(?: only)?\b/gi,
   /\binternal documentation\b/gi,
   /\b(?:standard operating procedure|sop)s?\b/gi,
 ];
+
+// Pricing is never quoted in chat — a human gives the actual, region-specific
+// quote. Any monetary figure that slips through (symbol-, code-, or word-tagged)
+// is stripped here as a backstop. Optional pricing lead-ins ("from", "around",
+// "starting at"…) are consumed with the amount so the sentence doesn't read
+// "...starts from ." afterwards. Bare numbers (timelines, "20+ hours", "ISO 27001")
+// are left untouched — only amounts attached to a currency are removed.
+const PRICING_LEAD_IN =
+  "(?:\\b(?:from|starting\\s+(?:at|from)|typically\\s+(?:ranges?(?:\\s+from)?|costs?|starts?\\s+(?:at|from))|ranges?\\s+from|around|approximately|about|roughly|only|just|up\\s+to|as\\s+low\\s+as|costs?|priced\\s+at|price(?:d)?(?:\\s+(?:is|at))?|budget\\s+of|investment\\s+of)\\b[\\s:]*)*";
+
+const PRICING_PATTERNS: RegExp[] = [
+  // symbol-prefixed: €1,500  $500  £800  €1.5k  €3,000+  €500/mo
+  new RegExp(
+    `${PRICING_LEAD_IN}[€£$₤¥₹]\\s?\\d[\\d.,]*\\s*(?:k|m)?\\+?(?:\\s?/\\s?(?:mo|month|hr|hour|yr|year))?`,
+    "gi"
+  ),
+  // amount + currency code/word: 1500 EUR  500 dollars  1,500 PLN  5000 zloty
+  new RegExp(
+    `${PRICING_LEAD_IN}\\b\\d[\\d.,]*\\s?(?:k|m)?\\+?\\s?(?:eur|usd|gbp|pln|zwl|zar|ngn|kes|chf|euros?|dollars?|pounds?|z[łl]oty)\\b`,
+    "gi"
+  ),
+  // currency code-prefixed: EUR 1500  PLN 1,500  ZWL 5000
+  /\b(?:eur|usd|gbp|pln|zwl|zar|ngn|kes|chf)\s?\d[\d.,]*\s*(?:k|m)?\+?/gi,
+];
+
+function stripPricing(text: string): string {
+  let out = text;
+  for (const re of PRICING_PATTERNS) out = out.replace(re, "");
+  return out;
+}
 
 function looksLikeRawLeak(text: string): boolean {
   return RAW_LEAK_SIGNALS.some(re => re.test(text));
@@ -63,6 +94,9 @@ export function sanitizeBotReply(input: unknown): string {
 
   // 2. Scrub internal terminology that slipped into otherwise-normal prose.
   for (const re of BANNED_PHRASES) text = text.replace(re, "");
+
+  // 2b. Strip any monetary figure — pricing is never quoted in chat.
+  text = stripPricing(text);
 
   // 3. Clean up artifacts left by the scrub.
   text = tidy(text);

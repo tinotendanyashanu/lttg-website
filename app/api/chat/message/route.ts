@@ -63,7 +63,9 @@ export async function POST(request: Request) {
         const currentLeadScore = session.leadScore ?? 0;
         aiModel = getSelectedChatModel(visitorMessageCount, currentLeadScore);
 
-        const kbContext = await getKBContext(safeMessage);
+        // Use the country detected in earlier turns to pull region-specific context.
+        const priorCountry = session.detectedCountry || undefined;
+        const kbContext = await getKBContext(safeMessage, priorCountry);
         retrievalUsed = Boolean(kbContext);
 
         const aiResponse = await getAIBotResponse(
@@ -77,6 +79,7 @@ export async function POST(request: Request) {
         aiMode = "ai";
         aiConfidence = aiResponse.confidence;
         session.leadScore = aiResponse.leadScore;
+        if (aiResponse.detectedCountry) session.detectedCountry = aiResponse.detectedCountry;
 
         if (aiResponse.detectedGap && aiResponse.gapTitle && aiResponse.gapSuggestedContent) {
           import("@/models/KnowledgeGapSuggestion").then(({ KnowledgeGapSuggestion }) => {

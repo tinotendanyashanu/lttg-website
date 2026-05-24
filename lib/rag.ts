@@ -3,6 +3,9 @@ import { GoogleGenerativeAI, TaskType } from "@google/generative-ai";
 export const EMBEDDING_MODEL = process.env.GEMINI_EMBEDDING_MODEL || "gemini-embedding-001";
 const TOP_K = 3;
 const SIMILARITY_THRESHOLD = 0.45;
+// Pricing is region-specific. When the visitor's country is known we prioritize
+// articles scoped to that market so country-specific guidance ranks first.
+const COUNTRY_MATCH_BOOST = 0.2;
 
 interface KnowledgeArticleVector {
   title?: string;
@@ -135,7 +138,17 @@ export async function generateEmbedding(
   return result.embedding.values;
 }
 
-export async function getRAGContext(query: string): Promise<string> {
+function articleMentionsCountry(article: KnowledgeArticleVector, country: string): boolean {
+  const needle = country.trim().toLowerCase();
+  if (needle.length < 2) return false;
+  const haystack = [article.title, article.category, ...(article.tags || [])]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+  return haystack.includes(needle);
+}
+
+export async function getRAGContext(query: string, country?: string): Promise<string> {
   try {
     const { default: dbConnect } = await import("./mongodb");
     const { KnowledgeArticle } = await import("@/models/KnowledgeArticle");
@@ -153,11 +166,18 @@ export async function getRAGContext(query: string): Promise<string> {
     const safeArticles = (articles as KnowledgeArticleVector[]).filter(isClientSafeArticle);
     if (!safeArticles.length) return "";
 
-    const queryEmbedding = await generateEmbedding(query, "RETRIEVAL_QUERY");
+    // Bias the query embedding toward the visitor's market so region-specific
+    // pricing/context surfaces instead of generic global material.
+    const searchText = country ? `${query}\n(country / market: ${country})` : query;
+    const queryEmbedding = await generateEmbedding(searchText, "RETRIEVAL_QUERY");
 
     const scored = safeArticles
       .filter(a => Array.isArray(a.embedding) && a.embedding.length > 0)
-      .map(a => ({ article: a, score: cosineSimilarity(queryEmbedding, a.embedding!) }))
+      .map(a => {
+        const base = cosineSimilarity(queryEmbedding, a.embedding!);
+        const score = country && articleMentionsCountry(a, country) ? base + COUNTRY_MATCH_BOOST : base;
+        return { article: a, score };
+      })
       .filter(({ score }) => score >= SIMILARITY_THRESHOLD)
       .sort((a, b) => b.score - a.score)
       .slice(0, TOP_K);

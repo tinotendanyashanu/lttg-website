@@ -17,10 +17,10 @@ function toGuidanceSnippet(article: KnowledgeArticleSnippet, maxLen: number) {
   return snippet;
 }
 
-export async function getKBContext(query: string): Promise<string> {
+export async function getKBContext(query: string, country?: string): Promise<string> {
   if (process.env.GOOGLE_AI_API_KEY) {
     try {
-      const ragContext = await getRAGContext(query);
+      const ragContext = await getRAGContext(query, country);
       if (ragContext) return ragContext;
     } catch {
       // fall through to keyword search
@@ -31,9 +31,12 @@ export async function getKBContext(query: string): Promise<string> {
     await dbConnect();
     const { KnowledgeArticle } = await import("@/models/KnowledgeArticle");
 
+    // Include the country in the keyword search so region-specific articles surface.
+    const searchQuery = country ? `${query} ${country}` : query;
+
     const articles = await KnowledgeArticle.find(
       {
-        $text: { $search: query },
+        $text: { $search: searchQuery },
         status: "published",
         $or: [{ roleVisibility: "all" }, { roleVisibility: "client" }],
       },
