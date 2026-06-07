@@ -34,6 +34,15 @@ export interface IKnowledgeArticle extends Document {
   embedding?: number[];
   embeddingUpdatedAt?: Date;
   embeddingModel?: string;
+  // Knowledge classification + service/region scoping (additive, all optional)
+  kind?: string; // one of KB_KINDS
+  services: string[];
+  regions: string[];
+  // Retrieval & feedback analytics counters
+  helpfulCount: number;
+  notHelpfulCount: number;
+  retrievalCount: number;
+  lastRetrievedAt?: Date;
 }
 
 const KnowledgeArticleSchema: Schema = new Schema({
@@ -64,12 +73,24 @@ const KnowledgeArticleSchema: Schema = new Schema({
   embedding: { type: [Number], default: undefined, select: false },
   embeddingUpdatedAt: { type: Date },
   embeddingModel: { type: String },
+  // Knowledge classification + service/region scoping
+  kind: { type: String },
+  services: { type: [String], default: [] },
+  regions: { type: [String], default: [] },
+  // Retrieval & feedback analytics counters
+  helpfulCount: { type: Number, default: 0 },
+  notHelpfulCount: { type: Number, default: 0 },
+  retrievalCount: { type: Number, default: 0 },
+  lastRetrievedAt: { type: Date },
 }, { timestamps: true });
 
 KnowledgeArticleSchema.index({ category: 1 });
 KnowledgeArticleSchema.index({ isPublished: 1 });
 KnowledgeArticleSchema.index({ title: 'text', content: 'text', tags: 'text' });
 KnowledgeArticleSchema.index({ roleVisibility: 1 });
+KnowledgeArticleSchema.index({ kind: 1, status: 1 });
+KnowledgeArticleSchema.index({ services: 1 });
+KnowledgeArticleSchema.index({ regions: 1 });
 
 export const KnowledgeArticle: Model<IKnowledgeArticle> =
   mongoose.models.KnowledgeArticle || mongoose.model<IKnowledgeArticle>('KnowledgeArticle', KnowledgeArticleSchema);

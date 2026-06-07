@@ -172,6 +172,39 @@ export async function submitArticleFeedback(articleId: string, userEmail: string
             isHelpful,
             comment
         });
+
+        // Keep denormalized counters on the article in sync for fast dashboard reads.
+        await KnowledgeArticle.findByIdAndUpdate(articleId, {
+            $inc: isHelpful ? { helpfulCount: 1 } : { notHelpfulCount: 1 },
+        }).catch(() => {});
+
+        // Best-effort: attribute the feedback to this user's most recent retrieval
+        // that surfaced this article, so retrieval feedback analytics reflect it.
+        try {
+            const { RetrievalLog } = await import('../../models/RetrievalLog');
+            await RetrievalLog.findOneAndUpdate(
+                { articleIds: articleId, ...(userEmail ? { userEmail } : {}) },
+                { $set: { feedback: isHelpful ? 'helpful' : 'unhelpful' } },
+                { sort: { createdAt: -1 } }
+            );
+        } catch { /* analytics attribution is best-effort */ }
+
+        return { success: true };
+    } catch (error: any) {
+        return { success: false, error: error.message };
+    }
+}
+
+/**
+ * Record thumbs feedback against a specific retrieval (chatbot / employee assistant).
+ * Lightweight and unauthenticated-safe — used by AI answer feedback widgets.
+ */
+export async function logRetrievalFeedback(retrievalId: string, value: 'helpful' | 'unhelpful') {
+    try {
+        if (!mongoose.Types.ObjectId.isValid(retrievalId)) return { success: false };
+        await dbConnect();
+        const { RetrievalLog } = await import('../../models/RetrievalLog');
+        await RetrievalLog.findByIdAndUpdate(retrievalId, { $set: { feedback: value } });
         return { success: true };
     } catch (error: any) {
         return { success: false, error: error.message };
@@ -244,7 +277,12 @@ export async function getArticleBySlug(slug: string, role: string) {
     }
 }
 
-export async function searchKnowledgeBase(query: string, categoryId: string, role: string) {
+export async function searchKnowledgeBase(
+    query: string,
+    categoryId: string,
+    role: string,
+    filters?: { kind?: string; service?: string; region?: string }
+) {
     try {
         await dbConnect();
 
@@ -268,6 +306,11 @@ export async function searchKnowledgeBase(query: string, categoryId: string, rol
                 matchStage.category = categoryId;
             }
         }
+
+        // Optional service/region/kind scoping (additive — undefined = no constraint).
+        if (filters?.kind) matchStage.kind = filters.kind;
+        if (filters?.service) matchStage.services = filters.service;
+        if (filters?.region) matchStage.regions = filters.region;
 
         const pipeline: any[] = [];
 

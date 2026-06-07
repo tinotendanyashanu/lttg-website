@@ -5,27 +5,32 @@ import { Search } from 'lucide-react';
 import Link from 'next/link';
 
 const STATUS_STYLES: Record<string, string> = {
+  new:            'bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-900/20 dark:text-sky-400 dark:border-sky-900/40',
   open:           'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-900/40',
   in_progress:    'bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-900/20 dark:text-violet-400 dark:border-violet-900/40',
   waiting_client: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-900/40',
+  escalated:      'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-900/40',
   resolved:       'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-900/40',
   closed:         'bg-gray-100 text-gray-500 border-gray-200 dark:bg-gray-800 dark:text-gray-500 dark:border-gray-700',
 };
 
 const PRIORITY_STYLES: Record<string, string> = {
-  low:    'text-gray-500',
-  medium: 'text-blue-600 dark:text-blue-400',
-  high:   'text-orange-500',
-  urgent: 'text-red-600 dark:text-red-400 font-bold',
+  low:      'text-gray-500',
+  medium:   'text-blue-600 dark:text-blue-400',
+  high:     'text-orange-500',
+  urgent:   'text-red-600 dark:text-red-400 font-bold',
+  critical: 'text-red-600 dark:text-red-400 font-bold',
 };
 
-const PRIORITY_ORDER: Record<string, number> = { urgent: 0, high: 1, medium: 2, low: 3 };
+const PRIORITY_ORDER: Record<string, number> = { critical: 0, urgent: 0, high: 1, medium: 2, low: 3 };
 
 const STATUS_TABS = [
   { value: 'all',            label: 'All' },
+  { value: 'new',            label: 'New' },
   { value: 'open',           label: 'Open' },
   { value: 'in_progress',    label: 'In Progress' },
   { value: 'waiting_client', label: 'Waiting' },
+  { value: 'escalated',      label: 'Escalated' },
   { value: 'resolved',       label: 'Resolved' },
   { value: 'closed',         label: 'Closed' },
 ];

@@ -2,11 +2,16 @@ import { auth } from '@/auth';
 import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
 import dbConnect from '@/lib/mongodb';
+import ClientTicketReply from '@/components/portal/client/ClientTicketReply';
+import MessageAttachments from '@/components/support/MessageAttachments';
+import ProjectMilestonesPanel from '@/components/support/ProjectMilestonesPanel';
 
 const STATUS_STYLES: Record<string, string> = {
+  new: 'bg-sky-50 text-sky-600 dark:bg-sky-900/20 dark:text-sky-400',
   open: 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400',
   in_progress: 'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400',
   waiting_client: 'bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400',
+  escalated: 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400',
   resolved: 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400',
   closed: 'bg-gray-50 text-gray-400 dark:bg-gray-900/20 dark:text-gray-500',
 };
@@ -16,6 +21,7 @@ const PRIORITY_STYLES: Record<string, string> = {
   medium: 'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400',
   high: 'bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400',
   urgent: 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400',
+  critical: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
 };
 
 async function getTicket(clientId: string, ticketId: string) {
@@ -23,7 +29,18 @@ async function getTicket(clientId: string, ticketId: string) {
     await dbConnect();
     const { SupportTicket } = await import('@/models/SupportTicket');
     const ticket = await SupportTicket.findOne({ _id: ticketId, clientId }).lean();
-    return ticket ? JSON.parse(JSON.stringify(ticket)) : null;
+    if (!ticket) return null;
+
+    let project = null;
+    if ((ticket as any).caseId) {
+      const { ClientCase } = await import('@/models/ClientCase');
+      project = await ClientCase.findById((ticket as any).caseId, 'title milestones').lean();
+    }
+
+    return {
+      ticket: JSON.parse(JSON.stringify(ticket)),
+      project: project ? JSON.parse(JSON.stringify(project)) : null,
+    };
   } catch (_) {
     return null;
   }
@@ -38,8 +55,9 @@ export default async function TicketDetailPage({
   const session = await auth();
   if (!session?.user?.id) redirect('/login');
 
-  const ticket = await getTicket(session.user.id, ticketId);
-  if (!ticket) notFound();
+  const data = await getTicket(session.user.id, ticketId);
+  if (!data) notFound();
+  const { ticket, project } = data;
 
   return (
     <div className="space-y-6 max-w-3xl">
@@ -106,6 +124,15 @@ export default async function TicketDetailPage({
         </p>
       </div>
 
+      {/* Project deliverables (read-only) when this ticket is linked to a project */}
+      {project && project.milestones && project.milestones.length > 0 && (
+        <ProjectMilestonesPanel
+          caseId={String(project._id)}
+          ticketId={ticketId}
+          milestones={project.milestones}
+        />
+      )}
+
       {/* Messages / Replies */}
       {ticket.messages && ticket.messages.length > 0 && (
         <div className="space-y-3">
@@ -130,35 +157,33 @@ export default async function TicketDetailPage({
               <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
                 {msg.content}
               </p>
+              <MessageAttachments attachments={msg.attachments} />
             </div>
           ))}
         </div>
       )}
 
-      {/* Status info for closed/resolved tickets */}
-      {(ticket.status === 'resolved' || ticket.status === 'closed') && (
-        <div className="bg-green-50 dark:bg-green-900/10 border border-green-100 dark:border-green-900/30 rounded-2xl p-4 flex items-center gap-3">
-          <span className="material-icons-outlined text-green-600 dark:text-green-400">check_circle</span>
-          <p className="text-sm text-green-700 dark:text-green-400 font-medium">
-            This ticket has been {ticket.status}. If you need further help, please create a new ticket.
+      {/* Reply form — available unless the ticket is closed */}
+      {ticket.status !== 'closed' ? (
+        <ClientTicketReply ticketId={ticketId} />
+      ) : (
+        <div className="bg-gray-50 dark:bg-gray-800/30 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 flex items-center gap-3">
+          <span className="material-icons-outlined text-gray-400">lock</span>
+          <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+            This ticket has been closed. If you need further help, please create a new ticket.
           </p>
         </div>
       )}
 
-      {/* Messages link */}
-      <div className="bg-white dark:bg-[#27272a] rounded-2xl shadow-soft border border-gray-100 dark:border-gray-800 p-4 flex items-center justify-between">
-        <div>
-          <p className="text-sm font-semibold text-gray-900 dark:text-white">Need faster help?</p>
-          <p className="text-xs text-gray-400 mt-0.5">Send a direct message to our team</p>
+      {/* Resolved confirmation (still replyable, which reopens the ticket) */}
+      {ticket.status === 'resolved' && (
+        <div className="bg-green-50 dark:bg-green-900/10 border border-green-100 dark:border-green-900/30 rounded-2xl p-4 flex items-center gap-3">
+          <span className="material-icons-outlined text-green-600 dark:text-green-400">check_circle</span>
+          <p className="text-sm text-green-700 dark:text-green-400 font-medium">
+            This ticket is marked resolved. Replying will reopen it for our team.
+          </p>
         </div>
-        <Link
-          href="/portal/client/messages"
-          className="inline-flex items-center gap-1.5 bg-[#2F2F2F] hover:bg-[#4a4a4a] text-white rounded-full px-4 py-2 text-sm font-medium transition-colors"
-        >
-          <span className="material-icons-outlined text-[14px]">chat</span>
-          Messages
-        </Link>
-      </div>
+      )}
     </div>
   );
 }

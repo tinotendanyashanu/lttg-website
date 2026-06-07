@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export type LeadStatus = 'new' | 'contacted' | 'qualified' | 'converted' | 'rejected' | 'closed';
-export type LeadSource = 'manual' | 'referral_link' | 'contact_form' | 'consultation_form' | 'project_inquiry';
+export type LeadSource = 'manual' | 'referral_link' | 'contact_form' | 'consultation_form' | 'project_inquiry' | 'chatbot';
 
 export interface ILead extends Document {
   // Partner System fields
@@ -38,7 +38,7 @@ const LeadSchema: Schema = new Schema({
   clientPhone: { type: String },
   source: {
     type: String,
-    enum: ['manual', 'referral_link', 'contact_form', 'consultation_form', 'project_inquiry'],
+    enum: ['manual', 'referral_link', 'contact_form', 'consultation_form', 'project_inquiry', 'chatbot'],
     default: 'referral_link'
   },
   

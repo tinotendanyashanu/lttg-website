@@ -115,6 +115,36 @@ function buildWhatsAppLink(
   return `https://wa.me/${clean}?text=${encodeURIComponent(text)}`;
 }
 
+// ── AI quotation draft (staff reviews before sending) ──────────────────────────
+
+/**
+ * Generate an AI quotation draft from free-text requirements + region + complexity.
+ * Admin-gated. Returns a draft only — it never creates or sends a quotation; the
+ * admin reviews/edits the result and submits it through the normal create flow.
+ */
+export async function draftQuotationWithAI(input: {
+  requirements: string;
+  region?: string;
+  currency?: string;
+  complexity?: 'simple' | 'standard' | 'complex';
+}) {
+  await checkAdmin();
+  const requirements = (input.requirements || '').trim();
+  if (requirements.length < 10) {
+    throw new Error('Please describe the project requirements (at least a sentence).');
+  }
+
+  const { generateQuotationDraft } = await import('@/lib/services/quotation-ai');
+  const draft = await generateQuotationDraft({
+    requirements: requirements.slice(0, 4000),
+    region: input.region,
+    currency: input.currency,
+    complexity: input.complexity,
+  });
+
+  return { success: true, draft };
+}
+
 // ── Create quotation ───────────────────────────────────────────────────────────
 
 export async function createAdminQuotation(data: {

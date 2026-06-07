@@ -4,15 +4,9 @@ import { useActionState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { createSupportTicket } from '@/lib/actions/client';
+import { TICKET_CATEGORIES } from '@/lib/support/constants';
 
-const CATEGORIES = [
-  { value: 'billing', label: 'Billing & Payments' },
-  { value: 'case_inquiry', label: 'Case Inquiry' },
-  { value: 'technical', label: 'Technical Issue' },
-  { value: 'document_request', label: 'Document Request' },
-  { value: 'general', label: 'General Question' },
-  { value: 'other', label: 'Other' },
-];
+const CATEGORIES = TICKET_CATEGORIES;
 
 function CreateTicketForm() {
   const searchParams = useSearchParams();

@@ -20,7 +20,7 @@ function getBaseUrl() {
 export async function adminReplyToTicket(
   ticketId: string,
   content: string,
-  newStatus?: 'open' | 'in_progress' | 'waiting_client' | 'resolved' | 'closed',
+  newStatus?: 'new' | 'open' | 'in_progress' | 'waiting_client' | 'escalated' | 'resolved' | 'closed',
 ) {
   const admin = await checkAdmin();
   await dbConnect();
@@ -33,20 +33,51 @@ export async function adminReplyToTicket(
   const ticket = await SupportTicket.findById(ticketId);
   if (!ticket) throw new Error('Ticket not found');
 
+  const now = new Date();
   const message = {
     senderRole: 'admin',
     senderName: 'LeoTheTechGuy Team',
     content: content.trim(),
-    createdAt: new Date(),
+    createdAt: now,
   };
 
-  const updates: Record<string, unknown> = { $push: { messages: message } };
+  const set: Record<string, unknown> = {};
   if (newStatus) {
-    (updates as any).$set = { status: newStatus };
-    if (newStatus === 'resolved') (updates as any).$set.resolvedAt = new Date();
+    set.status = newStatus;
+    if (newStatus === 'resolved') set.resolvedAt = now;
   }
 
+  // Stamp first response + evaluate SLA the first time the team replies.
+  if (!ticket.firstResponseAt) {
+    set.firstResponseAt = now;
+    if (ticket.firstResponseDueAt && now > new Date(ticket.firstResponseDueAt)) {
+      set.slaFirstResponseBreached = true;
+    }
+  }
+
+  const activityEntry = {
+    type: 'reply',
+    actor: admin.name || 'Support Agent',
+    actorRole: 'admin',
+    detail: newStatus ? `Replied · status → ${newStatus.replace(/_/g, ' ')}` : 'Replied to client',
+    createdAt: now,
+  };
+
+  const updates: Record<string, unknown> = {
+    $push: { messages: message, activity: activityEntry },
+    ...(Object.keys(set).length ? { $set: set } : {}),
+  };
+
   await SupportTicket.findByIdAndUpdate(ticketId, updates);
+
+  // Keep the linked conversation thread preview fresh.
+  if (ticket.threadId) {
+    const { MessageThread } = await import('@/models/MessageThread');
+    await MessageThread.findByIdAndUpdate(ticket.threadId, {
+      $set: { lastMessageAt: now, lastMessagePreview: content.trim().slice(0, 140) },
+      $inc: { unreadByClient: 1 },
+    }).catch(() => {});
+  }
 
   const client = await Account.findById(ticket.clientId, 'fullName email').lean();
   const portalLink = `${getBaseUrl()}/portal/client/tickets/${ticketId}`;
@@ -94,7 +125,7 @@ export async function adminReplyToTicket(
 
 export async function adminUpdateTicketStatus(
   ticketId: string,
-  newStatus: 'open' | 'in_progress' | 'waiting_client' | 'resolved' | 'closed',
+  newStatus: 'new' | 'open' | 'in_progress' | 'waiting_client' | 'escalated' | 'resolved' | 'closed',
   notifyClient = true,
 ) {
   const admin = await checkAdmin();
@@ -108,10 +139,28 @@ export async function adminUpdateTicketStatus(
   const ticket = await SupportTicket.findById(ticketId);
   if (!ticket) throw new Error('Ticket not found');
 
+  const now = new Date();
   const updateData: Record<string, unknown> = { status: newStatus };
-  if (newStatus === 'resolved') updateData.resolvedAt = new Date();
+  if (newStatus === 'resolved' || newStatus === 'closed') {
+    if (!ticket.resolvedAt) updateData.resolvedAt = now;
+    const resolvedTime = ticket.resolvedAt ? new Date(ticket.resolvedAt) : now;
+    if (ticket.resolutionDueAt && resolvedTime > new Date(ticket.resolutionDueAt)) {
+      updateData.slaResolutionBreached = true;
+    }
+  }
 
-  await SupportTicket.findByIdAndUpdate(ticketId, { $set: updateData });
+  await SupportTicket.findByIdAndUpdate(ticketId, {
+    $set: updateData,
+    $push: {
+      activity: {
+        type: 'status_change',
+        actor: admin.name || 'Admin',
+        actorRole: 'admin',
+        detail: `Status → ${newStatus.replace(/_/g, ' ')}`,
+        createdAt: now,
+      },
+    },
+  });
 
   const client = await Account.findById(ticket.clientId, 'fullName email').lean();
   const portalLink = `${getBaseUrl()}/portal/client/tickets/${ticketId}`;
@@ -181,15 +230,49 @@ export async function adminCreateTicket(data: {
   const count = await SupportTicket.countDocuments();
   const ticketId = `TKT-${String(count + 1).padStart(5, '0')}`;
 
+  const { computeSlaDueDates } = await import('@/lib/services/support-sla');
+  const sla = computeSlaDueDates((data.priority || 'medium') as any);
+
   const ticket = await SupportTicket.create({
     ticketId,
     clientId: resolvedClientId,
     subject: data.subject,
     description: data.description,
     priority: data.priority || 'medium',
-    category: data.category || 'general',
-    status: 'open',
+    category: data.category || 'general_inquiry',
+    status: 'new',
+    aiProcessingStatus: 'pending',
+    firstResponseDueAt: sla.firstResponseDueAt,
+    resolutionDueAt: sla.resolutionDueAt,
+    activity: [
+      {
+        type: 'created',
+        actor: admin.name || 'Admin',
+        actorRole: 'admin',
+        detail: 'Ticket created on behalf of client',
+        createdAt: new Date(),
+      },
+    ],
   });
+
+  // Linked conversation thread + fire-and-forget AI processing.
+  try {
+    const { MessageThread } = await import('@/models/MessageThread');
+    const thread = await MessageThread.create({
+      clientId: resolvedClientId,
+      subject: `[${ticketId}] ${data.subject}`,
+      participants: [resolvedClientId],
+      ticketId: ticket._id,
+      lastMessagePreview: data.description.slice(0, 140),
+    });
+    ticket.threadId = thread._id;
+    await ticket.save();
+  } catch (_) {}
+
+  try {
+    const { reprocessTicketAI } = await import('@/lib/actions/support-center');
+    void reprocessTicketAI(String(ticket._id)).catch(() => {});
+  } catch (_) {}
 
   await ClientNotification.create({
     clientId: resolvedClientId,

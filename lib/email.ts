@@ -298,6 +298,22 @@ export const EmailTemplates = {
       <p style="margin-top: 32px;">Best regards,<br /><strong style="color: #1e293b;">The LeoTheTechGuy Team</strong></p>
     `),
 
+  projectKickoff: (name: string, projectRef: string, portalLink: string) =>
+    BaseTemplate(`
+      <h2 style="color: #10b981; font-size: 20px; margin-top: 0; margin-bottom: 24px;">Your Project Is Underway</h2>
+      <p>Hello ${name},</p>
+      <p>Thank you — your payment has been received and your project is now officially under way. We've set up a dedicated workspace where you can track milestones, share assets and message the team.</p>
+      <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px 20px; margin: 24px 0;">
+        <p style="margin: 0 0 4px 0; font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">Project Reference</p>
+        <p style="margin: 0; font-size: 15px; font-weight: 600; color: #0f172a;">${projectRef}</p>
+      </div>
+      <p>Your team will reach out shortly to schedule the kickoff call and confirm the scope and timeline.</p>
+      <div style="margin: 32px 0;">
+        <a href="${portalLink}" style="background-color: #2563eb; color: #ffffff; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block;">View My Project</a>
+      </div>
+      <p style="margin-top: 32px;">Best regards,<br /><strong style="color: #1e293b;">The LeoTheTechGuy Team</strong></p>
+    `),
+
   clientPasswordSetupConfirmation: (name: string) =>
     BaseTemplate(`
       <h2 style="color: #10b981; font-size: 20px; margin-top: 0; margin-bottom: 24px;">Account Activated</h2>
@@ -655,6 +671,127 @@ export const EmailTemplates = {
       </div>
       <p style="margin-top: 32px;">Regards,<br /><strong style="color: #1e293b;">The LeoTheTechGuy Support Team</strong></p>
     `),
+
+  supportExecutiveDigest: (
+    recipientName: string,
+    digest: {
+      windowDays: number;
+      narrative: string;
+      metrics: {
+        created: number;
+        resolved: number;
+        openNow: number;
+        unanswered: number;
+        slaFirstResponseBreaches: number;
+        slaResolutionBreaches: number;
+        negativeSentiment: number;
+      };
+      topCategories: { label: string; count: number }[];
+      atRiskCustomers: { name: string; level: string; score: number; openTickets: number }[];
+    },
+    dashboardLink: string,
+  ) => {
+    const stat = (label: string, value: string | number, color = '#0f172a') => `
+      <td style="padding: 14px 16px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; text-align: center;">
+        <div style="font-size: 22px; font-weight: 700; color: ${color};">${value}</div>
+        <div style="font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em; margin-top: 4px;">${label}</div>
+      </td>`;
+    const breachColor = digest.metrics.slaFirstResponseBreaches + digest.metrics.slaResolutionBreaches > 0 ? '#dc2626' : '#059669';
+    const categories = digest.topCategories.length
+      ? digest.topCategories.map((c) => `<li style="margin-bottom: 4px;">${c.label} — <strong>${c.count}</strong></li>`).join('')
+      : '<li style="color:#94a3b8;">No active tickets</li>';
+    const atRisk = digest.atRiskCustomers.length
+      ? digest.atRiskCustomers
+          .map(
+            (c) =>
+              `<li style="margin-bottom: 4px;">${c.name} — <strong style="text-transform: capitalize; color:${c.level === 'critical' ? '#dc2626' : '#d97706'};">${c.level.replace('_', ' ')}</strong> (score ${c.score}, ${c.openTickets} open)</li>`,
+          )
+          .join('')
+      : '<li style="color:#059669;">No at-risk customers 🎉</li>';
+    return BaseTemplate(`
+      <h2 style="color: #0f172a; font-size: 20px; margin-top: 0; margin-bottom: 8px;">Support Executive Digest</h2>
+      <p style="color:#64748b; font-size: 13px; margin-top: 0;">Last ${digest.windowDays} days · for ${recipientName}</p>
+      <p style="color: #334155; line-height: 1.6;">${digest.narrative}</p>
+      <table style="width: 100%; border-collapse: separate; border-spacing: 8px; margin: 16px 0;">
+        <tr>${stat('Created', digest.metrics.created)}${stat('Resolved', digest.metrics.resolved, '#059669')}${stat('Open Now', digest.metrics.openNow)}</tr>
+        <tr>${stat('Awaiting Reply', digest.metrics.unanswered, '#d97706')}${stat('SLA Breaches', digest.metrics.slaFirstResponseBreaches + digest.metrics.slaResolutionBreaches, breachColor)}${stat('Negative', digest.metrics.negativeSentiment, digest.metrics.negativeSentiment > 0 ? '#dc2626' : '#0f172a')}</tr>
+      </table>
+      <div style="display:flex; gap:16px; margin: 24px 0;">
+        <div style="flex:1;">
+          <p style="margin: 0 0 8px 0; font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">Top Issue Categories</p>
+          <ul style="margin: 0; padding-left: 18px; color: #334155; font-size: 14px;">${categories}</ul>
+        </div>
+        <div style="flex:1;">
+          <p style="margin: 0 0 8px 0; font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">At-Risk Customers</p>
+          <ul style="margin: 0; padding-left: 18px; color: #334155; font-size: 14px;">${atRisk}</ul>
+        </div>
+      </div>
+      <div style="margin: 32px 0;">
+        <a href="${dashboardLink}" style="background-color: #0f172a; color: #ffffff; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block;">Open Support Insights</a>
+      </div>
+      <p style="margin-top: 32px; color:#94a3b8; font-size: 12px;">Automated digest from the LeoTheTechGuy Support Center.</p>
+    `);
+  },
+
+  executiveWeeklySummary: (
+    recipientName: string,
+    summary: {
+      windowDays: number;
+      narrative: string;
+      revenue: { collectedInWindow: number; outstanding: number; invoicesPaid: number; invoicesOverdue: number };
+      leads: { newInWindow: number; converted: number; conversionRate: number; chatSessions: number };
+      projects: { active: number; completedInWindow: number; milestonesDone: number; milestonesTotal: number };
+      support: { openTickets: number; slaBreaches: number; atRiskCustomers: number };
+      knowledge: { successRate: number; aiDraftedPending: number };
+    },
+    dashboardLink: string,
+  ) => {
+    const kpi = (label: string, value: string | number, color = '#0f172a') => `
+      <td style="padding: 14px 12px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; text-align: center; width: 25%;">
+        <div style="font-size: 22px; font-weight: 700; color: ${color};">${value}</div>
+        <div style="font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 4px;">${label}</div>
+      </td>`;
+    const slaColor = summary.support.slaBreaches > 0 ? '#dc2626' : '#059669';
+    const msLabel = summary.projects.milestonesTotal
+      ? `${summary.projects.milestonesDone}/${summary.projects.milestonesTotal}`
+      : '—';
+    return BaseTemplate(`
+      <h2 style="color: #0f172a; font-size: 20px; margin-top: 0; margin-bottom: 8px;">Weekly Business Summary</h2>
+      <p style="color:#64748b; font-size: 13px; margin-top: 0;">Last ${summary.windowDays} days · for ${recipientName}</p>
+      <p style="color: #334155; line-height: 1.7;">${summary.narrative}</p>
+      <p style="margin: 0 0 6px 0; font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.06em;">Revenue</p>
+      <table style="width: 100%; border-collapse: separate; border-spacing: 6px; margin-bottom: 18px;">
+        <tr>
+          ${kpi('Collected (USD)', `$${Math.round(summary.revenue.collectedInWindow).toLocaleString()}`, '#059669')}
+          ${kpi('Outstanding (USD)', `$${Math.round(summary.revenue.outstanding).toLocaleString()}`)}
+          ${kpi('Invoices Paid', summary.revenue.invoicesPaid, '#059669')}
+          ${kpi('Overdue', summary.revenue.invoicesOverdue, summary.revenue.invoicesOverdue > 0 ? '#dc2626' : '#0f172a')}
+        </tr>
+      </table>
+      <p style="margin: 0 0 6px 0; font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.06em;">Leads &amp; Projects</p>
+      <table style="width: 100%; border-collapse: separate; border-spacing: 6px; margin-bottom: 18px;">
+        <tr>
+          ${kpi('New Leads', summary.leads.newInWindow)}
+          ${kpi('Converted', summary.leads.converted, '#059669')}
+          ${kpi('Conversion', `${summary.leads.conversionRate}%`, summary.leads.conversionRate >= 20 ? '#059669' : '#d97706')}
+          ${kpi('Active Projects', summary.projects.active)}
+        </tr>
+      </table>
+      <p style="margin: 0 0 6px 0; font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.06em;">Support &amp; AI</p>
+      <table style="width: 100%; border-collapse: separate; border-spacing: 6px; margin-bottom: 24px;">
+        <tr>
+          ${kpi('Open Tickets', summary.support.openTickets)}
+          ${kpi('SLA Breaches', summary.support.slaBreaches, slaColor)}
+          ${kpi('AI Success Rate', `${summary.knowledge.successRate}%`, summary.knowledge.successRate >= 70 ? '#059669' : '#d97706')}
+          ${kpi('KB Drafts Pending', summary.knowledge.aiDraftedPending, summary.knowledge.aiDraftedPending > 0 ? '#d97706' : '#0f172a')}
+        </tr>
+      </table>
+      <div style="margin: 28px 0;">
+        <a href="${dashboardLink}" style="background-color: #0f172a; color: #ffffff; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block;">Open Command Center</a>
+      </div>
+      <p style="margin-top: 32px; color:#94a3b8; font-size: 12px;">Automated weekly summary from LeoTheTechGuy AI Business OS.</p>
+    `);
+  },
 
   newMessageNotification: (clientName: string, senderName: string, preview: string, portalLink: string) =>
     BaseTemplate(`

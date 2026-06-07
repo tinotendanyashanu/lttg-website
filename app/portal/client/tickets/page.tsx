@@ -4,9 +4,11 @@ import Link from 'next/link';
 import dbConnect from '@/lib/mongodb';
 
 const STATUS_STYLES: Record<string, string> = {
+  new: 'bg-sky-50 text-sky-600 dark:bg-sky-900/20 dark:text-sky-400',
   open: 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400',
   in_progress: 'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400',
   waiting_client: 'bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400',
+  escalated: 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400',
   resolved: 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400',
   closed: 'bg-gray-50 text-gray-400 dark:bg-gray-900/20 dark:text-gray-500',
 };
@@ -16,6 +18,7 @@ const PRIORITY_STYLES: Record<string, string> = {
   medium: 'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400',
   high: 'bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400',
   urgent: 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400',
+  critical: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
 };
 
 async function getTickets(clientId: string) {

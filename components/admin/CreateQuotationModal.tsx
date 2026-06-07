@@ -2,7 +2,8 @@
 
 import { useState, useTransition } from 'react';
 import ClientCombobox from '@/components/ClientCombobox';
-import { createAdminQuotation, type QuotationLineItem } from '@/lib/actions/admin-quotations';
+import { createAdminQuotation, draftQuotationWithAI, type QuotationLineItem } from '@/lib/actions/admin-quotations';
+import { KB_REGIONS, KB_REGION_LABELS, type KbRegion } from '@/lib/knowledge/constants';
 
 interface Client {
   _id: string;
@@ -44,7 +45,57 @@ export default function CreateQuotationModal({ clients }: Props) {
   const [validUntil, setValidUntil] = useState('');
   const [lineItems, setLineItems] = useState<QuotationLineItem[]>([{ ...EMPTY_LINE_ITEM }]);
 
+  // AI draft assist
+  const [aiOpen, setAiOpen] = useState(false);
+  const [aiRequirements, setAiRequirements] = useState('');
+  const [aiRegion, setAiRegion] = useState<KbRegion | ''>('');
+  const [aiComplexity, setAiComplexity] = useState<'simple' | 'standard' | 'complex'>('standard');
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+  const [aiInfo, setAiInfo] = useState<string | null>(null);
+
   const total = lineItems.reduce((s, i) => s + i.total, 0);
+
+  async function handleGenerate() {
+    setAiError(null);
+    setAiInfo(null);
+    if (aiRequirements.trim().length < 10) {
+      setAiError('Describe the project requirements first (a sentence or two).');
+      return;
+    }
+    setAiLoading(true);
+    try {
+      const res = await draftQuotationWithAI({
+        requirements: aiRequirements.trim(),
+        region: aiRegion || undefined,
+        currency,
+        complexity: aiComplexity,
+      });
+      const draft = res.draft;
+      if (draft.description) setDescription(draft.description);
+      const noteParts = [draft.timeline ? `Estimated timeline: ${draft.timeline}.` : '', draft.notes].filter(Boolean);
+      if (noteParts.length) setNotes(noteParts.join('\n\n'));
+      if (draft.lineItems.length) {
+        setLineItems(
+          draft.lineItems.map((i) => ({
+            description: i.description,
+            quantity: i.quantity,
+            unitPrice: i.unitPrice,
+            total: i.total,
+          })),
+        );
+      }
+      setAiInfo(
+        draft.lineItems.length
+          ? `Draft created — review and adjust before sending.${draft.usedPricingKnowledge ? ' Based on internal pricing guidance.' : ' No internal pricing found — figures are indicative.'}`
+          : 'Could not generate line items. Please draft manually.',
+      );
+    } catch (err: any) {
+      setAiError(err?.message || 'Failed to generate a draft.');
+    } finally {
+      setAiLoading(false);
+    }
+  }
 
   function updateLineItem(index: number, field: keyof QuotationLineItem, value: string | number) {
     setLineItems((prev) => {
@@ -84,6 +135,12 @@ export default function CreateQuotationModal({ clients }: Props) {
     setCurrency('USD');
     setValidUntil('');
     setLineItems([{ ...EMPTY_LINE_ITEM }]);
+    setAiOpen(false);
+    setAiRequirements('');
+    setAiRegion('');
+    setAiComplexity('standard');
+    setAiError(null);
+    setAiInfo(null);
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -178,6 +235,74 @@ export default function CreateQuotationModal({ clients }: Props) {
             </div>
 
             <form onSubmit={handleSubmit} className="px-6 py-6 md:px-10 md:py-8 space-y-8 md:space-y-10">
+
+              {/* AI draft assist */}
+              <div className="rounded-2xl border border-violet-100 dark:border-violet-900/40 bg-violet-50/40 dark:bg-violet-900/10 overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setAiOpen((v) => !v)}
+                  className="w-full flex items-center justify-between px-4 py-3 text-left"
+                >
+                  <span className="flex items-center gap-2 text-sm font-semibold text-violet-700 dark:text-violet-300">
+                    <span className="material-icons-outlined text-[18px]">auto_awesome</span>
+                    Draft with AI
+                  </span>
+                  <span className="material-icons-outlined text-[20px] text-violet-400">
+                    {aiOpen ? 'expand_less' : 'expand_more'}
+                  </span>
+                </button>
+
+                {aiOpen && (
+                  <div className="px-4 pb-4 space-y-3">
+                    <textarea
+                      value={aiRequirements}
+                      onChange={(e) => setAiRequirements(e.target.value)}
+                      rows={3}
+                      placeholder="Describe what the client needs — e.g. 'A 5-page marketing website with a blog, contact form and basic SEO for a law firm.'"
+                      className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#27272a] text-gray-900 dark:text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30 resize-none"
+                    />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <select
+                        value={aiRegion}
+                        onChange={(e) => setAiRegion(e.target.value as KbRegion | '')}
+                        className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#27272a] text-gray-900 dark:text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30"
+                      >
+                        <option value="">Region (for pricing)…</option>
+                        {KB_REGIONS.map((r) => (
+                          <option key={r} value={r}>{KB_REGION_LABELS[r]}</option>
+                        ))}
+                      </select>
+                      <select
+                        value={aiComplexity}
+                        onChange={(e) => setAiComplexity(e.target.value as 'simple' | 'standard' | 'complex')}
+                        className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#27272a] text-gray-900 dark:text-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30"
+                      >
+                        <option value="simple">Simple</option>
+                        <option value="standard">Standard</option>
+                        <option value="complex">Complex</option>
+                      </select>
+                    </div>
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                        AI fills the fields below. You review and adjust before sending.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={handleGenerate}
+                        disabled={aiLoading}
+                        className="shrink-0 inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white rounded-xl px-4 py-2 text-sm font-semibold transition-colors"
+                      >
+                        <span className={`material-icons-outlined text-[16px] ${aiLoading ? 'animate-spin' : ''}`}>
+                          {aiLoading ? 'autorenew' : 'auto_awesome'}
+                        </span>
+                        {aiLoading ? 'Generating…' : 'Generate draft'}
+                      </button>
+                    </div>
+                    {aiError && <p className="text-xs text-red-600 dark:text-red-400">{aiError}</p>}
+                    {aiInfo && <p className="text-xs text-emerald-600 dark:text-emerald-400">{aiInfo}</p>}
+                  </div>
+                )}
+              </div>
 
               {/* Recipient type toggle */}
               <div>

@@ -12,6 +12,41 @@ import {
 } from '@/lib/actions/portal-admin-knowledge';
 import { getKnowledgeCategories, getKnowledgeAnalytics } from '@/lib/actions/knowledge';
 import BlockEditor from '@/components/portal/knowledge-base/editor/BlockEditor';
+import {
+  KB_KINDS,
+  KB_KIND_LABELS,
+  KB_SERVICES,
+  KB_REGIONS,
+  KB_REGION_LABELS,
+  KB_AUDIENCES,
+  type KbAudience,
+} from '@/lib/knowledge/constants';
+
+const AUDIENCE_LABELS: Record<KbAudience, string> = {
+  public: 'Public (everyone)',
+  client: 'Clients',
+  employee: 'Employees',
+  admin: 'Admins only',
+};
+
+// roleVisibility is an array; map a single chosen audience to the role(s) stored.
+function audienceToVisibility(audience: string): string[] {
+  switch (audience) {
+    case 'public': return ['all'];
+    case 'client': return ['client'];
+    case 'employee': return ['employee'];
+    case 'admin': return ['admin'];
+    default: return ['all'];
+  }
+}
+
+function visibilityToAudience(roleVisibility?: string[]): KbAudience {
+  const roles = roleVisibility || [];
+  if (roles.includes('admin') && !roles.includes('all')) return 'admin';
+  if (roles.includes('employee') || roles.includes('intern')) return 'employee';
+  if (roles.includes('client') && !roles.includes('all')) return 'client';
+  return 'public';
+}
 
 export default function KnowledgeManagerClient({ initialArticles }: { initialArticles: any[] }) {
   const router = useRouter();
@@ -52,7 +87,7 @@ export default function KnowledgeManagerClient({ initialArticles }: { initialArt
      setIsUpdating(true);
      const formData = new FormData(e.currentTarget);
      
-     const data = {
+     const data: Record<string, any> = {
        title: formData.get('title') as string,
        subtitle: formData.get('subtitle') as string,
        slug: formData.get('slug') as string,
@@ -60,6 +95,11 @@ export default function KnowledgeManagerClient({ initialArticles }: { initialArt
        status: formData.get('status') as string,
        type: formData.get('type') as string,
        content: selectedArticle?.content || '',
+       // Knowledge classification + scoping + access control
+       kind: (formData.get('kind') as string) || undefined,
+       services: formData.getAll('services') as string[],
+       regions: formData.getAll('regions') as string[],
+       roleVisibility: audienceToVisibility(formData.get('audience') as string),
      };
      
      try {
@@ -248,14 +288,60 @@ export default function KnowledgeManagerClient({ initialArticles }: { initialArt
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Type</label>
-                                    <select 
-                                        name="type" 
+                                    <select
+                                        name="type"
                                         defaultValue={selectedArticle?.type || 'article'}
                                         className="w-full bg-gray-50 dark:bg-gray-900 border-none rounded-2xl px-4 py-3 text-sm outline-none"
                                     >
                                         <option value="article">Article</option>
                                         <option value="resource">Resource</option>
                                         <option value="policy">Policy</option>
+                                    </select>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Knowledge Kind</label>
+                                    <select
+                                        name="kind"
+                                        defaultValue={selectedArticle?.kind || ''}
+                                        className="w-full bg-gray-50 dark:bg-gray-900 border-none rounded-2xl px-4 py-3 text-sm outline-none"
+                                    >
+                                        <option value="">— None —</option>
+                                        {KB_KINDS.map(k => <option key={k} value={k}>{KB_KIND_LABELS[k]}</option>)}
+                                    </select>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Audience (access)</label>
+                                    <select
+                                        name="audience"
+                                        defaultValue={visibilityToAudience(selectedArticle?.roleVisibility)}
+                                        className="w-full bg-gray-50 dark:bg-gray-900 border-none rounded-2xl px-4 py-3 text-sm outline-none"
+                                    >
+                                        {KB_AUDIENCES.map(a => <option key={a} value={a}>{AUDIENCE_LABELS[a]}</option>)}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Services <span className="text-gray-300 normal-case font-normal">(ctrl/cmd-click for multiple)</span></label>
+                                    <select
+                                        name="services"
+                                        multiple
+                                        defaultValue={selectedArticle?.services || []}
+                                        className="w-full bg-gray-50 dark:bg-gray-900 border-none rounded-2xl px-4 py-3 text-sm outline-none min-h-[110px]"
+                                    >
+                                        {KB_SERVICES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                                    </select>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Regions <span className="text-gray-300 normal-case font-normal">(ctrl/cmd-click for multiple)</span></label>
+                                    <select
+                                        name="regions"
+                                        multiple
+                                        defaultValue={selectedArticle?.regions || []}
+                                        className="w-full bg-gray-50 dark:bg-gray-900 border-none rounded-2xl px-4 py-3 text-sm outline-none min-h-[110px]"
+                                    >
+                                        {KB_REGIONS.map(r => <option key={r} value={r}>{KB_REGION_LABELS[r]}</option>)}
                                     </select>
                                 </div>
                             </div>

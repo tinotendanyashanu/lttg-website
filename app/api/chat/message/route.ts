@@ -124,6 +124,27 @@ export async function POST(request: Request) {
     session.messages.push({ role: "bot", content: botReply.content, timestamp: new Date() });
     await session.save();
 
+    // Sales automation: a qualifying conversation becomes a CRM lead (idempotent,
+    // fire-and-forget — never affects the chat response).
+    if ((session.leadScore ?? 0) >= 7) {
+      import("@/lib/services/sales-qualification")
+        .then(({ maybeCreateLeadFromChat }) =>
+          maybeCreateLeadFromChat({
+            sessionId,
+            visitorName: session.visitorName,
+            visitorEmail: session.visitorEmail,
+            detectedCountry: session.detectedCountry,
+            leadScore: session.leadScore,
+            leadSummary: session.leadSummary,
+            messages: session.messages.map((m: { role: string; content: string }) => ({
+              role: m.role,
+              content: m.content,
+            })),
+          }),
+        )
+        .catch(() => {});
+    }
+
     return NextResponse.json({
       reply: botReply.content,
       actions: botReply.actions,

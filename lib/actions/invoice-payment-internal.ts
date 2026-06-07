@@ -131,6 +131,15 @@ export async function recordPaymentFromWebhook(
     metadata: { invoiceNumber: invoice.invoiceNumber, newStatus, remainingBalance: invoice.remainingBalance },
   });
 
+  // On full payment, automatically spin up the client's project (idempotent,
+  // fire-and-forget — never blocks or fails the payment recording).
+  if (isFullyPaid) {
+    try {
+      const { runProjectOnboarding } = await import('@/lib/services/project-onboarding');
+      runProjectOnboarding(invoiceId).catch(() => {});
+    } catch (_) {}
+  }
+
   revalidatePath('/admin/invoices');
   revalidatePath(`/admin/invoices/${invoiceId}`);
   revalidatePath('/portal/client/invoices');

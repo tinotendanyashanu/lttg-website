@@ -18,6 +18,19 @@ export interface IClientCaseTimeline {
   createdAt: Date;
 }
 
+export type MilestoneStatus = 'pending' | 'in_progress' | 'done';
+
+export interface IClientCaseMilestone {
+  _id?: mongoose.Types.ObjectId;
+  title: string;
+  description?: string;
+  status: MilestoneStatus;
+  dueDate?: Date;
+  completedAt?: Date;
+  order: number;
+  createdAt: Date;
+}
+
 export interface IClientCase extends Document {
   caseNumber: string;
   clientId: mongoose.Types.ObjectId;
@@ -29,6 +42,7 @@ export interface IClientCase extends Document {
   assignedTeam?: string;
   assignedTo?: mongoose.Types.ObjectId;
   timeline: IClientCaseTimeline[];
+  milestones: IClientCaseMilestone[];
   internalCaseId?: mongoose.Types.ObjectId;
   resolvedAt?: Date;
   closedAt?: Date;
@@ -69,6 +83,21 @@ const ClientCaseSchema: Schema = new Schema(
         description: { type: String },
         performedBy: { type: Schema.Types.ObjectId, ref: 'Account' },
         performedByName: { type: String },
+        createdAt: { type: Date, default: Date.now },
+      },
+    ],
+    milestones: [
+      {
+        title: { type: String, required: true },
+        description: { type: String },
+        status: {
+          type: String,
+          enum: ['pending', 'in_progress', 'done'],
+          default: 'pending',
+        },
+        dueDate: { type: Date },
+        completedAt: { type: Date },
+        order: { type: Number, default: 0 },
         createdAt: { type: Date, default: Date.now },
       },
     ],

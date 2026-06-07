@@ -1,6 +1,6 @@
 import dbConnect from "./mongodb";
 import type { BotResponse } from "./chatbot";
-import { getRAGContext, articleToPlainText, isClientSafeArticle } from "./rag";
+import { articleToPlainText, isClientSafeArticle } from "./rag";
 
 interface KnowledgeArticleSnippet {
   title?: string;
@@ -18,13 +18,24 @@ function toGuidanceSnippet(article: KnowledgeArticleSnippet, maxLen: number) {
 }
 
 export async function getKBContext(query: string, country?: string): Promise<string> {
-  if (process.env.GOOGLE_AI_API_KEY) {
-    try {
-      const ragContext = await getRAGContext(query, country);
-      if (ragContext) return ragContext;
-    } catch {
-      // fall through to keyword search
+  // Route through the unified retriever (hybrid vector+keyword, re-ranking,
+  // confidence scoring, no-hallucination guard, analytics). On low confidence it
+  // returns no chunks, so the bot escalates instead of guessing.
+  try {
+    const { retrieveKnowledge } = await import("@/lib/services/knowledge-retrieval");
+    const result = await retrieveKnowledge({
+      source: "chatbot",
+      query,
+      country,
+      audience: "public",
+    });
+    if (result.chunks.length) {
+      return result.chunks
+        .map(text => `[INTERNAL GUIDANCE - do not mention the source]\n${text}`)
+        .join("\n\n");
     }
+  } catch {
+    // fall through to keyword search below
   }
 
   try {

@@ -331,7 +331,7 @@ export async function createSupportTicket(prevState: unknown, formData: FormData
   const subject = formData.get('subject') as string;
   const description = formData.get('description') as string;
   const priority = (formData.get('priority') as string) || 'medium';
-  const category = (formData.get('category') as string) || 'general';
+  const category = (formData.get('category') as string) || 'general_inquiry';
   const caseId = formData.get('caseId') as string | null;
 
   if (!subject || !description) {
@@ -344,7 +344,10 @@ export async function createSupportTicket(prevState: unknown, formData: FormData
   const count = await SupportTicket.countDocuments();
   const ticketId = `TKT-${String(count + 1).padStart(5, '0')}`;
 
-  await SupportTicket.create({
+  const { computeSlaDueDates } = await import('@/lib/services/support-sla');
+  const sla = computeSlaDueDates(priority as any);
+
+  const ticket = await SupportTicket.create({
     ticketId,
     clientId: session.user.id,
     subject,
@@ -352,11 +355,125 @@ export async function createSupportTicket(prevState: unknown, formData: FormData
     priority,
     category,
     caseId: caseId || undefined,
-    status: 'open',
+    status: 'new',
+    aiProcessingStatus: 'pending',
+    firstResponseDueAt: sla.firstResponseDueAt,
+    resolutionDueAt: sla.resolutionDueAt,
+    activity: [
+      {
+        type: 'created',
+        actor: session.user.name || 'Client',
+        actorRole: 'client',
+        detail: 'Ticket created via client portal',
+        createdAt: new Date(),
+      },
+    ],
   });
+
+  // Auto-create a linked support conversation thread (reuses MessageThread).
+  try {
+    const { MessageThread } = await import('@/models/MessageThread');
+    const thread = await MessageThread.create({
+      clientId: session.user.id,
+      subject: `[${ticketId}] ${subject}`,
+      participants: [session.user.id],
+      caseId: caseId || undefined,
+      ticketId: ticket._id,
+      lastMessagePreview: description.slice(0, 140),
+    });
+    ticket.threadId = thread._id;
+    await ticket.save();
+  } catch (_) {}
+
+  // Fire-and-forget AI processing — must never block or fail ticket creation.
+  try {
+    const { reprocessTicketAI } = await import('@/lib/actions/support-center');
+    void reprocessTicketAI(String(ticket._id)).catch(() => {});
+  } catch (_) {}
 
   revalidatePath('/portal/client/tickets');
   return { success: true, ticketId };
+}
+
+interface ReplyAttachment {
+  url: string;
+  name: string;
+  size?: number;
+  mimeType?: string;
+}
+
+/**
+ * Client reply to one of their own tickets. Appends a message (with optional
+ * attachments) to the ticket thread, reopens the ticket if it was waiting on the
+ * client or already resolved, refreshes the linked MessageThread and flags it
+ * unread for the team. Never touches closed tickets (the UI hides the form).
+ */
+export async function replyToOwnTicket(
+  ticketId: string,
+  content: string,
+  attachments: ReplyAttachment[] = [],
+) {
+  const session = await auth();
+  if (!session?.user?.id || session.user.role !== 'client') {
+    return { error: 'Unauthorized' };
+  }
+
+  const trimmed = (content || '').trim();
+  if (!trimmed && attachments.length === 0) {
+    return { error: 'Message cannot be empty.' };
+  }
+
+  await dbConnect();
+  const { SupportTicket } = await import('@/models/SupportTicket');
+  const { Account } = await import('@/models/Account');
+
+  const ticket = await SupportTicket.findOne({ _id: ticketId, clientId: session.user.id });
+  if (!ticket) return { error: 'Ticket not found.' };
+  if (ticket.status === 'closed') return { error: 'This ticket is closed. Please open a new ticket.' };
+
+  const account = await Account.findById(session.user.id).lean();
+  const senderName = (account as any)?.fullName || session.user.name || 'Client';
+  const now = new Date();
+
+  ticket.messages.push({
+    senderRole: 'client',
+    senderName,
+    content: trimmed,
+    attachments,
+    createdAt: now,
+  } as any);
+
+  // A client response reopens a ticket that was waiting on them or resolved.
+  if (ticket.status === 'waiting_client' || ticket.status === 'resolved') {
+    ticket.status = 'open';
+  }
+
+  ticket.activity = ticket.activity || [];
+  ticket.activity.push({
+    type: 'reply',
+    actor: senderName,
+    actorRole: 'client',
+    detail: attachments.length ? `Client replied · ${attachments.length} attachment(s)` : 'Client replied',
+    createdAt: now,
+  });
+  await ticket.save();
+
+  // Keep the linked conversation thread fresh and flag it for the team.
+  if (ticket.threadId) {
+    const { MessageThread } = await import('@/models/MessageThread');
+    await MessageThread.findByIdAndUpdate(ticket.threadId, {
+      $set: {
+        lastMessageAt: now,
+        lastMessagePreview: (trimmed || 'Sent an attachment').slice(0, 140),
+      },
+      $inc: { unreadByTeam: 1 },
+    }).catch(() => {});
+  }
+
+  revalidatePath(`/portal/client/tickets/${ticketId}`);
+  revalidatePath(`/admin/tickets/${ticketId}`);
+  revalidatePath(`/portal/employee/support/${ticketId}`);
+  return { success: true };
 }
 
 // ─── Messages ─────────────────────────────────────────────────────────────────

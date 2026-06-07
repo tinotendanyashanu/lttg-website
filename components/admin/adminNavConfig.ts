@@ -16,9 +16,10 @@ export const NAV_SECTIONS: NavSection[] = [
     id: 'overview',
     label: null,
     items: [
-      { name: 'Overview',   href: '/admin',            icon: 'dashboard',  exact: true },
-      { name: 'Mail',       href: '/dashboard/mail',   icon: 'mail' },
-      { name: 'Analytics',  href: '/admin/analytics',  icon: 'bar_chart' },
+      { name: 'Overview',        href: '/admin',                 icon: 'dashboard',    exact: true },
+      { name: 'Command Center',  href: '/admin/command-center',  icon: 'rocket_launch' },
+      { name: 'Mail',            href: '/dashboard/mail',        icon: 'mail' },
+      { name: 'Analytics',       href: '/admin/analytics',       icon: 'bar_chart' },
     ],
   },
   {
@@ -30,10 +31,20 @@ export const NAV_SECTIONS: NavSection[] = [
       { name: 'Contracts', href: '/admin/contracts', icon: 'description' },
       { name: 'Quotations', href: '/admin/quotations', icon: 'request_quote' },
       { name: 'Invoices',  href: '/admin/invoices',  icon: 'receipt_long' },
-      { name: 'Tickets',   href: '/admin/tickets',   icon: 'support_agent' },
       { name: 'Messages',  href: '/admin/messages',  icon: 'chat' },
       { name: 'Chat Inbox',  href: '/admin/chat',          icon: 'chat_bubble' },
       { name: 'AI Insights', href: '/admin/chat/insights', icon: 'psychology' },
+    ],
+  },
+  {
+    id: 'support',
+    label: 'Support',
+    items: [
+      { name: 'Tickets',           href: '/admin/tickets',           icon: 'support_agent' },
+      { name: 'SLA Monitor',       href: '/admin/support/sla',       icon: 'timer' },
+      { name: 'Customer Health',   href: '/admin/support/health',    icon: 'favorite' },
+      { name: 'AI Insights',       href: '/admin/support/insights',  icon: 'auto_awesome' },
+      { name: 'Support Analytics', href: '/admin/support/analytics', icon: 'insights' },
     ],
   },
   {
@@ -59,6 +70,7 @@ export const NAV_SECTIONS: NavSection[] = [
     label: 'Content',
     items: [
       { name: 'Knowledge Base', href: '/admin/knowledge',     icon: 'menu_book' },
+      { name: 'AI & Knowledge', href: '/admin/ai-knowledge',  icon: 'neurology' },
       { name: 'Academy',        href: '/admin/academy',       icon: 'school' },
       { name: 'Resources',      href: '/portal/employee/resources', icon: 'folder_zip' },
       { name: 'Announcements',  href: '/admin/announcements', icon: 'campaign' },

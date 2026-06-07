@@ -21,9 +21,9 @@ async function getTickets() {
     accountMap[String(acc._id)] = { fullName: acc.fullName, email: acc.email };
   }
 
-  const openCount     = tickets.filter((t: any) => t.status === 'open').length;
+  const openCount     = tickets.filter((t: any) => ['new', 'open'].includes(t.status)).length;
   const inProgressCount = tickets.filter((t: any) => t.status === 'in_progress').length;
-  const urgentCount   = tickets.filter((t: any) => t.priority === 'urgent' && !['resolved', 'closed'].includes(t.status)).length;
+  const urgentCount   = tickets.filter((t: any) => ['urgent', 'critical'].includes(t.priority) && !['resolved', 'closed'].includes(t.status)).length;
 
   return { tickets, accountMap, openCount, inProgressCount, urgentCount };
 }

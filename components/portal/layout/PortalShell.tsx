@@ -239,6 +239,19 @@ export default function PortalShell({
             </Link>
 
             <Link
+              href="/portal/employee/assistant"
+              className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-center lg:justify-start'} gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
+                pathname.startsWith("/portal/employee/assistant")
+                  ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
+                  : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
+              }`}
+              title={isCollapsed ? "AI Assistant" : undefined}
+            >
+              <span className="material-icons-outlined text-[20px] group-hover:scale-110 transition-transform">neurology</span>
+              {!isCollapsed && <span className="hidden lg:block text-sm">AI Assistant</span>}
+            </Link>
+
+            <Link
               href="/portal/employee/team"
               className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-center lg:justify-start'} gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
                 pathname.startsWith("/portal/employee/team")
@@ -319,6 +332,21 @@ export default function PortalShell({
                   <span className="material-icons-outlined text-[20px] group-hover:scale-110 transition-transform">chat_bubble</span>
                   {!isCollapsed && <span className="hidden lg:block text-sm">Chat Inbox</span>}
                 </div>
+              </Link>
+            )}
+
+            {(isAdmin || roles.includes('employee')) && (
+              <Link
+                href="/portal/employee/support"
+                className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-start'} gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors group ${
+                  pathname.startsWith("/portal/employee/support")
+                    ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
+                    : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
+                }`}
+                title={isCollapsed ? "Support Inbox" : undefined}
+              >
+                <span className="material-icons-outlined text-[20px] group-hover:scale-110 transition-transform">support_agent</span>
+                {!isCollapsed && <span className="hidden lg:block text-sm">Support Inbox</span>}
               </Link>
             )}
 
