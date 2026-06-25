@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Send, MessageCircle, ChevronDown, Sparkles, User, ArrowRight, Bot, CheckCheck } from 'lucide-react';
+import { Send, MessageCircle, ChevronDown, Sparkles, User, ArrowRight, Bot, CheckCheck, RotateCcw, AlertCircle } from 'lucide-react';
 
 type MessageRole = 'bot' | 'visitor' | 'employee';
 
@@ -46,16 +46,43 @@ function TypingDots() {
   );
 }
 
+function tokenizeLine(text: string): React.ReactNode[] {
+  const parts = text.split(/(\*\*[^*]+\*\*|\[[^\]]+\]\([^)]+\))/g);
+  return parts.map((p, i) => {
+    if (p.startsWith('**') && p.endsWith('**')) return <strong key={i}>{p.slice(2, -2)}</strong>;
+    const m = p.match(/^\[([^\]]+)\]\((https?:\/\/[^\s)]+|\/[^\s)]*)\)$/);
+    if (m) {
+      const ext = m[2].startsWith('http');
+      return (
+        <a key={i} href={m[2]} target={ext ? '_blank' : undefined} rel={ext ? 'noreferrer' : undefined}
+          className="underline underline-offset-2 hover:opacity-80">
+          {m[1]}
+        </a>
+      );
+    }
+    return <span key={i}>{p}</span>;
+  });
+}
+
+function renderContent(content: string) {
+  return content.split('\n').map((line, i) => {
+    const isBullet = /^[-*•]\s/.test(line);
+    const text = isBullet ? line.replace(/^[-*•]\s/, '') : line;
+    if (isBullet) {
+      return (
+        <span key={i} className="flex gap-1.5 items-start mt-0.5">
+          <span className="mt-[7px] w-1 h-1 rounded-full bg-current opacity-50 flex-shrink-0" />
+          <span>{tokenizeLine(text)}</span>
+        </span>
+      );
+    }
+    return <span key={i} className="block">{tokenizeLine(text) || <>&nbsp;</>}</span>;
+  });
+}
+
 function MessageBubble({ msg }: { msg: Message }) {
   const isVisitor = msg.role === 'visitor';
   const isEmployee = msg.role === 'employee';
-
-  const parts = msg.content.split(/(\*\*[^*]+\*\*)/g);
-  const rendered = parts.map((p, i) =>
-    p.startsWith('**') && p.endsWith('**')
-      ? <strong key={i}>{p.slice(2, -2)}</strong>
-      : <span key={i}>{p}</span>
-  );
 
   return (
     <div className={`flex gap-2.5 ${isVisitor ? 'flex-row-reverse' : 'flex-row'}`}>
@@ -71,13 +98,13 @@ function MessageBubble({ msg }: { msg: Message }) {
           </span>
         )}
         <div
-          className={`px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
+          className={`px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed ${
             isVisitor
               ? 'bg-[#7c3aed] text-white rounded-br-md'
               : 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100 rounded-bl-md'
           }`}
         >
-          {rendered}
+          {renderContent(msg.content)}
         </div>
         <span className="text-[10px] text-gray-400 dark:text-gray-500 px-1">
           {formatTime(msg.timestamp)}
@@ -147,6 +174,7 @@ export default function ChatWidget() {
   const [sessionId, setSessionId] = useState('');
   const [chatStatus, setChatStatus] = useState<string>('bot');
   const [hasNewReply, setHasNewReply] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Escalation form
   const [escalateName, setEscalateName] = useState('');
@@ -245,6 +273,7 @@ export default function ChatWidget() {
     setInput('');
     setSending(true);
     setPendingActions(null);
+    setError(null);
 
     const userMsg: Message = { role: 'visitor', content: text, timestamp: new Date() };
     setMessages(prev => [...prev, userMsg]);
@@ -257,8 +286,11 @@ export default function ChatWidget() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ sessionId, content: text }),
         });
-      } catch { /* silent */ }
-      setSending(false);
+      } catch {
+        setError('Failed to send reply. Check your connection.');
+      } finally {
+        setSending(false);
+      }
       return;
     }
 
@@ -269,32 +301,37 @@ export default function ChatWidget() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sessionId, message: text }),
       });
+
       const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || `HTTP ${res.status}`);
+      }
 
       if (data.handedOff) {
         setChatStatus(data.status);
         setView('waiting');
-        setSending(false);
-        setTyping(false);
         return;
       }
 
-      const botMsg: Message = {
-        role: 'bot',
+      setTyping(false);
+      setMessages(prev => [...prev, {
+        role: 'bot' as MessageRole,
         content: data.reply || "I'm here to help! What would you like to know?",
         timestamp: new Date(),
-      };
-
-      setTimeout(() => {
-        setTyping(false);
-        setMessages(prev => [...prev, botMsg]);
-        if (data.actions?.length) setPendingActions(data.actions);
-        if (data.shouldEscalate) setView('escalate');
-        if (data.status) setChatStatus(data.status);
-        setSending(false);
-      }, 800 + Math.random() * 400);
-    } catch {
+      }]);
+      if (data.actions?.length) setPendingActions(data.actions);
+      if (data.shouldEscalate) setView('escalate');
+      if (data.status) setChatStatus(data.status);
+    } catch (err) {
       setTyping(false);
+      const msg = err instanceof Error ? err.message : '';
+      setError(
+        msg.toLowerCase().includes('429') || msg.toLowerCase().includes('too many')
+          ? 'Slow down — you\'re sending too fast.'
+          : 'Couldn\'t reach the AI right now. Please try again.'
+      );
+    } finally {
       setSending(false);
     }
   }
@@ -345,6 +382,19 @@ export default function ChatWidget() {
       e.preventDefault();
       sendMessage();
     }
+  }
+
+  function resetConversation() {
+    const newSid = generateSessionId();
+    localStorage.setItem(SESSION_KEY, newSid);
+    localStorage.removeItem(SESSION_DB_KEY);
+    setSessionId(newSid);
+    setMessages([]);
+    setPendingActions(null);
+    setChatStatus('bot');
+    setView('chat');
+    setError(null);
+    setInput('');
   }
 
   const isHumanActive = chatStatus === 'human_active' || chatStatus === 'pending_human';
@@ -407,6 +457,16 @@ export default function ChatWidget() {
                     : 'AI Assistant · Usually instant'}
                 </p>
               </div>
+              {messages.length > 0 && chatStatus === 'bot' && (
+                <button
+                  onClick={resetConversation}
+                  className="w-7 h-7 rounded-full hover:bg-white/20 flex items-center justify-center transition-colors"
+                  aria-label="New conversation"
+                  title="Start new conversation"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                </button>
+              )}
               <button
                 onClick={() => setOpen(false)}
                 className="w-7 h-7 rounded-full hover:bg-white/20 flex items-center justify-center transition-colors"
@@ -458,6 +518,21 @@ export default function ChatWidget() {
                       <div className="flex items-center gap-2">
                         <CheckCheck className="w-3.5 h-3.5 text-emerald-500" />
                         <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">Conversation resolved</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {error && (
+                    <div className="mx-1 flex items-start gap-2 p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-xl">
+                      <AlertCircle className="w-3.5 h-3.5 text-red-500 flex-shrink-0 mt-0.5" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-red-600 dark:text-red-400">{error}</p>
+                        <button
+                          onClick={() => setError(null)}
+                          className="text-[11px] text-red-400 hover:text-red-600 underline mt-0.5"
+                        >
+                          Dismiss
+                        </button>
                       </div>
                     </div>
                   )}
@@ -547,6 +622,7 @@ export default function ChatWidget() {
                     value={input}
                     onChange={e => {
                       setInput(e.target.value);
+                      if (error) setError(null);
                       e.target.style.height = 'auto';
                       e.target.style.height = Math.min(e.target.scrollHeight, 100) + 'px';
                     }}

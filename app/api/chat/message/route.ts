@@ -3,6 +3,20 @@ import dbConnect from "@/lib/mongodb";
 import { ChatSession } from "@/models/ChatSession";
 import { sanitizeBotReply } from "@/lib/chat-sanitizer";
 
+// Simple in-memory rate limiter: max 5 messages per session per 10 seconds
+const rateLimitMap = new Map<string, number[]>();
+const RATE_WINDOW_MS = 10_000;
+const RATE_MAX = 5;
+
+function isRateLimited(key: string): boolean {
+  const now = Date.now();
+  const hits = (rateLimitMap.get(key) || []).filter(t => now - t < RATE_WINDOW_MS);
+  if (hits.length >= RATE_MAX) return true;
+  hits.push(now);
+  rateLimitMap.set(key, hits);
+  return false;
+}
+
 type BotReply = {
   content: string;
   actions?: { label: string; type: "booking" | "service" | "escalate"; href?: string }[];
@@ -20,6 +34,9 @@ export async function POST(request: Request) {
     }
     if (!message || typeof message !== "string" || message.trim().length === 0) {
       return NextResponse.json({ error: "Message required" }, { status: 400 });
+    }
+    if (isRateLimited(sessionId)) {
+      return NextResponse.json({ error: "Too many messages. Please slow down." }, { status: 429 });
     }
     const safeMessage = message.trim().slice(0, 1000);
 
