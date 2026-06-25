@@ -4,6 +4,7 @@ import dbConnect from "@/lib/mongodb";
 import { ChatSession } from "@/models/ChatSession";
 import { KnowledgeArticle } from "@/models/KnowledgeArticle";
 import { EMBEDDING_MODEL } from "@/lib/rag";
+import { getAIProviderConfigForAdmin } from "@/lib/ai/provider";
 
 export const dynamic = "force-dynamic";
 
@@ -16,13 +17,17 @@ export async function GET() {
 
   await dbConnect();
 
-  const [totalSessions, fallbackSessions, aiSessions, publishedArticles, embeddedArticles, staleEmbeddings] = await Promise.all([
+  const aiConfig = await getAIProviderConfigForAdmin();
+
+  const [totalSessions, fallbackSessions, aiSessions, publishedArticles, embeddedArticles, staleEmbeddings, recentAiCalls, failedAiCalls] = await Promise.all([
     ChatSession.countDocuments({}),
     ChatSession.countDocuments({ aiMode: "fallback" }),
     ChatSession.countDocuments({ aiMode: "ai" }),
     KnowledgeArticle.countDocuments({ status: "published" }),
     KnowledgeArticle.countDocuments({ status: "published", embedding: { $exists: true, $not: { $size: 0 } } }),
     KnowledgeArticle.countDocuments({ status: "published", embeddingModel: { $ne: EMBEDDING_MODEL } }),
+    (await import("@/models/AICallLog")).AICallLog.countDocuments({ createdAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) } }),
+    (await import("@/models/AICallLog")).AICallLog.countDocuments({ status: "failure", createdAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) } }),
   ]);
 
   const recentErrors = await ChatSession.find({ aiError: { $exists: true, $ne: "" } })
@@ -33,9 +38,17 @@ export async function GET() {
 
   return NextResponse.json({
     models: {
-      primary: process.env.GEMINI_PRIMARY_MODEL || "gemini-2.5-flash",
-      upgraded: process.env.GEMINI_UPGRADED_MODEL || "gemini-2.5-flash",
-      embedding: EMBEDDING_MODEL,
+      provider: aiConfig.provider,
+      default: aiConfig.defaultModel,
+      secondary: aiConfig.secondaryModel,
+      embedding: aiConfig.embeddingModel,
+      tasks: aiConfig.taskModels,
+    },
+    providerHealth: aiConfig.health,
+    aiCalls: {
+      last24h: recentAiCalls,
+      failedLast24h: failedAiCalls,
+      failureRateLast24h: recentAiCalls ? failedAiCalls / recentAiCalls : 0,
     },
     sessions: {
       total: totalSessions,

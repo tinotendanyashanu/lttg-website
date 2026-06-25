@@ -1,6 +1,6 @@
-import { GoogleGenerativeAI, TaskType } from "@google/generative-ai";
+import { AIProvider, getAIEmbeddingModelName } from "@/lib/ai/provider";
 
-export const EMBEDDING_MODEL = process.env.GEMINI_EMBEDDING_MODEL || "gemini-embedding-001";
+export const EMBEDDING_MODEL = getAIEmbeddingModelName();
 const TOP_K = 3;
 const SIMILARITY_THRESHOLD = 0.45;
 // Pricing is region-specific. When the visitor's country is known we prioritize
@@ -28,12 +28,6 @@ const INTERNAL_KB_TERMS = [
   "handbook",
   "commission",
 ];
-
-function getGenAI() {
-  const apiKey = process.env.GOOGLE_AI_API_KEY;
-  if (!apiKey) throw new Error("GOOGLE_AI_API_KEY not configured");
-  return new GoogleGenerativeAI(apiKey);
-}
 
 function collectBlockText(value: unknown, parts: string[]) {
   if (!value) return;
@@ -129,13 +123,8 @@ export async function generateEmbedding(
   text: string,
   taskType: "RETRIEVAL_DOCUMENT" | "RETRIEVAL_QUERY" = "RETRIEVAL_DOCUMENT"
 ): Promise<number[]> {
-  const genAI = getGenAI();
-  const model = genAI.getGenerativeModel({ model: EMBEDDING_MODEL });
-  const result = await model.embedContent({
-    content: { parts: [{ text: text.slice(0, 8000) }], role: "user" },
-    taskType: TaskType[taskType],
-  });
-  return result.embedding.values;
+  void taskType;
+  return AIProvider.embed(text, "embedding");
 }
 
 function articleMentionsCountry(article: KnowledgeArticleVector, country: string): boolean {

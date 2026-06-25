@@ -47,8 +47,7 @@ export async function POST(request: Request) {
     let aiConfidence = 0;
     let retrievalUsed = false;
 
-    if (process.env.GOOGLE_AI_API_KEY) {
-      try {
+    try {
         const { getAIBotResponse, getSelectedChatModel } = await import("@/lib/ai-chatbot");
         const { getKBContext } = await import("@/lib/chatbot-kb");
 
@@ -105,10 +104,6 @@ export async function POST(request: Request) {
         console.error("AI chatbot error, falling back:", err);
         botReply = await getFallbackResponse(safeMessage, visitorMessageCount);
       }
-    } else {
-      aiError = "GOOGLE_AI_API_KEY not configured";
-      botReply = await getFallbackResponse(safeMessage, visitorMessageCount);
-    }
 
     // Final safety net: strip any internal/raw content before it is stored or shown.
     // Applies to BOTH the AI path and the regex fallback — nothing reaches the visitor unscrubbed.

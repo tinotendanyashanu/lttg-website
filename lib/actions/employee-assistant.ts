@@ -5,7 +5,7 @@
  *
  * An internal RAG assistant over the knowledge base (SOPs, pricing, playbooks,
  * contracts, workflows). Reuses the unified retriever (audience-scoped, so a user
- * never sees content above their role) and the same Gemini answer-with-context
+ * never sees content above their role) and the same AI answer-with-context
  * pattern as the public chatbot — but answers from internal knowledge only and
  * never hallucinates: on low confidence it says so and points to the right team.
  *
@@ -16,11 +16,9 @@ import { auth } from '@/auth';
 import { revalidatePath } from 'next/cache';
 import dbConnect from '@/lib/mongodb';
 import { getAccountByEmail } from '@/lib/data/account';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { AIProvider } from '@/lib/ai/provider';
 import type { KbAudience } from '@/lib/knowledge/constants';
 
-const MODEL =
-  process.env.GEMINI_ASSISTANT_MODEL || process.env.GEMINI_PRIMARY_MODEL || 'gemini-2.5-flash';
 
 const ASSISTANT_SYSTEM = `You are the internal AI assistant for the LeoTheTechGuy team. You help staff (employees, interns, admins) get fast, accurate answers from the company's internal knowledge base — SOPs, pricing guidance, sales playbooks, contracts, and workflows.
 
@@ -111,24 +109,33 @@ export async function askEmployeeAssistant(
     confidence = retrieval.confidence;
     sources = retrieval.articles.map((a) => ({ title: a.title, slug: a.slug, articleId: a.id }));
 
-    if (!retrieval.shouldEscalate && retrieval.chunks.length && process.env.GOOGLE_AI_API_KEY) {
-      const apiKey = process.env.GOOGLE_AI_API_KEY;
+    if (!retrieval.shouldEscalate && retrieval.chunks.length ) {
       const history = convo.messages
         .slice(-9, -1)
         .filter((m: any) => m.content)
-        .map((m: any) => ({ role: m.role === 'user' ? 'user' : 'model', parts: [{ text: m.content }] }));
+        .map((m: any) => ({
+          role: (m.role === 'user' ? 'user' : 'assistant') as 'user' | 'assistant',
+          content: m.content,
+        }));
 
-      const model = new GoogleGenerativeAI(apiKey).getGenerativeModel({
-        model: MODEL,
-        systemInstruction: `${ASSISTANT_SYSTEM}\n\nINTERNAL KNOWLEDGE:\n${retrieval.chunks.join('\n\n---\n\n')}`,
-        generationConfig: { temperature: 0.3, maxOutputTokens: 800 },
+      const result = await AIProvider.generate({
+        task: 'employee_assistant',
+        messages: [
+          {
+            role: 'system',
+            content: ASSISTANT_SYSTEM + String.fromCharCode(10) + String.fromCharCode(10) + 'INTERNAL KNOWLEDGE:' + String.fromCharCode(10) + retrieval.chunks.join(String.fromCharCode(10) + String.fromCharCode(10) + '---' + String.fromCharCode(10) + String.fromCharCode(10)),
+          },
+          ...history,
+          { role: 'user', content: trimmed },
+        ],
+        temperature: 0.3,
+        maxTokens: 800,
+        fallbackText: LOW_CONFIDENCE_ANSWER,
       });
-      const chat = model.startChat({ history });
-      const result = await chat.sendMessage(trimmed);
-      const text = result.response.text().trim();
+      const text = result.text.trim();
       if (text) answer = text;
     } else {
-      // Low confidence / no context / no API key → no-hallucination fallback.
+      // Low confidence / no context / provider unavailable → no-hallucination fallback.
       answer = LOW_CONFIDENCE_ANSWER;
       sources = []; // don't imply weak matches answered the question
     }

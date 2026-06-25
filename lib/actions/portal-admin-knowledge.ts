@@ -170,8 +170,6 @@ export async function deleteKnowledgeCategory(id: string) {
 
 
 async function generateArticleEmbedding(articleId: any, article: any) {
-  if (!process.env.GOOGLE_AI_API_KEY) return;
-
   const { generateEmbedding, buildArticleText, EMBEDDING_MODEL } = await import("@/lib/rag");
   const text = buildArticleText({
     title: article.title,

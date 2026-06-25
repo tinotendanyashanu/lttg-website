@@ -1,8 +1,7 @@
 /**
  * Support Center — AI service.
  *
- * Reuses the existing Gemini infrastructure (same SDK + defensive JSON pattern as
- * lib/ai-chatbot.ts) and the embedding/RAG helpers from lib/rag.ts. Provides:
+ * Uses the unified AI provider and the embedding/RAG helpers from lib/rag.ts. Provides:
  *   - processTicketAI:        summary, category, priority, sentiment, suggested team
  *   - suggestArticlesForTicket: KB-article suggestions via embeddings (for agents)
  *   - generateTicketReplyDraft: a professional draft reply for the AI Reply Assistant
@@ -11,8 +10,9 @@
  * existing KnowledgeGapSuggestion review queue (no new gap system is created).
  */
 
-import { GoogleGenerativeAI } from '@google/generative-ai';
-import { generateEmbedding, articleToPlainText } from '@/lib/rag';
+import { z } from 'zod';
+import { AIProvider } from '@/lib/ai/provider';
+import { articleToPlainText } from '@/lib/rag';
 import {
   CATEGORY_VALUES,
   categoryLabel,
@@ -20,16 +20,6 @@ import {
   type TicketPriority,
   type Sentiment,
 } from '@/lib/support/constants';
-
-const SUPPORT_MODEL = process.env.GEMINI_SUPPORT_MODEL || process.env.GEMINI_PRIMARY_MODEL || 'gemini-2.5-flash';
-const SIMILARITY_THRESHOLD = 0.45;
-const ARTICLE_TOP_K = 3;
-
-function getGenAI() {
-  const apiKey = process.env.GOOGLE_AI_API_KEY;
-  if (!apiKey) throw new Error('GOOGLE_AI_API_KEY is not configured');
-  return new GoogleGenerativeAI(apiKey);
-}
 
 // ── Ticket classification ──────────────────────────────────────────────────────
 
@@ -56,6 +46,13 @@ Guidance:
 ALWAYS respond with valid JSON only, matching exactly:
 {"summary":"...","category":"one-of-the-category-values","priority":"low|medium|high|critical","sentiment":"positive|neutral|negative"}`;
 
+const TicketClassificationSchema = z.object({
+  summary: z.string().optional().default(""),
+  category: z.string().optional().default("general_inquiry"),
+  priority: z.string().optional().default("medium"),
+  sentiment: z.string().optional().default("neutral"),
+});
+
 function coercePriority(v: unknown): TicketPriority {
   const s = String(v || '').toLowerCase();
   if (s === 'critical' || s === 'urgent') return 'critical';
@@ -77,7 +74,7 @@ function coerceCategory(v: unknown): string {
 }
 
 /**
- * Classify a ticket with Gemini. On any failure returns a safe heuristic result
+ * Classify a ticket with the unified AI provider. On any failure returns a safe heuristic result
  * so callers never have to handle exceptions — ticket creation must never break.
  */
 export async function processTicketAI(input: {
@@ -93,20 +90,16 @@ export async function processTicketAI(input: {
   };
 
   try {
-    const model = getGenAI().getGenerativeModel({
-      model: SUPPORT_MODEL,
-      systemInstruction: CLASSIFY_SYSTEM,
-      generationConfig: {
-        responseMimeType: 'application/json',
-        temperature: 0.2,
-        maxOutputTokens: 400,
-      },
+    const prompt = ['SUBJECT: ' + input.subject, '', 'DESCRIPTION:', input.description].join(String.fromCharCode(10)).slice(0, 6000);
+    const parsed = await AIProvider.classify({
+      task: 'support',
+      system: CLASSIFY_SYSTEM,
+      prompt,
+      temperature: 0.2,
+      maxTokens: 400,
+      schema: TicketClassificationSchema,
+      fallback,
     });
-
-    const prompt = `SUBJECT: ${input.subject}\n\nDESCRIPTION:\n${input.description}`.slice(0, 6000);
-    const result = await model.generateContent(prompt);
-    const raw = result.response.text();
-    const parsed = JSON.parse(raw.replace(/^```json\s*/i, '').replace(/```\s*$/, '').trim());
 
     const category = coerceCategory(parsed.category);
     return {
@@ -209,11 +202,6 @@ export async function generateTicketReplyDraft(input: {
   history?: { senderRole: string; content: string }[];
   kbContext?: string;
 }): Promise<string> {
-  const model = getGenAI().getGenerativeModel({
-    model: SUPPORT_MODEL,
-    systemInstruction: REPLY_SYSTEM,
-    generationConfig: { temperature: 0.5, maxOutputTokens: 600 },
-  });
 
   const historyText = (input.history || [])
     .slice(-6)
@@ -234,8 +222,15 @@ export async function generateTicketReplyDraft(input: {
     .join('\n')
     .slice(0, 8000);
 
-  const result = await model.generateContent(prompt);
-  const text = result.response.text().trim();
+  const result = await AIProvider.generate({
+    task: 'support',
+    system: REPLY_SYSTEM,
+    prompt,
+    temperature: 0.5,
+    maxTokens: 600,
+    fallbackText: 'Thank you for reaching out — we are looking into this and will follow up shortly.',
+  });
+  const text = result.text.trim();
   return text || 'Thank you for reaching out — we are looking into this and will follow up shortly.';
 }
 
@@ -250,7 +245,7 @@ export async function buildKbContextForArticles(articleIds: string[]): Promise<s
       { _id: { $in: articleIds } },
       { title: 1, content: 1 }
     ).lean();
-    return (articles as any[])
+    return (articles as { content?: unknown }[])
       .map((a) => articleToPlainText(a.content, 700))
       .filter(Boolean)
       .join('\n\n')

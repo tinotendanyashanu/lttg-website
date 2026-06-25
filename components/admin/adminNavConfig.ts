@@ -71,6 +71,7 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { name: 'Knowledge Base', href: '/admin/knowledge',     icon: 'menu_book' },
       { name: 'AI & Knowledge', href: '/admin/ai-knowledge',  icon: 'neurology' },
+      { name: 'AI Settings',    href: '/admin/ai-settings',   icon: 'settings_suggest' },
       { name: 'Academy',        href: '/admin/academy',       icon: 'school' },
       { name: 'Resources',      href: '/portal/employee/resources', icon: 'folder_zip' },
       { name: 'Announcements',  href: '/admin/announcements', icon: 'campaign' },

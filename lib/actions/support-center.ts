@@ -17,7 +17,7 @@ import {
   categoryLabel,
   type TicketPriority,
 } from '@/lib/support/constants';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { AIProvider } from '@/lib/ai/provider';
 import { sendEmail, EmailTemplates } from '@/lib/email';
 
 // ── Auth ────────────────────────────────────────────────────────────────────
@@ -836,11 +836,6 @@ export async function getSupportExecutiveSummary(): Promise<{ summary: string }>
   await requireSupportStaff();
   const analytics = await getSupportAnalytics();
 
-  const apiKey = process.env.GOOGLE_AI_API_KEY;
-  if (!apiKey) {
-    return { summary: 'AI summary unavailable — GOOGLE_AI_API_KEY is not configured.' };
-  }
-
   const topCategories = analytics.byCategory.slice(0, 3).map((c) => `${c.label} (${c.count})`).join(', ');
   const facts = [
     `Total tickets: ${analytics.total}`,
@@ -854,15 +849,18 @@ export async function getSupportExecutiveSummary(): Promise<{ summary: string }>
     `Sentiment — positive ${analytics.sentiment.positive}, neutral ${analytics.sentiment.neutral}, negative ${analytics.sentiment.negative}`,
   ].join('\n');
 
+  const heuristic = 'Support is handling ' + analytics.total + ' tickets (' + analytics.open + ' open) with a ' + analytics.resolutionRate + '% resolution rate. Most common categories: ' + (topCategories || 'n/a') + '.';
+
   try {
-    const model = new GoogleGenerativeAI(apiKey).getGenerativeModel({
-      model: process.env.GEMINI_SUPPORT_MODEL || process.env.GEMINI_PRIMARY_MODEL || 'gemini-2.5-flash',
-      systemInstruction:
-        'You are a support operations analyst for LeoTheTechGuy. Write a crisp executive summary (3-5 sentences) of the support metrics provided. Call out the dominant issue category, any SLA risk, sentiment trend, and one clear recommendation. No bullet points, no markdown, plain prose.',
-      generationConfig: { temperature: 0.4, maxOutputTokens: 400 },
+    const result = await AIProvider.generate({
+      task: 'executive',
+      system: 'You are a support operations analyst for LeoTheTechGuy. Write a crisp executive summary (3-5 sentences) of the support metrics provided. Call out the dominant issue category, any SLA risk, sentiment trend, and one clear recommendation. No bullet points, no markdown, plain prose.',
+      prompt: 'Support metrics:' + String.fromCharCode(10) + facts,
+      temperature: 0.4,
+      maxTokens: 400,
+      fallbackText: heuristic,
     });
-    const result = await model.generateContent(`Support metrics:\n${facts}`);
-    return { summary: result.response.text().trim() || 'No summary generated.' };
+    return { summary: result.text.trim() || heuristic };
   } catch {
     return {
       summary: `Support is handling ${analytics.total} tickets (${analytics.open} open) with a ${analytics.resolutionRate}% resolution rate. Most common categories: ${topCategories || 'n/a'}.`,

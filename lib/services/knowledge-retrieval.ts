@@ -258,13 +258,11 @@ export async function retrieveKnowledge(input: RetrieveInput): Promise<Retrieval
 
     // Embed the query (biased toward the caller's market when known).
     let queryEmbedding: number[] | null = null;
-    if (process.env.GOOGLE_AI_API_KEY) {
-      try {
-        const searchText = input.country ? `${query}\n(country / market: ${input.country})` : query;
-        queryEmbedding = await generateEmbedding(searchText, 'RETRIEVAL_QUERY');
-      } catch {
-        queryEmbedding = null;
-      }
+    try {
+      const searchText = input.country ? `\n(country / market: )` : query;
+      queryEmbedding = await generateEmbedding(searchText, 'RETRIEVAL_QUERY');
+    } catch {
+      queryEmbedding = null;
     }
 
     // 3. Hybrid search — vector + keyword in parallel.

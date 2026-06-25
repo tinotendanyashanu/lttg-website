@@ -23,10 +23,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (!process.env.GOOGLE_AI_API_KEY) {
-    return NextResponse.json({ error: "GOOGLE_AI_API_KEY not configured" }, { status: 500 });
-  }
-
   const { searchParams } = new URL(request.url);
   const force = searchParams.get("force") === "true";
 

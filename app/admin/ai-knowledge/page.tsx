@@ -69,6 +69,13 @@ export default async function AiKnowledgePage() {
         <StatCard icon="bolt" tone="text-violet-500" value={`${totals.vectorShare}%`} label="Vector-served" hint="Else in-memory fallback" />
       </div>
 
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard icon="memory" tone="text-blue-500" value={ai.callCount} label="AI calls" hint="Provider calls in window" />
+        <StatCard icon="speed" tone="text-emerald-500" value={`${ai.avgLatencyMs}ms`} label="Avg latency" />
+        <StatCard icon="alt_route" tone="text-amber-500" value={ai.fallbackCount} label="Fallbacks" />
+        <StatCard icon="error" tone="text-red-500" value={ai.failureCount} label="Provider failures" hint={`${ai.estimatedTokens.toLocaleString()} est. tokens`} />
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Most searched topics */}
         <div className="bg-white dark:bg-[#27272a] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-soft p-6">

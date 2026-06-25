@@ -3,18 +3,16 @@
  *
  * Composes a periodic executive summary of support operations: ticket volume,
  * SLA risk, sentiment, top issue categories and at-risk customers, plus a short
- * Gemini-written narrative. Kept as a plain (un-gated) service so the scheduled
+ * AI-written narrative. Kept as a plain (un-gated) service so the scheduled
  * cron route can build it without an interactive session; the admin "send now"
  * action layers its own auth on top. Never throws — degrades to heuristics.
  */
 
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { AIProvider } from '@/lib/ai/provider';
 import dbConnect from '@/lib/mongodb';
 import { getCustomerHealthList } from '@/lib/services/customer-health';
 import { OPEN_STATUSES, categoryLabel } from '@/lib/support/constants';
 
-const SUPPORT_MODEL =
-  process.env.GEMINI_SUPPORT_MODEL || process.env.GEMINI_PRIMARY_MODEL || 'gemini-2.5-flash';
 
 export interface SupportDigest {
   generatedAt: string;
@@ -34,12 +32,10 @@ export interface SupportDigest {
 }
 
 async function buildNarrative(d: Omit<SupportDigest, 'narrative'>): Promise<string> {
-  const apiKey = process.env.GOOGLE_AI_API_KEY;
   const heuristic =
     `Over the last ${d.windowDays} days, ${d.metrics.created} tickets were created and ${d.metrics.resolved} resolved. ` +
     `${d.metrics.openNow} remain open (${d.metrics.unanswered} awaiting a reply). ` +
     `SLA breaches: ${d.metrics.slaFirstResponseBreaches} first-response, ${d.metrics.slaResolutionBreaches} resolution.`;
-  if (!apiKey) return heuristic;
 
   const facts = [
     `Window: last ${d.windowDays} days`,
@@ -55,14 +51,15 @@ async function buildNarrative(d: Omit<SupportDigest, 'narrative'>): Promise<stri
   ].join('\n');
 
   try {
-    const model = new GoogleGenerativeAI(apiKey).getGenerativeModel({
-      model: SUPPORT_MODEL,
-      systemInstruction:
-        'You are a support operations analyst for LeoTheTechGuy. Write a crisp executive digest (3-5 sentences, plain prose, no markdown) of the support metrics provided. Lead with the headline, call out SLA risk and any at-risk customers, note the sentiment/category trend, and end with one concrete recommendation.',
-      generationConfig: { temperature: 0.4, maxOutputTokens: 400 },
+    const result = await AIProvider.generate({
+      task: 'executive',
+      system: 'You are a support operations analyst for LeoTheTechGuy. Write a crisp executive digest (3-5 sentences, plain prose, no markdown) of the support metrics provided. Lead with the headline, call out SLA risk and any at-risk customers, note the sentiment/category trend, and end with one concrete recommendation.',
+      prompt: 'Support metrics:' + String.fromCharCode(10) + facts,
+      temperature: 0.4,
+      maxTokens: 400,
+      fallbackText: heuristic,
     });
-    const result = await model.generateContent(`Support metrics:\n${facts}`);
-    return result.response.text().trim() || heuristic;
+    return result.text.trim() || heuristic;
   } catch {
     return heuristic;
   }

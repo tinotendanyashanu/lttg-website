@@ -1,14 +1,9 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
-
-// Model routing — configurable via env vars
-// Keep these defaults on stable, verified model IDs. Stale model aliases silently
-// degrade the site into the regex fallback bot.
-const PRIMARY_MODEL = process.env.GEMINI_PRIMARY_MODEL || 'gemini-2.5-flash';
-const UPGRADED_MODEL = process.env.GEMINI_UPGRADED_MODEL || 'gemini-2.5-flash';
+import { z } from 'zod';
+import { AIProvider, getAIModelName } from '@/lib/ai/provider';
 
 function selectModel(messageCount: number, leadScore: number): string {
-  if (messageCount >= 6 || leadScore >= 7) return UPGRADED_MODEL;
-  return PRIMARY_MODEL;
+  if (messageCount >= 6 || leadScore >= 7) return getAIModelName('reasoning');
+  return getAIModelName('chatbot');
 }
 
 export function getSelectedChatModel(messageCount: number, leadScore: number): string {
@@ -138,6 +133,24 @@ export interface HistoryMessage {
   content: string;
 }
 
+const BotResponseSchema = z.object({
+  response: z.string().optional().default(''),
+  confidence: z.number().optional().default(0.8),
+  shouldEscalate: z.boolean().optional().default(false),
+  leadScore: z.number().optional().default(5),
+  isHighIntent: z.boolean().optional().default(false),
+  detectedCountry: z.string().optional().default(''),
+  needsCountry: z.boolean().optional().default(false),
+  detectedGap: z.boolean().optional().default(false),
+  gapTitle: z.string().optional().default(''),
+  gapSuggestedContent: z.string().optional().default(''),
+  actions: z.array(z.object({
+    label: z.string(),
+    type: z.enum(['booking', 'service', 'escalate']),
+    href: z.string().optional(),
+  })).optional().default([]),
+});
+
 export async function getAIBotResponse(
   message: string,
   history: HistoryMessage[],
@@ -145,84 +158,55 @@ export async function getAIBotResponse(
   leadScore: number,
   kbContext?: string
 ): Promise<AIBotResponse> {
-  const apiKey = process.env.GOOGLE_AI_API_KEY;
-  if (!apiKey) throw new Error('GOOGLE_AI_API_KEY is not configured');
-
-  const genAI = new GoogleGenerativeAI(apiKey);
   const modelId = selectModel(messageCount, leadScore);
-
   const systemInstruction = kbContext
-    ? `${BASE_SYSTEM_PROMPT}\n\nRELEVANT KNOWLEDGE BASE:\n${kbContext}`
+    ? BASE_SYSTEM_PROMPT + String.fromCharCode(10) + String.fromCharCode(10) + 'RELEVANT KNOWLEDGE BASE:' + String.fromCharCode(10) + kbContext
     : BASE_SYSTEM_PROMPT;
 
-  const model = genAI.getGenerativeModel({
+  const aiMessages = [
+    { role: 'system' as const, content: systemInstruction },
+    ...history.slice(-8).map((m) => ({
+      role: (m.role === 'model' ? 'assistant' : 'user') as 'assistant' | 'user',
+      content: m.content,
+    })),
+    { role: 'user' as const, content: message },
+  ];
+
+  const parsed = await AIProvider.extractJSON({
+    task: 'chatbot',
     model: modelId,
-    systemInstruction,
-    generationConfig: {
-      responseMimeType: 'application/json',
-      temperature: 0.45,
-      maxOutputTokens: 700,
+    messages: aiMessages,
+    temperature: 0.45,
+    maxTokens: 700,
+    schema: BotResponseSchema,
+    fallback: {
+      response: SAFE_AI_FALLBACK,
+      confidence: 0.5,
+      shouldEscalate: false,
+      leadScore: 5,
+      isHighIntent: false,
+      detectedCountry: '',
+      needsCountry: false,
+      detectedGap: true,
+      gapTitle: 'Unanswered visitor question',
+      gapSuggestedContent: 'Review this visitor conversation and add a knowledge article if the team has a documented answer.',
+      actions: [{ label: 'Book a Free Call', type: 'booking', href: 'https://cal.com/leothetechguy' }],
     },
   });
 
-  // Keep last 8 turns to stay within context limits
-  const geminiHistory = history.slice(-8).map(m => ({
-    role: m.role,
-    parts: [{ text: m.content }],
-  }));
-
-  const chat = model.startChat({ history: geminiHistory });
-  const result = await chat.sendMessage(message);
-  const raw = result.response.text();
-
-  try {
-    const parsed = JSON.parse(raw);
-    return {
-      content: String(parsed.response || '').trim() || "I'm here to help — what would you like to know?",
-      confidence: Math.min(1, Math.max(0, Number(parsed.confidence) || 0.8)),
-      shouldEscalate: Boolean(parsed.shouldEscalate),
-      leadScore: Math.min(10, Math.max(1, Math.round(Number(parsed.leadScore)) || 5)),
-      isHighIntent: Boolean(parsed.isHighIntent),
-      detectedCountry: String(parsed.detectedCountry || '').trim().slice(0, 60),
-      needsCountry: Boolean(parsed.needsCountry),
-      detectedGap: Boolean(parsed.detectedGap),
-      gapTitle: String(parsed.gapTitle || '').trim(),
-      gapSuggestedContent: String(parsed.gapSuggestedContent || '').trim(),
-      actions: sanitizeActions(parsed.actions),
-    };
-  } catch {
-    // Strip any markdown code fences and retry parse. We only ever surface the
-    // structured `response` field — never raw model output, which could contain
-    // leaked context, JSON, or instructions.
-    const cleaned = raw.replace(/^```json\s*/i, '').replace(/```\s*$/, '').trim();
-    try {
-      const parsed = JSON.parse(cleaned);
-      const response = String(parsed.response || '').trim();
-      return {
-        content: response || SAFE_AI_FALLBACK,
-        confidence: 0.7,
-        shouldEscalate: false,
-        leadScore: 5,
-        isHighIntent: false,
-        detectedGap: false,
-        actions: [],
-      };
-    } catch {
-      // Could not parse a structured reply — return a safe generic message rather
-      // than echoing whatever raw text the model produced.
-      return {
-        content: SAFE_AI_FALLBACK,
-        confidence: 0.5,
-        shouldEscalate: false,
-        leadScore: 5,
-        isHighIntent: false,
-        detectedGap: false,
-        actions: [
-          { label: 'Book a Free Call', type: 'booking', href: 'https://cal.com/leothetechguy' },
-        ],
-      };
-    }
-  }
+  return {
+    content: String(parsed.response || '').trim() || SAFE_AI_FALLBACK,
+    confidence: Math.min(1, Math.max(0, Number(parsed.confidence) || 0.5)),
+    shouldEscalate: Boolean(parsed.shouldEscalate),
+    leadScore: Math.min(10, Math.max(1, Math.round(Number(parsed.leadScore)) || 5)),
+    isHighIntent: Boolean(parsed.isHighIntent),
+    detectedCountry: String(parsed.detectedCountry || '').trim().slice(0, 60),
+    needsCountry: Boolean(parsed.needsCountry),
+    detectedGap: Boolean(parsed.detectedGap),
+    gapTitle: String(parsed.gapTitle || '').trim(),
+    gapSuggestedContent: String(parsed.gapSuggestedContent || '').trim(),
+    actions: sanitizeActions(parsed.actions),
+  };
 }
 
 const SAFE_AI_FALLBACK =

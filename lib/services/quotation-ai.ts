@@ -12,11 +12,10 @@
  * existing staff-gated quotation flow.
  */
 
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { z } from 'zod';
+import { AIProvider } from '@/lib/ai/provider';
 import { KB_REGION_LABELS, type KbRegion } from '@/lib/knowledge/constants';
 
-const MODEL =
-  process.env.GEMINI_QUOTATION_MODEL || process.env.GEMINI_PRIMARY_MODEL || 'gemini-2.5-flash';
 
 export type QuotationComplexity = 'simple' | 'standard' | 'complex';
 
@@ -57,6 +56,17 @@ RULES:
 
 Respond with valid JSON ONLY, matching exactly:
 {"description":"one-line summary of the engagement","timeline":"e.g. 4-6 weeks","lineItems":[{"description":"deliverable","quantity":1,"unitPrice":0}],"notes":"assumptions, exclusions, and that pricing is indicative pending review"}`;
+
+const QuotationDraftSchema = z.object({
+  description: z.string().optional().default(""),
+  timeline: z.string().optional().default(""),
+  lineItems: z.array(z.object({
+    description: z.string().optional().default(""),
+    quantity: z.number().optional().default(1),
+    unitPrice: z.number().optional().default(0),
+  })).optional().default([]),
+  notes: z.string().optional().default(""),
+});
 
 function sanitizeLineItems(raw: unknown): DraftLineItem[] {
   if (!Array.isArray(raw)) return [];
@@ -114,17 +124,7 @@ export async function generateQuotationDraft(input: QuotationDraftInput): Promis
     /* pricing context is optional */
   }
 
-  if (!process.env.GOOGLE_AI_API_KEY) {
-    return { ...safe, usedPricingKnowledge: Boolean(pricingContext), pricingSources };
-  }
-
   try {
-    const model = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY).getGenerativeModel({
-      model: MODEL,
-      systemInstruction: DRAFT_SYSTEM,
-      generationConfig: { responseMimeType: 'application/json', temperature: 0.4, maxOutputTokens: 1400 },
-    });
-
     const prompt = [
       `REQUIREMENTS:\n${requirements}`,
       `\nREGION: ${regionLabel || 'not specified'}`,
@@ -134,8 +134,15 @@ export async function generateQuotationDraft(input: QuotationDraftInput): Promis
       `\nDraft the quotation now.`,
     ].join('\n');
 
-    const result = await model.generateContent(prompt);
-    const parsed = JSON.parse(result.response.text().replace(/^```json\s*/i, '').replace(/```\s*$/, '').trim());
+    const parsed = await AIProvider.extractJSON({
+      task: 'quotation',
+      system: DRAFT_SYSTEM,
+      prompt,
+      temperature: 0.4,
+      maxTokens: 1400,
+      schema: QuotationDraftSchema,
+      fallback: { description: '', timeline: '', lineItems: [], notes: safe.notes },
+    });
 
     const lineItems = sanitizeLineItems(parsed.lineItems);
     return {

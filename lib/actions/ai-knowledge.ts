@@ -38,6 +38,11 @@ export interface AiKnowledgeDashboard {
     avgChatConfidence: number;
     feedbackHelpful: number;
     feedbackUnhelpful: number;
+    callCount: number;
+    failureCount: number;
+    fallbackCount: number;
+    avgLatencyMs: number;
+    estimatedTokens: number;
   };
   worstArticles: { id: string; title: string; helpful: number; notHelpful: number; retrievals: number }[];
 }
@@ -52,6 +57,7 @@ export async function getAiKnowledgeDashboard(windowDays = 30): Promise<AiKnowle
   const { KnowledgeArticle } = await import('@/models/KnowledgeArticle');
   const { KnowledgeGapSuggestion } = await import('@/models/KnowledgeGapSuggestion');
   const { ChatSession } = await import('@/models/ChatSession');
+  const { AICallLog } = await import('@/models/AICallLog');
 
   const since = new Date(Date.now() - windowDays * DAY_MS);
   const sinceMatch = { createdAt: { $gte: since } };
@@ -71,6 +77,7 @@ export async function getAiKnowledgeDashboard(windowDays = 30): Promise<AiKnowle
     feedbackAgg,
     pendingGaps,
     avgChatAgg,
+    aiCallAgg,
     worstArticlesDocs,
   ] = await Promise.all([
     RetrievalLog.countDocuments(sinceMatch),
@@ -130,6 +137,20 @@ export async function getAiKnowledgeDashboard(windowDays = 30): Promise<AiKnowle
       { $match: { updatedAt: { $gte: since }, aiConfidence: { $exists: true } } },
       { $group: { _id: null, avg: { $avg: '$aiConfidence' } } },
     ]),
+    AICallLog.aggregate([
+      { $match: sinceMatch },
+      {
+        $group: {
+          _id: null,
+          callCount: { $sum: 1 },
+          failureCount: { $sum: { $cond: [{ $eq: ['$status', 'failure'] }, 1, 0] } },
+          fallbackCount: { $sum: { $cond: ['$fallbackUsed', 1, 0] } },
+          avgLatencyMs: { $avg: '$latencyMs' },
+          inputTokens: { $sum: '$estimatedInputTokens' },
+          outputTokens: { $sum: '$estimatedOutputTokens' },
+        },
+      },
+    ]),
     KnowledgeArticle.find({ notHelpfulCount: { $gt: 0 } })
       .select('title helpfulCount notHelpfulCount retrievalCount')
       .sort({ notHelpfulCount: -1 })
@@ -145,6 +166,7 @@ export async function getAiKnowledgeDashboard(windowDays = 30): Promise<AiKnowle
 
   const feedbackMap: Record<string, number> = {};
   for (const f of feedbackAgg as any[]) feedbackMap[f._id] = f.count;
+  const aiCallStats = (aiCallAgg as any[])[0] || {};
 
   return {
     windowDays,
@@ -180,6 +202,11 @@ export async function getAiKnowledgeDashboard(windowDays = 30): Promise<AiKnowle
       avgChatConfidence: Number(((avgChatAgg as any[])[0]?.avg || 0).toFixed(3)),
       feedbackHelpful: feedbackMap.helpful || 0,
       feedbackUnhelpful: feedbackMap.unhelpful || 0,
+      callCount: aiCallStats.callCount || 0,
+      failureCount: aiCallStats.failureCount || 0,
+      fallbackCount: aiCallStats.fallbackCount || 0,
+      avgLatencyMs: Math.round(aiCallStats.avgLatencyMs || 0),
+      estimatedTokens: (aiCallStats.inputTokens || 0) + (aiCallStats.outputTokens || 0),
     },
     worstArticles: (worstArticlesDocs as any[]).map((a) => ({
       id: String(a._id),

@@ -2,20 +2,16 @@
  * Executive Intelligence Service (Phase D, spec §9).
  *
  * Aggregates every business slice (revenue, leads, projects, support, AI/knowledge)
- * into a single typed report and optionally generates a Gemini-written executive
+ * into a single typed report and optionally generates a AI-written executive
  * narrative. Follows the same build+narrate pattern as support-digest.ts.
  *
  * Safe to call fire-and-forget or from cron — never throws, always degrades
  * gracefully when models or API keys are absent.
  */
 
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { AIProvider } from '@/lib/ai/provider';
 import dbConnect from '@/lib/mongodb';
 
-const EXEC_MODEL =
-  process.env.GEMINI_EXEC_MODEL ||
-  process.env.GEMINI_PRIMARY_MODEL ||
-  'gemini-2.5-flash';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -74,14 +70,12 @@ export interface ExecSummary {
 // ── Narrative ─────────────────────────────────────────────────────────────────
 
 async function buildNarrative(d: Omit<ExecSummary, 'narrative'>): Promise<string> {
-  const apiKey = process.env.GOOGLE_AI_API_KEY;
   const heuristic =
     `In the last ${d.windowDays} days: ${d.revenue.invoicesPaid} invoices paid (USD ${d.revenue.collectedInWindow.toFixed(0)} collected), ` +
     `${d.leads.newInWindow} new leads (${d.leads.conversionRate}% conversion), ` +
     `${d.projects.active} active projects, ${d.support.openTickets} open support tickets, ` +
     `${d.support.slaBreaches} SLA breaches, AI knowledge success rate ${d.knowledge.successRate}%.`;
 
-  if (!apiKey) return heuristic;
 
   const facts = [
     `Window: last ${d.windowDays} days`,
@@ -100,16 +94,15 @@ async function buildNarrative(d: Omit<ExecSummary, 'narrative'>): Promise<string
   ].join('\n');
 
   try {
-    const model = new GoogleGenerativeAI(apiKey).getGenerativeModel({
-      model: EXEC_MODEL,
-      systemInstruction:
-        'You are a chief-of-staff analyst for LeoTheTechGuy. Write a crisp, executive weekly summary (4-6 sentences, plain prose, no markdown, no bullet points). ' +
-        'Lead with the revenue headline, note lead conversion and pipeline health, call out any SLA risk or at-risk customers, ' +
-        'highlight AI/knowledge performance, and close with one concrete priority action for the CEO this week.',
-      generationConfig: { temperature: 0.35, maxOutputTokens: 500 },
+    const result = await AIProvider.generate({
+      task: 'executive',
+      system: 'You are a chief-of-staff analyst for LeoTheTechGuy. Write a crisp, executive weekly summary (4-6 sentences, plain prose, no markdown, no bullet points). Lead with the revenue headline, note lead conversion and pipeline health, call out any SLA risk or at-risk customers, highlight AI/knowledge performance, and close with one concrete priority action for the CEO this week.',
+      prompt: 'Business metrics:' + String.fromCharCode(10) + facts,
+      temperature: 0.35,
+      maxTokens: 500,
+      fallbackText: heuristic,
     });
-    const result = await model.generateContent(`Business metrics:\n${facts}`);
-    return result.response.text().trim() || heuristic;
+    return result.text.trim() || heuristic;
   } catch {
     return heuristic;
   }

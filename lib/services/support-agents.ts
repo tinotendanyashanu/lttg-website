@@ -3,8 +3,8 @@
  *
  * Coordinates several specialized AI "agents" over a single ticket and merges
  * their output into one actionable workup for the human agent. Each agent reuses
- * the existing single-purpose helpers in `support-ai.ts` (no duplicated Gemini
- * plumbing); the strategist is the only extra Gemini call and it is fully
+ * the existing single-purpose helpers in `support-ai.ts` (no duplicated provider
+ * plumbing); the strategist is the only extra model call and it is fully
  * defensive — any failure degrades to a heuristic so the caller never throws.
  *
  *   triage      → classification + summary (processTicketAI)
@@ -12,7 +12,8 @@
  *   strategist  → recommendation, confidence, can-auto-resolve, next steps, draft
  */
 
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { z } from 'zod';
+import { AIProvider } from '@/lib/ai/provider';
 import {
   processTicketAI,
   suggestArticlesForTicket,
@@ -22,8 +23,6 @@ import {
 } from '@/lib/services/support-ai';
 import { categoryLabel } from '@/lib/support/constants';
 
-const SUPPORT_MODEL =
-  process.env.GEMINI_SUPPORT_MODEL || process.env.GEMINI_PRIMARY_MODEL || 'gemini-2.5-flash';
 
 export interface AgentStep {
   agent: string;
@@ -59,6 +58,13 @@ Rules:
 - "confidence" reflects how well the available context covers the request.
 - 2-4 nextSteps, each a short imperative phrase. No markdown, no prose outside the JSON.`;
 
+const StrategistSchema = z.object({
+  recommendation: z.string().optional().default(""),
+  confidence: z.number().optional().default(0.5),
+  canAutoResolve: z.boolean().optional().default(false),
+  nextSteps: z.array(z.string()).optional().default([]),
+});
+
 function clamp01(n: unknown): number {
   const v = Number(n);
   if (!Number.isFinite(v)) return 0.5;
@@ -81,16 +87,7 @@ async function runStrategist(
       : ['Investigate the issue', 'Gather any missing detail from the client', 'Draft a manual reply'],
   };
 
-  const apiKey = process.env.GOOGLE_AI_API_KEY;
-  if (!apiKey) return fallback;
-
   try {
-    const model = new GoogleGenerativeAI(apiKey).getGenerativeModel({
-      model: SUPPORT_MODEL,
-      systemInstruction: STRATEGIST_SYSTEM,
-      generationConfig: { responseMimeType: 'application/json', temperature: 0.3, maxOutputTokens: 500 },
-    });
-
     const prompt = [
       `TICKET SUBJECT: ${input.subject}`,
       `CATEGORY: ${categoryLabel(input.category)} · PRIORITY: ${input.priority || 'medium'}`,
@@ -101,9 +98,15 @@ async function runStrategist(
       .join('\n')
       .slice(0, 8000);
 
-    const result = await model.generateContent(prompt);
-    const raw = result.response.text().replace(/^```json\s*/i, '').replace(/```\s*$/, '').trim();
-    const parsed = JSON.parse(raw);
+    const parsed = await AIProvider.extractJSON({
+      task: 'support',
+      system: STRATEGIST_SYSTEM,
+      prompt,
+      temperature: 0.3,
+      maxTokens: 500,
+      schema: StrategistSchema,
+      fallback,
+    });
 
     const nextSteps = Array.isArray(parsed.nextSteps)
       ? parsed.nextSteps.map((s: unknown) => String(s).slice(0, 160)).filter(Boolean).slice(0, 4)

@@ -10,16 +10,15 @@
  *  - Fire-and-forget: never throws, never blocks the resolve action.
  *  - Dedupe first: if the unified retriever already finds a confident article for
  *    this topic, we skip drafting (no near-duplicate noise).
- *  - Reuses the existing Gemini + JSON pattern (lib/ai-chatbot.ts / support-ai.ts),
+ *  - Reuses the unified AI provider JSON pattern (lib/ai-chatbot.ts / support-ai.ts),
  *    the KnowledgeArticle model, and the embedding writer.
  *  - One draft per ticket (idempotent on a deterministic slug marker).
  */
 
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { z } from 'zod';
+import { AIProvider } from '@/lib/ai/provider';
 import { KB_KINDS, KB_SERVICE_VALUES, RETRIEVAL_CONFIDENCE } from '@/lib/knowledge/constants';
 
-const MODEL =
-  process.env.GEMINI_SUPPORT_MODEL || process.env.GEMINI_PRIMARY_MODEL || 'gemini-2.5-flash';
 
 // Marker tag stamped on AI-drafted articles so they can be filtered in review.
 const AI_DRAFT_TAG = 'ai-drafted';
@@ -46,11 +45,14 @@ RULES:
 Respond with valid JSON ONLY, matching exactly:
 {"title":"...","subtitle":"...","body":"the full article text in plain prose/markdown","kind":"one-of-the-kinds","tags":["3-6","short","lowercase","tags"],"services":["service-id"]}`;
 
-function getGenAI() {
-  const apiKey = process.env.GOOGLE_AI_API_KEY;
-  if (!apiKey) throw new Error('GOOGLE_AI_API_KEY is not configured');
-  return new GoogleGenerativeAI(apiKey);
-}
+const TicketArticleDraftSchema = z.object({
+  title: z.string().optional().default(''),
+  subtitle: z.string().optional().default(''),
+  body: z.string().optional().default(''),
+  kind: z.string().optional().default('support'),
+  tags: z.array(z.string()).optional().default([]),
+  services: z.array(z.string()).optional().default([]),
+});
 
 function slugify(text: string): string {
   return text
@@ -87,7 +89,6 @@ function coerceTags(v: unknown): string[] {
  */
 export async function draftArticleFromResolvedTicket(input: TicketInput): Promise<string | null> {
   try {
-    if (!process.env.GOOGLE_AI_API_KEY) return null;
 
     const { default: dbConnect } = await import('@/lib/mongodb');
     const { KnowledgeArticle } = await import('@/models/KnowledgeArticle');
@@ -118,17 +119,6 @@ export async function draftArticleFromResolvedTicket(input: TicketInput): Promis
       /* dedupe is best-effort */
     }
 
-    // Generate the draft.
-    const model = getGenAI().getGenerativeModel({
-      model: MODEL,
-      systemInstruction: DRAFT_SYSTEM,
-      generationConfig: {
-        responseMimeType: 'application/json',
-        temperature: 0.4,
-        maxOutputTokens: 1200,
-      },
-    });
-
     const prompt = [
       `RESOLVED TICKET`,
       `Subject: ${input.subject}`,
@@ -141,9 +131,15 @@ export async function draftArticleFromResolvedTicket(input: TicketInput): Promis
       .join('\n')
       .slice(0, 8000);
 
-    const result = await model.generateContent(prompt);
-    const raw = result.response.text();
-    const parsed = JSON.parse(raw.replace(/^```json\s*/i, '').replace(/```\s*$/, '').trim());
+    const parsed = await AIProvider.extractJSON({
+      task: 'knowledge_draft',
+      system: DRAFT_SYSTEM,
+      prompt,
+      temperature: 0.4,
+      maxTokens: 1200,
+      schema: TicketArticleDraftSchema,
+      fallback: { title: '', subtitle: '', body: '', kind: 'support', tags: [], services: [] },
+    });
 
     const title = String(parsed.title || '').trim().slice(0, 160);
     const body = String(parsed.body || '').trim();

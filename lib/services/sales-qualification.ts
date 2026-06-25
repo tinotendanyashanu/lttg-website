@@ -12,10 +12,9 @@
  *  - Only fires on genuine intent (lead score threshold) with some way to follow up.
  */
 
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { z } from 'zod';
+import { AIProvider } from '@/lib/ai/provider';
 
-const MODEL =
-  process.env.GEMINI_SALES_MODEL || process.env.GEMINI_PRIMARY_MODEL || 'gemini-2.5-flash';
 
 // Lead score at/above which we consider the visitor a qualified lead.
 const QUALIFY_SCORE = 7;
@@ -44,6 +43,13 @@ Respond with valid JSON ONLY, matching exactly:
 
 Rules: never invent details the chat does not contain. estimatedBudget is a number in their currency if they stated one, else 0.`;
 
+const QualifiedLeadSchema = z.object({
+  serviceInterest: z.string().optional().default(""),
+  summary: z.string().optional().default(""),
+  estimatedBudget: z.number().optional().default(0),
+  contactName: z.string().optional().default(""),
+});
+
 function buildTranscript(messages: { role: string; content: string }[]): string {
   return messages
     .filter((m) => m.role === 'visitor' || m.role === 'bot')
@@ -54,15 +60,16 @@ function buildTranscript(messages: { role: string; content: string }[]): string 
 
 async function summariseLead(transcript: string, fallbackSummary?: string): Promise<QualifiedLead> {
   const fallback: QualifiedLead = { summary: fallbackSummary || 'Qualified via chat.', estimatedBudget: 0 };
-  if (!process.env.GOOGLE_AI_API_KEY) return fallback;
   try {
-    const model = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY).getGenerativeModel({
-      model: MODEL,
-      systemInstruction: SUMMARY_SYSTEM,
-      generationConfig: { responseMimeType: 'application/json', temperature: 0.3, maxOutputTokens: 400 },
+    const parsed = await AIProvider.extractJSON({
+      task: 'sales',
+      system: SUMMARY_SYSTEM,
+      prompt: 'CHAT TRANSCRIPT:' + String.fromCharCode(10) + transcript,
+      temperature: 0.3,
+      maxTokens: 400,
+      schema: QualifiedLeadSchema,
+      fallback: { serviceInterest: '', summary: fallback.summary, estimatedBudget: 0, contactName: '' },
     });
-    const result = await model.generateContent(`CHAT TRANSCRIPT:\n${transcript}`);
-    const parsed = JSON.parse(result.response.text().replace(/^```json\s*/i, '').replace(/```\s*$/, '').trim());
     return {
       serviceInterest: String(parsed.serviceInterest || '').trim().slice(0, 80) || undefined,
       summary: String(parsed.summary || '').trim().slice(0, 800) || fallback.summary,

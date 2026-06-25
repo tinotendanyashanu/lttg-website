@@ -1,21 +1,22 @@
 /**
  * Support Center — outbound channel dispatch.
  *
- * Sends a staff reply back out to the channel a ticket arrived on. WhatsApp /
- * Instagram / Messenger go through the Meta Graph API; voice is delivered as an
- * SMS/notification fallback via a generic webhook. Every provider call is gated
- * on its credentials — when they are absent (e.g. local/dev, or a channel not
- * yet provisioned) the dispatcher is a safe no-op that reports `skipped`, so the
- * reply still lands in the ticket and nothing throws.
+ * Sends a staff reply back out to the channel a ticket arrived on. WhatsApp
+ * goes through lib/channels/whatsapp.ts; Instagram / Messenger go through the
+ * Meta Graph Send API; voice is delivered as an SMS/notification fallback via
+ * a generic webhook. Every provider call is gated on its credentials — when
+ * they are absent the dispatcher is a safe no-op that reports `skipped`.
  *
  * Required env per channel (all optional — absence disables that channel):
- *   META_GRAPH_TOKEN            page/app access token for Graph API sends
- *   META_WHATSAPP_PHONE_ID      WhatsApp Business phone-number id
+ *   WHATSAPP_ACCESS_TOKEN       WhatsApp access token
+ *   WHATSAPP_PHONE_NUMBER_ID    WhatsApp phone-number id
+ *   META_GRAPH_TOKEN            page/app access token for Instagram/Messenger
  *   VOICE_OUTBOUND_WEBHOOK_URL  generic POST endpoint for voice/SMS replies
  *   VOICE_OUTBOUND_WEBHOOK_KEY  bearer token for the voice webhook (optional)
  */
 
 import type { TicketChannel } from '@/lib/support/constants';
+import { sendTextMessage as whatsappSendText } from '@/lib/channels/whatsapp';
 
 const GRAPH_VERSION = process.env.META_GRAPH_VERSION || 'v21.0';
 
@@ -31,40 +32,35 @@ export interface DispatchResult {
   reason?: string;
 }
 
-async function sendMetaMessage(
+async function sendWhatsApp(recipientId: string, text: string): Promise<DispatchResult> {
+  try {
+    const result = await whatsappSendText(recipientId, text);
+    return result.success
+      ? { delivered: true }
+      : { delivered: false, skipped: !result.error, reason: result.error };
+  } catch (err) {
+    return { delivered: false, reason: (err as Error).message };
+  }
+}
+
+async function sendMetaMessengerMessage(
   recipientId: string,
   text: string,
-  channel: TicketChannel,
 ): Promise<DispatchResult> {
   const token = process.env.META_GRAPH_TOKEN;
   if (!token) return { delivered: false, skipped: true, reason: 'META_GRAPH_TOKEN not configured' };
 
   try {
-    let endpoint: string;
-    let body: Record<string, unknown>;
-
-    if (channel === 'whatsapp') {
-      const phoneId = process.env.META_WHATSAPP_PHONE_ID;
-      if (!phoneId) return { delivered: false, skipped: true, reason: 'META_WHATSAPP_PHONE_ID not configured' };
-      endpoint = `https://graph.facebook.com/${GRAPH_VERSION}/${phoneId}/messages`;
-      body = {
-        messaging_product: 'whatsapp',
-        to: recipientId,
-        type: 'text',
-        text: { body: text },
-      };
-    } else {
-      // Messenger + Instagram share the Send API shape.
-      endpoint = `https://graph.facebook.com/${GRAPH_VERSION}/me/messages`;
-      body = { recipient: { id: recipientId }, message: { text }, messaging_type: 'RESPONSE' };
-    }
-
+    const endpoint = `https://graph.facebook.com/${GRAPH_VERSION}/me/messages`;
     const res = await fetch(`${endpoint}?access_token=${token}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
+      body: JSON.stringify({
+        recipient: { id: recipientId },
+        message: { text },
+        messaging_type: 'RESPONSE',
+      }),
     });
-
     if (!res.ok) {
       const detail = await res.text().catch(() => '');
       return { delivered: false, reason: `Graph API ${res.status}: ${detail.slice(0, 200)}` };
@@ -116,9 +112,10 @@ export async function dispatchChannelReply(
 
   switch (target.channel) {
     case 'whatsapp':
+      return sendWhatsApp(recipient!, text);
     case 'messenger':
     case 'instagram':
-      return sendMetaMessage(recipient!, text, target.channel);
+      return sendMetaMessengerMessage(recipient!, text);
     case 'voice':
       return sendVoiceReply(target, text);
     default:
