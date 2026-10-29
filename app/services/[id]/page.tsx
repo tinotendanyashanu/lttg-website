@@ -1,28 +1,45 @@
-import { notFound } from 'next/navigation';
-import { services, getServiceById } from '@/data/services';
-import ServiceDetailClient from '@/components/ServiceDetailClient';
+import { notFound } from "next/navigation";
+import { services, getServiceById } from "@/data/services";
+import ServiceDetailClient from "@/components/ServiceDetailClient";
+import { businessServices } from "@/data/business-services";
+import BusinessServicePage from "@/components/marketing/BusinessServicePage";
+import { marketingMetadata } from "@/lib/marketing-metadata";
+
+export const dynamicParams = false;
 
 // Generate static params for all services
 export function generateStaticParams() {
-  return services.map((service) => ({
+  return [...services, ...businessServices].map((service) => ({
     id: service.id,
   }));
 }
 
 // Generate metadata for each service page
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
+  const businessService = businessServices.find((service) => service.id === id);
+  if (businessService)
+    return marketingMetadata(
+      businessService.title,
+      businessService.description,
+      `/services/${id}`,
+    );
   const service = getServiceById(id);
-  
+
   if (!service) {
     return {
-      title: 'Service Not Found | LeoTheTechGuy',
+      title: "Service Not Found | LeoTheTechGuy",
     };
   }
 
   return {
     title: `${service.title} | Leo The Tech Guy`,
     description: service.description,
+    alternates: { canonical: `/services/${id}` },
     openGraph: {
       title: `${service.title} | Leo The Tech Guy`,
       description: service.description,
@@ -39,8 +56,14 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   };
 }
 
-export default async function ServiceDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ServiceDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
+  const businessService = businessServices.find((service) => service.id === id);
+  if (businessService) return <BusinessServicePage service={businessService} />;
   const service = getServiceById(id);
 
   if (!service) {

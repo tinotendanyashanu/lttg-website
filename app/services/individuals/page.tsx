@@ -267,16 +267,16 @@ export default function IndividualsPage() {
                </div>
                <div className="grid md:grid-cols-3 gap-12 text-center divide-y md:divide-y-0 md:divide-x divide-slate-200">
                     <div className="p-4">
-                        <div className="text-5xl font-bold mb-2 text-slate-900">2x</div>
-                        <div className="text-emerald-600 font-medium">Conversion Rate</div>
+                        <div className="text-5xl font-bold mb-2 text-slate-900">Clear</div>
+                        <div className="text-emerald-600 font-medium">Customer journeys</div>
                     </div>
                     <div className="p-4">
-                        <div className="text-5xl font-bold mb-2 text-slate-900">95+</div>
-                        <div className="text-emerald-600 font-medium">Google PageSpeed</div>
+                        <div className="text-5xl font-bold mb-2 text-slate-900">Measured</div>
+                        <div className="text-emerald-600 font-medium">Performance checks</div>
                     </div>
                     <div className="p-4">
-                        <div className="text-5xl font-bold mb-2 text-slate-900">100%</div>
-                        <div className="text-emerald-600 font-medium">Ownership</div>
+                        <div className="text-5xl font-bold mb-2 text-slate-900">Agreed</div>
+                        <div className="text-emerald-600 font-medium">Ownership & handover</div>
                     </div>
                </div>
           </div>

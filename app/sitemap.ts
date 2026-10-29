@@ -1,44 +1,36 @@
-import { MetadataRoute } from 'next';
-
+import type { MetadataRoute } from "next";
+import { projects } from "@/data/projects";
+import { caseStudies } from "@/data/case-studies";
+import { services } from "@/data/services";
+import { businessServices } from "@/data/business-services";
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://leothetechguy.com';
-
-  return [
-    {
-      url: baseUrl,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 1,
-    },
-    {
-      url: `${baseUrl}/about`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/services`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/portfolio`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/contact`,
-      lastModified: new Date(),
-      changeFrequency: 'yearly',
-      priority: 0.5,
-    },
-    {
-      url: `${baseUrl}/book`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
+  const paths = [
+    "",
+    "/about",
+    "/services",
+    "/portfolio",
+    "/how-i-work",
+    "/contact",
+    "/book",
+    ...new Set(
+      [...caseStudies, ...projects].map(
+        (project) => `/portfolio/${project.id}`,
+      ),
+    ),
+    ...new Set(
+      [...services, ...businessServices].map(
+        (service) => `/services/${service.id}`,
+      ),
+    ),
   ];
+  return paths.map((path) => ({
+    url: `https://leothetechguy.com${path}`,
+    changeFrequency: "monthly",
+    priority:
+      path === ""
+        ? 1
+        : path.includes("/services/") || path.includes("/portfolio/")
+          ? 0.7
+          : 0.8,
+  }));
 }

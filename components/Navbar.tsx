@@ -1,121 +1,108 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { Menu, X, Calendar } from 'lucide-react';
-import Link from 'next/link';
-import Image from 'next/image';
-import StrategySessionModal from './StrategySessionModal';
+import { useEffect, useState } from "react";
+import { ArrowUpRight, Menu, X } from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
+import { usePathname } from "next/navigation";
 
-const Navbar = () => {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+const links = [
+  { href: "/services", label: "Services" },
+  { href: "/portfolio", label: "Our work" },
+  { href: "/how-i-work", label: "How it works" },
+  { href: "/about", label: "About Leo" },
+];
 
+export default function Navbar() {
+  const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
   useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 10) {
-        setScrolled(true);
-      } else {
-        setScrolled(false);
-      }
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setIsOpen(false);
     };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => document.removeEventListener("keydown", closeOnEscape);
   }, []);
-
   return (
-    <>
-    <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled ? 'glass shadow-sm' : 'glass border-b border-white/50'}`}>
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <div className="flex-shrink-0">
-            <Link href="/" className="flex items-center gap-2 text-lg font-semibold tracking-tight text-slate-900 hover:opacity-80 transition-opacity">
-              <Image 
-                src="/logo_symbo.png" 
-                alt="LeoTheTechGuy Logo" 
-                width={32} 
-                height={32}
-                className="w-8 h-8 object-contain"
-              />
-              LeoTheTechGuy
-            </Link>
-          </div>
-
-          {/* Desktop Menu */}
-          <div className="hidden md:flex items-center space-x-6">
-            <Link href="/services" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
-              Services
-            </Link>
-            <Link href="/portal/partner" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Partner</Link>
-            <Link href="/tech-stack" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Resources</Link>
-            <Link href="/contact" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Contact</Link>
-          </div>
-
-          {/* Desktop CTA */}
-          <div className="hidden md:flex items-center gap-3">
-            <button 
-              onClick={() => setIsModalOpen(true)}
-              className="group relative px-5 py-2 text-sm font-bold text-white bg-slate-900 rounded-full hover:bg-black transition-all duration-300 flex items-center gap-2"
-            >
-              <Calendar className="w-4 h-4" />
-              Book a Session
-            </button>
-          </div>
-
-          {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center">
-            <button 
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="text-slate-600 hover:text-slate-900 focus:outline-none p-2"
-            >
-              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile Menu */}
-      {isMobileMenuOpen && (
-        <div className="md:hidden glass border-t border-slate-100 absolute w-full bg-white/95">
-          <div className="px-6 pt-4 pb-6 space-y-2">
-            <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50/50">Home</Link>
-
-            {/* Mobile Services Submenu */}
-            <div className="px-3 py-2">
-              <div className="font-medium text-slate-900 mb-2">Services</div>
-              <div className="pl-4 space-y-2 border-l-2 border-slate-100">
-                 <Link href="/services/sme" onClick={() => setIsMobileMenuOpen(false)} className="block text-sm text-slate-600 hover:text-slate-900">SMEs</Link>
-                 <Link href="/services/startups" onClick={() => setIsMobileMenuOpen(false)} className="block text-sm text-slate-600 hover:text-slate-900">Startups</Link>
-                 <Link href="/services/enterprise" onClick={() => setIsMobileMenuOpen(false)} className="block text-sm text-slate-600 hover:text-slate-900">Enterprise</Link>
-                 <Link href="/services/individuals" onClick={() => setIsMobileMenuOpen(false)} className="block text-sm text-slate-600 hover:text-slate-900">Individuals</Link>
-                 <Link href="/services" onClick={() => setIsMobileMenuOpen(false)} className="block text-sm font-medium text-blue-600 mt-2">View Overview</Link>
-              </div>
-            </div>
-
-            <Link href="/portal/partner" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50/50">Partner</Link>
-            <Link href="/tech-stack" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50/50">Resources</Link>
-            <Link href="/contact" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50/50">Contact</Link>
-            <div className="pt-4">
-              <button 
-                onClick={() => {
-                  setIsMobileMenuOpen(false);
-                  setIsModalOpen(true);
-                }} 
-                className="w-full text-center px-5 py-3 text-base font-bold text-white bg-slate-900 rounded-xl"
+    <header className="site-header">
+      <nav className="marketing-container" aria-label="Main navigation">
+        <div className="flex h-20 items-center justify-between gap-6">
+          <Link
+            href="/"
+            onClick={() => setIsOpen(false)}
+            className="flex shrink-0 items-center gap-2 text-base font-bold tracking-tight text-slate-950"
+          >
+            <Image
+              src="/logo_symbo.png"
+              alt=""
+              width={32}
+              height={32}
+              className="h-8 w-8 object-contain"
+            />
+            LeoTheTechGuy<span className="text-emerald-700">.</span>
+          </Link>
+          <div className="hidden items-center gap-7 lg:flex">
+            {links.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                aria-current={pathname === link.href ? "page" : undefined}
+                className={`text-sm transition-colors hover:text-emerald-700 ${pathname === link.href ? "font-semibold text-slate-950" : "text-slate-600"}`}
               >
-                Book a Session
-              </button>
-            </div>
+                {link.label}
+              </Link>
+            ))}
           </div>
+          <Link
+            href="/book"
+            className="marketing-button button-dark hidden !min-h-11 !px-5 !py-3 !text-xs lg:inline-flex"
+          >
+            Let’s talk <ArrowUpRight className="h-4 w-4" />
+          </Link>
+          <button
+            type="button"
+            onClick={() => setIsOpen(!isOpen)}
+            aria-label={isOpen ? "Close navigation" : "Open navigation"}
+            aria-expanded={isOpen}
+            aria-controls="mobile-navigation"
+            className="rounded-lg p-3 text-slate-950 lg:hidden"
+          >
+            {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
         </div>
-      )}
-    </nav>
-    
-    <StrategySessionModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
-    </>
+        {isOpen && (
+          <div
+            id="mobile-navigation"
+            className="border-t border-slate-200 pb-6 pt-3 lg:hidden"
+          >
+            {links.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setIsOpen(false)}
+                className="block rounded-lg px-2 py-3 text-base text-slate-700"
+                aria-current={pathname === link.href ? "page" : undefined}
+              >
+                {link.label}
+              </Link>
+            ))}
+            <Link
+              href="/contact"
+              onClick={() => setIsOpen(false)}
+              className="block px-2 py-3 text-slate-700"
+            >
+              Request an estimate
+            </Link>
+            <Link
+              href="/book"
+              onClick={() => setIsOpen(false)}
+              className="marketing-button button-dark mt-3 w-full"
+            >
+              Book a discovery call <ArrowUpRight className="h-4 w-4" />
+            </Link>
+          </div>
+        )}
+      </nav>
+    </header>
   );
-};
-
-export default Navbar;
+}

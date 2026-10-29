@@ -73,7 +73,7 @@ export default function SMEPage() {
                             <h3 className="text-2xl font-bold text-slate-900">Deploy & Optimize</h3>
                         </div>
                         <p className="text-slate-600 text-lg leading-relaxed pl-14 border-l-2 border-slate-200 group-hover:border-emerald-500 transition-colors duration-300">
-                            We launch your new infrastructure in parallel with existing systems to ensure zero downtime. Once validated, we switch over and monitor for efficiency gains.
+                            We plan the rollout alongside your existing systems, validate the new workflow and agree a transition that limits disruption.
                         </p>
                     </div>
                 </div>
@@ -102,7 +102,7 @@ export default function SMEPage() {
                         </div>
                         <h3 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">AI Workflow Automation</h3>
                         <p className="text-lg text-slate-600 mb-8 leading-relaxed">
-                            Manual repetition is the enemy of scale. We replace hours of admin work with intelligent agents. Imagine an employee that works 24/7, never makes a typo, and costs a fraction of a salary.
+                            Manual repetition is the enemy of scale. We replace hours of admin work with intelligent agents. Automations can handle defined tasks, with monitoring, exception handling and human review where needed.
                         </p>
                         
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
@@ -235,7 +235,7 @@ export default function SMEPage() {
                   <div>
                       <h2 className="text-3xl md:text-5xl font-bold mb-6">Ongoing Support & Optimization.</h2>
                       <p className="text-xl text-slate-400 leading-relaxed mb-8">
-                          Infrastructure is a living thing. We provide ongoing monitoring, updates, and optimization to ensure your systems never age out.
+                          Infrastructure is a living thing. Monitoring, updates and optimization can be included in an agreed support plan.
                       </p>
                       <Link href="/contact" className="inline-flex items-center px-8 py-4 bg-emerald-600 text-white rounded-full font-bold hover:bg-emerald-700 transition-colors">
                           Upgrade My Systems <ArrowRight className="ml-2 w-5 h-5" />
@@ -243,12 +243,12 @@ export default function SMEPage() {
                   </div>
                   <div className="grid grid-cols-2 gap-6">
                       <div className="bg-white/5 border border-white/10 p-6 rounded-xl backdrop-blur-sm">
-                          <h4 className="font-bold text-lg mb-2 text-emerald-400">99.9% Uptime</h4>
-                          <p className="text-sm text-slate-400">We monitor your systems 24/7 so you don&apos;t have to.</p>
+                          <h4 className="font-bold text-lg mb-2 text-emerald-400">Agreed availability</h4>
+                          <p className="text-sm text-slate-400">Monitoring coverage and response times are defined in your support agreement.</p>
                       </div>
                       <div className="bg-white/5 border border-white/10 p-6 rounded-xl backdrop-blur-sm">
                           <h4 className="font-bold text-lg mb-2 text-emerald-400">Rapid Response</h4>
-                          <p className="text-sm text-slate-400">Direct access to engineering for critical issues.</p>
+                          <p className="text-sm text-slate-400">Escalation routes agreed for critical issues.</p>
                       </div>
                        <div className="bg-white/5 border border-white/10 p-6 rounded-xl backdrop-blur-sm">
                           <h4 className="font-bold text-lg mb-2 text-emerald-400">Monthly Audits</h4>
@@ -272,16 +272,16 @@ export default function SMEPage() {
                </div>
                <div className="grid md:grid-cols-3 gap-12 text-center divide-y md:divide-y-0 md:divide-x divide-slate-200">
                     <div className="p-4">
-                        <div className="text-5xl font-bold mb-2 text-slate-900">30%</div>
-                        <div className="text-emerald-600 font-medium">Reduction in OpEx</div>
+                        <div className="text-5xl font-bold mb-2 text-slate-900">Less admin</div>
+                        <div className="text-emerald-600 font-medium">Clearer operational workflows</div>
                     </div>
                     <div className="p-4">
-                        <div className="text-5xl font-bold mb-2 text-slate-900">100+</div>
-                        <div className="text-emerald-600 font-medium">Hours Saved Monthly</div>
+                        <div className="text-5xl font-bold mb-2 text-slate-900">Connected</div>
+                        <div className="text-emerald-600 font-medium">Systems that work together</div>
                     </div>
                     <div className="p-4">
-                        <div className="text-5xl font-bold mb-2 text-slate-900">2x</div>
-                        <div className="text-emerald-600 font-medium">Revenue Capacity</div>
+                        <div className="text-5xl font-bold mb-2 text-slate-900">Useful data</div>
+                        <div className="text-emerald-600 font-medium">Reporting for decisions</div>
                     </div>
                </div>
           </div>

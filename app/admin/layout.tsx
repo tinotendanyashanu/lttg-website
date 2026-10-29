@@ -2,6 +2,10 @@ import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import AdminPanelShell from '@/components/admin/AdminPanelShell';
 
+// Authenticated admin records must be read for the current request, never
+// prerendered into a build artifact or queried while building public pages.
+export const dynamic = 'force-dynamic';
+
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
 

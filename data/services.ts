@@ -81,11 +81,11 @@ export const services: Service[] = [
       },
       {
         title: "Scale Without Hiring",
-        description: "AI systems work 24/7 without breaks, allowing you to scale operations without proportionally increasing headcount."
+        description: "Automate defined tasks with monitoring, exception handling and human review appropriate to the workflow."
       },
       {
         title: "Improve Customer Experience",
-        description: "Intelligent chatbots and support systems provide instant, accurate responses around the clock."
+        description: "AI-assisted support can help answer routine questions, with escalation paths and review for uncertain responses."
       }
     ],
     process: [

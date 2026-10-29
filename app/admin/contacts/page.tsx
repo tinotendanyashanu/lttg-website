@@ -3,6 +3,8 @@ import dbConnect from '@/lib/mongodb';
 import Contact, { IContact } from '@/models/Contact';
 import ContactsClient from '@/components/admin/ContactsClient';
 import AdminPageBanner from '@/components/admin/AdminPageBanner';
+import { auth } from '@/auth';
+import { redirect } from 'next/navigation';
 
 async function getContacts() {
   await dbConnect();
@@ -12,6 +14,8 @@ async function getContacts() {
 }
 
 export default async function AdminContactsPage() {
+  const session = await auth();
+  if (!session?.user || session.user.role !== 'admin') redirect('/admin/login');
   const contacts = await getContacts();
 
   // Transform data for table

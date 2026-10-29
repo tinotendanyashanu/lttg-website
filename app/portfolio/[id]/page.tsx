@@ -1,116 +1,172 @@
-import React from 'react';
-// import Navbar from '@/components/Navbar';
-// import Footer from '@/components/Footer';
-// import { ArrowLeft, CheckCircle, ArrowUpRight } from 'lucide-react';
-// import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { ArrowLeft, ArrowUpRight, Check } from "lucide-react";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import EngagementCTA from "@/components/marketing/EngagementCTA";
+import { caseStudies } from "@/data/case-studies";
+import { projects } from "@/data/projects";
+import { marketingMetadata } from "@/lib/marketing-metadata";
 
-// This would typically come from a CMS or database
-const projects = [
-  {
-    id: "preciagro",
-    title: "PreciAgro",
-    category: "AI-powered agriculture system",
-    heroImage: "bg-green-600", // Placeholder for real image
-    description: "Diagnoses crops, predicts yields, provides farming insights, and supports farmers using intelligent models.",
-    challenge: "Rural farmers lack access to real-time agricultural expertise, leading to crop loss and inefficient resource usage.",
-    solution: "We built an AI-driven mobile platform that allows farmers to scan crops for diseases, get weather-based advice, and optimize fertilizer usage.",
-    techStack: ["React Native", "TensorFlow Lite", "Node.js", "MongoDB"],
-    outcome: "Helped 500+ farmers increase yield by 30% in the first season.",
-    features: [
-      "Offline-first architecture for remote areas",
-      "Real-time disease detection via camera",
-      "Localized voice support for accessibility",
-      "Market price integration"
-    ]
-  },
-  {
-    id: "sanganai-events",
-    title: "Sanganai Events Platform",
-    category: "Event management, ticketing, QR access",
-    heroImage: "bg-purple-600",
-    description: "Handles everything from ticket sales to security to fraud detection.",
-    challenge: "Existing event platforms were expensive and lacked robust fraud prevention for local markets.",
-    solution: "A comprehensive event management suite with secure QR ticketing, real-time analytics, and AI-powered support chat.",
-    techStack: ["Next.js", "PostgreSQL", "Stripe Connect", "Redis"],
-    outcome: "Processed over $100k in ticket sales with zero reported fraud incidents.",
-    features: [
-      "Dynamic QR code generation",
-      "Real-time attendance tracking",
-      "Automated payouts to organizers",
-      "AI chatbot for attendee queries"
-    ]
-  },
-  {
-    id: "blockchain-remittance",
-    title: "Blockchain Remittance System",
-    category: "FinTech / Web3",
-    heroImage: "bg-blue-600",
-    description: "Users send money like normal, but the backend uses blockchain for speed and low cost.",
-    challenge: "Cross-border transfers were slow (3-5 days) and expensive (7-10% fees).",
-    solution: "A hybrid fiat-crypto bridge that settles transactions on the blockchain while keeping the user experience purely fiat.",
-    techStack: ["Solidity", "React", "Node.js", "Web3.js"],
-    outcome: "Reduced transaction fees to <1% and settlement time to seconds.",
-    features: [
-      "Instant settlement",
-      "KYC/AML compliance integration",
-      "Multi-currency support",
-      "Transparent audit trail"
-    ]
-  },
-  {
-    id: "crm-automation",
-    title: "CRM & Automation Systems",
-    category: "Internal Tools",
-    heroImage: "bg-orange-600",
-    description: "Helps businesses manage leads, communication, tasks, and team operations.",
-    challenge: "The client was drowning in spreadsheets and manual data entry, missing leads and delaying follow-ups.",
-    solution: "A custom CRM tailored to their specific workflow, with automated email sequences and task assignment.",
-    techStack: ["Vue.js", "Firebase", "Zapier", "SendGrid"],
-    outcome: "Increased lead conversion by 40% and saved the team 15 hours/week.",
-    features: [
-      "Drag-and-drop pipeline",
-      "Automated email sequences",
-      "Team performance analytics",
-      "Calendar integration"
-    ]
-  },
-  {
-    id: "security-tools",
-    title: "Security Tools & Automation",
-    category: "Cybersecurity",
-    heroImage: "bg-red-600",
-    description: "Monitors systems, prevents weaknesses, and automates defensive tasks.",
-    challenge: "Manual security audits were too infrequent to catch rapidly evolving threats.",
-    solution: "A suite of automated scripts and monitoring tools that continuously scan for vulnerabilities and suspicious activity.",
-    techStack: ["Python", "Bash", "Docker", "Elasticsearch"],
-    outcome: "Detected and blocked 99.9% of automated attacks in real-time.",
-    features: [
-      "Automated vulnerability scanning",
-      "Real-time intrusion detection",
-      "Log analysis and alerting",
-      "Automated patch management"
-    ]
-  }
-];
-
+type Props = { params: Promise<{ id: string }> };
+export const dynamicParams = false;
 export function generateStaticParams() {
-  return projects.map((project) => ({
-    id: project.id,
-  }));
+  return [
+    ...new Set([...caseStudies.map((p) => p.id), ...projects.map((p) => p.id)]),
+  ].map((id) => ({ id }));
 }
-
-export default async function ProjectPage(props: { params: Promise<{ id: string }> }) {
-  const params = await props.params;
-  const project = projects.find((p) => p.id === params.id);
-
-  if (!project) {
-    notFound();
-  }
-
+export async function generateMetadata({ params }: Props) {
+  const { id } = await params;
+  const project =
+    caseStudies.find((p) => p.id === id) ?? projects.find((p) => p.id === id);
+  if (!project) return { title: "Project not found | LeoTheTechGuy" };
+  return marketingMetadata(
+    "name" in project ? `${project.name} Case Study` : project.title,
+    "summary" in project ? project.summary : project.description,
+    `/portfolio/${id}`,
+  );
+}
+export default async function ProjectPage({ params }: Props) {
+  const { id } = await params;
+  const study = caseStudies.find((p) => p.id === id);
+  const project = projects.find((p) => p.id === id);
+  if (!study && !project) notFound();
+  const name = study?.name ?? project!.title;
   return (
-    <main className="min-h-screen bg-white">
-       <div>Test Page for {project.title}</div>
-    </main>
+    <div className="marketing-site">
+      <Navbar />
+      <main id="main-content">
+        <section className="marketing-page-hero border-b border-slate-200 bg-slate-50">
+          <div className="marketing-container">
+            <Link
+              href="/portfolio"
+              className="inline-flex items-center gap-2 text-sm text-slate-600"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to the work
+            </Link>
+            <p className="marketing-eyebrow mt-10">
+              {study?.category ?? project!.category} ·{" "}
+              {study?.engagement ?? project!.status}
+            </p>
+            <h1 className="marketing-heading mt-5 max-w-4xl !text-[clamp(2.5rem,5vw,4.5rem)]">
+              {study?.title ?? name}
+            </h1>
+            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-600">
+              {study?.summary ?? project!.description}
+            </p>
+          </div>
+        </section>
+        {study ? (
+          <section className="marketing-section">
+            <div className="marketing-container grid gap-12 lg:grid-cols-[1fr_320px]">
+              <div className="space-y-12">
+                {[
+                  {
+                    label: "01 / THE BUSINESS PROBLEM",
+                    title: "The work that needed a better system.",
+                    text: study.problem,
+                  },
+                  {
+                    label: "02 / THE SOLUTION",
+                    title: "Software shaped around the workflow.",
+                    text: study.solution,
+                  },
+                  {
+                    label: "03 / THE ENGINEERING",
+                    title: "My involvement.",
+                    text: study.involvement,
+                  },
+                  {
+                    label: "04 / THE BUSINESS APPLICATION",
+                    title: "What the platform brings together.",
+                    text: study.delivery,
+                  },
+                ].map((section) => (
+                  <section key={section.label}>
+                    <p className="marketing-eyebrow">{section.label}</p>
+                    <h2 className="mt-4 text-2xl font-semibold tracking-tight text-slate-950">
+                      {section.title}
+                    </h2>
+                    <p className="mt-4 max-w-2xl leading-relaxed text-slate-600">
+                      {section.text}
+                    </p>
+                  </section>
+                ))}
+                <p className="border-l-2 border-emerald-600 pl-5 text-sm leading-relaxed text-slate-500">
+                  {study.scopeNote}
+                </p>
+              </div>
+              <aside className="h-fit rounded-xl border border-slate-200 bg-slate-50 p-7">
+                <p className="marketing-eyebrow">{name}</p>
+                <h2 className="mt-4 text-lg font-semibold">
+                  Workflow coverage
+                </h2>
+                <ul className="mt-6 space-y-4">
+                  {study.capabilities.map((item) => (
+                    <li
+                      key={item}
+                      className="flex gap-2 text-sm text-slate-600"
+                    >
+                      <Check className="h-4 w-4 shrink-0 text-emerald-700" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <h3 className="mt-9 text-sm font-semibold">Relevant for</h3>
+                <p className="mt-3 text-sm leading-relaxed text-slate-600">
+                  {study.audience}.
+                </p>
+                <Link
+                  href={`/contact?project=${encodeURIComponent(name)}&source=case-study`}
+                  className="marketing-button button-dark mt-8 w-full"
+                >
+                  Discuss a similar project <ArrowUpRight className="h-4 w-4" />
+                </Link>
+              </aside>
+            </div>
+          </section>
+        ) : (
+          <section className="marketing-section">
+            <div className="marketing-container max-w-3xl">
+              <p className="marketing-eyebrow">PROJECT OVERVIEW</p>
+              <h2 className="marketing-heading mt-4">{name}</h2>
+              <p className="mt-6 leading-relaxed text-slate-600">
+                {project!.description}
+              </p>
+              <p className="mt-4 text-sm text-slate-600">
+                Published project status: <strong>{project!.status}</strong>
+              </p>
+              <div className="mt-7 flex flex-wrap gap-2">
+                {project!.tags.map((tag) => (
+                  <span
+                    className="rounded-full bg-slate-100 px-4 py-2 text-xs text-slate-600"
+                    key={tag}
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+              {(project!.liveUrl ?? project!.link) && (
+                <a
+                  href={project!.liveUrl ?? project!.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="marketing-button button-dark mt-9"
+                >
+                  Visit project website <ArrowUpRight className="h-4 w-4" />
+                </a>
+              )}
+              <p className="mt-6 text-sm text-slate-500">
+                The linked website may show the current product beyond the scope
+                of this portfolio entry.
+              </p>
+            </div>
+          </section>
+        )}
+        <EngagementCTA />
+      </main>
+      <Footer />
+    </div>
   );
 }

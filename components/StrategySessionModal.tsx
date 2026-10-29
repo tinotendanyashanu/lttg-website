@@ -1,199 +1,86 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { X, ArrowRight, Loader2, CheckCircle, MessageCircle, Mail } from 'lucide-react';
-import Link from 'next/link';
+import { useEffect, useRef } from "react";
+import { ArrowUpRight, CalendarDays, FileText, X } from "lucide-react";
+import Link from "next/link";
 
-interface Props {
+// Retains the existing entry points on service pages while using the same two
+// journeys as the homepage. Booking no longer requires submitting two forms.
+export default function StrategySessionModal({
+  isOpen,
+  onClose,
+}: {
   isOpen: boolean;
   onClose: () => void;
-}
-
-export default function StrategySessionModal({ isOpen, onClose }: Props) {
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState('');
-  const [submittedName, setSubmittedName] = useState('');
-  const [submittedProject, setSubmittedProject] = useState('');
-
-  if (!isOpen) return null;
-
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-
-    const formData = new FormData(e.currentTarget);
-    const name = formData.get('name') as string;
-    const email = formData.get('email') as string;
-    const whatsapp = formData.get('whatsapp') as string;
-    const project = formData.get('project') as string;
-
-    try {
-      const res = await fetch('/api/project-inquiry', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, whatsapp, project, message: project }),
-      });
-
-      const result = await res.json();
-      if (!res.ok) throw new Error(result.message || 'Something went wrong');
-
-      setSubmittedName(name);
-      setSubmittedProject(project);
-      setSuccess(true);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'An unknown error occurred');
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  const whatsappMessage = encodeURIComponent(
-    `Hi Leo, I just submitted a strategy session request.\n\nName: ${submittedName}\nProject: ${submittedProject}\n\nLooking forward to connecting!`
-  );
-  const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '';
-  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`;
-  const emailUrl = `mailto:contact@leothetechguy.com?subject=${encodeURIComponent(`Strategy Session - ${submittedName}`)}&body=${encodeURIComponent(`Hi Leo,\n\nI submitted a strategy session request.\n\nProject: ${submittedProject}\n\nLooking forward to connecting!`)}`;
-
+}) {
+  const dialog = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    if (isOpen && !dialog.current?.open) dialog.current?.showModal();
+    if (!isOpen && dialog.current?.open) dialog.current?.close();
+  }, [isOpen]);
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-
-      {/* Modal */}
-      <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-lg p-8 animate-in fade-in zoom-in duration-200">
+    <dialog
+      ref={dialog}
+      onCancel={onClose}
+      onClick={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+      aria-labelledby="strategy-title"
+      className="engagement-dialog"
+    >
+      <div className="relative p-7 sm:p-10">
         <button
+          type="button"
           onClick={onClose}
-          className="absolute top-5 right-5 p-2 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
-          aria-label="Close modal"
+          aria-label="Close dialog"
+          className="absolute right-4 top-4 rounded-full p-3 text-slate-600 hover:bg-slate-100"
         >
-          <X className="w-5 h-5" />
+          <X className="h-5 w-5" />
         </button>
-
-        {success ? (
-          <div className="text-center py-4">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-5">
-              <CheckCircle className="w-8 h-8 text-green-600" />
-            </div>
-            <h2 className="text-2xl font-bold text-slate-900 mb-2">Step 1 Complete!</h2>
-            <p className="text-slate-500 mb-8">
-              I&apos;ve received your details. To make the most of our time, please **choose a specific slot** on my calendar now.
-            </p>
-            <div className="flex flex-col gap-3">
-              <Link
-                href="/book"
-                onClick={onClose}
-                className="inline-flex items-center justify-center gap-3 w-full px-6 py-4 bg-[#0071e3] text-white font-semibold rounded-2xl hover:bg-[#0077ED] transition-colors"
-              >
-                Schedule Your Slot Now
-                <ArrowRight className="w-5 h-5" />
-              </Link>
-              <div className="flex items-center gap-2 py-2">
-                <div className="h-px bg-slate-100 flex-grow"></div>
-                <span className="text-[10px] text-slate-400 uppercase font-bold tracking-widest">Or connect via</span>
-                <div className="h-px bg-slate-100 flex-grow"></div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <a
-                  href={whatsappUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 px-4 py-3 bg-[#25D366]/10 text-[#25D366] text-sm font-semibold rounded-xl hover:bg-[#25D366]/20 transition-colors"
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  WhatsApp
-                </a>
-                <a
-                  href={emailUrl}
-                  className="inline-flex items-center justify-center gap-2 px-4 py-3 bg-slate-100 text-slate-900 text-sm font-semibold rounded-xl hover:bg-slate-200 transition-colors"
-                >
-                  <Mail className="w-4 h-4" />
-                  Email
-                </a>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <>
-            <h2 className="text-2xl font-bold text-slate-900 mb-1">Book a Strategy Session</h2>
-            <p className="text-slate-500 mb-7 text-sm">Align your technology with your revenue goals. I&apos;ll help you map out the execution.</p>
-
-            {error && (
-              <div className="mb-5 p-4 bg-red-50 text-red-700 rounded-xl text-sm border border-red-100">
-                {error}
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="modal-name" className="block text-sm font-medium text-slate-700 mb-1.5">Full Name</label>
-                  <input
-                    type="text"
-                    id="modal-name"
-                    name="name"
-                    required
-                    placeholder="John Doe"
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 outline-none text-sm transition-all"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="modal-email" className="block text-sm font-medium text-slate-700 mb-1.5">Email</label>
-                  <input
-                    type="email"
-                    id="modal-email"
-                    name="email"
-                    required
-                    placeholder="john@company.com"
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 outline-none text-sm transition-all"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="modal-whatsapp" className="block text-sm font-medium text-slate-700 mb-1.5">
-                  WhatsApp Number <span className="text-slate-400 font-normal">(optional)</span>
-                </label>
-                <input
-                  type="tel"
-                  id="modal-whatsapp"
-                  name="whatsapp"
-                  placeholder="+1 234 567 8900"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 outline-none text-sm transition-all"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="modal-project" className="block text-sm font-medium text-slate-700 mb-1.5">What do you need?</label>
-                <textarea
-                  id="modal-project"
-                  name="project"
-                  required
-                  rows={3}
-                  placeholder="Briefly describe what you want to build or discuss..."
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 outline-none text-sm transition-all resize-none"
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full inline-flex justify-center items-center px-8 py-4 text-base font-semibold text-white bg-[#0071e3] rounded-full hover:bg-[#0077ED] transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed mt-1"
-              >
-                {loading ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
-                  <>
-                    Submit & Connect
-                    <ArrowRight className="ml-2 w-4 h-4" />
-                  </>
-                )}
-              </button>
-            </form>
-          </>
-        )}
+        <p className="marketing-eyebrow">LET’S FIND THE NEXT STEP</p>
+        <h2
+          id="strategy-title"
+          className="mt-4 pr-7 text-3xl font-semibold tracking-tight text-slate-950"
+        >
+          Talk through your project.
+        </h2>
+        <p className="mt-4 leading-relaxed text-slate-600">
+          Choose a conversation or send a written brief. We’ll explore the
+          problem, scope and a sensible way forward.
+        </p>
+        <div className="mt-7 grid gap-4">
+          <Link
+            onClick={onClose}
+            href="/book"
+            className="flex items-center gap-4 rounded-xl border border-slate-200 p-5 text-slate-950 hover:border-emerald-600"
+          >
+            <CalendarDays className="h-5 w-5 shrink-0 text-emerald-700" />
+            <span>
+              <strong className="block text-sm">Book a discovery call</strong>
+              <span className="mt-1 block text-xs text-slate-600">
+                Choose a time to discuss your workflow.
+              </span>
+            </span>
+            <ArrowUpRight className="ml-auto h-4 w-4" />
+          </Link>
+          <Link
+            onClick={onClose}
+            href="/contact"
+            className="flex items-center gap-4 rounded-xl border border-slate-200 p-5 text-slate-950 hover:border-emerald-600"
+          >
+            <FileText className="h-5 w-5 shrink-0 text-emerald-700" />
+            <span>
+              <strong className="block text-sm">
+                Request a project estimate
+              </strong>
+              <span className="mt-1 block text-xs text-slate-600">
+                Share requirements, timeline and budget.
+              </span>
+            </span>
+            <ArrowUpRight className="ml-auto h-4 w-4" />
+          </Link>
+        </div>
       </div>
-    </div>
+    </dialog>
   );
 }

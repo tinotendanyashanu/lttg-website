@@ -233,7 +233,7 @@ export default function StartupsPage() {
                   <div>
                       <h2 className="text-3xl md:text-5xl font-bold mb-6">Infrastructure That Sleeps Well.</h2>
                       <p className="text-xl text-slate-400 leading-relaxed mb-8">
-                          We treat infrastructure as code. Automated deployments, self-healing clusters, and zero-downtime updates allow you to ship without fear.
+                          We treat infrastructure as code. Automated deployments, monitoring and a considered rollout plan support reliable releases.
                       </p>
                       <Link href="/contact" className="inline-flex items-center px-8 py-4 bg-blue-600 text-white rounded-full font-bold hover:bg-blue-700 transition-colors">
                           Start My Build <ArrowRight className="ml-2 w-5 h-5" />
@@ -254,7 +254,7 @@ export default function StartupsPage() {
                       </div>
                        <div className="bg-white/5 border border-white/10 p-6 rounded-xl backdrop-blur-sm">
                           <h4 className="font-bold text-lg mb-2 text-blue-400">Security First</h4>
-                          <p className="text-sm text-slate-400">OWASP Top 10 compliance baked in.</p>
+                          <p className="text-sm text-slate-400">Security review against relevant risks.</p>
                       </div>
                   </div>
               </div>
@@ -270,16 +270,16 @@ export default function StartupsPage() {
                </div>
                <div className="grid md:grid-cols-3 gap-12 text-center divide-y md:divide-y-0 md:divide-x divide-slate-200">
                     <div className="p-4">
-                        <div className="text-5xl font-bold mb-2 text-slate-900">4-6</div>
-                        <div className="text-blue-600 font-medium">Weeks to Launch</div>
+                        <div className="text-5xl font-bold mb-2 text-slate-900">Scoped</div>
+                        <div className="text-blue-600 font-medium">Milestones agreed together</div>
                     </div>
                      <div className="p-4">
-                        <div className="text-5xl font-bold mb-2 text-slate-900">99.9%</div>
-                        <div className="text-blue-600 font-medium">Uptime Target</div>
+                        <div className="text-5xl font-bold mb-2 text-slate-900">Reliable</div>
+                        <div className="text-blue-600 font-medium">Availability requirements</div>
                     </div>
                      <div className="p-4">
-                        <div className="text-5xl font-bold mb-2 text-slate-900">90+</div>
-                        <div className="text-blue-600 font-medium">Lighthouse Score</div>
+                        <div className="text-5xl font-bold mb-2 text-slate-900">Measured</div>
+                        <div className="text-blue-600 font-medium">Performance checked at delivery</div>
                     </div>
                </div>
           </div>

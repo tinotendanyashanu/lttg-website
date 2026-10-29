@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "setup:admin": "node scripts/setup-admin.js"
+    "setup:admin": "node scripts/setup-admin.js",
+    "test:inquiries": "node --import tsx --test tests/inquiry-validation.test.ts"
   },
   "engines": {
     "node": ">=20.19 <21"

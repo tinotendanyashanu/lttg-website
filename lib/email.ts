@@ -63,6 +63,7 @@ export async function sendEmail({
       html,
       replyTo: replyTo,
     });
+    if (data.error) return { success: false, error: data.error };
     return { success: true, data };
   } catch (error) {
     return { success: false, error };
@@ -79,15 +80,16 @@ export async function sendAdminNotification({
   replyTo?: string;
 }) {
   try {
-      await getResendClient().emails.send({
+      const result = await getResendClient().emails.send({
           from: FROM_EMAIL,
           to: ADMIN_EMAIL,
           subject: `[ADMIN] ${subject}`,
           html: `<p>${text}</p>`,
           replyTo: replyTo,
       });
+      return result.error ? { success: false } : { success: true };
   } catch (error) {
-      // Silently fail in production
+      return { success: false };
   }
 }
 
@@ -150,8 +152,8 @@ export const EmailTemplates = {
       <h2 style="color: #0f172a; font-size: 20px; margin-top: 0; margin-bottom: 24px;">Project Inquiry: ${project}</h2>
       <p>Hello ${name},</p>
       <p>Thank you for your interest in partnering with LeoTheTechGuy for <strong>${project}</strong>.</p>
-      <p>I am currently reviewing your project details. My goal is to ensure every engagement is a strategic fit for both parties. If the initiative aligns with my current capacity and expertise, I will reach out within 1-2 business days with a link to schedule a discovery call.</p>
-      <p>I look forward to potentially exploring this further.</p>
+      <p>I will review the business problem, requirements and timing, then follow up with questions or next steps. A project estimate follows that scope discussion.</p>
+      <p>If you prefer to speak, you can <a href="https://leothetechguy.com/book">choose a discovery call time</a>. Submitting a brief does not reserve a calendar slot.</p>
       <p style="margin-top: 32px;">Best regards,<br /><strong style="color: #1e293b;">Leo</strong></p>
     `),
 

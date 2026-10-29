@@ -227,7 +227,7 @@ export default function EnterprisePage() {
                   <div>
                       <h2 className="text-3xl md:text-5xl font-bold mb-6">Enterprise-Grade Reliability.</h2>
                       <p className="text-xl text-slate-400 leading-relaxed mb-8">
-                          We design for 99.9%+ uptime. Our infrastructure is redundant, continuously monitored, and aligned with international compliance standards.
+                          Availability, monitoring, recovery objectives and relevant security requirements are scoped for your infrastructure and operating needs.
                       </p>
                       <Link href="/contact" className="inline-flex items-center px-8 py-4 bg-indigo-600 text-white rounded-full font-bold hover:bg-indigo-700 transition-colors">
                           Schedule Consultation <ArrowRight className="ml-2 w-5 h-5" />
@@ -235,12 +235,12 @@ export default function EnterprisePage() {
                   </div>
                   <div className="grid grid-cols-2 gap-6">
                       <div className="bg-white/5 border border-white/10 p-6 rounded-xl backdrop-blur-sm">
-                          <h4 className="font-bold text-lg mb-2 text-indigo-400">SOC2 Ready</h4>
+                          <h4 className="font-bold text-lg mb-2 text-indigo-400">Security planning</h4>
                           <p className="text-sm text-slate-400">Security controls built-in.</p>
                       </div>
                       <div className="bg-white/5 border border-white/10 p-6 rounded-xl backdrop-blur-sm">
                           <h4 className="font-bold text-lg mb-2 text-indigo-400">Disaster Recovery</h4>
-                          <p className="text-sm text-slate-400">RPO/RTO designed for zero loss.</p>
+                          <p className="text-sm text-slate-400">Recovery objectives agreed for your business.</p>
                       </div>
                        <div className="bg-white/5 border border-white/10 p-6 rounded-xl backdrop-blur-sm">
                           <h4 className="font-bold text-lg mb-2 text-indigo-400">Data Sovereignty</h4>
@@ -264,16 +264,16 @@ export default function EnterprisePage() {
                </div>
                 <div className="grid md:grid-cols-3 gap-12 text-center divide-y md:divide-y-0 md:divide-x divide-slate-200">
                     <div className="p-4">
-                        <div className="text-5xl font-bold mb-2 text-slate-900">SOC2</div>
-                        <div className="text-indigo-600 font-medium">Compliance Ready</div>
+                        <div className="text-5xl font-bold mb-2 text-slate-900">Security</div>
+                        <div className="text-indigo-600 font-medium">Controls scoped to your needs</div>
                     </div>
                     <div className="p-4">
-                        <div className="text-5xl font-bold mb-2 text-slate-900">100%</div>
+                        <div className="text-5xl font-bold mb-2 text-slate-900">Data control</div>
                         <div className="text-indigo-600 font-medium">Data Sovereignty</div>
                     </div>
                     <div className="p-4">
-                        <div className="text-5xl font-bold mb-2 text-slate-900">24/7</div>
-                        <div className="text-indigo-600 font-medium">System Reliability</div>
+                        <div className="text-5xl font-bold mb-2 text-slate-900">Support</div>
+                        <div className="text-indigo-600 font-medium">Coverage agreed in advance</div>
                     </div>
                </div>
           </div>

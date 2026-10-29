@@ -373,3 +373,318 @@
 /* Base Light Mode Styles (Deprecated/Fallback) */
 /* (We now rely on the color: inherit above + container classes) */
 
+
+
+/* Public marketing pages. Scoped classes keep the application portals intact. */
+.marketing-site {
+  background: #fff;
+  color: #14201f;
+}
+.marketing-container {
+  width: min(100% - 3rem, 1200px);
+  margin-inline: auto;
+}
+.marketing-section {
+  padding-block: clamp(4rem, 7vw, 7rem);
+}
+.marketing-eyebrow {
+  color: #047857;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  line-height: 1.6;
+}
+.marketing-eyebrow.text-emerald-300 {
+  color: #6ee7b7;
+}
+.marketing-heading {
+  font-size: clamp(2rem, 3.7vw, 3.4rem);
+  font-weight: 600;
+  letter-spacing: -0.045em;
+  line-height: 1.14;
+  color: #101e1e;
+}
+.marketing-button {
+  min-height: 50px;
+  padding: 15px 23px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.4;
+  transition:
+    background 0.2s,
+    transform 0.2s;
+}
+.marketing-button:hover {
+  transform: translateY(-2px);
+}
+.button-mint {
+  background: #6ee7b7;
+  color: #102620;
+}
+.button-mint:hover {
+  background: #a7f3d0;
+}
+.button-dark {
+  background: #112423;
+  color: white;
+}
+.button-dark:hover {
+  background: #24504a;
+}
+.button-outline-light {
+  border: 1px solid #ffffff40;
+  color: #fff;
+}
+.button-outline-light:hover {
+  background: #ffffff0f;
+}
+.button-outline {
+  border: 1px solid #cbd5e1;
+  color: #14201f;
+  background: #fff;
+}
+.site-header {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 50;
+  background: #fffffff5;
+  border-bottom: 1px solid #e2e8f0;
+  backdrop-filter: blur(16px);
+}
+.home-hero {
+  padding: 160px 0 36px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+  background: #101f20;
+}
+.home-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(#ffffff03 1px, transparent 1px),
+    linear-gradient(90deg, #ffffff03 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: linear-gradient(to right, transparent, #000);
+  pointer-events: none;
+}
+.hero-founder {
+  max-width: 340px;
+  margin-left: auto;
+  border: 1px solid #ffffff26;
+  background: #ffffff05;
+  border-radius: 16px;
+  overflow: hidden;
+}
+.section-heading-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 32px;
+}
+.case-card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #dfe6e3;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #fff;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+}
+.case-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px #1026200a;
+}
+.case-cover {
+  padding: 24px;
+  background: #e1efe8;
+  color: #173e31;
+  min-height: 245px;
+  display: flex;
+  flex-direction: column;
+}
+.case-blue .case-cover {
+  background: #e3ebf5;
+  color: #233f68;
+}
+.case-violet .case-cover {
+  background: #ebe6f5;
+  color: #483564;
+}
+.case-type {
+  font-size: 0.625rem;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+.case-wordmark {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-block: 36px;
+  font-size: clamp(1.6rem, 2.4vw, 2.2rem);
+  font-weight: 650;
+  letter-spacing: -0.05em;
+}
+.case-wordmark > span {
+  font-size: 2rem;
+  font-weight: 400;
+  opacity: 0.5;
+}
+.case-flow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.case-flow > span {
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  padding: 5px 7px;
+  font-size: 0.5625rem;
+  line-height: 1.4;
+  opacity: 0.8;
+}
+.service-panel {
+  display: flex;
+  flex-direction: column;
+  padding: 32px;
+  border-radius: 12px;
+  border: 1px solid #dde5e1;
+  background: #fafcfb;
+  scroll-margin-top: 110px;
+}
+.marketing-cta {
+  padding-block: clamp(4rem, 7vw, 7rem);
+  background: #101f20;
+  color: white;
+}
+.cta-option {
+  display: flex;
+  gap: 18px;
+  align-items: start;
+  padding: 24px;
+  border: 1px solid #ffffff26;
+  border-radius: 10px;
+  transition: background 0.2s;
+}
+.cta-option:hover {
+  background: #ffffff08;
+}
+.cta-option strong {
+  display: block;
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+.cta-option span span {
+  display: block;
+  margin-top: 7px;
+  color: #cbd5e1;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+}
+.marketing-page-hero {
+  padding-block: 152px 64px;
+}
+.marketing-input {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 12px 14px;
+  background: white;
+  font-size: 0.875rem;
+  color: #0f172a;
+}
+.marketing-input:focus {
+  outline: 2px solid #047857;
+  outline-offset: 2px;
+}
+.marketing-label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #334155;
+}
+.engagement-dialog {
+  width: min(100% - 2rem, 540px);
+  margin: auto;
+  max-height: calc(100dvh - 2rem);
+  padding: 0;
+  border: 0;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 20px 80px #0004;
+}
+.engagement-dialog::backdrop {
+  background: #0f172aa6;
+  backdrop-filter: blur(4px);
+}
+.marketing-site :is(a, button, input, select, textarea):focus-visible,
+.site-header :is(a, button):focus-visible {
+  outline: 3px solid #059669;
+  outline-offset: 5px;
+}
+.skip-link {
+  position: fixed;
+  left: 16px;
+  top: -100px;
+  z-index: 200;
+  padding: 14px 20px;
+  border-radius: 8px;
+  background: #fff;
+  color: #102620;
+  box-shadow: 0 4px 20px #0003;
+}
+.skip-link:focus {
+  top: 12px;
+}
+@media (max-width: 1023px) {
+  .hero-founder {
+    display: none;
+  }
+  .home-hero {
+    padding-top: 140px;
+  }
+}
+@media (max-width: 640px) {
+  .marketing-container {
+    width: calc(100% - 2.5rem);
+  }
+  .section-heading-row {
+    flex-direction: column;
+    align-items: start;
+  }
+  .home-hero {
+    padding-top: 128px;
+  }
+  .marketing-page-hero {
+    padding-block: 128px 48px;
+  }
+  .case-cover {
+    min-height: 220px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html,
+  html.scroll-smooth {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
