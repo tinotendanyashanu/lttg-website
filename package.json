@@ -11,7 +11,7 @@
     "test:inquiries": "node --import tsx --test tests/inquiry-validation.test.ts"
   },
   "engines": {
-    "node": ">=20.19 <21"
+    "node": "24.x"
   },
   "packageManager": "npm@10.9.0",
   "dependencies": {
