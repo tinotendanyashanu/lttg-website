@@ -1,3 +1,5 @@
+import { marketingImages, type MarketingImage } from "./marketing-images";
+
 export interface CaseStudy {
   id: string;
   name: string;
@@ -13,6 +15,7 @@ export interface CaseStudy {
   scopeNote: string;
   audience: string;
   color: string;
+  image: MarketingImage;
 }
 
 // Source: the owner's October 2026 B2B audit. Add approved screenshots and
@@ -20,6 +23,7 @@ export interface CaseStudy {
 export const caseStudies: CaseStudy[] = [
   {
     id: "drago",
+    image: marketingImages.fleet,
     name: "Drago Partner",
     category: "Fleet operations",
     title: "Bringing fleet settlements and operations into one place.",
@@ -47,6 +51,7 @@ export const caseStudies: CaseStudy[] = [
   },
   {
     id: "maran",
+    image: marketingImages.automotive,
     name: "Maran",
     category: "Booking & operations",
     title: "Connecting customer bookings with the team running the business.",
@@ -75,6 +80,7 @@ export const caseStudies: CaseStudy[] = [
   },
   {
     id: "swipee",
+    image: marketingImages.retail,
     name: "Swipee",
     category: "Retail software",
     title: "Building the everyday tools behind a retail business.",

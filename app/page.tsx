@@ -17,6 +17,7 @@ import DeliveryProcess from "@/components/marketing/DeliveryProcess";
 import EngagementCTA from "@/components/marketing/EngagementCTA";
 import { caseStudies } from "@/data/case-studies";
 import { marketingMetadata } from "@/lib/marketing-metadata";
+import { marketingImages } from "@/data/marketing-images";
 
 export const metadata = marketingMetadata(
   "Custom Business Software & Automation in Warsaw",
@@ -51,13 +52,13 @@ export default function Home() {
       <Navbar />
       <main id="main-content">
         <section className="home-hero">
-          <div className="marketing-container relative z-10 grid gap-12 lg:grid-cols-[1.35fr_0.65fr] lg:items-end">
+          <div className="marketing-container relative z-10 grid gap-12 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
             <div>
               <p className="marketing-eyebrow text-emerald-300">
                 <span className="mr-3 inline-block h-1.5 w-1.5 rounded-full bg-emerald-300" />
                 CUSTOM SOFTWARE · AUTOMATION · AI
               </p>
-              <h1 className="mt-7 max-w-4xl text-[clamp(2.75rem,6.2vw,5.7rem)] font-semibold leading-[1.06] tracking-[-0.055em]">
+              <h1 className="mt-7 max-w-4xl text-[clamp(2.75rem,5.1vw,4.25rem)] font-semibold leading-[1.06] tracking-[-0.055em]">
                 Software that makes
                 <br className="hidden sm:block" /> your business
                 <br />
@@ -84,33 +85,36 @@ export default function Home() {
                 Warsaw, Poland · Working with businesses worldwide
               </p>
             </div>
-            <aside className="hero-founder">
-              <div className="relative aspect-[4/3] overflow-hidden rounded-t-2xl bg-[#202c30]">
+            <aside className="hero-visual">
+              <div className="hero-workspace">
+                <Image
+                  src={marketingImages.workspace.src}
+                  alt={marketingImages.workspace.alt}
+                  fill
+                  sizes="(min-width: 1280px) 480px, (min-width: 1024px) 42vw, 94vw"
+                  className="object-cover object-right"
+                  quality={85}
+                  priority
+                />
+                <div className="hero-image-label">
+                  <span />
+                  Thoughtful engineering. Practical software.
+                </div>
+              </div>
+              <Link href="/about" className="hero-builder">
                 <Image
                   src="/images/leos-portrait.png"
                   alt="Leo, founder of LeoTheTechGuy"
-                  fill
-                  sizes="(min-width: 1024px) 320px, 85vw"
-                  className="object-cover object-[center_25%]"
-                  priority
+                  width={56}
+                  height={56}
+                  className="hero-builder-portrait"
                 />
-              </div>
-              <div className="p-6">
-                <p className="text-sm font-semibold text-white">
-                  A direct line to the builder.
-                </p>
-                <p className="mt-2 text-sm leading-relaxed text-slate-300">
-                  I’m Leo. I work with business owners and teams to turn
-                  operational problems into useful software.
-                </p>
-                <Link
-                  href="/about"
-                  className="mt-5 inline-flex items-center gap-2 text-xs font-semibold text-emerald-300"
-                >
-                  Meet your technical partner{" "}
-                  <ArrowUpRight className="h-3.5 w-3.5" />
-                </Link>
-              </div>
+                <span>
+                  <strong>A direct line to the builder.</strong>
+                  <span>Work with Leo, from discovery to delivery.</span>
+                </span>
+                <ArrowUpRight className="ml-auto h-5 w-5 shrink-0 text-emerald-300" />
+              </Link>
             </aside>
           </div>
           <div className="marketing-container relative z-10 mt-16">

@@ -2,9 +2,17 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   async redirects() {
-    return [{ source: '/portfolio/sanganai-events', destination: '/portfolio/sanganai', permanent: true }];
+    return [
+      {
+        source: "/portfolio/sanganai-events",
+        destination: "/portfolio/sanganai",
+        permanent: true,
+      },
+    ];
   },
   images: {
+    qualities: [75, 80, 85],
+    formats: ["image/avif", "image/webp"],
     remotePatterns: [
       {
         protocol: "https",

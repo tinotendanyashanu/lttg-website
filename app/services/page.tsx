@@ -6,6 +6,8 @@ import DeliveryProcess from "@/components/marketing/DeliveryProcess";
 import EngagementCTA from "@/components/marketing/EngagementCTA";
 import { businessServices } from "@/data/business-services";
 import { marketingMetadata } from "@/lib/marketing-metadata";
+import EditorialImage from "@/components/marketing/EditorialImage";
+import { marketingImages } from "@/data/marketing-images";
 
 export const metadata = marketingMetadata(
   "Custom Software, Mobile Products & AI Automation",
@@ -18,19 +20,22 @@ export default function Services() {
       <Navbar />
       <main id="main-content">
         <section className="marketing-page-hero">
-          <div className="marketing-container">
-            <p className="marketing-eyebrow">
-              SOFTWARE ENGINEERING FOR YOUR BUSINESS
-            </p>
-            <h1 className="marketing-heading mt-5 max-w-4xl !text-[clamp(2.5rem,5.5vw,4.8rem)]">
-              Less friction.
-              <br />
-              Better-connected work.
-            </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-600">
-              Build the tools your business needs, connect the systems you
-              already use and automate the work that slows your team down.
-            </p>
+          <div className="marketing-container service-hero-grid">
+            <div>
+              <p className="marketing-eyebrow">
+                SOFTWARE ENGINEERING FOR YOUR BUSINESS
+              </p>
+              <h1 className="marketing-heading mt-5 max-w-4xl !text-[clamp(2.5rem,5.5vw,4.8rem)]">
+                Less friction.
+                <br />
+                Better-connected work.
+              </h1>
+              <p className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-600">
+                Build the tools your business needs, connect the systems you
+                already use and automate the work that slows your team down.
+              </p>
+            </div>
+            <EditorialImage image={marketingImages.workspace} priority />
           </div>
         </section>
         <section className="pb-24">

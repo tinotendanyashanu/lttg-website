@@ -6,6 +6,8 @@ import EngagementCTA from "./EngagementCTA";
 import CaseStudyCard from "./CaseStudyCard";
 import { businessServices } from "@/data/business-services";
 import { caseStudies } from "@/data/case-studies";
+import { serviceImages } from "@/data/marketing-images";
+import EditorialImage from "./EditorialImage";
 
 export default function BusinessServicePage({
   service,
@@ -20,23 +22,26 @@ export default function BusinessServicePage({
       <Navbar />
       <main id="main-content">
         <section className="marketing-page-hero border-b border-slate-200 bg-slate-50">
-          <div className="marketing-container">
-            <p className="marketing-eyebrow">{service.eyebrow}</p>
-            <h1 className="marketing-heading mt-5 max-w-4xl !text-[clamp(2.5rem,5vw,4.6rem)]">
-              {service.title}
-            </h1>
-            <p className="mt-5 text-xl font-medium text-emerald-800">
-              {service.headline}
-            </p>
-            <p className="mt-5 max-w-2xl text-lg leading-relaxed text-slate-600">
-              {service.description}
-            </p>
-            <Link
-              href={`/contact?service=${encodeURIComponent(service.id)}`}
-              className="marketing-button button-dark mt-8"
-            >
-              Discuss your requirements <ArrowUpRight className="h-4 w-4" />
-            </Link>
+          <div className="marketing-container service-hero-grid">
+            <div>
+              <p className="marketing-eyebrow">{service.eyebrow}</p>
+              <h1 className="marketing-heading mt-5 max-w-4xl !text-[clamp(2.25rem,4vw,3.9rem)]">
+                {service.title}
+              </h1>
+              <p className="mt-5 text-xl font-medium text-emerald-800">
+                {service.headline}
+              </p>
+              <p className="mt-5 max-w-2xl text-lg leading-relaxed text-slate-600">
+                {service.description}
+              </p>
+              <Link
+                href={`/contact?service=${encodeURIComponent(service.id)}`}
+                className="marketing-button button-dark mt-8"
+              >
+                Discuss your requirements <ArrowUpRight className="h-4 w-4" />
+              </Link>
+            </div>
+            <EditorialImage image={serviceImages[service.id]} priority />
           </div>
         </section>
         <section className="marketing-section">
@@ -82,7 +87,12 @@ export default function BusinessServicePage({
               </h2>
               <div className="mt-10 grid gap-6 md:grid-cols-2">
                 {relevant.map((study, index) => (
-                  <CaseStudyCard study={study} index={index} key={study.id} />
+                  <CaseStudyCard
+                    study={study}
+                    index={index}
+                    columns={2}
+                    key={study.id}
+                  />
                 ))}
               </div>
             </div>

@@ -7,6 +7,7 @@ import EngagementCTA from "@/components/marketing/EngagementCTA";
 import { caseStudies } from "@/data/case-studies";
 import { projects } from "@/data/projects";
 import { marketingMetadata } from "@/lib/marketing-metadata";
+import EditorialImage from "@/components/marketing/EditorialImage";
 
 type Props = { params: Promise<{ id: string }> };
 export const dynamicParams = false;
@@ -57,6 +58,16 @@ export default async function ProjectPage({ params }: Props) {
             </p>
           </div>
         </section>
+        {study && (
+          <section
+            className="case-study-visual"
+            aria-label={`${name} industry context`}
+          >
+            <div className="marketing-container">
+              <EditorialImage image={study.image} wide priority />
+            </div>
+          </section>
+        )}
         {study ? (
           <section className="marketing-section">
             <div className="marketing-container grid gap-12 lg:grid-cols-[1fr_320px]">

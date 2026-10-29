@@ -1,13 +1,16 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
 import type { CaseStudy } from "@/data/case-studies";
 
 export default function CaseStudyCard({
   study,
   index = 0,
+  columns = 3,
 }: {
   study: CaseStudy;
   index?: number;
+  columns?: 2 | 3;
 }) {
   return (
     <Link
@@ -15,19 +18,29 @@ export default function CaseStudyCard({
       className={`case-card case-${study.color} group`}
     >
       <div className="case-cover">
+        <Image
+          src={study.image.src}
+          alt={study.image.alt}
+          fill
+          sizes={
+            columns === 2
+              ? "(min-width: 1280px) 588px, (min-width: 768px) 47vw, 94vw"
+              : "(min-width: 1280px) 384px, (min-width: 1024px) 32vw, 94vw"
+          }
+          className="case-cover-image object-cover"
+          quality={80}
+        />
         <div className="flex items-center justify-between gap-3 text-xs">
           <span className="case-type">{study.category}</span>
-          <span className="font-mono opacity-60">0{index + 1}</span>
+          <span className="case-index" aria-hidden="true">
+            0{index + 1}
+          </span>
         </div>
         <div className="case-wordmark">
           {study.name}
-          <span aria-hidden="true">↗</span>
+          <ArrowUpRight aria-hidden="true" className="h-7 w-7" />
         </div>
-        <div className="case-flow" aria-label="Project capabilities">
-          {study.capabilities.slice(0, 3).map((item) => (
-            <span key={item}>{item}</span>
-          ))}
-        </div>
+        <p className="case-context">Industry illustration</p>
       </div>
       <div className="p-6 sm:p-8">
         <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500">

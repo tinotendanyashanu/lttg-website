@@ -1,0 +1,26 @@
+{
+  "generator": "Built-in image_gen",
+  "purpose": "Illustrative editorial imagery for website UI; not client premises or product screenshots",
+  "assets": [
+    {
+      "key": "workspace",
+      "file": "software-workspace.png",
+      "prompt": "Use case: photorealistic-natural. Asset type: premium B2B software engineering website hero photograph, landscape 3:2 composition. Create a beautifully composed editorial still life of a precise modern software workspace: slim unbranded graphite laptop partly open at an oblique angle, one unbranded dark-screen smartphone standing on a low brushed aluminium support, an understated closed notebook, dark walnut surface, softly translucent deep green architectural glass in the background. Realistic tactile materials, subtle fingerprints and natural reflections, restrained deep petrol, forest green, warm walnut, slate palette, soft directional daylight from upper left, architectural shadows, excellent tonal depth. Devices occupy the centre-right and leave some breathing room; the laptop screen is angled away with dark abstract reflections and absolutely no readable interface. Sophisticated European design-studio photography shot on a full-frame camera, 50mm lens, detailed but calm. It should feel like a considered real photograph, not futuristic technology art. No people, no logos, no text, no charts, no invented dashboard, no holograms, no neon, no watermark."
+    },
+    {
+      "key": "fleet",
+      "file": "fleet-operations.png",
+      "prompt": "Use case: photorealistic-natural. Asset type: landscape 3:2 editorial industry photograph for a premium business software case study about fleet operations. Show a carefully composed diagonal line of several unbranded contemporary silver and dark graphite fleet cars parked outside a clean modern European fleet depot. View at an elegant elevated three-quarter angle with the first car in foreground and others receding into soft focus. Architectural green-tinted glass and subtle industrial concrete in background. Soft early morning sun, crisp reflections, deep petrol and restrained silver palette with a small natural warm highlight. Authentic commercial photography, full-frame 50mm, realistic shapes and wheel geometry, precise materials, premium but believable. The composition should support both a wide banner and a centred 4:3 card crop. This is an illustrative sector scene, not a photograph of any named client. No logos, no readable number plates, no people, no text, no diagrams, no futuristic vehicles, no watermark."
+    },
+    {
+      "key": "automotive",
+      "file": "automotive-booking.png",
+      "prompt": "Use case: photorealistic-natural. Asset type: landscape 3:2 editorial industry photograph for a premium B2B software case study about automotive service bookings. A close three-quarter view of a beautiful unbranded graphite car in a meticulous contemporary vehicle detailing studio. A technician's cropped hands, wearing understated dark teal protective gloves, gently polish the front side of the car with a folded microfiber cloth; no face is visible. Rich realistic paint reflections, subtle water droplets, clean architectural concrete, dark green glass, soft daylight, no neon lighting. Restrained graphite, petrol green and warm neutral palette. Premium architectural and automotive editorial photography, full-frame 50mm, realistic craft and exceptional tactile detail, calm composition that works as both a wide banner and a centred 4:3 card crop. This is an illustrative sector scene, not a named client's actual premises. No logos, no readable number plate, no lettering, no invented UI, no watermark."
+    },
+    {
+      "key": "retail",
+      "file": "retail-operations.png",
+      "prompt": "Use case: photorealistic-natural. Asset type: landscape 3:2 editorial industry photograph for a premium business software website about retail inventory and point-of-sale workflows. An inviting independent modern neighbourhood shop with a warm walnut checkout counter in the foreground. Cropped natural hands of a shopkeeper using a slim unbranded graphite laptop at the counter; screen is seen from the back/oblique angle and no interface is visible. Tasteful shelves of simple unbranded boxes and muted merchandise recede into background; deep forest green wall accents, soft natural window light, gently warm highlights, authentic texture, quiet confident atmosphere. Premium magazine editorial photography, 50mm full-frame, believable anatomy, restrained composition, no stock-photo handshake or smiling staged team. Layout supports a wide banner and centred 4:3 card crop. This is illustrative retail context, not an actual product screenshot or client premises. No logos, no readable packaging labels, no payment-card terminal, no bank branding, no charts, no text, no watermark."
+    }
+  ]
+}
