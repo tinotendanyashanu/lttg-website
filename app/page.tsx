@@ -2,8 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowUpRight,
-  ArrowRight,
-  MapPin,
+  ChevronRight,
   Layers3,
   Workflow,
   CalendarDays,
@@ -51,94 +50,44 @@ export default function Home() {
     <div className="marketing-site">
       <Navbar />
       <main id="main-content">
-        <section className="home-hero">
-          <div className="marketing-container relative z-10 grid gap-12 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
-            <div>
-              <p className="marketing-eyebrow text-emerald-300">
-                <span className="mr-3 inline-block h-1.5 w-1.5 rounded-full bg-emerald-300" />
-                CUSTOM SOFTWARE · AUTOMATION · AI
-              </p>
-              <h1 className="mt-7 max-w-4xl text-[clamp(2.75rem,5.1vw,4.25rem)] font-semibold leading-[1.06] tracking-[-0.055em]">
-                Software that makes
-                <br className="hidden sm:block" /> your business
-                <br />
-                <span className="text-emerald-300">work better.</span>
-              </h1>
-              <p className="mt-7 max-w-xl text-lg leading-relaxed text-slate-300">
-                Replace spreadsheets, repetitive tasks and disconnected tools
-                with custom platforms, mobile apps and intelligent automation
-                built around your business.
-              </p>
-              <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-                <Link href="/book" className="marketing-button button-mint">
-                  Book a discovery call <ArrowUpRight className="h-4 w-4" />
-                </Link>
-                <Link
-                  href="/portfolio"
-                  className="marketing-button button-outline-light"
-                >
-                  Explore the work <ArrowRight className="h-4 w-4" />
-                </Link>
-              </div>
-              <p className="mt-7 flex items-center gap-2 text-xs text-slate-400">
-                <MapPin className="h-3.5 w-3.5" />
-                Warsaw, Poland · Working with businesses worldwide
-              </p>
-            </div>
-            <aside className="hero-visual">
-              <div className="hero-workspace">
-                <Image
-                  src={marketingImages.workspace.src}
-                  alt={marketingImages.workspace.alt}
-                  fill
-                  sizes="(min-width: 1280px) 480px, (min-width: 1024px) 42vw, 94vw"
-                  className="object-cover object-right"
-                  quality={85}
-                  priority
-                />
-                <div className="hero-image-label">
-                  <span />
-                  Thoughtful engineering. Practical software.
-                </div>
-              </div>
-              <Link href="/about" className="hero-builder">
-                <Image
-                  src="/images/leos-portrait.png"
-                  alt="Leo, founder of LeoTheTechGuy"
-                  width={56}
-                  height={56}
-                  className="hero-builder-portrait"
-                />
-                <span>
-                  <strong>A direct line to the builder.</strong>
-                  <span>Work with Leo, from discovery to delivery.</span>
-                </span>
-                <ArrowUpRight className="ml-auto h-5 w-5 shrink-0 text-emerald-300" />
+        <section className="home-hero" aria-labelledby="hero-title">
+          <div className="marketing-container hero-intro">
+            <p className="hero-eyebrow">Custom software. Built around you.</p>
+            <h1 id="hero-title" className="hero-title">
+              <span>Better software.</span>
+              <span className="hero-title-accent">Better business.</span>
+            </h1>
+            <p className="hero-description">
+              Custom platforms, mobile apps and intelligent automation.
+              <br className="hidden sm:block" /> Built around the way your
+              business works.
+            </p>
+            <div className="hero-actions">
+              <Link
+                href="/book"
+                className="hero-cta"
+                aria-label="Book a discovery call"
+              >
+                Book a call
               </Link>
-            </aside>
-          </div>
-          <div className="marketing-container relative z-10 mt-16">
-            <div className="grid gap-5 border-t border-white/15 pt-6 text-sm text-slate-300 sm:grid-cols-3">
-              <span>
-                <span className="mr-3 font-mono text-xs text-emerald-300">
-                  01
-                </span>
-                Business operations software
-              </span>
-              <span>
-                <span className="mr-3 font-mono text-xs text-emerald-300">
-                  02
-                </span>
-                Web & mobile products
-              </span>
-              <span>
-                <span className="mr-3 font-mono text-xs text-emerald-300">
-                  03
-                </span>
-                AI & workflow automation
-              </span>
+              <Link href="/portfolio" className="hero-work">
+                <span>Explore the work</span>
+                <ChevronRight className="h-4 w-4" aria-hidden="true" />
+              </Link>
             </div>
           </div>
+          <div className="hero-stage">
+            <Image
+              src={marketingImages.heroDevices.src}
+              alt={marketingImages.heroDevices.alt}
+              fill
+              sizes="(max-width: 640px) 196vw, (min-width: 1280px) 1700px, 146vw"
+              className="hero-device-image"
+              quality={85}
+              priority
+            />
+          </div>
+          <p className="hero-footnote">Based in Warsaw. Working worldwide.</p>
         </section>
         <section className="marketing-section" id="selected-work">
           <div className="marketing-container">

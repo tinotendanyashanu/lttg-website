@@ -8,6 +8,11 @@ export interface MarketingImage {
 // Editorial illustrations provide sector context. These are not client
 // premises or screenshots of the software described in the case studies.
 export const marketingImages = {
+  heroDevices: {
+    src: "/images/marketing/hero-devices.png",
+    alt: "Illustrative laptop and mobile device with abstract emerald screen artwork",
+    caption: "Custom software across web, mobile and automation.",
+  },
   workspace: {
     src: "/images/marketing/software-workspace.png",
     alt: "A considered workspace with a graphite laptop, phone and notebook in natural light",
